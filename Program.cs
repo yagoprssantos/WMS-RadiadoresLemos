@@ -1,4 +1,4 @@
-namespace WMS_RadiadoresLemos_WinForms
+namespace TestandoInterfaces
 {
     internal static class Program
     {
