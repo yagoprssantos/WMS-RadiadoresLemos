@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35303.130
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMS-RadiadoresLemos-WinForms", "WMS-RadiadoresLemos-WinForms.csproj", "{47E0A93A-7895-46A2-8BE7-A8190F33EA3A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMS-RadiadoresLemos-WPF", "WMS-RadiadoresLemos-WPF.csproj", "{8BEA776F-4308-4A8F-8A8A-6C777ED66EF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{47E0A93A-7895-46A2-8BE7-A8190F33EA3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47E0A93A-7895-46A2-8BE7-A8190F33EA3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47E0A93A-7895-46A2-8BE7-A8190F33EA3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47E0A93A-7895-46A2-8BE7-A8190F33EA3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BEA776F-4308-4A8F-8A8A-6C777ED66EF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BEA776F-4308-4A8F-8A8A-6C777ED66EF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BEA776F-4308-4A8F-8A8A-6C777ED66EF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BEA776F-4308-4A8F-8A8A-6C777ED66EF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8C00F2A0-EE52-4475-9214-123837B17203}
+		SolutionGuid = {E464172E-7C1C-4D33-96D5-7B3353FD3EC1}
 	EndGlobalSection
 EndGlobal
