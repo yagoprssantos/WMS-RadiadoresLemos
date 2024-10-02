@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Oracle.ManagedDataAccess.Client;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +20,10 @@ namespace WMS_RadiadoresLemos_WPF
         public MainWindow()
         {
             InitializeComponent();
+
+            // Conectar com o banco de dados
+            DatabaseConnect db = new DatabaseConnect();
+            db.Connect();
         }
 
         private void ControleEstoque_Click(object sender, RoutedEventArgs e)

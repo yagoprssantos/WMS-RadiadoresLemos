@@ -40,6 +40,10 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     textBox.Text = "Marca do Produto";
                 }
+                else if (textBox.Name == "CodigoProduto")
+                {
+                    textBox.Text = "Código do Produto";
+                }
                 else if (textBox.Name == "QuantidadeProduto")
                 {
                     textBox.Text = "Quantidade";
@@ -55,6 +59,65 @@ namespace WMS_RadiadoresLemos_WPF
         private void AdicionarQuantidade_Click(object sender, RoutedEventArgs e)
         {
             // Lógica para adicionar quantidade ao produto selecionado
+        }
+
+        private void EditarProduto_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para editar o produto selecionado
+            if (EstoqueDataGrid.SelectedItem != null)
+            {
+                // Obter o produto selecionado e abrir uma nova janela ou diálogo para edição
+            }
+            else
+            {
+                MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void AlterarQuantidade_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para adicionar ou remover quantidade do produto selecionado
+            if (EstoqueDataGrid.SelectedItem != null)
+            {
+                // Obter o produto selecionado e abrir uma nova janela ou diálogo para editar quantidade 
+            }
+            else
+            {
+                MessageBox.Show("Selecione um produto para adicionar/remover quantidade.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void DeletarProduto_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para deletar o produto selecionado
+            if (EstoqueDataGrid.SelectedItem != null)
+            {
+                // Obter o produto selecionado
+                var produtoSelecionado = EstoqueDataGrid.SelectedItem;
+                // Confirmar a exclusão
+                MessageBoxResult result = MessageBox.Show("Tem certeza que deseja deletar este produto?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Lógica para deletar o produto do banco de dados
+                    DeletarProdutoDoBanco(produtoSelecionado);
+                    // Atualizar a tabela após a exclusão
+                    AtualizarTabelaEstoque();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Selecione um produto para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void AtualizarTabelaEstoque()
+        {
+            // Lógica para atualizar a tabela de estoque
+        }
+
+        private void DeletarProdutoDoBanco(object produtoSelecionado)
+        {
+            // Lógica para deletar o produto do banco de dados
         }
     }
 }

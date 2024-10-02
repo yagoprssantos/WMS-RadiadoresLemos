@@ -9,4 +9,13 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="8.23.50" />
+    <PackageReference Include="Oracle.ManagedDataAccess" Version="23.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Wallet\" />
+  </ItemGroup>
+
 </Project>
