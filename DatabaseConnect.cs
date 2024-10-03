@@ -14,10 +14,10 @@ namespace WMS_RadiadoresLemos_WPF
         public void Connect()
         {
             //Enter your ADB's user id, password, and net service name
-            string conString = "User Id=<admin>;Password=<Grupodoyagointegrador2>;Data Source=<radiadoreslemosdb_high>;Connection Timeout=15;";
+            string conString = "User Id=<admin>;Password=<Grupodoyagointegrador2>;Data Source=<radiadoreslemosdb_high>;Connection Timeout=60;";
 
             //Enter directory where you unzipped your cloud credentials
-            string walletPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RadiadoresLemosDB");
+            string walletPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Oracle\\network\\admin");
             OracleConfiguration.TnsAdmin = walletPath;
             OracleConfiguration.WalletLocation = OracleConfiguration.TnsAdmin;
 

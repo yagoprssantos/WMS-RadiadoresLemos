@@ -31,24 +31,9 @@ namespace WMS_RadiadoresLemos_WPF
             ContentArea.Content = new ControleEstoqueUserControl();
         }
 
-        private void Notificacoes_Click(object sender, RoutedEventArgs e)
-        {
-            //ContentArea.Content = new NotificacoesUserControl();
-        }
-
-        private void Relatorios_Click(object sender, RoutedEventArgs e)
-        {
-            //ContentArea.Content = new RelatoriosUserControl();
-        }
-
         private void BancoDados_Click(object sender, RoutedEventArgs e)
         {
             ContentArea.Content = new BancoDadosUserControl();
-        }
-
-        private void Usuarios_Click(object sender, RoutedEventArgs e)
-        {
-            //ContentArea.Content = new UsuariosUserControl();
         }
     }
 }
