@@ -9,8 +9,11 @@ using System.Windows;
 
 namespace WMS_RadiadoresLemos_WPF
 {
+
     class DatabaseConnect
     {
+        public bool IsConnected { get; private set; }
+
         public void Connect()
         {
             //Enter your ADB's user id, password, and net service name
@@ -23,20 +26,20 @@ namespace WMS_RadiadoresLemos_WPF
 
             using (OracleConnection con = new OracleConnection(conString))
             {
+                try
                 {
-                    try
-                    {
-                        con.Open();
-                        // Printa na tela confirmação de conexão
-                        MessageBox.Show("Conexão com o banco de dados realizada com sucesso!");
-                        Console.WriteLine("Connected to Oracle Database {0}", con.ServerVersion);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Printa na tela erro de conexão
-                        MessageBox.Show("Erro ao conectar com o banco de dados!");
-                        Console.WriteLine(ex.Message);
-                    }
+                    con.Open();
+                    // Printa na tela confirmação de conexão
+                    MessageBox.Show("Conexão com o banco de dados realizada com sucesso!");
+                    Console.WriteLine("Connected to Oracle Database {0}", con.ServerVersion);
+                    IsConnected = false;
+                }
+                catch (Exception ex)
+                {
+                    // Printa na tela erro de conexão
+                    MessageBox.Show("Erro ao conectar com o banco de dados!");
+                    Console.WriteLine(ex.Message);
+                    IsConnected = true;
                 }
             }
         }

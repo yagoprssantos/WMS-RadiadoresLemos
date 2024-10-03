@@ -69,8 +69,9 @@
         
 
         <!-- Barra de Status -->
-        <StatusBar Grid.ColumnSpan="2" VerticalAlignment="Bottom" Background="{StaticResource PrimaryColor}" FontSize="16">
-            <StatusBarItem Content="Pronto" Foreground="White"/>
+        <StatusBar Name="StatusBar" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Background="{StaticResource PrimaryColor}" FontSize="16">
+            <StatusBarItem Name="StatusBarItem" Foreground="White" HorizontalAlignment="Left"/>
+            <StatusBarItem Name="StatusBarDateTime" Foreground="White" HorizontalAlignment="Right"/>
         </StatusBar>
     </Grid>
 </Window>
