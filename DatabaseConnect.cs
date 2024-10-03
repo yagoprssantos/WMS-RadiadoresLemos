@@ -1,6 +1,7 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Configuration;
+using System.IO;
 using System.Windows;
 
 namespace WMS_RadiadoresLemos_WPF
@@ -10,8 +11,10 @@ namespace WMS_RadiadoresLemos_WPF
         public bool IsConnected { get; private set; }
         static DatabaseConnect()
         {
-            // Caminho para a pasta da Wallet usando sqlnet.ora e tnsnames.ora
-            string walletPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Wallet");
+            // Caminho para a pasta da Wallet do Projeto
+            string walletPath = System.IO.Directory.GetCurrentDirectory();
+
+            MessageBox.Show(walletPath);
 
             // Configurações do Oracle para usar a Wallet
             OracleConfiguration.TnsAdmin = walletPath;

@@ -27,6 +27,7 @@ namespace WMS_RadiadoresLemos_WPF
             SetupStatusBar();
         }
 
+
         private void SetupDatabaseConnection()
         {
             DatabaseConnect databaseConnect = new DatabaseConnect();
@@ -62,6 +63,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        
         private void SetupStatusBar()
         {
             UpdateDateTime();
@@ -87,6 +89,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Abre a aba de Controle de Vendas
             ContentArea.Content = new BancoDadosUserControl();
         }
+
 
 
         // Barra de Status
