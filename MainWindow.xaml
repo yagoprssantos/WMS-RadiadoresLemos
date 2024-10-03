@@ -42,6 +42,17 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Estilo para a seta circular -->
+        <Style x:Key="CircularArrowStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource ButtonForegroundColor}"/>
+            <Setter Property="Background" Value="{StaticResource ButtonBackgroundColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -68,12 +79,37 @@
 
         <!-- Área de Conteúdo -->
         <ContentControl Grid.Column="1" Name="ContentArea" Margin="10, 10, 10, 36"/>
-        
 
         <!-- Barra de Status -->
         <StatusBar Name="StatusBar" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Background="{StaticResource PrimaryColor}" FontSize="16">
-            <StatusBarItem Name="StatusBarItem" Foreground="White" HorizontalAlignment="Left"/>
-            <StatusBarItem Name="StatusBarDateTime" Foreground="White" HorizontalAlignment="Right"/>
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+
+            <!-- Informações de Status -->
+            <StatusBarItem Name="StatusBarItem" Foreground="White" HorizontalAlignment="Left" Grid.Column="0" Margin="5, 0, 0, 0"/>
+
+            <!-- Botão para reconectar no centro da status bar -->
+            <StatusBarItem Grid.Column="1">
+                <Button Name="VerifyConnectionButton" 
+                        Content="Reconectar"
+                        Click="VerifyConnectionButton_Click" 
+                        Visibility="Visible"
+                        Width="200" Height="Auto" Margin="1, 0, 0, 0"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                </Button>
+            </StatusBarItem>
+
+            <!-- Data e Hora -->
+            <StatusBarItem Name="StatusBarDateTime" Foreground="White" HorizontalAlignment="Right" Grid.Column="2"/>
         </StatusBar>
     </Grid>
 </Window>

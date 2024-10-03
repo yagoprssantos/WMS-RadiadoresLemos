@@ -1,4 +1,5 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Microsoft.EntityFrameworkCore.Query;
+using Oracle.ManagedDataAccess.Client;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,11 +34,31 @@ namespace WMS_RadiadoresLemos_WPF
 
             if (databaseConnect.IsConnected)
             {
-                UpdateStatusBar("Banco de dados conectado", Colors.DarkGreen);
+                UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
+                VerifyConnectionButton.Visibility = Visibility.Collapsed;
             }
             else
             {
-                UpdateStatusBar("Banco de dados desconectado", Colors.DarkRed);
+                UpdateStatusBar("Erro ao conectar com o banco de dados", Colors.DarkRed);
+                VerifyConnectionButton.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void DatabaseReconnection()
+        {
+            DatabaseConnect databaseConnect = new DatabaseConnect();
+            if (databaseConnect.IsConnected)
+            {
+                // Fecha a conexão
+                databaseConnect.Disconnect();
+
+                // Tenta conectar novamente
+                databaseConnect.Connect();
+            }
+            else
+            {
+                // Tenta conectar
+                databaseConnect.Connect();
             }
         }
 
@@ -70,6 +91,14 @@ namespace WMS_RadiadoresLemos_WPF
 
         // Barra de Status
 
+        // Botão para verificar a conexão com o banco de dados novamente
+        private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            DatabaseReconnection();
+            SetupStatusBar();
+        }
+
+
         private void UpdateStatusBar(string message, Color color)
         {
             StatusBarItem.Content = message;
@@ -78,7 +107,7 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void UpdateDateTime()
         {
-            StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}";
+            StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}  ";
         }
 
 
