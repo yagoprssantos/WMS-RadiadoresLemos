@@ -1,7 +1,9 @@
 ﻿<Window x:Class="WMS_RadiadoresLemos_WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Controle de Estoque" MinHeight="600" MinWidth="900">
+        Title="Controle de Estoque" 
+        Height="700" Width="1000"
+        MinHeight="700" MinWidth="1000">
     <Window.Resources>
         <!-- Definição de Cores -->
         <SolidColorBrush x:Key="PrimaryColor" Color="#003366"/>
