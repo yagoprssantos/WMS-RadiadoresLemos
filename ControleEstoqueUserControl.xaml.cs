@@ -252,10 +252,18 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void EditarProduto_Click(object sender, RoutedEventArgs e)
         {
-            // Lógica para editar o produto selecionado
-            if (EstoqueDataGrid.SelectedItem != null)
+            if (EstoqueDataGrid.SelectedItem is Produto produtoSelecionado)
             {
-                // Obter o produto selecionado e abrir uma nova janela ou diálogo para 
+                // Cria uma nova instância do modal passando o produto selecionado
+                EditarProdutoWindow editarWindow = new EditarProdutoWindow(produtoSelecionado);
+
+                // Exibe o modal e verifica se o usuário confirmou a edição
+                if (editarWindow.ShowDialog() == true)
+                {
+                    // Atualiza a tabela após a edição
+                    EstoqueDataGrid.Items.Refresh();
+                    MessageBox.Show("Produto atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             else
             {
@@ -263,31 +271,52 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+
         private void AlterarQuantidade_Click(object sender, RoutedEventArgs e)
         {
-            // Lógica para adicionar ou remover quantidade do produto selecionado
-            if (EstoqueDataGrid.SelectedItem != null)
+            if (EstoqueDataGrid.SelectedItem is Produto produtoSelecionado)
             {
-                // Obter o produto selecionado e abrir uma nova janela ou diálogo para editar quantidade 
+                // Abre o modal para alterar a quantidade, passando a quantidade atual do produto
+                AlterarQuantidadeWindow alterarQuantidadeWindow = new AlterarQuantidadeWindow(produtoSelecionado.Quantidade);
+
+                // Exibe o modal e verifica se o usuário confirmou a alteração
+                if (alterarQuantidadeWindow.ShowDialog() == true)
+                {
+                    // Atualiza a quantidade do produto com o novo valor
+                    produtoSelecionado.Quantidade = alterarQuantidadeWindow.Quantidade;
+                    EstoqueDataGrid.Items.Refresh(); // Atualiza o DataGrid para exibir a nova quantidade
+                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             else
             {
-                MessageBox.Show("Selecione um produto para adicionar/remover quantidade.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Selecione um produto para alterar a quantidade.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
+
         private void DeletarProduto_Click(object sender, RoutedEventArgs e)
         {
-            // Lógica para deletar o produto selecionado
-            if (EstoqueDataGrid.SelectedItem != null)
+            if (EstoqueDataGrid.SelectedItem is Produto produtoSelecionado)
             {
-                // Obter o produto selecionado
-                var produtoSelecionado = EstoqueDataGrid.SelectedItem;
-                MessageBoxResult result = MessageBox.Show("Tem certeza que deseja deletar este produto?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                // Exibe uma janela de confirmação
+                MessageBoxResult result = MessageBox.Show(
+                    $"Tem certeza que deseja deletar o produto '{produtoSelecionado.Nome}'?",
+                    "Confirmação de Exclusão",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question
+                );
+
+                // Se o usuário confirmar a exclusão
                 if (result == MessageBoxResult.Yes)
                 {
-                    DeletarProdutoDoBanco(produtoSelecionado);
-                    AtualizarTabelaEstoque();
+                    // Remove o produto da lista
+                    produtos.Remove(produtoSelecionado);
+
+                    // Atualiza o DataGrid para refletir a exclusão
+                    EstoqueDataGrid.Items.Refresh();
+
+                    MessageBox.Show("Produto deletado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             else
@@ -295,6 +324,7 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show("Selecione um produto para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
+
 
         private void AtualizarTabelaEstoque()
         {
@@ -306,6 +336,11 @@ namespace WMS_RadiadoresLemos_WPF
         {
             // TODO
             // Lógica para deletar o produto do banco de dados
+        }
+
+        private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 

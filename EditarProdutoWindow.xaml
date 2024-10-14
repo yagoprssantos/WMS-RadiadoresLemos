@@ -1,0 +1,32 @@
+﻿<Window x:Class="WMS_RadiadoresLemos_WPF.EditarProdutoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
+        mc:Ignorable="d"
+        Title="EditarProdutoWindow" Height="450" Width="800">
+    <Grid Margin="10">
+        <StackPanel Margin="150,10,150,-10">
+            <TextBlock Text="Nome" FontSize="18" />
+            <TextBox Name="NomeTextBox" FontSize="18" />
+
+            <TextBlock Text="Tipo" Margin="0,10,0,0" FontSize="18" />
+            <TextBox Name="TipoTextBox" FontSize="18" />
+
+            <TextBlock Text="Marca" Margin="0,10,0,0" FontSize="18" />
+            <TextBox Name="MarcaTextBox" FontSize="18" />
+
+            <TextBlock Text="Código" Margin="0,10,0,0" FontSize="18" />
+            <TextBox Name="CodigoTextBox" FontSize="18" />
+
+            <TextBlock Text="Quantidade" Margin="0,10,0,0" FontSize="18" />
+            <TextBox Name="QuantidadeTextBox" PreviewTextInput="QuantidadeTextBox_PreviewTextInput" FontSize="18" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Salvar" Width="80" Margin="5" Click="Salvar_Click" FontSize="18" />
+                <Button Content="Cancelar" Width="80" Margin="5" Click="Cancelar_Click" FontSize="18" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

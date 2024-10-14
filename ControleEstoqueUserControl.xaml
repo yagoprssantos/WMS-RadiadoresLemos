@@ -16,7 +16,7 @@
                             <TextBox Name="NomeProduto" Margin="0,0,0,15" PreviewTextInput="NomeProduto_PreviewTextInput" DataObject.Pasting="NomeProduto_Pasting"/>
 
                             <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"/>
-                            <ComboBox Name="TipoProduto" Margin="0,0,0,15">
+                            <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged">
                                 <!-- Tipos de Produtos -->
                                 <ComboBoxItem Content="Caixa"/>
                                 <ComboBoxItem Content="Radiador"/>
