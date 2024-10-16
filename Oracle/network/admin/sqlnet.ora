@@ -1,2 +1,0 @@
-WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY = C:\Users\Yago\Code\VisualStudio\Projetos\WMS-RadiadoresLemos\Oracle\network\admin)))
-SSL_SERVER_DN_MATCH=yes

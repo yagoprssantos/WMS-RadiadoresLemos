@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Query;
-using Oracle.ManagedDataAccess.Client;
+﻿using Google.Cloud.Firestore;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using WMS_RadiadoresLemos_WPF.Classes;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -30,10 +30,8 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void SetupDatabaseConnection()
         {
-            DatabaseConnect databaseConnect = new DatabaseConnect();
-            databaseConnect.Connect();
-
-            if (databaseConnect.IsConnected)
+            DatabaseConnect.SetEnvironmentVarible();
+            if (true)
             {
                 UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
                 VerifyConnectionButton.Visibility = Visibility.Collapsed;
@@ -45,23 +43,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void DatabaseReconnection()
-        {
-            DatabaseConnect databaseConnect = new DatabaseConnect();
-            if (databaseConnect.IsConnected)
-            {
-                // Fecha a conexão
-                databaseConnect.Disconnect();
-
-                // Tenta conectar novamente
-                databaseConnect.Connect();
-            }
-            else
-            {
-                // Tenta conectar
-                databaseConnect.Connect();
-            }
-        }
 
         
         private void SetupStatusBar()
@@ -97,7 +78,6 @@ namespace WMS_RadiadoresLemos_WPF
         // Botão para verificar a conexão com o banco de dados novamente
         private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            DatabaseReconnection();
             SetupStatusBar();
         }
 

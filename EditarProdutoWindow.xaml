@@ -18,10 +18,10 @@
             <TextBox Name="MarcaTextBox" FontSize="18" />
 
             <TextBlock Text="Código" Margin="0,10,0,0" FontSize="18" />
-            <TextBox Name="CodigoTextBox" FontSize="18" />
+            <TextBox Name="CodigoTextBox" FontSize="18" TextChanged="CodigoTextBox_TextChanged" />
 
             <TextBlock Text="Quantidade" Margin="0,10,0,0" FontSize="18" />
-            <TextBox Name="QuantidadeTextBox" PreviewTextInput="QuantidadeTextBox_PreviewTextInput" FontSize="18" />
+            <TextBox Name="QuantidadeTextBox" PreviewTextInput="QuantidadeTextBox_PreviewTextInput" FontSize="18" TextChanged="QuantidadeTextBox_TextChanged" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                 <Button Content="Salvar" Width="80" Margin="5" Click="Salvar_Click" FontSize="18" />
