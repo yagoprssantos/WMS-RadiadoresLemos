@@ -62,18 +62,8 @@ namespace WMS_RadiadoresLemos_WPF
             HandlePasting(e, "[^0-9]+"); // Apenas números
         }
 
-        // Nome do Produto
-        private void NomeProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+"); // Apenas letras e espaços
-        }
 
-        private void NomeProduto_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z ]+"); // Apenas letras e espaços
-        }
-
-        // Tipo do Produto
+        // Marca do Produto
         private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+"); // Apenas letras e espaços
@@ -84,16 +74,6 @@ namespace WMS_RadiadoresLemos_WPF
             HandlePasting(e, "[^a-zA-Z ]+"); // Apenas letras e espaços
         }
 
-        // Marca do Produto
-        private void CodigoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z0-9]+"); // Letras e números
-        }
-
-        private void CodigoProduto_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z0-9]+"); // Letras e números
-        }
 
         // Função para verificar se o texto é permitido
         private static bool IsTextAllowed(string text, string pattern)
@@ -101,6 +81,7 @@ namespace WMS_RadiadoresLemos_WPF
             Regex regex = new Regex(pattern);
             return !regex.IsMatch(text);
         }
+
 
         // Função para lidar com a colagem de texto
         private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
@@ -118,6 +99,7 @@ namespace WMS_RadiadoresLemos_WPF
                 e.CancelCommand();
             }
         }
+
 
         private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

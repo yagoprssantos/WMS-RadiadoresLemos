@@ -80,17 +80,7 @@ namespace WMS_RadiadoresLemos_WPF
             HandlePasting(e, "[^0-9]+"); // Apenas números
         }
 
-        // Nome do Produto
-        private void NomeProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+"); // Apenas letras e espaços
-        }
-        private void NomeProduto_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z ]+"); // Apenas letras e espaços
-        }
-
-        // Tipo do Produto
+        // Marca do Produto
         private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+"); // Apenas letras e espaços
@@ -98,16 +88,6 @@ namespace WMS_RadiadoresLemos_WPF
         private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             HandlePasting(e, "[^a-zA-Z ]+"); // Apenas letras e espaços
-        }
-
-        // Marca do Produto
-        private void CodigoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z0-9]+"); // Letras e números
-        }
-        private void CodigoProduto_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z0-9]+"); // Letras e números
         }
 
         // Função para verificar se o texto é permitido
@@ -188,6 +168,7 @@ namespace WMS_RadiadoresLemos_WPF
                 // Avisar o usuário para preencher todos os campos
                 MessageBox.Show("Preencha todos os campos para cadastrar o produto.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+            AtualizarTabelaEstoque();
         }
 
         private void LimparCamposCadastro()

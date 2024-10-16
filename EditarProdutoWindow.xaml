@@ -10,7 +10,7 @@
         <Grid Margin="20">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
                 <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"/>
-                <TextBox Name="NomeProduto" Margin="0,0,0,15" PreviewTextInput="NomeProduto_PreviewTextInput" DataObject.Pasting="NomeProduto_Pasting"/>
+                <TextBox Name="NomeProduto" Margin="0,0,0,15"/>
 
                 <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"/>
                 <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged">
@@ -23,7 +23,7 @@
                 <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
 
                 <TextBlock Text="Código do Produto:" Margin="0,0,0,5"/>
-                <TextBox Name="CodigoProduto" Margin="0,0,0,15" PreviewTextInput="CodigoProduto_PreviewTextInput" DataObject.Pasting="CodigoProduto_Pasting"/>
+                <TextBox Name="CodigoProduto" Margin="0,0,0,15"/>
 
                 <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"/>
                 <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting"/>
