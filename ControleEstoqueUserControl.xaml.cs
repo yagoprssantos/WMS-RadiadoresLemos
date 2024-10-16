@@ -184,7 +184,15 @@ namespace WMS_RadiadoresLemos_WPF
         private void CarregarProdutos()
         {
             // Carrega produtos do banco de dados Firestore
-            // TODO: Implementar lógica para carregar produtos do banco de dados
+            var db = DatabaseConnect.Database;
+            var produtosRef = db.Collection("Produtos");
+            var snapshot = produtosRef.GetSnapshotAsync().Result;
+            foreach (var doc in snapshot.Documents)
+            {
+                var produto = doc.ConvertTo<ProdutoData>();
+                produtos.Add(produto);
+            }
+            EstoqueDataGrid.ItemsSource = produtos;
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -200,43 +208,36 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void EditarProduto_Click(object sender, RoutedEventArgs e)
         {
-            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
+            if (produtos.Any())
             {
-                // Converte ProdutoData para Produto
-                ProdutoData produto = new ProdutoData
+                // Abre a janela de edição de produto
+                EditarProdutoWindow editarProdutoWindow = new EditarProdutoWindow();
+                editarProdutoWindow.Show();
+
+                // Preenche os campos da janela de edição com os dados do produto selecionado
+                if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
                 {
-                    Nome = produtoSelecionado.Nome,
-                    Tipo = produtoSelecionado.Tipo,
-                    Marca = produtoSelecionado.Marca,
-                    Codigo = produtoSelecionado.Codigo,
-                    Quantidade = produtoSelecionado.Quantidade
-                };
-
-                // Cria uma nova instância do modal passando o produto convertido
-                EditarProdutoWindow editarWindow = new EditarProdutoWindow(produto);
-
-                // Exibe o modal e verifica se o usuário confirmou a edição
-                if (editarWindow.ShowDialog() == true)
-                {
-                    // Atualiza os dados do produto selecionado com os novos valores
-                    produtoSelecionado.Nome = editarWindow.ProdutoEditado.Nome;
-                    produtoSelecionado.Tipo = editarWindow.ProdutoEditado.Tipo;
-                    produtoSelecionado.Marca = editarWindow.ProdutoEditado.Marca;
-                    produtoSelecionado.Codigo = editarWindow.ProdutoEditado.Codigo;
-                    produtoSelecionado.Quantidade = editarWindow.ProdutoEditado.Quantidade;
-
-                    // Atualiza a tabela após a edição
-                    EstoqueDataGrid.Items.Refresh();
-
-                    // Atualiza o produto no banco de dados Firestore
-                    AtualizarProdutoNoBanco(produtoSelecionado);
-
-                    MessageBox.Show("Produto atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    editarProdutoWindow.NomeTextBox.Text = produtoSelecionado.Nome;
+                    editarProdutoWindow.TipoTextBox.Text = produtoSelecionado.Tipo;
+                    editarProdutoWindow.MarcaTextBox.Text = produtoSelecionado.Marca;
+                    editarProdutoWindow.CodigoTextBox.Text = produtoSelecionado.Codigo;
+                    editarProdutoWindow.QuantidadeTextBox.Text = produtoSelecionado.Quantidade.ToString();
                 }
+                else
+                {
+                    editarProdutoWindow.Close();
+                    MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                // Atualiza a tabela de estoque após a edição
+                editarProdutoWindow.Closed += (s, ev) => AtualizarTabelaEstoque();
+
+                // Atualiza tabela de estoque
+                EstoqueDataGrid.Items.Refresh();
             }
             else
             {
-                MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Não há produtos para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -257,9 +258,13 @@ namespace WMS_RadiadoresLemos_WPF
                 // Exibe o modal e verifica se o usuário confirmou a alteração
                 if (alterarQuantidadeWindow.ShowDialog() == true)
                 {
-                    // Atualiza a quantidade do produto com o novo valor
+                    // Atualiza a quantidade do produto com o novo valor no banco de dados
                     produtoSelecionado.Quantidade = alterarQuantidadeWindow.Quantidade;
-                    EstoqueDataGrid.Items.Refresh(); // Atualiza o DataGrid para exibir a nova quantidade
+                    AtualizarProdutoNoBanco(produtoSelecionado);
+
+                    // Atualiza a tabela de estoque
+                    EstoqueDataGrid.Items.Refresh();
+                    
                     MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -287,6 +292,9 @@ namespace WMS_RadiadoresLemos_WPF
                     // Remove o produto da lista
                     produtos.Remove(produtoSelecionado);
 
+                    // Remove o produto do banco de dados
+                    DeletarProdutoDoBanco(produtoSelecionado);
+
                     // Atualiza o DataGrid para refletir a exclusão
                     EstoqueDataGrid.Items.Refresh();
 
@@ -299,21 +307,40 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void AtualizarTabelaEstoque()
-        {
-            // TODO
-            // Lógica para atualizar a tabela de estoque
-        }
-
         private void DeletarProdutoDoBanco(object produtoSelecionado)
         {
-            // TODO
-            // Lógica para deletar o produto do banco de dados
+            // Encontra o produto selecionado
+            var db = DatabaseConnect.Database;
+            DocumentReference docRef = db.Collection("Produtos").Document(((ProdutoData)produtoSelecionado).Codigo);
+
+            // Deleta o produto do banco de dados
+            docRef.DeleteAsync();
         }
+
+
+        private void AtualizarTabelaEstoque()
+        {
+            // Limpa a lista de produtos e carrega novamente
+            produtos.Clear();
+
+            // Carrega produtos do banco de dados Firestore
+            CarregarProdutos();
+
+            // Atualiza a tabela de estoque
+            EstoqueDataGrid.Items.Refresh();
+        }
+
 
         private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // TODO: Implementar lógica para seleção de tipo de produto
+            if (TipoProduto.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string selectedTipo = selectedItem.Content.ToString();
+                var filteredProducts = produtos.Where(p => p.Tipo == selectedTipo).ToList();
+                EstoqueDataGrid.ItemsSource = filteredProducts;
+            }
         }
+
     }
+
 }

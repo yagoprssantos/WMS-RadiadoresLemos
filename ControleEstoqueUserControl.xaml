@@ -8,7 +8,7 @@
     <Grid>
         <TabControl>
             <!-- Aba de Cadastrar Produtos -->
-            <TabItem Header="Cadastrar Produtos" FontSize="18">
+            <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid Margin="20">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
@@ -38,7 +38,7 @@
             </TabItem>
 
             <!-- Aba de Controle de Estoque -->
-            <TabItem Header="Controle de Estoque" FontSize="18">
+            <TabItem Header="Controle de Estoque" Name="AbaControle" FontSize="18">
                 <DockPanel Margin="10">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                         <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10"/>

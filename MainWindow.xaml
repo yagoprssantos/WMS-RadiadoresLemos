@@ -69,11 +69,6 @@
                         <ToolTip Content="Registrar entrada e saída de produtos"/>
                     </Button.ToolTip>
                 </Button>
-                <Button Content="Banco de Dados" Click="BancoDados_Click" FontSize="16">
-                    <Button.ToolTip>
-                        <ToolTip Content="Gerenciar banco de dados"/>
-                    </Button.ToolTip>
-                </Button>
             </StackPanel>
         </DockPanel>
 
