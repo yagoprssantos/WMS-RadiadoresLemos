@@ -5,28 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="450" Width="800">
-    <Grid Margin="10">
-        <StackPanel Margin="150,10,150,-10">
-            <TextBlock Text="Nome" FontSize="18" />
-            <TextBox Name="NomeTextBox" FontSize="18" />
+        Title="EditarProdutoWindow" Height="510" Width="800" FontSize="18">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
+                <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"/>
+                <TextBox Name="NomeProduto" Margin="0,0,0,15" PreviewTextInput="NomeProduto_PreviewTextInput" DataObject.Pasting="NomeProduto_Pasting"/>
 
-            <TextBlock Text="Tipo" Margin="0,10,0,0" FontSize="18" />
-            <TextBox Name="TipoTextBox" FontSize="18" />
+                <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"/>
+                <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged">
+                    <!-- Tipos de Produtos -->
+                    <ComboBoxItem Content="Caixa"/>
+                    <ComboBoxItem Content="Radiador"/>
+                </ComboBox>
 
-            <TextBlock Text="Marca" Margin="0,10,0,0" FontSize="18" />
-            <TextBox Name="MarcaTextBox" FontSize="18" />
+                <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"/>
+                <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
 
-            <TextBlock Text="Código" Margin="0,10,0,0" FontSize="18" />
-            <TextBox Name="CodigoTextBox" FontSize="18" TextChanged="CodigoTextBox_TextChanged" />
+                <TextBlock Text="Código do Produto:" Margin="0,0,0,5"/>
+                <TextBox Name="CodigoProduto" Margin="0,0,0,15" PreviewTextInput="CodigoProduto_PreviewTextInput" DataObject.Pasting="CodigoProduto_Pasting"/>
 
-            <TextBlock Text="Quantidade" Margin="0,10,0,0" FontSize="18" />
-            <TextBox Name="QuantidadeTextBox" PreviewTextInput="QuantidadeTextBox_PreviewTextInput" FontSize="18" TextChanged="QuantidadeTextBox_TextChanged" />
+                <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"/>
+                <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting"/>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Content="Salvar" Width="80" Margin="5" Click="Salvar_Click" FontSize="18" />
-                <Button Content="Cancelar" Width="80" Margin="5" Click="Cancelar_Click" FontSize="18" />
+                <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20"/>
             </StackPanel>
-        </StackPanel>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </Window>

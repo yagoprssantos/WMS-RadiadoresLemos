@@ -97,7 +97,7 @@
                 <Button Name="VerifyConnectionButton" 
                         Content="Reconectar"
                         Click="VerifyConnectionButton_Click" 
-                        Visibility="Visible"
+                        Visibility="Collapsed"
                         Width="200" Height="Auto" Margin="1, 0, 0, 0"
                         HorizontalAlignment="Center" VerticalAlignment="Center">
                 </Button>

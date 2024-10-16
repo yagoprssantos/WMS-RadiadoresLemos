@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,25 +7,36 @@ namespace WMS_RadiadoresLemos_WPF
 {
     public partial class EditarProdutoWindow : Window
     {
-        public EditarProdutoWindow()
+        private ProdutoData produto;
+
+        public EditarProdutoWindow(ProdutoData produto)
         {
             InitializeComponent();
+            this.produto = produto;
+            PreencherCampos();
         }
 
-        private void Salvar_Click(object sender, RoutedEventArgs e)
+        private void PreencherCampos()
         {
-            // Lógica para salvar o produto
-            string nome = NomeTextBox.Text;
-            string tipo = TipoTextBox.Text;
-            string marca = MarcaTextBox.Text;
-            string codigo = CodigoTextBox.Text;
-            int quantidade;
+            NomeProduto.Text = produto.Nome;
+            TipoProduto.Text = produto.Tipo;
+            MarcaProduto.Text = produto.Marca;
+            CodigoProduto.Text = produto.Codigo;
+            QuantidadeInicial.Text = produto.Quantidade.ToString();
+        }
 
-            if (int.TryParse(QuantidadeTextBox.Text, out quantidade))
+        private void CadastrarProduto_Click(object sender, RoutedEventArgs e)
+        {
+            if (int.TryParse(QuantidadeInicial.Text, out int quantidade))
             {
-                // Suponha que você tenha um método para salvar o produto
-                // SalvarProduto(nome, tipo, marca, codigo, quantidade);
-                MessageBox.Show("Produto salvo com sucesso!");
+                produto.Nome = NomeProduto.Text;
+                produto.Tipo = TipoProduto.Text;
+                produto.Marca = MarcaProduto.Text;
+                produto.Codigo = CodigoProduto.Text;
+                produto.Quantidade = quantidade;
+
+                DialogResult = true;
+                Close();
             }
             else
             {
@@ -35,24 +46,86 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void Cancelar_Click(object sender, RoutedEventArgs e)
         {
-            // Lógica para cancelar a edição
-            this.Close();
+            DialogResult = false;
+            Close();
         }
 
-        private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        // Restrições de entrada de texto nos TextBoxes
+        // Quantidade inicial
+        private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            // Permitir apenas entrada numérica
-            e.Handled = !int.TryParse(e.Text, out _);
+            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+"); // Apenas números
         }
 
-        private void QuantidadeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void QuantidadeInicial_Pasting(object sender, DataObjectPastingEventArgs e)
         {
-            // Lógica para quando o texto da quantidade mudar
+            HandlePasting(e, "[^0-9]+"); // Apenas números
         }
 
-        private void CodigoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        // Nome do Produto
+        private void NomeProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            // Lógica para quando o texto do código mudar
+            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+"); // Apenas letras e espaços
         }
+
+        private void NomeProduto_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^a-zA-Z ]+"); // Apenas letras e espaços
+        }
+
+        // Tipo do Produto
+        private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+"); // Apenas letras e espaços
+        }
+
+        private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^a-zA-Z ]+"); // Apenas letras e espaços
+        }
+
+        // Marca do Produto
+        private void CodigoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z0-9]+"); // Letras e números
+        }
+
+        private void CodigoProduto_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^a-zA-Z0-9]+"); // Letras e números
+        }
+
+        // Função para verificar se o texto é permitido
+        private static bool IsTextAllowed(string text, string pattern)
+        {
+            Regex regex = new Regex(pattern);
+            return !regex.IsMatch(text);
+        }
+
+        // Função para lidar com a colagem de texto
+        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsTextAllowed(text, pattern))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+        private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TipoProduto.SelectedItem is ComboBoxItem selectedItem)
+            {
+                produto.Tipo = selectedItem.Content.ToString();
+            }
+        }
+
     }
 }

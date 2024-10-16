@@ -9,7 +9,7 @@ namespace WMS_RadiadoresLemos_WPF
 {
 
     [FirestoreData]
-    internal class ProdutoData
+    public class ProdutoData
     {
         [FirestoreProperty]
         public string Nome { get; set; }

@@ -30,8 +30,11 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void SetupDatabaseConnection()
         {
+            UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
+
+            // Estabelece a conexão com o banco de dados
             DatabaseConnect.SetEnvironmentVarible();
-            if (true)
+            if (DatabaseConnect.Database != null)
             {
                 UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
                 VerifyConnectionButton.Visibility = Visibility.Collapsed;
@@ -43,14 +46,12 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-        
+                
         private void SetupStatusBar()
         {
             UpdateDateTime();
             StartDateTimeUpdater();
         }
-
 
 
         // Função para abrir a aba de Controle de Estoque
@@ -74,13 +75,12 @@ namespace WMS_RadiadoresLemos_WPF
 
 
         // Barra de Status
-
         // Botão para verificar a conexão com o banco de dados novamente
         private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
         {
+            SetupDatabaseConnection();
             SetupStatusBar();
         }
-
 
         private void UpdateStatusBar(string message, Color color)
         {
@@ -92,7 +92,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}  ";
         }
-
 
         private void StartDateTimeUpdater()
         {

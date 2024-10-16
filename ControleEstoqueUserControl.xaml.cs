@@ -20,6 +20,22 @@ namespace WMS_RadiadoresLemos_WPF
             CarregarProdutos();
         }
 
+        // Função para atualizar a tabela de estoque
+        private void AtualizarTabelaEstoque()
+        {
+            produtos.Clear();
+            var db = DatabaseConnect.Database;
+            var produtosRef = db.Collection("Produtos");
+            var snapshot = produtosRef.GetSnapshotAsync().Result;
+            foreach (var doc in snapshot.Documents)
+            {
+                var produto = doc.ConvertTo<ProdutoData>();
+                produtos.Add(produto);
+            }
+            EstoqueDataGrid.ItemsSource = null;
+            EstoqueDataGrid.ItemsSource = produtos;
+        }
+
         // Aba de Cadastro de Produtos
 
         // Função foco e perda de foco dos TextBoxes
@@ -158,6 +174,9 @@ namespace WMS_RadiadoresLemos_WPF
                 // Lógica para cadastrar o produto no banco de dados
                 CadastrarProdutoNoBanco();
 
+                // Atualiza a tabela de estoque
+                AtualizarTabelaEstoque();
+
                 // Avisa o usuário que o produto foi cadastrado
                 MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -181,6 +200,14 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Aba de Estoque
+
+        // Função que atualiza tabela de estoque
+        private void AbaEstoque_Loaded(object sender, RoutedEventArgs e)
+        {
+            AtualizarTabelaEstoque();
+        }
+
+
         private void CarregarProdutos()
         {
             // Carrega produtos do banco de dados Firestore
@@ -210,30 +237,22 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (produtos.Any())
             {
-                // Abre a janela de edição de produto
-                EditarProdutoWindow editarProdutoWindow = new EditarProdutoWindow();
-                editarProdutoWindow.Show();
-
-                // Preenche os campos da janela de edição com os dados do produto selecionado
                 if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
                 {
-                    editarProdutoWindow.NomeTextBox.Text = produtoSelecionado.Nome;
-                    editarProdutoWindow.TipoTextBox.Text = produtoSelecionado.Tipo;
-                    editarProdutoWindow.MarcaTextBox.Text = produtoSelecionado.Marca;
-                    editarProdutoWindow.CodigoTextBox.Text = produtoSelecionado.Codigo;
-                    editarProdutoWindow.QuantidadeTextBox.Text = produtoSelecionado.Quantidade.ToString();
+                    var editarProdutoWindow = new EditarProdutoWindow(produtoSelecionado);
+                    editarProdutoWindow.ShowDialog();
+
+                    if (editarProdutoWindow.DialogResult == true)
+                    {
+                        AtualizarProdutoNoBanco(produtoSelecionado);
+                        AtualizarTabelaEstoque();
+                        MessageBox.Show("Produto atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
                 else
                 {
-                    editarProdutoWindow.Close();
                     MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
-
-                // Atualiza a tabela de estoque após a edição
-                editarProdutoWindow.Closed += (s, ev) => AtualizarTabelaEstoque();
-
-                // Atualiza tabela de estoque
-                EstoqueDataGrid.Items.Refresh();
             }
             else
             {
@@ -244,8 +263,7 @@ namespace WMS_RadiadoresLemos_WPF
         private void AtualizarProdutoNoBanco(ProdutoData produto)
         {
             var db = DatabaseConnect.Database;
-            DocumentReference docRef = db.Collection("Produtos").Document(produto.Codigo);
-            docRef.SetAsync(produto);
+            db.Collection("Produtos").Document(produto.Codigo).SetAsync(produto);
         }
 
         private void AlterarQuantidade_Click(object sender, RoutedEventArgs e)
@@ -296,7 +314,7 @@ namespace WMS_RadiadoresLemos_WPF
                     DeletarProdutoDoBanco(produtoSelecionado);
 
                     // Atualiza o DataGrid para refletir a exclusão
-                    EstoqueDataGrid.Items.Refresh();
+                    AtualizarTabelaEstoque();
 
                     MessageBox.Show("Produto deletado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -315,19 +333,9 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Deleta o produto do banco de dados
             docRef.DeleteAsync();
-        }
 
-
-        private void AtualizarTabelaEstoque()
-        {
-            // Limpa a lista de produtos e carrega novamente
-            produtos.Clear();
-
-            // Carrega produtos do banco de dados Firestore
-            CarregarProdutos();
-
-            // Atualiza a tabela de estoque
-            EstoqueDataGrid.Items.Refresh();
+            // Atualiza a tabela
+            AtualizarTabelaEstoque();
         }
 
 
