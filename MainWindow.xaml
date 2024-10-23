@@ -4,6 +4,8 @@
         Title="Controle de Estoque" 
         Height="700" Width="1000"
         MinHeight="700" MinWidth="1000">
+
+    <!-- Definição de Recursos -->
     <Window.Resources>
         <!-- Definição de Cores -->
         <SolidColorBrush x:Key="PrimaryColor" Color="#003366"/>
@@ -62,7 +64,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Painel de Navegação -->
-        <DockPanel Grid.Column="0" Background="{StaticResource PrimaryColor}" >
+        <DockPanel Grid.Column="0" Background="{StaticResource PrimaryColor}">
             <StackPanel Margin="10">
                 <Button Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16">
                     <Button.ToolTip>

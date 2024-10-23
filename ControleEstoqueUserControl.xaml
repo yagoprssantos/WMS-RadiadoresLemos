@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="800">
     <Grid>
-        <TabControl>
+        <TabControl SelectionChanged="TabControl_SelectionChanged">
             <!-- Aba de Cadastrar Produtos -->
             <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -64,11 +64,26 @@
                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                               Width="Auto" Height="Auto">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
-                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" />
-                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" />
-                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" />
-                            <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" />
+                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True"/>
+                            <DataGridTemplateColumn Header="Quantidade">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="-" Click="DecrementarQuantidade_Click" Tag="{Binding}" />
+                                            <TextBlock Text="{Binding Quantidade}" Margin="5,0"/>
+                                            <Button Content="+" Click="IncrementarQuantidade_Click" Tag="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Quantidade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>

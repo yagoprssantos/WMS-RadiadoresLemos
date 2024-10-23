@@ -26,5 +26,8 @@ namespace WMS_RadiadoresLemos_WPF
         [FirestoreProperty]
         public int Quantidade { get; set; }
 
+
+        [FirestoreDocumentId]
+        public string Id { get; set; } // Identificador único do documento
     }
 }

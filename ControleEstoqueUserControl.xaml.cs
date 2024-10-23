@@ -2,9 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Data;
 using WMS_RadiadoresLemos_WPF.Classes;
 using Google.Cloud.Firestore;
 
@@ -12,92 +9,106 @@ namespace WMS_RadiadoresLemos_WPF
 {
     public partial class ControleEstoqueUserControl : UserControl
     {
-        private List<ProdutoData> produtos = new List<ProdutoData>();
+        // Lista para armazenar os produtos carregados do banco de dados
+        private readonly List<ProdutoData> produtos = new();
+        // Flag para verificar se os produtos já foram carregados
+        private bool produtosCarregados = false;
 
         public ControleEstoqueUserControl()
         {
             InitializeComponent();
-            CarregarProdutos();
         }
 
-        // Função para atualizar a tabela de estoque
-        private void AtualizarTabelaEstoque()
+        // Método para atualizar a tabela de estoque com os produtos do banco de dados
+        private async void AtualizarTabelaEstoque()
         {
-            produtos.Clear();
-            var db = DatabaseConnect.Database;
-            var produtosRef = db.Collection("Produtos");
-            var snapshot = produtosRef.GetSnapshotAsync().Result;
-            foreach (var doc in snapshot.Documents)
+            try
             {
-                var produto = doc.ConvertTo<ProdutoData>();
-                produtos.Add(produto);
+                // Se os produtos já foram carregados, não faz nada
+                if (produtosCarregados) return;
+
+                // Limpa a lista de produtos
+                produtos.Clear();
+                // Conecta ao banco de dados
+                var db = DatabaseConnect.Database;
+                if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
+                var produtosRef = db.Collection("Produtos");
+                // Obtém o snapshot dos documentos na coleção "Produtos"
+                var snapshot = await produtosRef.GetSnapshotAsync();
+
+                // Converte cada documento para ProdutoData e adiciona à lista de produtos
+                foreach (var doc in snapshot.Documents)
+                {
+                    var produto = doc.ConvertTo<ProdutoData>();
+                    produtos.Add(produto);
+                }
+
+                // Atualiza a fonte de dados do DataGrid
+                EstoqueDataGrid.ItemsSource = null;
+                EstoqueDataGrid.ItemsSource = produtos;
+                // Marca que os produtos foram carregados
+                produtosCarregados = true;
             }
-            EstoqueDataGrid.ItemsSource = null;
-            EstoqueDataGrid.ItemsSource = produtos;
+            catch (Exception ex)
+            {
+                // Exibe mensagem de erro caso ocorra uma exceção
+                MessageBox.Show($"Erro ao atualizar a tabela de estoque: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        // Aba de Cadastro de Produtos
-
-        // Função foco e perda de foco dos TextBoxes
+        // Método chamado quando um TextBox ganha foco
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox && (textBox.Text == "Nome do Produto" || textBox.Text == "Tipo do Produto" || textBox.Text == "Marca do Produto" || textBox.Text == "Quantidade"))
+            if (sender is TextBox textBox && IsPlaceholderText(textBox.Text))
             {
                 textBox.Text = string.Empty;
             }
         }
 
+        // Método chamado quando um TextBox perde foco
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox && textBox.Text == string.Empty)
+            if (sender is TextBox textBox && string.IsNullOrEmpty(textBox.Text))
             {
-                switch (textBox.Name)
-                {
-                    case "NomeProduto":
-                        textBox.Text = "Nome do Produto";
-                        break;
-                    case "TipoProduto":
-                        textBox.Text = "Tipo do Produto";
-                        break;
-                    case "MarcaProduto":
-                        textBox.Text = "Marca do Produto";
-                        break;
-                    case "QuantidadeInicial":
-                        textBox.Text = "Quantidade";
-                        break;
-                }
+                textBox.Text = GetPlaceholderText(textBox.Name);
             }
         }
 
-        // Restrições de entrada de texto nos TextBoxes
-        // Quantidade inicial
-        private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+"); // Apenas números
-        }
-        private void QuantidadeInicial_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^0-9]+"); // Apenas números
-        }
+        // Verifica se o texto é um texto de placeholder
+        private static bool IsPlaceholderText(string text) =>
+            text is "Nome do Produto" or "Tipo do Produto" or "Marca do Produto" or "Quantidade";
 
-        // Marca do Produto
-        private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        // Retorna o texto de placeholder baseado no nome do TextBox
+        private static string GetPlaceholderText(string textBoxName) => textBoxName switch
         {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+"); // Apenas letras e espaços
-        }
-        private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z ]+"); // Apenas letras e espaços
-        }
+            "NomeProduto" => "Nome do Produto",
+            "TipoProduto" => "Tipo do Produto",
+            "MarcaProduto" => "Marca do Produto",
+            "QuantidadeInicial" => "Quantidade",
+            _ => string.Empty
+        };
 
-        // Função para verificar se o texto é permitido
-        private static bool IsTextAllowed(string text, string pattern)
-        {
-            Regex regex = new Regex(pattern);
-            return !regex.IsMatch(text);
-        }
+        // Método para validar a entrada de texto no TextBox de quantidade inicial
+        private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
+            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
 
-        // Função para lidar com a colagem de texto
+        // Método para validar a colagem de texto no TextBox de quantidade inicial
+        private void QuantidadeInicial_Pasting(object sender, DataObjectPastingEventArgs e) =>
+            HandlePasting(e, "[^0-9]+");
+
+        // Método para validar a entrada de texto no TextBox de marca do produto
+        private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
+            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
+
+        // Método para validar a colagem de texto no TextBox de marca do produto
+        private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e) =>
+            HandlePasting(e, "[^a-zA-Z ]+");
+
+        // Verifica se o texto é permitido baseado no padrão regex
+        private static bool IsTextAllowed(string text, string pattern) =>
+            !new Regex(pattern).IsMatch(text);
+
+        // Método para lidar com a colagem de texto e validar se é permitido
         private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
         {
             if (e.DataObject.GetDataPresent(typeof(string)))
@@ -114,222 +125,186 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Puxar produtos preenchidos no banco de dados Firestore
-        private ProdutoData DadosDoProduto()
+        // Método para obter os dados do produto a partir dos TextBoxes
+        private ProdutoData DadosDoProduto() => new()
         {
-            string nome = NomeProduto.Text.Trim();
-            string tipo = TipoProduto.Text.Trim();
-            string marca = MarcaProduto.Text.Trim();
-            string codigo = CodigoProduto.Text.Trim();
-            int quantidade = int.Parse(QuantidadeInicial.Text.Trim());
+            Nome = NomeProduto.Text.Trim(),
+            Tipo = TipoProduto.Text.Trim(),
+            Marca = MarcaProduto.Text.Trim(),
+            Codigo = CodigoProduto.Text.Trim(),
+            Quantidade = int.Parse(QuantidadeInicial.Text.Trim())
+        };
 
-            return new ProdutoData()
-            {
-                Nome = nome,
-                Tipo = tipo,
-                Marca = marca,
-                Codigo = codigo,
-                Quantidade = quantidade
-            };
-        }
-
-        // Função cadastrar produto no banco de dados Firestore
-        private void CadastrarProdutoNoBanco()
+        // Método para cadastrar um novo produto no banco de dados
+        private async void CadastrarProdutoNoBanco()
         {
-            // Lógica para cadastrar o produto no banco de dados
-            // Conecta com o banco de dados Firestore
             var db = DatabaseConnect.Database;
+            if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
             var data = DadosDoProduto();
-            DocumentReference docRef = db.Collection("Produtos").Document(data.Codigo);
-            docRef.SetAsync(data);
+            var docRef = db.Collection("Produtos").Document(data.Codigo);
+            await docRef.SetAsync(data);
         }
 
-        // Botões
+        // Método chamado ao clicar no botão de cadastrar produto
         private void CadastrarProduto_Click(object sender, RoutedEventArgs e)
         {
-            // Lógica para cadastrar o produto no banco de dados
-            // Verificar se todos os campos estão preenchidos
-            if (NomeProduto.Text != "" && TipoProduto.Text != "" && MarcaProduto.Text != "" && CodigoProduto.Text != "" && QuantidadeInicial.Text != "")
+            if (CamposPreenchidos())
             {
-                // Lógica para cadastrar o produto no banco de dados
                 CadastrarProdutoNoBanco();
-
-                // Atualiza a tabela de estoque
                 AtualizarTabelaEstoque();
-
-                // Avisa o usuário que o produto foi cadastrado
                 MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // Limpar os campos após o cadastro
                 LimparCamposCadastro();
             }
             else
             {
-                // Avisar o usuário para preencher todos os campos
                 MessageBox.Show("Preencha todos os campos para cadastrar o produto.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-            AtualizarTabelaEstoque();
         }
 
+        // Verifica se todos os campos necessários estão preenchidos
+        private bool CamposPreenchidos() =>
+            !string.IsNullOrEmpty(NomeProduto.Text) &&
+            !string.IsNullOrEmpty(TipoProduto.Text) &&
+            !string.IsNullOrEmpty(MarcaProduto.Text) &&
+            !string.IsNullOrEmpty(CodigoProduto.Text) &&
+            !string.IsNullOrEmpty(QuantidadeInicial.Text);
+
+        // Método para limpar os campos de cadastro
         private void LimparCamposCadastro()
         {
-            NomeProduto.Text = "";
-            TipoProduto.Text = "";
-            MarcaProduto.Text = "";
-            CodigoProduto.Text = "";
-            QuantidadeInicial.Text = "";
+            NomeProduto.Text = string.Empty;
+            TipoProduto.Text = string.Empty;
+            MarcaProduto.Text = string.Empty;
+            CodigoProduto.Text = string.Empty;
+            QuantidadeInicial.Text = string.Empty;
         }
 
-        // Aba de Estoque
-
-        // Função que atualiza tabela de estoque
+        // Método chamado ao carregar a aba de estoque
         private void AbaEstoque_Loaded(object sender, RoutedEventArgs e)
         {
-            AtualizarTabelaEstoque();
-        }
-
-
-        private void CarregarProdutos()
-        {
-            // Carrega produtos do banco de dados Firestore
-            var db = DatabaseConnect.Database;
-            var produtosRef = db.Collection("Produtos");
-            var snapshot = produtosRef.GetSnapshotAsync().Result;
-            foreach (var doc in snapshot.Documents)
+            if (!produtosCarregados)
             {
-                var produto = doc.ConvertTo<ProdutoData>();
-                produtos.Add(produto);
+                AtualizarTabelaEstoque();
             }
-            EstoqueDataGrid.ItemsSource = produtos;
         }
 
+        // Método chamado ao alterar o texto da caixa de busca
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Lógica para filtrar produtos na tabela de estoque, pesquisando por nome, tipo, marca ou código simultaneamente
+            if (!produtosCarregados)
+            {
+                AtualizarTabelaEstoque();
+            }
+
             string searchText = SearchBox.Text.ToLower();
-            var filteredProducts = produtos.Where(p => p.Nome.ToLower().Contains(searchText) ||
-                                                       p.Tipo.ToLower().Contains(searchText) ||
-                                                       p.Marca.ToLower().Contains(searchText) ||
-                                                       p.Codigo.ToLower().Contains(searchText)).ToList();
+            var filteredProducts = produtos.Where(p =>
+                p.Nome.ToLower().Contains(searchText) ||
+                p.Tipo.ToLower().Contains(searchText) ||
+                p.Marca.ToLower().Contains(searchText) ||
+                p.Codigo.ToLower().Contains(searchText)).ToList();
+
             EstoqueDataGrid.ItemsSource = filteredProducts;
         }
 
-        private void EditarProduto_Click(object sender, RoutedEventArgs e)
+        // Método chamado ao clicar no botão de editar produto
+        private async void EditarProduto_Click(object sender, RoutedEventArgs e)
         {
-            if (produtos.Any())
+            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
             {
-                if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
+                var editarProdutoWindow = new EditarProdutoWindow(produtoSelecionado);
+                if (editarProdutoWindow.ShowDialog() == true)
                 {
-                    var editarProdutoWindow = new EditarProdutoWindow(produtoSelecionado);
-                    editarProdutoWindow.ShowDialog();
-
-                    if (editarProdutoWindow.DialogResult == true)
-                    {
-                        AtualizarProdutoNoBanco(produtoSelecionado);
-                        AtualizarTabelaEstoque();
-                        MessageBox.Show("Produto atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                    await AtualizarProdutoNoBanco(editarProdutoWindow.Produto);
+                    AtualizarTabelaEstoque();
+                    MessageBox.Show("Produto atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else
-                {
-                    MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Não há produtos para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
-        private void AtualizarProdutoNoBanco(ProdutoData produto)
+        // Método para atualizar um produto no banco de dados
+        private async Task AtualizarProdutoNoBanco(ProdutoData produto)
         {
             var db = DatabaseConnect.Database;
-            db.Collection("Produtos").Document(produto.Codigo).SetAsync(produto);
+            if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
+            var docRef = db.Collection("Produtos").Document(produto.Id);
+            await docRef.SetAsync(produto, SetOptions.Overwrite);
         }
 
-        private void AlterarQuantidade_Click(object sender, RoutedEventArgs e)
+        // Método chamado quando a seleção do TabControl é alterada
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source is TabControl)
+            {
+                AtualizarTabelaEstoque();
+            }
+        }
+
+        // Método chamado quando a seleção do ComboBox de Tipo de Produto é alterada
+        private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Lógica para lidar com a mudança de seleção do tipo de produto
+            // Por exemplo, você pode querer filtrar os produtos exibidos com base no tipo selecionado
+        }
+
+        // Método chamado ao clicar no botão de alterar quantidade
+        private async void AlterarQuantidade_Click(object sender, RoutedEventArgs e)
         {
             if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
             {
-                // Abre o modal para alterar a quantidade, passando a quantidade atual do produto
-                AlterarQuantidadeWindow alterarQuantidadeWindow = new AlterarQuantidadeWindow(produtoSelecionado.Quantidade);
-
-                // Exibe o modal e verifica se o usuário confirmou a alteração
+                var alterarQuantidadeWindow = new AlterarQuantidadeWindow(produtoSelecionado.Quantidade);
                 if (alterarQuantidadeWindow.ShowDialog() == true)
                 {
-                    // Atualiza a quantidade do produto com o novo valor no banco de dados
                     produtoSelecionado.Quantidade = alterarQuantidadeWindow.Quantidade;
-                    AtualizarProdutoNoBanco(produtoSelecionado);
-
-                    // Atualiza a tabela de estoque
-                    EstoqueDataGrid.Items.Refresh();
-                    
-                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await AtualizarProdutoNoBanco(produtoSelecionado);
+                    AtualizarTabelaEstoque();
+                    MessageBox.Show("Quantidade do produto alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-            }
-            else
-            {
-                MessageBox.Show("Selecione um produto para alterar a quantidade.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
-        private void DeletarProduto_Click(object sender, RoutedEventArgs e)
+        // Método chamado ao clicar no botão de deletar produto
+        private async void DeletarProduto_Click(object sender, RoutedEventArgs e)
         {
             if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
             {
-                // Exibe uma janela de confirmação
-                MessageBoxResult result = MessageBox.Show(
-                    $"Tem certeza que deseja deletar o produto '{produtoSelecionado.Nome}'?",
-                    "Confirmação de Exclusão",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question
-                );
-
-                // Se o usuário confirmar a exclusão
+                var result = MessageBox.Show("Tem certeza que deseja deletar este produto?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                 {
-                    // Remove o produto da lista
-                    produtos.Remove(produtoSelecionado);
-
-                    // Remove o produto do banco de dados
-                    DeletarProdutoDoBanco(produtoSelecionado);
-
-                    // Atualiza o DataGrid para refletir a exclusão
+                    var db = DatabaseConnect.Database;
+                    if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
+                    var docRef = db.Collection("Produtos").Document(produtoSelecionado.Id);
+                    await docRef.DeleteAsync();
                     AtualizarTabelaEstoque();
-
                     MessageBox.Show("Produto deletado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
-            else
+        }
+
+        // Método chamado ao clicar no botão de incrementar quantidade
+        private async void IncrementarQuantidade_Click(object sender, RoutedEventArgs e)
+        {
+            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
             {
-                MessageBox.Show("Selecione um produto para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                produtoSelecionado.Quantidade++;
+                await AtualizarProdutoNoBanco(produtoSelecionado);
+                AtualizarTabelaEstoque();
             }
         }
 
-        private void DeletarProdutoDoBanco(object produtoSelecionado)
+        // Método chamado ao clicar no botão de decrementar quantidade
+        private async void DecrementarQuantidade_Click(object sender, RoutedEventArgs e)
         {
-            // Encontra o produto selecionado
-            var db = DatabaseConnect.Database;
-            DocumentReference docRef = db.Collection("Produtos").Document(((ProdutoData)produtoSelecionado).Codigo);
-
-            // Deleta o produto do banco de dados
-            docRef.DeleteAsync();
-
-            // Atualiza a tabela
-            AtualizarTabelaEstoque();
-        }
-
-
-        private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (TipoProduto.SelectedItem is ComboBoxItem selectedItem)
+            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
             {
-                string selectedTipo = selectedItem.Content.ToString();
-                var filteredProducts = produtos.Where(p => p.Tipo == selectedTipo).ToList();
-                EstoqueDataGrid.ItemsSource = filteredProducts;
+                if (produtoSelecionado.Quantidade > 0)
+                {
+                    produtoSelecionado.Quantidade--;
+                    await AtualizarProdutoNoBanco(produtoSelecionado);
+                    AtualizarTabelaEstoque();
+                }
             }
         }
+
 
     }
-
 }
