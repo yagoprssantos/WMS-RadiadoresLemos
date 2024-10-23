@@ -23,38 +23,38 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para atualizar a tabela de estoque com os produtos do banco de dados
         private async void AtualizarTabelaEstoque()
         {
-            //try
-            //{
-            //    // Se os produtos já foram carregados, não faz nada
-            //    if (produtosCarregados) return;
+            try
+            {
+                // Se os produtos já foram carregados, não faz nada
+                if (produtosCarregados) return;
 
-            //    // Limpa a lista de produtos
-            //    produtos.Clear();
-            //    // Conecta ao banco de dados
-            //    var db = DatabaseConnect.Database;
-            //    if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
-            //    var produtosRef = db.Collection("Produtos");
-            //    // Obtém o snapshot dos documentos na coleção "Produtos"
-            //    var snapshot = await produtosRef.GetSnapshotAsync();
+                // Limpa a lista de produtos
+                produtos.Clear();
+                // Conecta ao banco de dados
+                var db = DatabaseConnect.Database;
+                if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
+                var produtosRef = db.Collection("Produtos");
+                // Obtém o snapshot dos documentos na coleção "Produtos"
+                var snapshot = await produtosRef.GetSnapshotAsync();
 
-            //    // Converte cada documento para ProdutoData e adiciona à lista de produtos
-            //    foreach (var doc in snapshot.Documents)
-            //    {
-            //        var produto = doc.ConvertTo<ProdutoData>();
-            //        produtos.Add(produto);
-            //    }
+                // Converte cada documento para ProdutoData e adiciona à lista de produtos
+                foreach (var doc in snapshot.Documents)
+                {
+                    var produto = doc.ConvertTo<ProdutoData>();
+                    produtos.Add(produto);
+                }
 
-            //    // Atualiza a fonte de dados do DataGrid
-            //    EstoqueDataGrid.ItemsSource = null;
-            //    EstoqueDataGrid.ItemsSource = produtos;
-            //    // Marca que os produtos foram carregados
-            //    produtosCarregados = true;
-            //}
-            //catch (Exception ex)
-            //{
-            //    // Exibe mensagem de erro caso ocorra uma exceção
-            //    MessageBox.Show($"Erro ao atualizar a tabela de estoque: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
+                // Atualiza a fonte de dados do DataGrid
+                EstoqueDataGrid.ItemsSource = null;
+                EstoqueDataGrid.ItemsSource = produtos;
+                // Marca que os produtos foram carregados
+                produtosCarregados = true;
+            }
+            catch (Exception ex)
+            {
+                // Exibe mensagem de erro caso ocorra uma exceção
+                MessageBox.Show($"Erro ao atualizar a tabela de estoque: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // Método chamado quando um TextBox ganha foco
