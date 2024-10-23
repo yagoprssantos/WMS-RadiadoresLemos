@@ -5,8 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="550" Width="600" FontSize="18">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        Title="EditarProdutoWindow" Height="600" Width="600" FontSize="18"
+        TextBlock.Foreground="White">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  Background="{StaticResource BackgroundBrush}">
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
                 <!-- Barra de Pesquisa e Seleção -->
@@ -17,7 +20,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ComboBox Name="SearchComboBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                    <ComboBox Name="SearchComboBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                               IsEditable="True" 
                               PreviewKeyUp="SearchComboBox_PreviewKeyUp"
                               SelectionChanged="SearchComboBox_SelectionChanged">
@@ -60,7 +63,8 @@
                     <!-- Botão Salvar -->
                     <Button Content="Atualizar Produto" Click="Salvar_Click" Width="250" Margin="10"/>
                     <!-- Botão Cancelar -->
-                    <Button Content="Cancelar" Click="Cancelar_Click" Width="150" Margin="10"/>
+                    <Button Content="Cancelar" Click="Cancelar_Click" Width="150" Margin="10"
+                            Style="{StaticResource CancelButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
         </Grid>
