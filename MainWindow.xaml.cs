@@ -1,15 +1,8 @@
 ﻿using Google.Cloud.Firestore;
-using System.Text;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using WMS_RadiadoresLemos_WPF.Classes;
 
@@ -25,15 +18,16 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
             SetupDatabaseConnection();
             SetupStatusBar();
+            AbrirDashboard();
         }
-
 
         private void SetupDatabaseConnection()
         {
             UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
 
-            // Estabelece a conexão com o banco de dados
-            DatabaseConnect.SetEnvironmentVarible();
+            // Estabelece a conexão com o banco de dados Firestore
+            DatabaseConnect.SetEnvironmentVarible(); // Certifique-se de que essa função configura corretamente a variável do banco
+
             if (DatabaseConnect.Database != null)
             {
                 UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
@@ -46,62 +40,70 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-                
         private void SetupStatusBar()
         {
             UpdateDateTime();
             StartDateTimeUpdater();
         }
 
-
-        // Função para abrir a aba de Controle de Estoque
-        private void ControleEstoque_Click(object sender, RoutedEventArgs e)
-        {
-            // Fecha qualquer aba aberta
-            ContentArea.Content = null;
-            // Abre a aba de Controle de Estoque
-            ContentArea.Content = new ControleEstoqueUserControl();
-        }
-
-        // Função para abrir a aba de Controle de Vendas
-        private void BancoDados_Click(object sender, RoutedEventArgs e)
-        {
-            // Fecha qualquer aba aberta
-            ContentArea.Content = null;
-            // Abre a aba de Controle de Vendas
-            ContentArea.Content = new BancoDadosUserControl();
-        }
-
-
-
-        // Barra de Status
-        // Botão para verificar a conexão com o banco de dados novamente
-        private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
-        {
-            SetupDatabaseConnection();
-            SetupStatusBar();
-        }
-
-        private void UpdateStatusBar(string message, Color color)
-        {
-            StatusBarItem.Content = message;
-            StatusBar.Background = new SolidColorBrush(color);
-        }
-
+        // Atualiza a barra de status com a data e hora atual
         private void UpdateDateTime()
         {
             StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}  ";
         }
 
+        // Inicia o temporizador que atualiza a data e hora a cada segundo
         private void StartDateTimeUpdater()
         {
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
+            DispatcherTimer timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
             timer.Tick += (sender, args) => UpdateDateTime();
             timer.Start();
         }
 
+        // Função para abrir a aba de Controle de Estoque
+        private void ControleEstoque_Click(object sender, RoutedEventArgs e)
+        {
+            ContentArea.Content = null;
+            ContentArea.Content = new ControleEstoqueUserControl();
+            UpdateStatusBar("Exibindo o Controle de Estoque", Colors.DarkBlue);
+        }
+
+        // Função para abrir o Dashboard
+        private void Dashboard_Click(object sender, RoutedEventArgs e)
+        {
+            AbrirDashboard();
+        }
+
+        // Função que abre o Dashboard
+        private void AbrirDashboard()
+        {
+            ContentArea.Content = null;
+            ContentArea.Content = new DashboardUserControl();
+            UpdateStatusBar("Exibindo o Dashboard", Colors.DarkBlue);
+        }
+
+        // Função para abrir a aba de Usuários
+        private void Usuarios_Click(object sender, RoutedEventArgs e)
+        {
+            ContentArea.Content = null;
+            ContentArea.Content = new UsuariosUserControl();
+            UpdateStatusBar("Exibindo a aba de Usuários", Colors.DarkBlue);
+        }
+
+        // Verifica a conexão com o banco de dados e tenta reconectar
+        private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            SetupDatabaseConnection();
+        }
+
+        // Atualiza a barra de status com uma mensagem e uma cor
+        private void UpdateStatusBar(string message, Color color)
+        {
+            StatusBarItem.Content = message;
+            StatusBar.Background = new SolidColorBrush(color);
+        }
     }
-
 }
-

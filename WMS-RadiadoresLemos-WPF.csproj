@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Cloud.Firestore" Version="3.9.0" />
+    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
   </ItemGroup>
 
 </Project>
