@@ -4,31 +4,39 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="800">
-    <Grid>
-        <TabControl>
+             d:DesignHeight="550" d:DesignWidth="800"
+             TextBlock.Foreground="White">
+
+    <Grid >
+        <TabControl SelectionChanged="TabControl_SelectionChanged" >
             <!-- Aba de Cadastrar Produtos -->
             <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid Margin="20">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
-                            <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"/>
+                            <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"
+                                       Foreground="White"/>
                             <TextBox Name="NomeProduto" Margin="0,0,0,15"/>
 
-                            <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"/>
+                            <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"
+                                       Foreground="White"/>
+                            <!-- ComboBox com texto escura -->
                             <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged">
                                 <!-- Tipos de Produtos -->
                                 <ComboBoxItem Content="Caixa"/>
                                 <ComboBoxItem Content="Radiador"/>
                             </ComboBox>
 
-                            <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"/>
+                            <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"
+                                       Foreground="White"/>
                             <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
 
-                            <TextBlock Text="Código do Produto:" Margin="0,0,0,5"/>
+                            <TextBlock Text="Código do Produto:" Margin="0,0,0,5"
+                                       Foreground="White"/>
                             <TextBox Name="CodigoProduto" Margin="0,0,0,15"/>
 
-                            <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"/>
+                            <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"
+                                       Foreground="White"/>
                             <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting"/>
 
                             <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20"/>
@@ -43,7 +51,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                         <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10"/>
                         <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="200" Margin="10"/>
-                        <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10"/>
+                        <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
                     </StackPanel>
 
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
@@ -51,7 +59,8 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"
+                                   Foreground="White"/>
                         <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" TextChanged="SearchBox_TextChanged"/>
                     </Grid>
 
@@ -64,11 +73,26 @@
                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                               Width="Auto" Height="Auto">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
-                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" />
-                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" />
-                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" />
-                            <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" />
+                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True"/>
+                            <DataGridTemplateColumn Header="Quantidade">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="-" Click="DecrementarQuantidade_Click" Tag="{Binding}" />
+                                            <TextBlock Text="{Binding Quantidade}" Margin="5,0"/>
+                                            <Button Content="+" Click="IncrementarQuantidade_Click" Tag="{Binding}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Quantidade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>

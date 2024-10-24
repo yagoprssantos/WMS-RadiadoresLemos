@@ -3,58 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Controle de Estoque" 
         Height="700" Width="1000"
-        MinHeight="700" MinWidth="1000">
-    <Window.Resources>
-        <!-- Definição de Cores -->
-        <SolidColorBrush x:Key="PrimaryColor" Color="#003366"/>
-        <SolidColorBrush x:Key="SecondaryColor" Color="#00509E"/>
-        <SolidColorBrush x:Key="AccentColor" Color="#00A4CC"/>
-        <SolidColorBrush x:Key="ButtonForegroundColor" Color="White"/>
-        <SolidColorBrush x:Key="ButtonBackgroundColor" Color="#00509E"/>
-        <SolidColorBrush x:Key="ButtonHoverColor" Color="#003366"/>
-        <SolidColorBrush x:Key="ButtonBorderColor" Color="#00A4CC"/>
-
-        <!-- Estilo para Botões -->
-        <Style TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource ButtonForegroundColor}"/>
-            <Setter Property="Background" Value="{StaticResource ButtonBackgroundColor}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="Margin" Value="0,5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="5"
-                                Padding="5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource ButtonHoverColor}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Estilo para a seta circular -->
-        <Style x:Key="CircularArrowStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource ButtonForegroundColor}"/>
-            <Setter Property="Background" Value="{StaticResource ButtonBackgroundColor}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="Margin" Value="0,5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-    </Window.Resources>
-
+        MinHeight="700" MinWidth="1000"
+        WindowState="Maximized"
+        Background="{StaticResource SecondaryBrush}">
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300" MinWidth="200" MaxWidth="400" />
@@ -62,7 +14,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Painel de Navegação -->
-        <DockPanel Grid.Column="0" Background="{StaticResource PrimaryColor}" >
+        <DockPanel Grid.Column="0" Background="{StaticResource PanelBackgroundBrush}">
             <StackPanel Margin="10">
                 <Button Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16">
                     <Button.ToolTip>
@@ -85,10 +37,10 @@
         </DockPanel>
 
         <!-- Área de Conteúdo -->
-        <ContentControl Grid.Column="1" Name="ContentArea" Margin="10, 10, 10, 36"/>
+        <ContentControl Grid.Column="1" Name="ContentArea" Margin="10, 10, 10, 40"/>
 
         <!-- Barra de Status -->
-        <StatusBar Name="StatusBar" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Background="{StaticResource PrimaryColor}" FontSize="16">
+        <StatusBar Name="StatusBar" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Background="{StaticResource PrimaryBrush}" FontSize="16">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -102,7 +54,7 @@
             </StatusBar.ItemsPanel>
 
             <!-- Informações de Status -->
-            <StatusBarItem Name="StatusBarItem" Foreground="White" HorizontalAlignment="Left" Grid.Column="0" Margin="5, 0, 0, 0"/>
+            <StatusBarItem Name="StatusBarItem" Foreground="{StaticResource ButtonForegroundBrush}" HorizontalAlignment="Left" Grid.Column="0" Margin="5, 0, 0, 0"/>
 
             <!-- Botão para reconectar no centro da status bar -->
             <StatusBarItem Grid.Column="1">
@@ -116,7 +68,7 @@
             </StatusBarItem>
 
             <!-- Data e Hora -->
-            <StatusBarItem Name="StatusBarDateTime" Foreground="White" HorizontalAlignment="Right" Grid.Column="2"/>
+            <StatusBarItem Name="StatusBarDateTime" Foreground="{StaticResource ButtonForegroundBrush}" HorizontalAlignment="Right" Grid.Column="2"/>
         </StatusBar>
     </Grid>
 </Window>

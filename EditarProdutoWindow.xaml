@@ -5,13 +5,40 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="510" Width="800" FontSize="18">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="20">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
-                <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"/>
-                <TextBox Name="NomeProduto" Margin="0,0,0,15"/>
+        Title="EditarProdutoWindow" Height="600" Width="600" FontSize="18"
+        TextBlock.Foreground="White">
 
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  Background="{StaticResource BackgroundBrush}">
+        <Grid>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
+                <!-- Barra de Pesquisa e Seleção -->
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <ComboBox Name="SearchComboBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                              IsEditable="True" 
+                              PreviewKeyUp="SearchComboBox_PreviewKeyUp"
+                              SelectionChanged="SearchComboBox_SelectionChanged">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+                    <Button Content="Buscar" Grid.Column="2" Click="Buscar_Click" />
+                </Grid>
+
+                <!-- Dados do Produto -->
+                <!-- Nome -->
+                <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"/>
+                <TextBox Name="NomeProduto" Margin="0,0,0,15" TextChanged="TextBox_TextChanged"/>
+
+                <!-- Tipo -->
                 <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"/>
                 <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged">
                     <!-- Tipos de Produtos -->
@@ -19,16 +46,26 @@
                     <ComboBoxItem Content="Radiador"/>
                 </ComboBox>
 
+                <!-- Marca -->
                 <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"/>
-                <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
+                <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting" TextChanged="TextBox_TextChanged"/>
 
+                <!-- Código -->
                 <TextBlock Text="Código do Produto:" Margin="0,0,0,5"/>
-                <TextBox Name="CodigoProduto" Margin="0,0,0,15"/>
+                <TextBox Name="CodigoProduto" Margin="0,0,0,15" TextChanged="TextBox_TextChanged"/>
 
+                <!-- Quantidade -->
                 <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"/>
-                <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting"/>
+                <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting" TextChanged="TextBox_TextChanged"/>
 
-                <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20"/>
+                <!-- Botões -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,10,0,0">
+                    <!-- Botão Salvar -->
+                    <Button Content="Atualizar Produto" Click="Salvar_Click" Width="250" Margin="10"/>
+                    <!-- Botão Cancelar -->
+                    <Button Content="Cancelar" Click="Cancelar_Click" Width="150" Margin="10"
+                            Style="{StaticResource CancelButtonStyle}"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
     </ScrollViewer>
