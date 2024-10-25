@@ -18,10 +18,10 @@ namespace WMS_RadiadoresLemos_WPF
     {
         public int Quantidade { get; private set; }
 
-        public AlterarQuantidadeWindow(int quantidadeAtual)
+        public AlterarQuantidadeWindow(ProdutoData produto)
         {
             InitializeComponent();
-            Quantidade = quantidadeAtual;
+            Quantidade = produto.Quantidade;
             QuantidadeTextBox.Text = Quantidade.ToString();
         }
 

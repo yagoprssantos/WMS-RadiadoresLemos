@@ -11,13 +11,33 @@ namespace WMS_RadiadoresLemos_WPF.Classes
         // Função para registrar um evento no Firestore
         public static async Task RegistrarEventoAsync(string descricao)
         {
-            var eventosRef = db.Collection("Eventos");
-            var evento = new
+            if (string.IsNullOrWhiteSpace(descricao))
             {
-                Descricao = descricao,
-                DataHora = DateTime.UtcNow  // Armazena a data/hora do evento
-            };
-            await eventosRef.AddAsync(evento);
+                Console.WriteLine("Descrição do evento não pode ser vazia.");
+                return;
+            }
+
+            if (db == null)
+            {
+                Console.WriteLine("Conexão com o Firestore não estabelecida.");
+                return;
+            }
+
+            try
+            {
+                var eventosRef = db.Collection("Eventos");
+                var evento = new
+                {
+                    Descricao = descricao,
+                    DataHora = DateTime.UtcNow  // Armazena a data/hora do evento
+                };
+                await eventosRef.AddAsync(evento);
+                Console.WriteLine("Evento registrado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao registrar evento: {ex.Message}");
+            }
         }
     }
 }

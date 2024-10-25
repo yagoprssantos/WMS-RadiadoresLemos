@@ -21,7 +21,7 @@
                             <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"
                                        Foreground="White"/>
                             <!-- ComboBox com texto escura -->
-                            <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged">
+                            <ComboBox Name="TipoProduto" Margin="0,0,0,15">
                                 <!-- Tipos de Produtos -->
                                 <ComboBoxItem Content="Caixa"/>
                                 <ComboBoxItem Content="Radiador"/>
@@ -48,11 +48,18 @@
             <!-- Aba de Controle de Estoque -->
             <TabItem Header="Controle de Estoque" Name="AbaEstoque" FontSize="18">
                 <DockPanel Margin="10">
+
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
+                        <!-- Botão discreto para atualizar a DataGrid -->
+                        <Button Content="🔄" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" 
+                                HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                Background="Transparent" Foreground="White" 
+                                BorderBrush="Transparent" FontSize="25"/>
                         <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10"/>
                         <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="200" Margin="10"/>
                         <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
                     </StackPanel>
+
 
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -64,6 +71,8 @@
                         <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" TextChanged="SearchBox_TextChanged"/>
                     </Grid>
 
+
+
                     <DataGrid Name="EstoqueDataGrid"
                               AutoGenerateColumns="False" 
                               IsReadOnly="True"
@@ -73,26 +82,11 @@
                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                               Width="Auto" Height="Auto">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True"/>
-                            <DataGridTemplateColumn Header="Quantidade">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Button Content="-" Click="DecrementarQuantidade_Click" Tag="{Binding}" />
-                                            <TextBlock Text="{Binding Quantidade}" Margin="5,0"/>
-                                            <Button Content="+" Click="IncrementarQuantidade_Click" Tag="{Binding}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                                <DataGridTemplateColumn.CellEditingTemplate>
-                                    <DataTemplate>
-                                        <TextBox Text="{Binding Quantidade, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellEditingTemplate>
-                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*"/>
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>
+                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True" Width="*"/>
+                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True" Width="*"/>
+                            <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" IsReadOnly="False" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>

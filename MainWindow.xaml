@@ -6,7 +6,7 @@
         MinHeight="700" MinWidth="1000"
         WindowState="Maximized"
         Background="{StaticResource SecondaryBrush}">
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300" MinWidth="200" MaxWidth="400" />
@@ -15,16 +15,17 @@
 
         <!-- Painel de Navegação -->
         <DockPanel Grid.Column="0" Background="{StaticResource PanelBackgroundBrush}">
-            <StackPanel Margin="10">
-                <Button Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16">
+            <StackPanel Name="BarraLateral" Margin="10" DockPanel.Dock="Top">
+                <!-- Botão para abrir a aba de Registro -->
+                <Button Content="Registro Entrada/Saida" Click="RegistroEntradaSaida_Click" FontSize="16">
                     <Button.ToolTip>
                         <ToolTip Content="Registrar entrada e saída de produtos"/>
                     </Button.ToolTip>
                 </Button>
-                <!-- Botão para abrir a aba de Usuários -->
-                <Button Content="Usuários" Click="Usuarios_Click" FontSize="16">
+                <!-- Botão para abrir a aba de Estoque -->
+                <Button Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16">
                     <Button.ToolTip>
-                        <ToolTip Content="Gerenciar usuários do sistema"/>
+                        <ToolTip Content="Registrar entrada e saída de produtos"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir o Dashboard -->
@@ -33,7 +34,36 @@
                         <ToolTip Content="Exibir o dashboard"/>
                     </Button.ToolTip>
                 </Button>
+                <!-- Botão para abrir a aba de Usuários -->
+                <Button Content="Usuários" Click="Usuarios_Click" FontSize="16">
+                    <Button.ToolTip>
+                        <ToolTip Content="Gerenciar usuários do sistema"/>
+                    </Button.ToolTip>
+                </Button>
             </StackPanel>
+
+            <!-- Perfil -->
+            <Grid Margin="20, 0, 20, 50" Name="Perfil" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Nome do Usuário" FontSize="16" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="0" Grid.Column="0" />
+                <TextBlock Text="Matrícula" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="1" Grid.Column="0" />
+                <Button Content="Logout" Click="LogoutButton_Click" FontSize="16" 
+                        Margin="0, 10, 0, 0" Width="100" Grid.Row="2" Grid.Column="1"
+                        Style="{StaticResource CancelButtonStyle}">
+                    <Button.ToolTip>
+                        <ToolTip Content="Sair do sistema"/>
+                    </Button.ToolTip>
+                </Button>
+            </Grid>
         </DockPanel>
 
         <!-- Área de Conteúdo -->

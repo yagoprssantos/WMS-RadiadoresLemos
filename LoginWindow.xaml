@@ -1,0 +1,31 @@
+﻿<Window x:Class="WMS_RadiadoresLemos_WPF.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
+        mc:Ignorable="d"
+        Title="LoginWindow" Height="350" Width="400"
+        WindowStartupLocation="CenterScreen"
+        Background="White">
+
+    <Grid>
+        <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <!-- Campo de Texto para Usuário -->
+            <TextBlock Text="Usuário" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
+            <TextBox Name="UsernameField" Width="250" Height="30" Margin="0,0,0,20" FontSize="14" Padding="5"/>
+
+            <!-- Campo de Texto para Senha -->
+            <TextBlock Text="Senha" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
+            <PasswordBox Name="PasswordField" Width="250" Height="30" Margin="0,0,0,20" FontSize="14" Padding="5"/>
+
+            <!-- Botão para Confirmar -->
+            <Button Content="Confirmar" FontSize="16" Width="200" Height="40" Click="ConfirmarLogin_Click" Margin="0, 0, 0, 20"/>
+            
+            <!-- Botão para Sair da aplicação -->
+            <Button Content="Sair" FontSize="16" Width="100" Height="30" Click="Sair_Click"
+                    Style="{StaticResource CancelButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</Window>
+

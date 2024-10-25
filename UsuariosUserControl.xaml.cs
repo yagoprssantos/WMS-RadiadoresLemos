@@ -1,17 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -69,8 +60,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-
         private void DeletarUsuario_Click(object sender, RoutedEventArgs e)
         {
             if (UsuariosDataGrid.SelectedItem is Usuario usuarioSelecionado)
@@ -104,6 +93,10 @@ namespace WMS_RadiadoresLemos_WPF
             UsuariosDataGrid.ItemsSource = filteredUsuarios;
         }
 
-
+        // Função chamada quando o botão de atualizar é clicado
+        private void AtualizarDataGrid_Click(object sender, RoutedEventArgs e)
+        {
+            UsuariosDataGrid.Items.Refresh();
+        }
     }
 }

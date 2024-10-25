@@ -5,34 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="600" Width="600" FontSize="18"
+        Title="EditarProdutoWindow" Height="500" Width="600" FontSize="18"
         TextBlock.Foreground="White">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   Background="{StaticResource BackgroundBrush}">
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
-                <!-- Barra de Pesquisa e Seleção -->
-                <Grid Margin="0,0,0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ComboBox Name="SearchComboBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                              IsEditable="True" 
-                              PreviewKeyUp="SearchComboBox_PreviewKeyUp"
-                              SelectionChanged="SearchComboBox_SelectionChanged">
-                        <ComboBox.ItemContainerStyle>
-                            <Style TargetType="ComboBoxItem">
-                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            </Style>
-                        </ComboBox.ItemContainerStyle>
-                    </ComboBox>
-                    <Button Content="Buscar" Grid.Column="2" Click="Buscar_Click" />
-                </Grid>
-
                 <!-- Dados do Produto -->
                 <!-- Nome -->
                 <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"/>

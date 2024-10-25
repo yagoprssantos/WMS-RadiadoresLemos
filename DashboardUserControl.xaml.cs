@@ -13,27 +13,36 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class DashboardUserControl : UserControl
     {
         // Variáveis necessárias para os gráficos
-        public ChartValues<int> ProdutosVendidosSeries { get; set; }
-        public string[] DiasVendas { get; set; }
-        public Func<double, string> FormatadorDeEixoY { get; set; }
+        public ChartValues<int> ProdutosVendidosSeries { get; set; } = new ChartValues<int>();
+        public string[] DiasVendas { get; set; } = Array.Empty<string>();
+        public Func<double, string> FormatadorDeEixoY { get; set; } = value => value.ToString("N");
 
-        private FirestoreDb db;
+        private FirestoreDb db = null!;
 
         public DashboardUserControl()
         {
             InitializeComponent();
-            db = DatabaseConnect.Database;  // Associa o Firestore à variável db
-            CarregarDadosDoDashboardAsync(); // Certifique-se de que está aguardando essa operação
+            SetupDatabaseConnection();
+            CarregarDadosDoDashboardAsync().ConfigureAwait(false);
+        }
+
+        private void SetupDatabaseConnection()
+        {
+            DatabaseConnect.SetEnvironmentVarible();
+            db = DatabaseConnect.Database ?? throw new InvalidOperationException("Banco de dados não configurado");
         }
 
         // Função para carregar os dados do dashboard
         private async Task CarregarDadosDoDashboardAsync()
         {
-            await ExibirTotalUsuariosAsync();
-            await ExibirTotalProdutosAsync();
-            await ExibirProdutosBaixoEstoqueAsync();
+            var usuariosTask = ExibirTotalUsuariosAsync();
+            var produtosTask = ExibirTotalProdutosAsync();
+            var baixoEstoqueTask = ExibirProdutosBaixoEstoqueAsync();
+            var logsTask = ExibirLogsRecentesAsync();
+
+            await Task.WhenAll(usuariosTask, produtosTask, baixoEstoqueTask, logsTask);
+
             ExibirGraficoDeVendas();
-            await ExibirLogsRecentesAsync();
         }
 
         private async Task ExibirTotalUsuariosAsync()
@@ -56,9 +65,10 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var produtosRef = db.Collection("Produtos");
             var snapshot = await produtosRef.GetSnapshotAsync();
-            int produtosBaixoEstoque = snapshot.Documents.Count(doc => doc.GetValue<int>("Quantidade") < 5);
+            int produtosBaixoEstoque = snapshot.Documents.Count(doc => doc.GetValue<int>("Quantidade") < 10);
             ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
         }
+
 
         // Exibe o gráfico de vendas
         private void ExibirGraficoDeVendas()

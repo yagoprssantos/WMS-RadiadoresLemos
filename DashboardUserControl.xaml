@@ -6,42 +6,40 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
 
-    <Grid Margin="10">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
-        <TextBlock Text="Dashboard" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 0, 0, 20" Grid.Row="0"/>
-
+        
         <!-- Painéis para Contadores e Resumos -->
         <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Stretch">
 
             <!-- Contadores (Usuários, Produtos, etc.) -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0, 10, 0, 10">
-                <Border Background="#2196F3" Padding="15" CornerRadius="10" Margin="10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0, 20, 0, 20">
+                <Border Background="#1976D2" Padding="20" CornerRadius="15" Margin="15">
                     <StackPanel>
-                        <TextBlock Text="Total de Usuários" FontSize="16" Foreground="White" FontWeight="Bold"/>
-                        <TextBlock x:Name="TotalUsuariosTextBlock" FontSize="24" Foreground="White" FontWeight="Bold" Text="0"/>
+                        <TextBlock Text="Total de Usuários" FontSize="18" Foreground="White" FontWeight="Bold"/>
+                        <TextBlock x:Name="TotalUsuariosTextBlock" FontSize="26" Foreground="White" FontWeight="Bold" Text="0"/>
                     </StackPanel>
                 </Border>
-                <Border Background="#4CAF50" Padding="15" CornerRadius="10" Margin="10">
+                <Border Background="#388E3C" Padding="20" CornerRadius="15" Margin="15">
                     <StackPanel>
-                        <TextBlock Text="Total de Produtos" FontSize="16" Foreground="White" FontWeight="Bold"/>
-                        <TextBlock x:Name="TotalProdutosTextBlock" FontSize="24" Foreground="White" FontWeight="Bold" Text="0"/>
+                        <TextBlock Text="Total de Produtos" FontSize="18" Foreground="White" FontWeight="Bold"/>
+                        <TextBlock x:Name="TotalProdutosTextBlock" FontSize="26" Foreground="White" FontWeight="Bold" Text="0"/>
                     </StackPanel>
                 </Border>
-                <Border Background="#FFC107" Padding="15" CornerRadius="10" Margin="10">
+                <Border Background="#FFA000" Padding="20" CornerRadius="15" Margin="15">
                     <StackPanel>
-                        <TextBlock Text="Produtos com Baixo Estoque" FontSize="16" Foreground="White" FontWeight="Bold"/>
-                        <TextBlock x:Name="ProdutosBaixoEstoqueTextBlock" FontSize="24" Foreground="White" FontWeight="Bold" Text="0"/>
+                        <TextBlock Text="Produtos com Baixo Estoque" FontSize="18" Foreground="White" FontWeight="Bold"/>
+                        <TextBlock x:Name="ProdutosBaixoEstoqueTextBlock" FontSize="26" Foreground="White" FontWeight="Bold" Text="0"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
 
             <!-- Gráfico de Barras para Exemplo de Produtos Vendidos -->
-            <GroupBox Header="Vendas Recentes" Margin="10">
-                <lvc:CartesianChart x:Name="GraficoVendas" Height="300" Margin="10">
+            <GroupBox Header="Vendas Recentes" Margin="15" Foreground="White">
+                <lvc:CartesianChart x:Name="GraficoVendas" Height="300" Margin="15">
                     <lvc:CartesianChart.Series>
                         <lvc:ColumnSeries Title="Produtos Vendidos" Values="{Binding ProdutosVendidosSeries}" Fill="#FF4081"/>
                     </lvc:CartesianChart.Series>
@@ -55,7 +53,7 @@
             </GroupBox>
 
             <!-- Logs Recentes -->
-            <GroupBox Header="Últimos Eventos" Margin="10">
+            <GroupBox Header="Últimos Eventos" Margin="15" Foreground="White">
                 <ListBox x:Name="UltimosEventosListBox" Height="150" />
             </GroupBox>
 

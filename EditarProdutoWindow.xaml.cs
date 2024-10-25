@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,31 +14,18 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private ProdutoData produto;
         private bool isModified = false;
-        private FirestoreDb firestoreDb = null!; // Inicializado com operador de negação
+        private List<ProdutoData> produtos; // Lista de produtos para busca
 
         // Propriedade pública para acessar o produto editado
         public ProdutoData Produto => produto;
 
         // Construtor que inicializa a janela com os dados do produto ou vazio
-        public EditarProdutoWindow(ProdutoData? produto = null)
+        public EditarProdutoWindow(ProdutoData? produto)
         {
             InitializeComponent();
             this.produto = produto ?? new ProdutoData();
-            ConectarFirestore();
+            produtos = new List<ProdutoData>(); // Inicializa a lista de produtos
             PreencherCampos();
-        }
-
-        // Conecta ao Firestore
-        private void ConectarFirestore()
-        {
-            try
-            {
-                firestoreDb = DatabaseConnect.Database ?? throw new InvalidOperationException("Não foi possível conectar ao Firestore.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao conectar ao Firestore: {ex.Message}");
-            }
         }
 
         // Preenche os campos da interface com os dados do produto
@@ -59,7 +46,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Evento disparado ao clicar no botão de atualizar produto
-        private async void Salvar_Click(object sender, RoutedEventArgs e)
+        private void Salvar_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -70,8 +57,6 @@ namespace WMS_RadiadoresLemos_WPF
                     produto.Marca = MarcaProduto.Text;
                     produto.Codigo = CodigoProduto.Text;
                     produto.Quantidade = int.Parse(QuantidadeInicial.Text);
-
-                    await AtualizarProdutoAsync(produto);
 
                     DialogResult = true;
                     Close();
@@ -223,152 +208,6 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao modificar texto: {ex.Message}");
-            }
-        }
-
-        // Evento disparado ao digitar no ComboBox de pesquisa
-        private async void SearchComboBox_PreviewKeyUp(object sender, KeyEventArgs e)
-        {
-            try
-            {
-                if (e.Key == Key.Enter)
-                {
-                    await RealizarBuscaAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao buscar produto: {ex.Message}");
-            }
-        }
-
-        // Evento disparado ao clicar no botão de busca
-        private async void Buscar_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                await RealizarBuscaAsync();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao buscar produto: {ex.Message}");
-            }
-        }
-
-        // Método para realizar a busca de produtos
-        private async Task RealizarBuscaAsync()
-        {
-            try
-            {
-                string searchText = SearchComboBox.Text.ToLower();
-                var nomesProdutos = await BuscarProdutosAsync(searchText);
-                SearchComboBox.ItemsSource = nomesProdutos;
-                SearchComboBox.IsDropDownOpen = true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao buscar produtos: {ex.Message}");
-            }
-        }
-
-        // Evento disparado ao selecionar um item no ComboBox de pesquisa
-        private async void SearchComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                if (SearchComboBox.SelectedItem is string selectedProductName)
-                {
-                    var produtoSelecionado = await BuscarProdutoPorNomeAsync(selectedProductName);
-                    if (produtoSelecionado != null)
-                    {
-                        produto = produtoSelecionado;
-                        PreencherCampos();
-                        isModified = false; // Resetar o estado de modificação
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao buscar produto: {ex.Message}");
-            }
-        }
-
-        // Método para buscar produtos no Firestore
-        private async Task<List<string>> BuscarProdutosAsync(string searchText)
-        {
-            try
-            {
-                ConectarFirestore(); // Garante que a conexão com o Firestore está estabelecida
-
-                // Busca todos os produtos
-                Query query = firestoreDb.Collection("Produtos");
-                QuerySnapshot querySnapshot = await query.GetSnapshotAsync();
-                List<string> nomesProdutos = new List<string>();
-
-                foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
-                {
-                    ProdutoData produto = documentSnapshot.ConvertTo<ProdutoData>();
-                    if (produto.Nome.ToLower().Contains(searchText.ToLower())) // Verifica se o nome do produto contém o texto de pesquisa
-                    {
-                        nomesProdutos.Add(produto.Nome);
-                    }
-                }
-
-                return nomesProdutos;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao buscar produtos: {ex.Message}");
-                return new List<string>();
-            }
-        }
-
-        // Método para buscar um produto pelo nome no Firestore
-        private async Task<ProdutoData?> BuscarProdutoPorNomeAsync(string nome)
-        {
-            try
-            {
-                ConectarFirestore(); // Garante que a conexão com o Firestore está estabelecida
-
-                // Converte o nome do produto para minúsculas
-                string nomeLower = nome.ToLower();
-
-                // Busca todos os produtos e filtra em memória
-                Query query = firestoreDb.Collection("Produtos");
-                QuerySnapshot querySnapshot = await query.GetSnapshotAsync();
-
-                foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
-                {
-                    ProdutoData produto = documentSnapshot.ConvertTo<ProdutoData>();
-                    if (produto.Nome.ToLower() == nomeLower) // Compara os nomes em minúsculas
-                    {
-                        produto.Id = documentSnapshot.Id; // Atribui o ID do documento ao produto
-                        return produto;
-                    }
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao buscar produto: {ex.Message}");
-                return null;
-            }
-        }
-
-        // Método para atualizar um produto no Firestore
-        private async Task AtualizarProdutoAsync(ProdutoData produto)
-        {
-            try
-            {
-                ConectarFirestore(); // Garante que a conexão com o Firestore está estabelecida
-
-                DocumentReference docRef = firestoreDb.Collection("Produtos").Document(produto.Id);
-                await docRef.SetAsync(produto, SetOptions.Overwrite);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao atualizar produto: {ex.Message}");
             }
         }
 
