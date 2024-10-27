@@ -272,7 +272,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para atualizar um produto no banco de dados
-        private async Task AtualizarProdutoNoBanco(ProdutoData produto)
+        private static async Task AtualizarProdutoNoBanco(ProdutoData produto)
         {
             try
             {

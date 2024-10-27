@@ -10,7 +10,6 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private List<object> dadosFiltrados = new List<object>();
         private bool dadosCarregados = false;
-        private bool precisaAtualizarDados = true;
 
         public BancoDadosUserControl()
         {
@@ -65,7 +64,6 @@ namespace WMS_RadiadoresLemos_WPF
                 dadosFiltrados = value;
                 DadosDataGrid.ItemsSource = dadosFiltrados;
                 dadosCarregados = true;
-                precisaAtualizarDados = false;
                 RemoverUltimaColuna();
             }
         }

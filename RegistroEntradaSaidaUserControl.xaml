@@ -3,10 +3,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="550" d:DesignWidth="800"
+             TextBlock.Foreground="White">
+
+    <Grid Margin="20">
+        <Border CornerRadius="10" Padding="30" Margin="50" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxWidth="1000">
+            <StackPanel Width="Auto" VerticalAlignment="Stretch">
+                <TextBlock Text="Registro de Entrada/Saída" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20" TextAlignment="Center"/>
+
+                <TextBlock Text="Produto:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
+                <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" Background="White" Foreground="Black" IsEditable="True" FontSize="18" 
+                          StaysOpenOnEdit="True" IsTextSearchEnabled="False" TextBoxBase.TextChanged="SearchTextBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged">
+                    <!-- Produtos serão carregados do banco de dados -->
+                </ComboBox>
+
+                <TextBlock Text="Quantidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
+                <TextBox Name="QuantidadeTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
+                         PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="20"
+                            Width="200" Margin="10" Background="#4CAF50" Foreground="White"/>
+                    <Button Content="Registrar Saída" Click="RegistrarSaida_Click" FontSize="20"
+                            Width="200" Margin="10" Background="#F44336" Foreground="White"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>
