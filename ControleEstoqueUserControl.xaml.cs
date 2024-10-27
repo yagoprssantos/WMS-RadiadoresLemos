@@ -10,7 +10,7 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class ControleEstoqueUserControl : UserControl
     {
         // Lista para armazenar os produtos carregados do banco de dados
-        private List<ProdutoData> produtos = new();
+        private List<ProdutoData> produtos = [];
         // Flag para verificar se os produtos já foram carregados
         private bool produtosCarregados = false;
         // Flag para verificar se a tabela de estoque precisa ser atualizada
@@ -165,7 +165,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Atualiza o cache local
             if (!Cache.Tabelas.TryGetValue("Produtos", out List<object>? value))
             {
-                value = new List<object>();
+                value = [];
                 Cache.Tabelas["Produtos"] = value;
             }
 
@@ -337,6 +337,8 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
                     EstoqueDataGrid.ItemsSource = produtos;
+
+                    MessageBox.Show("Produto deletado com sucesso", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             else

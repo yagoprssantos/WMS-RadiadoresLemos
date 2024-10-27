@@ -37,12 +37,8 @@
 
             <!-- Segunda Aba: Visualização de Dados -->
             <TabItem Header="Visualizar Dados">
-                <Grid Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                <DockPanel Margin="10">
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -54,8 +50,25 @@
                             <ComboBoxItem Content="Usuários"/>
                         </ComboBox>
                     </Grid>
-                    <DataGrid x:Name="DadosDataGrid" AutoGenerateColumns="True" Margin="5" Grid.Row="1"/>
-                </Grid>
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"
+                                   Foreground="White"/>
+                        <TextBox Name="SearchBox" Grid.Column="1" 
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                 TextChanged="SearchBox_TextChanged"/>
+                        <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" 
+                                HorizontalAlignment="Center" VerticalAlignment="Top" 
+                                Background="Transparent" Foreground="White" 
+                                Padding="0" Margin="7, 0, 0, 0"
+                                FontSize="33" Grid.Column="2"/>
+                    </Grid>
+                    <DataGrid x:Name="DadosDataGrid" AutoGenerateColumns="True" Margin="5" DockPanel.Dock="Bottom"/>
+                </DockPanel>
             </TabItem>
         </TabControl>
     </Grid>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="500" Width="600" FontSize="18"
+        Title="EditarProdutoWindow" Height="550" Width="600" FontSize="18"
         TextBlock.Foreground="White">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
