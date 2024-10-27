@@ -14,11 +14,13 @@
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
                 <!-- Dados do Produto -->
                 <!-- Nome -->
-                <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"/>
+                <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"
+                           Foreground="White"/>
                 <TextBox Name="NomeProduto" Margin="0,0,0,15" TextChanged="TextBox_TextChanged"/>
 
                 <!-- Tipo -->
-                <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"/>
+                <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"
+                           Foreground="White"/>
                 <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged">
                     <!-- Tipos de Produtos -->
                     <ComboBoxItem Content="Caixa"/>
@@ -26,15 +28,18 @@
                 </ComboBox>
 
                 <!-- Marca -->
-                <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"/>
+                <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"
+                           Foreground="White"/>
                 <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting" TextChanged="TextBox_TextChanged"/>
 
                 <!-- Código -->
-                <TextBlock Text="Código do Produto:" Margin="0,0,0,5"/>
+                <TextBlock Text="Código do Produto:" Margin="0,0,0,5"
+                           Foreground="White"/>
                 <TextBox Name="CodigoProduto" Margin="0,0,0,15" TextChanged="TextBox_TextChanged"/>
 
                 <!-- Quantidade -->
-                <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"/>
+                <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"
+                           Foreground="White"/>
                 <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting" TextChanged="TextBox_TextChanged"/>
 
                 <!-- Botões -->

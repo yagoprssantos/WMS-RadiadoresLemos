@@ -34,6 +34,12 @@
                         <ToolTip Content="Exibir o dashboard"/>
                     </Button.ToolTip>
                 </Button>
+                <!-- Botão para abrir a aba de Banco de Dados -->
+                <Button Content="Banco de Dados" Click="BancoDados_Click" FontSize="16">
+                    <Button.ToolTip>
+                        <ToolTip Content="Gerenciar o banco de dados"/>
+                    </Button.ToolTip>
+                </Button>
                 <!-- Botão para abrir a aba de Usuários -->
                 <Button Content="Usuários" Click="Usuarios_Click" FontSize="16">
                     <Button.ToolTip>

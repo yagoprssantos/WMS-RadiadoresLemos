@@ -99,6 +99,14 @@ namespace WMS_RadiadoresLemos_WPF
             ContentArea.Content = new DashboardUserControl();
         }
 
+        // Função para abrir a aba de Banco de Dados
+        private void BancoDados_Click(object sender, RoutedEventArgs e)
+        {
+            Log("Abrindo aba de Banco de Dados");
+            ContentArea.Content = null;
+            ContentArea.Content = new BancoDadosUserControl();
+        }
+
         // Função para abrir a aba de Usuários
         private void Usuarios_Click(object sender, RoutedEventArgs e)
         {

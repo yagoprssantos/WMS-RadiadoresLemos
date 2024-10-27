@@ -198,6 +198,7 @@ namespace WMS_RadiadoresLemos_WPF
             await AtualizarTabelaEstoque();
         }
 
+        // TODO - TESTAR SE ESTÁ PUXANDO OS DADOS RECURSIVAMENTE A CADA ALTERAÇÃO NO TEXTO
         // Método chamado ao alterar o texto da caixa de busca
         private async void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -275,7 +276,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
             {
-                var alterarQuantidadeWindow = new AlterarQuantidadeWindow(produtoSelecionado);
+                AlterarQuantidadeWindow alterarQuantidadeWindow = new AlterarQuantidadeWindow(produtoSelecionado);
                 if (alterarQuantidadeWindow.ShowDialog() == true)
                 {
                     produtoSelecionado.Quantidade = alterarQuantidadeWindow.Quantidade;
