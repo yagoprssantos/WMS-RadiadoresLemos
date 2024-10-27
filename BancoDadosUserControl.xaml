@@ -12,16 +12,10 @@
             <TabItem Header="Ferramentas">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <UniformGrid Rows="1" Columns="4" Margin="0,0,0,10">
-                        <Button Content="Exportar Dados" Margin="5"/>
-                        <Button Content="Importar Dados" Margin="5"/>
-                        <Button Content="Backup dos Dados" Margin="5"/>
-                        <Button Content="Reconectar com Banco de Dados" Margin="5"/>
-                    </UniformGrid>
-                    <GroupBox Header="Informações de Conexão" Grid.Row="1" Margin="10"
+                    <GroupBox Header="Informações de Conexão" Grid.Row="0" Margin="10"
                               Foreground="White">
                         <StackPanel Margin="10">
                             <TextBlock Text="Servidor: " FontWeight="Bold"/>
@@ -32,6 +26,12 @@
                             <TextBlock Text="{Binding ConnectionStatus}"/>
                         </StackPanel>
                     </GroupBox>
+                    <UniformGrid Rows="1" Columns="4" Margin="0,5,0,10" Grid.Row="1">
+                        <Button Content="Exportar Dados" Margin="5"/>
+                        <Button Content="Importar Dados" Margin="5"/>
+                        <Button Content="Backup dos Dados" Margin="5"/>
+                        <Button Content="Fazer reconexão" Margin="5"/>
+                    </UniformGrid>
                 </Grid>
             </TabItem>
 
@@ -49,7 +49,10 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Selecione a Tabela:" FontWeight="Bold" Margin="5" VerticalAlignment="Center" Grid.Column="0"
                                    Foreground="White"/>
-                        <ComboBox x:Name="TabelaComboBox" Width="Auto" Margin="5" Grid.Column="1" SelectionChanged="TabelaComboBox_SelectionChanged"/>
+                        <ComboBox x:Name="TabelaComboBox" Width="Auto" Margin="5" Grid.Column="1" SelectionChanged="TabelaComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Produtos"/>
+                            <ComboBoxItem Content="Usuários"/>
+                        </ComboBox>
                     </Grid>
                     <DataGrid x:Name="DadosDataGrid" AutoGenerateColumns="True" Margin="5" Grid.Row="1"/>
                 </Grid>

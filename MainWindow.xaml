@@ -95,10 +95,11 @@
             <!-- Botão para reconectar no centro da status bar -->
             <StatusBarItem Grid.Column="1">
                 <Button Name="VerifyConnectionButton" 
-                        Content="Reconectar"
+                        Content="⭯"
                         Click="VerifyConnectionButton_Click" 
                         Visibility="Collapsed"
-                        Width="200" Height="Auto" Margin="1, 0, 0, 0"
+                        Padding="0" Margin="0" FontSize="16"
+                        Foreground="White" Background="Transparent"
                         HorizontalAlignment="Center" VerticalAlignment="Center">
                 </Button>
             </StatusBarItem>

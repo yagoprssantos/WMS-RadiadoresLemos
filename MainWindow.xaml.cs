@@ -1,5 +1,9 @@
 ﻿using Google.Cloud.Firestore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -32,7 +36,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void SetupDatabaseConnection()
+        private async void SetupDatabaseConnection()
         {
             UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
 
@@ -43,6 +47,10 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
                 VerifyConnectionButton.Visibility = Visibility.Collapsed;
+
+                // Carrega todas as tabelas no cache
+                await CarregarTodasTabelasNoCache(); 
+
             }
             else
             {
@@ -132,10 +140,10 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+
         // Verifica a conexão com o banco de dados e tenta reconectar
         private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            Log("Verificando conexão com o banco de dados");
             SetupDatabaseConnection();
             SetupStatusBar();
         }
@@ -151,6 +159,74 @@ namespace WMS_RadiadoresLemos_WPF
         private void Log(string message)
         {
             Console.WriteLine($"{DateTime.Now}: {message}");
+        }
+
+
+        // Função para carregar todas as tabelas no cache
+        private async Task CarregarTodasTabelasNoCache()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
+
+                UpdateStatusBar("Carregando dados no cache...", Colors.DarkOrange);
+
+                // Lista de tabelas a serem carregadas no cache
+                var tabelas = new List<string>
+                {
+                    "Produtos",
+                    "Usuários"
+                };
+
+                // Para cada tabela, 
+                foreach (var tabela in tabelas)
+                {
+                    // Pega a referência da tabela
+                    var tabelaRef = db.Collection(tabela);
+                    // Pega o snapshot da tabela
+                    var snapshot = await tabelaRef.GetSnapshotAsync();
+
+                    // Lista de objetos para armazenar os dados da tabela
+                    var listaObjetos = new List<object>();
+                    foreach (var doc in snapshot.Documents)
+                    {
+                        // Se a tabela for de produtos, converte o documento para ProdutoData e adiciona à lista
+                        if (tabela == "Produtos")
+                        {
+                            var produto = doc.ConvertTo<ProdutoData>();
+                            listaObjetos.Add(produto);
+                        }
+                        // Se a tabela for de usuários, converte o documento para UsuarioData e adiciona à lista
+                        else if (tabela == "Usuários")
+                        {
+                            var usuario = doc.ConvertTo<UsuarioData>();
+                            listaObjetos.Add(usuario);
+                        }
+
+                        else
+                        {
+                            // Se a tabela não for reconhecida, retorna uma exceção
+                            throw new InvalidOperationException($"Tabela '{tabela}' não reconhecida.");
+                        }
+                    }
+
+                    // Adiciona a lista de objetos ao cache
+                    Cache.Tabelas[tabela] = listaObjetos;
+                }
+
+                // Todo esse código resulta em um cache com todas as tabelas carregadas
+                // O cache é um dicionário onde a chave é o nome da tabela e o valor é uma lista de objetos,
+                // onde cada objeto é um documento da tabela. Isso permite um acesso rápido e offline aos dados.
+
+                UpdateStatusBar("Dados carregados no cache com sucesso - Pronto para uso", Colors.DarkGreen);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateStatusBar("Erro ao carregar dados no cache - Verifique a conexão com o banco de dados", Colors.DarkRed);
+                VerifyConnectionButton.Visibility = Visibility.Visible;
+            }
         }
     }
 }
