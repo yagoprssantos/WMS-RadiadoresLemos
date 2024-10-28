@@ -8,7 +8,7 @@
              TextBlock.Foreground="White">
 
     <Grid >
-        <TabControl SelectionChanged="TabControl_SelectionChanged" >
+        <TabControl>
             <!-- Aba de Cadastrar Produtos -->
             <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -51,10 +51,6 @@
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                         <!-- Botão discreto para atualizar a DataGrid -->
-                        <Button Content="🔄" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" 
-                                HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                Background="Transparent" Foreground="White" 
-                                BorderBrush="Transparent" FontSize="25"/>
                         <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10"/>
                         <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="200" Margin="10"/>
                         <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
@@ -65,13 +61,19 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"
                                    Foreground="White"/>
-                        <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" TextChanged="SearchBox_TextChanged"/>
+                        <TextBox Name="SearchBox" Grid.Column="1" 
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                 TextChanged="SearchBox_TextChanged"/>
+                        <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" 
+                                HorizontalAlignment="Center" VerticalAlignment="Top" 
+                                Background="Transparent" Foreground="White" 
+                                Padding="0" Margin="7, 0, 0, 0"
+                                FontSize="33" Grid.Column="2"/>
                     </Grid>
-
-
 
                     <DataGrid Name="EstoqueDataGrid"
                               AutoGenerateColumns="False" 

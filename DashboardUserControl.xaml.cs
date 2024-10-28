@@ -1,6 +1,5 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
-using Google.Cloud.Firestore;
 using System.Windows.Controls;
 using System;
 using System.Collections.Generic;
@@ -17,58 +16,51 @@ namespace WMS_RadiadoresLemos_WPF
         public string[] DiasVendas { get; set; } = Array.Empty<string>();
         public Func<double, string> FormatadorDeEixoY { get; set; } = value => value.ToString("N");
 
-        private FirestoreDb db = null!;
-
         public DashboardUserControl()
         {
             InitializeComponent();
-            SetupDatabaseConnection();
-            CarregarDadosDoDashboardAsync().ConfigureAwait(false);
-        }
-
-        private void SetupDatabaseConnection()
-        {
-            DatabaseConnect.SetEnvironmentVarible();
-            db = DatabaseConnect.Database ?? throw new InvalidOperationException("Banco de dados não configurado");
+            CarregarDadosDoDashboard();
         }
 
         // Função para carregar os dados do dashboard
-        private async Task CarregarDadosDoDashboardAsync()
+        private void CarregarDadosDoDashboard()
         {
-            var usuariosTask = ExibirTotalUsuariosAsync();
-            var produtosTask = ExibirTotalProdutosAsync();
-            var baixoEstoqueTask = ExibirProdutosBaixoEstoqueAsync();
-            var logsTask = ExibirLogsRecentesAsync();
-
-            await Task.WhenAll(usuariosTask, produtosTask, baixoEstoqueTask, logsTask);
-
+            ExibirTotalUsuarios();
+            ExibirTotalProdutos();
+            ExibirProdutosBaixoEstoque();
+            ExibirLogsRecentes();
             ExibirGraficoDeVendas();
         }
 
-        private async Task ExibirTotalUsuariosAsync()
+        // Exibe o total de usuários
+        private void ExibirTotalUsuarios()
         {
-            var usuariosRef = db.Collection("Usuarios");
-            var snapshot = await usuariosRef.GetSnapshotAsync();
-            int totalUsuarios = snapshot.Count;
-            TotalUsuariosTextBlock.Text = totalUsuarios.ToString();
+            if (Cache.Tabelas.TryGetValue("Usuarios", out List<object>? usuarios))
+            {
+                int totalUsuarios = usuarios.Count;
+                TotalUsuariosTextBlock.Text = totalUsuarios.ToString();
+            }
         }
 
-        private async Task ExibirTotalProdutosAsync()
+        // Exibe o total de produtos
+        private void ExibirTotalProdutos()
         {
-            var produtosRef = db.Collection("Produtos");
-            var snapshot = await produtosRef.GetSnapshotAsync();
-            int totalProdutos = snapshot.Count;
-            TotalProdutosTextBlock.Text = totalProdutos.ToString();
+            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
+            {
+                int totalProdutos = produtos.Count;
+                TotalProdutosTextBlock.Text = totalProdutos.ToString();
+            }
         }
 
-        private async Task ExibirProdutosBaixoEstoqueAsync()
+        // Exibe a quantidade de produtos com baixo estoque
+        private void ExibirProdutosBaixoEstoque()
         {
-            var produtosRef = db.Collection("Produtos");
-            var snapshot = await produtosRef.GetSnapshotAsync();
-            int produtosBaixoEstoque = snapshot.Documents.Count(doc => doc.GetValue<int>("Quantidade") < 10);
-            ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
+            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
+            {
+                int produtosBaixoEstoque = produtos.Count(p => ((ProdutoData)p).Quantidade < 10);
+                ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
+            }
         }
-
 
         // Exibe o gráfico de vendas
         private void ExibirGraficoDeVendas()
@@ -81,18 +73,10 @@ namespace WMS_RadiadoresLemos_WPF
             DataContext = this;
         }
 
-        private async Task ExibirLogsRecentesAsync()
+        // Exibe os logs recentes
+        private void ExibirLogsRecentes()
         {
-            var eventosRef = db.Collection("Eventos");
-            var snapshot = await eventosRef.OrderByDescending("DataHora").Limit(10).GetSnapshotAsync();
-
-            UltimosEventosListBox.Items.Clear();
-            foreach (var doc in snapshot.Documents)
-            {
-                var descricao = doc.GetValue<string>("Descricao");
-                var dataHora = doc.GetValue<Timestamp>("DataHora").ToDateTime().ToLocalTime();
-                UltimosEventosListBox.Items.Add($"{dataHora}: {descricao}");
-            }
+            // TODO: Implementar
         }
     }
 }
