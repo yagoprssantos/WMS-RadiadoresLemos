@@ -1,6 +1,6 @@
 using Google.Cloud.Firestore;
 
-namespace WMS_RadiadoresLemos_WPF.Classes
+namespace WMS_RadiadoresLemos_WPF.src.Models
 {
     // Aqui estão armazenados os modelos de dados que serão utilizados para a comunicação com o banco de dados Firestore
     // Cada classe representa um tipo de dado que será armazenado no banco de dados, como um produto ou um usuário

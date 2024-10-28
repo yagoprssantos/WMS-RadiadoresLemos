@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WMS_RadiadoresLemos_WPF.Classes
+namespace WMS_RadiadoresLemos_WPF.src.Services
 {
 
     internal static class DatabaseConnect

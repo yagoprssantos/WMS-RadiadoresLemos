@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace WMS_RadiadoresLemos_WPF.Classes
+namespace WMS_RadiadoresLemos_WPF.src.Services
 {
     public static class LogEventos
     {

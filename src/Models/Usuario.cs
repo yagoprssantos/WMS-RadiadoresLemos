@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace WMS_RadiadoresLemos_WPF
+namespace WMS_RadiadoresLemos_WPF.src.Models
 {
     public class Usuario
     {

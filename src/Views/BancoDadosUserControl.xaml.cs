@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
-using WMS_RadiadoresLemos_WPF.Classes; // Certifique-se de que o namespace correto está sendo usado
+using WMS_RadiadoresLemos_WPF.src.Models; // Certifique-se de que o namespace correto está sendo usado
 
 namespace WMS_RadiadoresLemos_WPF
 {
