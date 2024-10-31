@@ -75,6 +75,29 @@
                                 FontSize="33" Grid.Column="2"/>
                     </Grid>
 
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" DockPanel.Dock="Top">
+                        
+                        
+                        <!-- Botão que abre o painel de filtros -->
+                        <Button Content="Filtros" Click="AbrirPainelFiltros_Click" Width="100" Margin="10"/>
+
+                        <!-- Popup que contém o painel de filtros -->
+                        <Popup Name="PainelFiltrosPopup" Placement="Left" PlacementTarget="{Binding ElementName=FiltroButton}" StaysOpen="False">
+                            <Border Background="LightGray" BorderBrush="Transparent" Padding="10" CornerRadius="5">
+                                <StackPanel>
+                                    <!-- Checkbox para filtrar produtos em estoque -->
+                                    <CheckBox Content="Em Estoque" Name="EmEstoqueCheckBox" Checked="EmEstoqueCheckBox_Checked" Unchecked="EmEstoqueCheckBox_Unchecked"/>
+                                    <!-- Checkbox para filtrar produtos do maior para menor -->
+                                    <CheckBox Content="Maior para Menor" Name="QuantidadeMaiorCheckBox" Checked="QuantidadeMaiorCheckBox_Checked" Unchecked="QuantidadeMaiorCheckBox_Unchecked"/>
+                                    <!-- Checkbox para filtrar produtos do menor para o maior -->
+                                    <CheckBox Content="Menor para Maior" Name="QuantidadeMenorCheckBox" Checked="QuantidadeMenorCheckBox_Checked" Unchecked="QuantidadeMenorCheckBox_Unchecked"/>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+                        
+                        
+                    </StackPanel>
+
                     <DataGrid Name="EstoqueDataGrid"
                               AutoGenerateColumns="False" 
                               IsReadOnly="True"

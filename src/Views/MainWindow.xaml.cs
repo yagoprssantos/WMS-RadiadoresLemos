@@ -123,6 +123,13 @@ namespace WMS_RadiadoresLemos_WPF
             ContentArea.Content = null;
             ContentArea.Content = new UsuariosUserControl();
         }
+        // Função para abrir a aba de Notificações
+        private void Notificacoes_Click(object sender, RoutedEventArgs e)
+        {
+            Log("Abrindo aba de Notificações");
+            ContentArea.Content = null;
+            ContentArea.Content = new NotificacoesUserControl();
+        }
 
         // Botão de logout para retornar à janela de login
         private void LogoutButton_Click(object sender, RoutedEventArgs e)

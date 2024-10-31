@@ -22,6 +22,29 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
             CarregarDadosIniciais();
         }
+        // Método para abrir o painel de filtros
+        private void AbrirPainelFiltros_Click(object sender, RoutedEventArgs e)
+        {
+            PainelFiltrosPopup.IsOpen = true;
+        }
+
+        // Método para aplicar o filtro "Em Estoque"
+        private void EmEstoqueCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!produtosCarregados)
+            {
+                AtualizarTabelaEstoqueCache();
+            }
+
+            var produtosEmEstoque = produtos.Where(p => p.Quantidade >= 1).ToList();
+            EstoqueDataGrid.ItemsSource = produtosEmEstoque;
+        }
+
+        // Método para remover o filtro "Em Estoque"
+        private void EmEstoqueCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            EstoqueDataGrid.ItemsSource = produtos;
+        }
 
         private void CarregarDadosIniciais()
         {
@@ -31,7 +54,41 @@ namespace WMS_RadiadoresLemos_WPF
                 EstoqueDataGrid.ItemsSource = produtos;
             }
         }
+        // Método para aplicar o filtro "Maior para Menor"
+private void QuantidadeMaiorCheckBox_Checked(object sender, RoutedEventArgs e)
+{
+    if (!produtosCarregados)
+    {
+        AtualizarTabelaEstoqueCache();
+    }
 
+    var produtosOrdenadosMaiorParaMenor = produtos.OrderByDescending(p => p.Quantidade).ToList();
+    EstoqueDataGrid.ItemsSource = produtosOrdenadosMaiorParaMenor;
+}
+
+// Método para remover o filtro "Maior para Menor"
+private void QuantidadeMaiorCheckBox_Unchecked(object sender, RoutedEventArgs e)
+{
+    EstoqueDataGrid.ItemsSource = produtos;
+}
+
+// Método para aplicar o filtro "Menor para Maior"
+private void QuantidadeMenorCheckBox_Checked(object sender, RoutedEventArgs e)
+{
+    if (!produtosCarregados)
+    {
+        AtualizarTabelaEstoqueCache();
+    }
+
+    var produtosOrdenadosMenorParaMaior = produtos.OrderBy(p => p.Quantidade).ToList();
+    EstoqueDataGrid.ItemsSource = produtosOrdenadosMenorParaMaior;
+}
+
+// Método para remover o filtro "Menor para Maior"
+private void QuantidadeMenorCheckBox_Unchecked(object sender, RoutedEventArgs e)
+{
+    EstoqueDataGrid.ItemsSource = produtos;
+}
         // Método para atualizar a tabela de estoque com os produtos do cache
         private void AtualizarTabelaEstoqueCache()
         {
