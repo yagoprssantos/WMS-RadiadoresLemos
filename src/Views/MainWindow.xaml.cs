@@ -220,7 +220,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     // Adiciona a lista de objetos ao cache
-                    Cache.Tabelas[tabela] = listaObjetos;
+                    DadosCache.Tabelas[tabela] = listaObjetos;
                 }
 
                 // Todo esse código resulta em um cache com todas as tabelas carregadas

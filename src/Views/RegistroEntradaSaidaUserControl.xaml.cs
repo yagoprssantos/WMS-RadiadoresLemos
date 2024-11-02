@@ -34,7 +34,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? produtosCache))
+                if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtosCache))
                 {
                     produtos = produtosCache.Cast<ProdutoData>().ToList();
                     produtoNomeParaId = produtos.ToDictionary(p => p.Nome, p => p.Id);
@@ -168,7 +168,7 @@ namespace WMS_RadiadoresLemos_WPF
                 DocumentReference docRef = db.Collection("Produtos").Document(produto.Id);
                 await docRef.SetAsync(produto, SetOptions.Overwrite);
 
-                Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
             }
             catch (Exception ex)
             {

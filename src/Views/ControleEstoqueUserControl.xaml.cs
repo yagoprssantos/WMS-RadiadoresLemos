@@ -27,7 +27,7 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void CarregarDadosIniciais()
         {
-            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
             {
                 produtos = value.Cast<ProdutoData>().ToList();
                 EstoqueDataGrid.ItemsSource = produtos;
@@ -62,7 +62,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para atualizar a tabela de estoque com os produtos do cache
         private void AtualizarTabelaEstoqueCache()
         {
-            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
             {
                 produtos = value.Cast<ProdutoData>().ToList();
                 EstoqueDataGrid.ItemsSource = produtos;
@@ -85,7 +85,7 @@ namespace WMS_RadiadoresLemos_WPF
                     return produto;
                 }).ToList();
 
-                Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
                 EstoqueDataGrid.ItemsSource = produtos;
                 produtosCarregados = true;
                 precisaAtualizarEstoque = false;
@@ -191,10 +191,10 @@ namespace WMS_RadiadoresLemos_WPF
             await docRef.SetAsync(data);
 
             // Atualiza o cache local
-            if (!Cache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+            if (!DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
             {
                 value = [];
-                Cache.Tabelas["Produtos"] = value;
+                DadosCache.Tabelas["Produtos"] = value;
             }
 
             value.Add(data);
@@ -260,6 +260,13 @@ namespace WMS_RadiadoresLemos_WPF
             // Aplica filtros
             AplicarFiltros();
         }
+
+        // Método chamado ao clicar no botão de filtrar
+        private void AbrirFiltroPopup_Click(object sender, RoutedEventArgs e)
+        {
+            PainelFiltrosPopup.IsOpen = true;
+        }
+
         // Método chamado ao clicar no botão de editar produto
         private async void EditarProduto_Click(object sender, RoutedEventArgs e)
         {
@@ -277,7 +284,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     // Atualiza o cache local
-                    Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
                     // Atualiza o banco de dados
                     await AtualizarProdutoNoBanco(produtoEditado);
@@ -362,7 +369,7 @@ namespace WMS_RadiadoresLemos_WPF
                     await AtualizarProdutoNoBanco(produtoSelecionado);
 
                     // Atualiza o cache local
-                    Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
                     // Avisa o usuário que a quantidade foi alterada
                     MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -385,7 +392,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     // Atualiza a lista e Cache local
                     produtos.Remove(produtoSelecionado);
-                    Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
                     // Deleta o produto do banco de dados
                     await DeletarProdutoNoBanco(produtoSelecionado);
