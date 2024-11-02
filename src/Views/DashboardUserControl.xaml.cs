@@ -35,7 +35,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Exibe o total de usuários
         private void ExibirTotalUsuarios()
         {
-            if (Cache.Tabelas.TryGetValue("Usuarios", out List<object>? usuarios))
+            if (DadosCache.Tabelas.TryGetValue("Usuarios", out List<object>? usuarios))
             {
                 int totalUsuarios = usuarios.Count;
                 TotalUsuariosTextBlock.Text = totalUsuarios.ToString();
@@ -45,7 +45,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Exibe o total de produtos
         private void ExibirTotalProdutos()
         {
-            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
             {
                 int totalProdutos = produtos.Count;
                 TotalProdutosTextBlock.Text = totalProdutos.ToString();
@@ -55,7 +55,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Exibe a quantidade de produtos com baixo estoque
         private void ExibirProdutosBaixoEstoque()
         {
-            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
             {
                 int produtosBaixoEstoque = produtos.Count(p => ((ProdutoData)p).Quantidade < 10);
                 ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
