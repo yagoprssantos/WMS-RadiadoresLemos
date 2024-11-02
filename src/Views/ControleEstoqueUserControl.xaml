@@ -7,36 +7,29 @@
              d:DesignHeight="550" d:DesignWidth="800"
              TextBlock.Foreground="White">
 
-    <Grid >
+    <Grid>
         <TabControl>
             <!-- Aba de Cadastrar Produtos -->
             <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid Margin="20">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
-                            <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"
-                                       Foreground="White"/>
+                            <TextBlock Text="Nome do Produto:" Margin="0,0,0,5" Foreground="White"/>
                             <TextBox Name="NomeProduto" Margin="0,0,0,15"/>
 
-                            <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"
-                                       Foreground="White"/>
-                            <!-- ComboBox com texto escura -->
+                            <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5" Foreground="White"/>
                             <ComboBox Name="TipoProduto" Margin="0,0,0,15">
-                                <!-- Tipos de Produtos -->
                                 <ComboBoxItem Content="Caixa"/>
                                 <ComboBoxItem Content="Radiador"/>
                             </ComboBox>
 
-                            <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"
-                                       Foreground="White"/>
+                            <TextBlock Text="Marca do Produto:" Margin="0,0,0,5" Foreground="White"/>
                             <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
 
-                            <TextBlock Text="Código do Produto:" Margin="0,0,0,5"
-                                       Foreground="White"/>
+                            <TextBlock Text="Código do Produto:" Margin="0,0,0,5" Foreground="White"/>
                             <TextBox Name="CodigoProduto" Margin="0,0,0,15"/>
 
-                            <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"
-                                       Foreground="White"/>
+                            <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5" Foreground="White"/>
                             <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting"/>
 
                             <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20"/>
@@ -48,64 +41,26 @@
             <!-- Aba de Controle de Estoque -->
             <TabItem Header="Controle de Estoque" Name="AbaEstoque" FontSize="18">
                 <DockPanel Margin="10">
-
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
-                        <!-- Botão discreto para atualizar a DataGrid -->
                         <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10"/>
                         <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="200" Margin="10"/>
                         <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
                     </StackPanel>
-
 
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"
-                                   Foreground="White"/>
-                        <TextBox Name="SearchBox" Grid.Column="1" 
-                                 HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                                 TextChanged="SearchBox_TextChanged"/>
-                        <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" 
-                                HorizontalAlignment="Center" VerticalAlignment="Top" 
-                                Background="Transparent" Foreground="White" 
-                                Padding="0" Margin="7, 0, 0, 0"
-                                FontSize="33" Grid.Column="2"/>
+                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" FontSize="18" Margin="0,0,10,0" Foreground="White"/>
+                        <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged"/>
+                        <Button Content="Filtrar" ToolTip="Filtrar" Click="AbrirFiltroPopup_Click" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource ButtonBackgroundBrush}" Foreground="White" Margin="20, 0, 10, 0" FontSize="18" Grid.Column="2"/>
+                        <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" Foreground="White" Margin="7, 0, 0, 0" FontSize="33" Grid.Column="3"/>
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" DockPanel.Dock="Top">
-                        
-                        
-                        <!-- Botão que abre o painel de filtros -->
-                        <Button Content="Filtros" Click="AbrirPainelFiltros_Click" Width="100" Margin="10"/>
-
-                        <!-- Popup que contém o painel de filtros -->
-                        <Popup Name="PainelFiltrosPopup" Placement="Left" PlacementTarget="{Binding ElementName=FiltroButton}" StaysOpen="False">
-                            <Border Background="LightGray" BorderBrush="Transparent" Padding="10" CornerRadius="5">
-                                <StackPanel>
-                                    <!-- Checkbox para filtrar produtos em estoque -->
-                                    <CheckBox Content="Em Estoque" Name="EmEstoqueCheckBox" Checked="EmEstoqueCheckBox_Checked" Unchecked="EmEstoqueCheckBox_Unchecked"/>
-                                    <!-- Checkbox para filtrar produtos do maior para menor -->
-                                    <CheckBox Content="Maior para Menor" Name="QuantidadeMaiorCheckBox" Checked="QuantidadeMaiorCheckBox_Checked" Unchecked="QuantidadeMaiorCheckBox_Unchecked"/>
-                                    <!-- Checkbox para filtrar produtos do menor para o maior -->
-                                    <CheckBox Content="Menor para Maior" Name="QuantidadeMenorCheckBox" Checked="QuantidadeMenorCheckBox_Checked" Unchecked="QuantidadeMenorCheckBox_Unchecked"/>
-                                </StackPanel>
-                            </Border>
-                        </Popup>
-                        
-                        
-                    </StackPanel>
-
-                    <DataGrid Name="EstoqueDataGrid"
-                              AutoGenerateColumns="False" 
-                              IsReadOnly="True"
-                              SelectionMode="Single"
-                              SelectionUnit="FullRow"
-                              Margin="0,0,0,10"
-                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                              Width="Auto" Height="Auto">
+                    <DataGrid Name="EstoqueDataGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>
@@ -117,5 +72,25 @@
                 </DockPanel>
             </TabItem>
         </TabControl>
+
+        <Popup x:Name="PainelFiltrosPopup" Placement="Mouse" StaysOpen="False">
+            <Border Background="{StaticResource ButtonBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}"
+                    BorderThickness="2" Padding="10">
+                <StackPanel Width="250" Margin="10">
+                    <CheckBox x:Name="EmEstoqueCheckBox" Content="Em Estoque" Foreground="White"
+                                Checked="Filtro_Changed" Unchecked="Filtro_Changed" 
+                                FontSize="16" Margin="0,0,0,10" Padding="5"/>
+
+                    <TextBlock Text="Marca do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="White"/>
+                    <ComboBox x:Name="MarcaProdutoComboBox" SelectionChanged="Filtro_Changed" 
+                                FontSize="16" Margin="0,0,0,10" Padding="5"/>
+
+                    <TextBlock Text="Tipo do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="White"/>
+                    <ComboBox x:Name="TipoProdutoComboBox" SelectionChanged="Filtro_Changed"
+                                FontSize="16" Margin="0,0,0,10" Padding="5"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
     </Grid>
 </UserControl>

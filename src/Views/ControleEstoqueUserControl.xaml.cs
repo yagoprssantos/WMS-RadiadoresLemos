@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using Google.Cloud.Firestore;
 using WMS_RadiadoresLemos_WPF.src.Models;
@@ -21,29 +22,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             CarregarDadosIniciais();
-        }
-        // Método para abrir o painel de filtros
-        private void AbrirPainelFiltros_Click(object sender, RoutedEventArgs e)
-        {
-            PainelFiltrosPopup.IsOpen = true;
-        }
-
-        // Método para aplicar o filtro "Em Estoque"
-        private void EmEstoqueCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            if (!produtosCarregados)
-            {
-                AtualizarTabelaEstoqueCache();
-            }
-
-            var produtosEmEstoque = produtos.Where(p => p.Quantidade >= 1).ToList();
-            EstoqueDataGrid.ItemsSource = produtosEmEstoque;
-        }
-
-        // Método para remover o filtro "Em Estoque"
-        private void EmEstoqueCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            EstoqueDataGrid.ItemsSource = produtos;
+            PreencherFiltros();
         }
 
         private void CarregarDadosIniciais()
@@ -54,41 +33,32 @@ namespace WMS_RadiadoresLemos_WPF
                 EstoqueDataGrid.ItemsSource = produtos;
             }
         }
-        // Método para aplicar o filtro "Maior para Menor"
-private void QuantidadeMaiorCheckBox_Checked(object sender, RoutedEventArgs e)
-{
-    if (!produtosCarregados)
-    {
-        AtualizarTabelaEstoqueCache();
-    }
 
-    var produtosOrdenadosMaiorParaMenor = produtos.OrderByDescending(p => p.Quantidade).ToList();
-    EstoqueDataGrid.ItemsSource = produtosOrdenadosMaiorParaMenor;
-}
+        private void PreencherFiltros()
+        {
+            try
+            {
+                var marcas = produtos.Select(p => p.Marca).Distinct().ToList();
+                var tipos = produtos.Select(p => p.Tipo).Distinct().ToList();
 
-// Método para remover o filtro "Maior para Menor"
-private void QuantidadeMaiorCheckBox_Unchecked(object sender, RoutedEventArgs e)
-{
-    EstoqueDataGrid.ItemsSource = produtos;
-}
+                if (marcas != null && marcas.Any())
+                {
+                    MarcaProdutoComboBox.ItemsSource = marcas;
+                }
 
-// Método para aplicar o filtro "Menor para Maior"
-private void QuantidadeMenorCheckBox_Checked(object sender, RoutedEventArgs e)
-{
-    if (!produtosCarregados)
-    {
-        AtualizarTabelaEstoqueCache();
-    }
+                if (tipos != null && tipos.Any())
+                {
+                    TipoProdutoComboBox.ItemsSource = tipos;
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show($"Erro ao preencher filtros: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-    var produtosOrdenadosMenorParaMaior = produtos.OrderBy(p => p.Quantidade).ToList();
-    EstoqueDataGrid.ItemsSource = produtosOrdenadosMenorParaMaior;
-}
 
-// Método para remover o filtro "Menor para Maior"
-private void QuantidadeMenorCheckBox_Unchecked(object sender, RoutedEventArgs e)
-{
-    EstoqueDataGrid.ItemsSource = produtos;
-}
+
         // Método para atualizar a tabela de estoque com os produtos do cache
         private void AtualizarTabelaEstoqueCache()
         {
@@ -287,14 +257,8 @@ private void QuantidadeMenorCheckBox_Unchecked(object sender, RoutedEventArgs e)
                 AtualizarTabelaEstoqueCache();
             }
 
-            string searchText = SearchBox.Text.ToLower();
-            var filteredProducts = produtos.Where(p =>
-                p.Nome.ToLower().Contains(searchText) ||
-                p.Tipo.ToLower().Contains(searchText) ||
-                p.Marca.ToLower().Contains(searchText) ||
-                p.Codigo.ToLower().Contains(searchText)).ToList();
-
-            EstoqueDataGrid.ItemsSource = filteredProducts;
+            // Aplica filtros
+            AplicarFiltros();
         }
         // Método chamado ao clicar no botão de editar produto
         private async void EditarProduto_Click(object sender, RoutedEventArgs e)
@@ -342,6 +306,40 @@ private void QuantidadeMenorCheckBox_Unchecked(object sender, RoutedEventArgs e)
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método chamado ao clicar no botão de filtros
+        private void Filtro_Changed(object sender, RoutedEventArgs e)
+        {
+            AplicarFiltros();
+        }
+
+
+        private void AplicarFiltros()
+        {
+            var view = CollectionViewSource.GetDefaultView(produtos);
+            if (view != null)
+            {
+                view.Filter = item =>
+                {
+                    var produto = item as ProdutoData;
+                    if (produto == null) return false;
+
+                    bool emEstoque = EmEstoqueCheckBox.IsChecked == true ? produto.Quantidade > 0 : true;
+                    bool marcaCorreta = MarcaProdutoComboBox.SelectedItem == null || produto.Marca == MarcaProdutoComboBox.SelectedItem.ToString();
+                    bool tipoCorreto = TipoProdutoComboBox.SelectedItem == null || produto.Tipo == TipoProdutoComboBox.SelectedItem.ToString();
+
+                    string searchText = SearchBox.Text.ToLower();
+                    bool pesquisaCorreta = string.IsNullOrEmpty(searchText) ||
+                                           produto.Nome.ToLower().Contains(searchText) ||
+                                           produto.Tipo.ToLower().Contains(searchText) ||
+                                           produto.Marca.ToLower().Contains(searchText) ||
+                                           produto.Codigo.ToLower().Contains(searchText);
+
+                    return emEstoque && marcaCorreta && tipoCorreto && pesquisaCorreta;
+                };
+                view.Refresh();
             }
         }
 
