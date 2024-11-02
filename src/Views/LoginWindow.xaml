@@ -13,7 +13,8 @@
         <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Campo de Texto para Usuário -->
             <TextBlock Text="Usuário" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
-            <TextBox Name="UsernameField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"/>
+            <TextBox Name="UsernameField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"
+                     VerticalAlignment="Center"/>
 
             <!-- Campo de Texto para Senha -->
             <TextBlock Text="Senha" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>

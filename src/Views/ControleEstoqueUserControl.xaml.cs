@@ -25,6 +25,7 @@ namespace WMS_RadiadoresLemos_WPF
             PreencherFiltros();
         }
 
+        // Método para carregar os dados iniciais
         private void CarregarDadosIniciais()
         {
             if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
@@ -34,12 +35,17 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para preencher os filtros de marca e tipo de produto
         private void PreencherFiltros()
         {
             try
             {
                 var marcas = produtos.Select(p => p.Marca).Distinct().ToList();
                 var tipos = produtos.Select(p => p.Tipo).Distinct().ToList();
+
+                // Adiciona uma opção vazia no início das listas
+                marcas.Insert(0, string.Empty);
+                tipos.Insert(0, string.Empty);
 
                 if (marcas != null && marcas.Any())
                 {
@@ -56,7 +62,6 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show($"Erro ao preencher filtros: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
 
         // Método para atualizar a tabela de estoque com os produtos do cache
@@ -322,7 +327,7 @@ namespace WMS_RadiadoresLemos_WPF
             AplicarFiltros();
         }
 
-
+        // Método para aplicar os filtros na tabela de estoque
         private void AplicarFiltros()
         {
             var view = CollectionViewSource.GetDefaultView(produtos);
@@ -334,9 +339,10 @@ namespace WMS_RadiadoresLemos_WPF
                     if (produto == null) return false;
 
                     bool emEstoque = EmEstoqueCheckBox.IsChecked == true ? produto.Quantidade > 0 : true;
-                    bool marcaCorreta = MarcaProdutoComboBox.SelectedItem == null || produto.Marca == MarcaProdutoComboBox.SelectedItem.ToString();
-                    bool tipoCorreto = TipoProdutoComboBox.SelectedItem == null || produto.Tipo == TipoProdutoComboBox.SelectedItem.ToString();
+                    bool marcaCorreta = MarcaProdutoComboBox.SelectedItem == null || MarcaProdutoComboBox.SelectedItem.ToString() == string.Empty || produto.Marca == MarcaProdutoComboBox.SelectedItem.ToString();
+                    bool tipoCorreto = TipoProdutoComboBox.SelectedItem == null || TipoProdutoComboBox.SelectedItem.ToString() == string.Empty || produto.Tipo == TipoProdutoComboBox.SelectedItem.ToString();
 
+                    // Faz a pesquisa por texto em todos os campos do produto com o filtro (se houver)
                     string searchText = SearchBox.Text.ToLower();
                     bool pesquisaCorreta = string.IsNullOrEmpty(searchText) ||
                                            produto.Nome.ToLower().Contains(searchText) ||
