@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
+using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Models;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -9,48 +11,46 @@ namespace WMS_RadiadoresLemos_WPF
         public NotificacoesUserControl()
         {
             InitializeComponent();
+            CarregarNotificacoes();
+        }
+
+        // Método para carregar todas as notificações
+        private void CarregarNotificacoes()
+        {
             CarregarHistorico();
             CarregarAlertas();
         }
 
-        // Método para carregar dados fictícios no DataGrid de Histórico
+        // Método para carregar dados no DataGrid de Histórico
         private void CarregarHistorico()
         {
-            var historico = new List<HistoricoItem>
-            {
-                new HistoricoItem { Data = DateTime.Now.AddDays(-1).ToString("dd/MM/yyyy"), Mensagem = "Entrada de novos itens no estoque" },
-                new HistoricoItem { Data = DateTime.Now.AddDays(-2).ToString("dd/MM/yyyy"), Mensagem = "Saída de itens para cliente" },
-                new HistoricoItem { Data = DateTime.Now.AddDays(-3).ToString("dd/MM/yyyy"), Mensagem = "Ajuste de inventário" }
-            };
+            var historico = new List<NotificacaoData>();
+            // Adicione aqui o código para carregar os dados reais de histórico
 
             HistoricoDataGrid.ItemsSource = historico;
         }
 
-        // Método para carregar dados fictícios no DataGrid de Alertas
+        // Método para carregar dados no DataGrid de Alertas
         private void CarregarAlertas()
         {
-            var alertas = new List<AlertaItem>
+            var alertas = new List<NotificacaoData>();
+
+            foreach (var mensagem in AlertaCache.ObterNotificacoes("Aviso"))
             {
-                new AlertaItem { Data = DateTime.Now.ToString("dd/MM/yyyy"), Alerta = "Baixa no estoque", Detalhes = "Estoque abaixo do mínimo para item XYZ" },
-                new AlertaItem { Data = DateTime.Now.AddDays(-1).ToString("dd/MM/yyyy"), Alerta = "Item vencido", Detalhes = "Produto ABC expirado" }
-            };
+                alertas.Add(new NotificacaoData { Data = DateTime.Now.ToString("dd/MM/yyyy"), Tipo = "Aviso", Detalhes = mensagem });
+            }
+
+            foreach (var mensagem in AlertaCache.ObterNotificacoes("Erro"))
+            {
+                alertas.Add(new NotificacaoData { Data = DateTime.Now.ToString("dd/MM/yyyy"), Tipo = "Erro", Detalhes = mensagem });
+            }
+
+            foreach (var mensagem in AlertaCache.ObterNotificacoes("Importante"))
+            {
+                alertas.Add(new NotificacaoData { Data = DateTime.Now.ToString("dd/MM/yyyy"), Tipo = "Crítica", Detalhes = mensagem });
+            }
 
             AlertaDataGrid.ItemsSource = alertas;
         }
-    }
-
-    // Classe para representar um item de histórico
-    public class HistoricoItem
-    {
-        public string Data { get; set; }
-        public string Mensagem { get; set; }
-    }
-
-    // Classe para representar um item de alerta
-    public class AlertaItem
-    {
-        public string Data { get; set; }
-        public string Alerta { get; set; }
-        public string Detalhes { get; set; }
     }
 }
