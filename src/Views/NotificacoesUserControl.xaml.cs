@@ -23,11 +23,9 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para carregar dados no DataGrid de Histórico
-        private void CarregarHistorico()
+        private async void CarregarHistorico()
         {
-            var historico = new List<NotificacaoData>();
-
-            // Lógica para carregar dados de histórico
+            var historico = await LogEventos.ObterLogsAsync();
 
             HistoricoDataGrid.ItemsSource = historico;
         }
@@ -35,7 +33,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para carregar dados no DataGrid de Alertas
         private void CarregarAlertas()
         {
-            var alertas = new List<NotificacaoData>();
+            var alertas = new List<AlertaData>();
 
             // Para cada tipo de alerta, carregar os dados
             foreach (var tipo in AlertaCache.Alertas.Keys)

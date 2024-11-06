@@ -6,25 +6,23 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 {
     internal static class AlertaCache
     {
-        public static Dictionary<string, List<NotificacaoData>> Alertas { get; set; } = new Dictionary<string, List<NotificacaoData>>()
+        public static Dictionary<string, List<AlertaData>> Alertas { get; set; } = new Dictionary<string, List<AlertaData>>()
         {
-            { "Importante", new List<NotificacaoData>() },
-            { "Erro", new List<NotificacaoData>() },
-            { "Aviso", new List<NotificacaoData>() }
+            { "Importante", new List<AlertaData>() },
+            { "Erro", new List<AlertaData>() },
+            { "Aviso", new List<AlertaData>() }
         };
 
         public static void AdicionarAlerta(string tipo, string mensagem, string acoes)
         {
             if (Alertas.ContainsKey(tipo))
             {
-                Alertas[tipo].Add(new NotificacaoData
+                Alertas[tipo].Add(new AlertaData
                 {
                     Data = DateTime.Now.ToString("dd/MM/yyyy"),
                     Tipo = tipo,
                     Detalhes = mensagem,
-                    Acoes = acoes, // Pode ser preenchido conforme necessário
-                    Usuario = null, // Não é relevante para alertas
-                    Nivel = null // Não é relevante para alertas
+                    Acoes = acoes // Pode ser preenchido conforme necessário
                 });
             }
             else
@@ -33,7 +31,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        public static List<NotificacaoData> ObterAlertas(string tipo)
+        public static List<AlertaData> ObterAlertas(string tipo)
         {
             if (Alertas.ContainsKey(tipo))
             {
