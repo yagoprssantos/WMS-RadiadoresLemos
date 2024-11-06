@@ -13,14 +13,32 @@
                 <Grid Margin="10">
                     <TextBlock Text="Notificações de Alerta" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 20"/>
                     <DataGrid Name="AlertaDataGrid"
-                              AutoGenerateColumns="True"
+                              AutoGenerateColumns="False"
                               IsReadOnly="True"
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               Margin="0, 40, 0, 0">
-                        <!-- Colunas serão geradas automaticamente -->
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
+                            <DataGridTemplateColumn Header="Detalhes" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Ações" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Acoes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
@@ -30,17 +48,31 @@
                 <Grid Margin="10">
                     <TextBlock Text="Histórico do Estoque" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 20"/>
                     <DataGrid Name="HistoricoDataGrid"
-                              AutoGenerateColumns="True"
+                              AutoGenerateColumns="False"
                               IsReadOnly="True"
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               Margin="0, 40, 0, 0">
-                        <!-- Colunas serão geradas automaticamente -->
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
+                            <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
+                            <DataGridTemplateColumn Header="Detalhes" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="Auto" />
+                        </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
         </TabControl>
     </Grid>
 </UserControl>
+    

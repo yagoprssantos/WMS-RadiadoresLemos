@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Controls;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Models;
@@ -25,7 +26,8 @@ namespace WMS_RadiadoresLemos_WPF
         private void CarregarHistorico()
         {
             var historico = new List<NotificacaoData>();
-            // Adicione aqui o código para carregar os dados reais de histórico
+
+            // Lógica para carregar dados de histórico
 
             HistoricoDataGrid.ItemsSource = historico;
         }
@@ -35,19 +37,10 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var alertas = new List<NotificacaoData>();
 
-            foreach (var mensagem in AlertaCache.ObterNotificacoes("Aviso"))
+            // Para cada tipo de alerta, carregar os dados
+            foreach (var tipo in AlertaCache.Alertas.Keys)
             {
-                alertas.Add(new NotificacaoData { Data = DateTime.Now.ToString("dd/MM/yyyy"), Tipo = "Aviso", Detalhes = mensagem });
-            }
-
-            foreach (var mensagem in AlertaCache.ObterNotificacoes("Erro"))
-            {
-                alertas.Add(new NotificacaoData { Data = DateTime.Now.ToString("dd/MM/yyyy"), Tipo = "Erro", Detalhes = mensagem });
-            }
-
-            foreach (var mensagem in AlertaCache.ObterNotificacoes("Importante"))
-            {
-                alertas.Add(new NotificacaoData { Data = DateTime.Now.ToString("dd/MM/yyyy"), Tipo = "Crítica", Detalhes = mensagem });
+                alertas.AddRange(AlertaCache.ObterAlertas(tipo));
             }
 
             AlertaDataGrid.ItemsSource = alertas;
