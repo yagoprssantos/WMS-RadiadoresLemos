@@ -13,6 +13,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         public int Id { get; set; } // Identificador único do usuário
         public string Nome { get; set; } // Nome do usuário
         public string Email { get; set; } // Email do usuário
+        public string Senha { get; set; } // Senha do usuário
         public string Permissao { get; set; } // Permissão do usuário (Admin, Usuário, Convidado)
 
         // Construtor padrão
