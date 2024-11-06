@@ -178,7 +178,8 @@ namespace WMS_RadiadoresLemos_WPF
                 var tabelas = new List<string>
                     {
                         "Produtos",
-                        "Usuários"
+                        "Usuarios",
+                        "Historico"
                     };
 
                 // Para cada tabela, 

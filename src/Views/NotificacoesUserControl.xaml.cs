@@ -23,9 +23,9 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para carregar dados no DataGrid de Histórico
-        private async void CarregarHistorico()
+        private void CarregarHistorico()
         {
-            var historico = await LogEventos.ObterLogsAsync();
+            var historico = LogHistorico.ObterLogs();
 
             HistoricoDataGrid.ItemsSource = historico;
         }

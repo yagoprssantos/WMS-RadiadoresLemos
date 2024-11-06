@@ -210,13 +210,13 @@ namespace WMS_RadiadoresLemos_WPF
             // Adiciona log
             var log = new LogData
             {
-                Data = DateTime.Now,
+                Data = DateTime.UtcNow,
                 Tipo = "OPERACIONAL",
                 Nivel = "Usuário",
                 Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
                 Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
             };
-            await LogEventos.RegistrarLogAsync(log);
+            await LogHistorico.RegistrarLogAsync(log);
         }
 
         // Método chamado ao clicar no botão de cadastrar produto
@@ -308,13 +308,20 @@ namespace WMS_RadiadoresLemos_WPF
                     // Adiciona log
                     var log = new LogData
                     {
-                        Data = DateTime.Now,
+                        Data = DateTime.UtcNow,
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Produto editado: {produtoEditado.Nome}, Código: {produtoEditado.Codigo}",
                         Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
                     };
-                    await LogEventos.RegistrarLogAsync(log);
+                    await LogHistorico.RegistrarLogAsync(log);
+
+                    // Atualiza a fonte de dados do DataGrid
+                    EstoqueDataGrid.ItemsSource = null;
+                    EstoqueDataGrid.ItemsSource = produtos;
+
+                    // Avisa o usuário que o produto foi editado
+                    MessageBox.Show("Produto editado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -391,23 +398,23 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza o cache local
                     DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
-                    // Avisa o usuário que a quantidade foi alterada
-                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-
                     // Adiciona log
                     var log = new LogData
                     {
-                        Data = DateTime.Now,
+                        Data = DateTime.UtcNow,
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Quantidade alterada: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}, Quantidade: {produtoSelecionado.Quantidade}",
                         Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
                     };
-                    await LogEventos.RegistrarLogAsync(log);
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
                     EstoqueDataGrid.ItemsSource = produtos;
+
+                    // Avisa o usuário que a quantidade foi alterada
+                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -431,13 +438,13 @@ namespace WMS_RadiadoresLemos_WPF
                     // Adiciona log
                     var log = new LogData
                     {
-                        Data = DateTime.Now,
+                        Data = DateTime.UtcNow,
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Produto deletado: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}",
                         Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
                     };
-                    await LogEventos.RegistrarLogAsync(log);
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
@@ -464,13 +471,13 @@ namespace WMS_RadiadoresLemos_WPF
                 // Adiciona log
                 var log = new LogData
                 {
-                    Data = DateTime.Now,
+                    Data = DateTime.UtcNow,
                     Tipo = "OPERACIONAL",
                     Nivel = "Usuário",
                     Detalhes = $"Produto deletado: {produto.Nome}, Código: {produto.Codigo}",
                     Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
                 };
-                await LogEventos.RegistrarLogAsync(log);
+                await LogHistorico.RegistrarLogAsync(log);
             }
             catch (Exception ex)
             {
