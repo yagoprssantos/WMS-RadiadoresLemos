@@ -1,27 +1,36 @@
 ﻿<Window x:Class="WMS_RadiadoresLemos_WPF.EditarUsuarioWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Registrar Usuário" Height="380" Width="400">
+        Title="Editar Usuário" Height="460" Width="400"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}">
 
     <Grid>
         <StackPanel Margin="20">
-            <TextBlock Text="Nome:" Foreground="White" />
-            <TextBox FontSize="16" Height="40" x:Name="NomeTextBox" />
+            <TextBlock Text="Nome:" Foreground="White" FontSize="16"/>
+            <TextBox FontSize="16" Height="35" x:Name="NomeTextBox" TextChanged="TextBox_TextChanged" PreviewTextInput="NomeTextBox_PreviewTextInput" />
 
-            <TextBlock Text="Email:" Margin="0,10,0,0" Foreground="White" />
-            <TextBox FontSize="16" Height="40" x:Name="EmailTextBox" />
+            <TextBlock Text="Email:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
+            <TextBox FontSize="16" Height="35" x:Name="EmailTextBox" TextChanged="TextBox_TextChanged" />
 
-            <TextBlock Text="Senha:" Margin="0,10,0,0" Foreground="White" />
-            <PasswordBox FontSize="16" Height="40" x:Name="SenhaPasswordBox" />
+            <TextBlock Text="Matrícula:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
+            <TextBox FontSize="16" Height="35" x:Name="MatriculaTextBox" TextChanged="TextBox_TextChanged" PreviewTextInput="MatriculaTextBox_PreviewTextInput" />
 
-            <TextBlock Text="Permissão:" Margin="0,10,0,0" Foreground="White" />
-            <ComboBox FontSize="16" Height="40" x:Name="PermissaoComboBox">
-                <ComboBoxItem Content="Admin" />
+            <TextBlock Text="Senha:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
+            <PasswordBox FontSize="16" Height="35" x:Name="SenhaPasswordBox" PasswordChanged="SenhaPasswordBox_PasswordChanged" />
+
+            <TextBlock Text="Permissão:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
+            <ComboBox FontSize="16" Height="35" x:Name="PermissaoComboBox" SelectionChanged="PermissaoComboBox_SelectionChanged">
+                <ComboBoxItem Content="Administrador" />
                 <ComboBoxItem Content="Usuário" />
                 <ComboBoxItem Content="Convidado" />
             </ComboBox>
 
-            <Button Content="Registrar" Margin="0,20,0,0" Click="RegistrarUsuario_Click"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button Content="Salvar" Width="100" Margin="10,0" Click="Salvar_Click" FontSize="16"/>
+                <Button Content="Cancelar" Width="100" Margin="10,0" Click="Cancelar_Click" FontSize="16"
+                        Style="{StaticResource CancelButtonStyle}"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>
