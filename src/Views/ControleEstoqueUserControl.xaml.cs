@@ -269,7 +269,17 @@ namespace WMS_RadiadoresLemos_WPF
         // Método chamado ao clicar no botão de filtrar
         private void AbrirFiltroPopup_Click(object sender, RoutedEventArgs e)
         {
-            PainelFiltrosPopup.IsOpen = true;
+            // Verifica se o PainelFiltrosPopup está aberto
+            if (PainelFiltrosPopup.IsOpen)
+            {
+                // Se estiver aberto, fecha o popup
+                PainelFiltrosPopup.IsOpen = false;
+            }
+            else
+            {
+                // Se estiver fechado, abre o popup
+                PainelFiltrosPopup.IsOpen = true;
+            }
         }
 
         // Método chamado ao clicar no botão de editar produto
