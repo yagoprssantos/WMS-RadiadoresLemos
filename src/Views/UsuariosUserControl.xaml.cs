@@ -144,6 +144,8 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza a fonte de dados do DataGrid
                     UsuariosDataGrid.ItemsSource = null;
                     UsuariosDataGrid.ItemsSource = usuarios;
+
+                    MessageBox.Show($"Usuário '{usuarioEditado.Nome}' atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             else
@@ -183,6 +185,8 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza a fonte de dados do DataGrid
                     UsuariosDataGrid.ItemsSource = null;
                     UsuariosDataGrid.ItemsSource = usuarios;
+
+                    MessageBox.Show("Usuário adicionado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
@@ -216,6 +220,8 @@ namespace WMS_RadiadoresLemos_WPF
                         // Atualiza a fonte de dados do DataGrid
                         UsuariosDataGrid.ItemsSource = null;
                         UsuariosDataGrid.ItemsSource = usuarios;
+
+                        MessageBox.Show("Usuário deletado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {

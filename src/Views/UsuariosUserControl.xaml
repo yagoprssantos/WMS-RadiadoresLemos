@@ -31,7 +31,7 @@
                       Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" FontSize="18">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="*"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="Auto"/>
                     <DataGridTextColumn Header="Matrícula" Binding="{Binding Matrícula}" IsReadOnly="True" Width="*"/>
                     <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" IsReadOnly="True" Width="*"/>
                 </DataGrid.Columns>

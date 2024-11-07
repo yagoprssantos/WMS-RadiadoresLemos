@@ -201,10 +201,16 @@ namespace WMS_RadiadoresLemos_WPF
                             listaObjetos.Add(produto);
                         }
                         // Se a tabela for de usuários, converte o documento para UsuarioData e adiciona à lista
-                        else if (tabela == "Usuários")
+                        else if (tabela == "Usuarios")
                         {
                             var usuario = doc.ConvertTo<UsuarioData>();
                             listaObjetos.Add(usuario);
+                        }
+                        // Se a tabela for de histórico, converte o documento para LogData e adiciona à lista
+                        else if (tabela == "Historico")
+                        {
+                            var log = doc.ConvertTo<LogData>();
+                            listaObjetos.Add(log);
                         }
 
                         else
