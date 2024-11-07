@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using Google.Cloud.Firestore;
 using WMS_RadiadoresLemos_WPF.src.Models;
@@ -21,21 +22,52 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             CarregarDadosIniciais();
+            PreencherFiltros();
         }
 
+        // Método para carregar os dados iniciais
         private void CarregarDadosIniciais()
         {
-            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
             {
                 produtos = value.Cast<ProdutoData>().ToList();
                 EstoqueDataGrid.ItemsSource = produtos;
             }
         }
 
+        // Método para preencher os filtros de marca e tipo de produto
+        private void PreencherFiltros()
+        {
+            try
+            {
+                var marcas = produtos.Select(p => p.Marca).Distinct().ToList();
+                var tipos = produtos.Select(p => p.Tipo).Distinct().ToList();
+
+                // Adiciona uma opção vazia no início das listas
+                marcas.Insert(0, string.Empty);
+                tipos.Insert(0, string.Empty);
+
+                if (marcas != null && marcas.Any())
+                {
+                    MarcaProdutoComboBox.ItemsSource = marcas;
+                }
+
+                if (tipos != null && tipos.Any())
+                {
+                    TipoProdutoComboBox.ItemsSource = tipos;
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show($"Erro ao preencher filtros: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
         // Método para atualizar a tabela de estoque com os produtos do cache
         private void AtualizarTabelaEstoqueCache()
         {
-            if (Cache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
             {
                 produtos = value.Cast<ProdutoData>().ToList();
                 EstoqueDataGrid.ItemsSource = produtos;
@@ -58,7 +90,7 @@ namespace WMS_RadiadoresLemos_WPF
                     return produto;
                 }).ToList();
 
-                Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
                 EstoqueDataGrid.ItemsSource = produtos;
                 produtosCarregados = true;
                 precisaAtualizarEstoque = false;
@@ -164,16 +196,27 @@ namespace WMS_RadiadoresLemos_WPF
             await docRef.SetAsync(data);
 
             // Atualiza o cache local
-            if (!Cache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+            if (!DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
             {
                 value = [];
-                Cache.Tabelas["Produtos"] = value;
+                DadosCache.Tabelas["Produtos"] = value;
             }
 
             value.Add(data);
             produtos.Add(data);
             EstoqueDataGrid.ItemsSource = null;
             EstoqueDataGrid.ItemsSource = produtos;
+
+            // Adiciona log
+            var log = new LogData
+            {
+                Data = DateTime.UtcNow,
+                Tipo = "OPERACIONAL",
+                Nivel = "Usuário",
+                Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
+                Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+            };
+            await LogHistorico.RegistrarLogAsync(log);
         }
 
         // Método chamado ao clicar no botão de cadastrar produto
@@ -230,15 +273,26 @@ namespace WMS_RadiadoresLemos_WPF
                 AtualizarTabelaEstoqueCache();
             }
 
-            string searchText = SearchBox.Text.ToLower();
-            var filteredProducts = produtos.Where(p =>
-                p.Nome.ToLower().Contains(searchText) ||
-                p.Tipo.ToLower().Contains(searchText) ||
-                p.Marca.ToLower().Contains(searchText) ||
-                p.Codigo.ToLower().Contains(searchText)).ToList();
-
-            EstoqueDataGrid.ItemsSource = filteredProducts;
+            // Aplica filtros
+            AplicarFiltros();
         }
+
+        // Método chamado ao clicar no botão de filtrar
+        private void AbrirFiltroPopup_Click(object sender, RoutedEventArgs e)
+        {
+            // Verifica se o PainelFiltrosPopup está aberto
+            if (PainelFiltrosPopup.IsOpen)
+            {
+                // Se estiver aberto, fecha o popup
+                PainelFiltrosPopup.IsOpen = false;
+            }
+            else
+            {
+                // Se estiver fechado, abre o popup
+                PainelFiltrosPopup.IsOpen = true;
+            }
+        }
+
         // Método chamado ao clicar no botão de editar produto
         private async void EditarProduto_Click(object sender, RoutedEventArgs e)
         {
@@ -256,19 +310,29 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     // Atualiza o cache local
-                    Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
                     // Atualiza o banco de dados
                     await AtualizarProdutoNoBanco(produtoEditado);
 
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Produto editado: {produtoEditado.Nome}, Código: {produtoEditado.Codigo}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
+
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
                     EstoqueDataGrid.ItemsSource = produtos;
+
+                    // Avisa o usuário que o produto foi editado
+                    MessageBox.Show("Produto editado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-            }
-            else
-            {
-                MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -285,6 +349,41 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método chamado ao clicar no botão de filtros
+        private void Filtro_Changed(object sender, RoutedEventArgs e)
+        {
+            AplicarFiltros();
+        }
+
+        // Método para aplicar os filtros na tabela de estoque
+        private void AplicarFiltros()
+        {
+            var view = CollectionViewSource.GetDefaultView(produtos);
+            if (view != null)
+            {
+                view.Filter = item =>
+                {
+                    var produto = item as ProdutoData;
+                    if (produto == null) return false;
+
+                    bool emEstoque = EmEstoqueCheckBox.IsChecked == true ? produto.Quantidade > 0 : true;
+                    bool marcaCorreta = MarcaProdutoComboBox.SelectedItem == null || MarcaProdutoComboBox.SelectedItem.ToString() == string.Empty || produto.Marca == MarcaProdutoComboBox.SelectedItem.ToString();
+                    bool tipoCorreto = TipoProdutoComboBox.SelectedItem == null || TipoProdutoComboBox.SelectedItem.ToString() == string.Empty || produto.Tipo == TipoProdutoComboBox.SelectedItem.ToString();
+
+                    // Faz a pesquisa por texto em todos os campos do produto com o filtro (se houver)
+                    string searchText = SearchBox.Text.ToLower();
+                    bool pesquisaCorreta = string.IsNullOrEmpty(searchText) ||
+                                           produto.Nome.ToLower().Contains(searchText) ||
+                                           produto.Tipo.ToLower().Contains(searchText) ||
+                                           produto.Marca.ToLower().Contains(searchText) ||
+                                           produto.Codigo.ToLower().Contains(searchText);
+
+                    return emEstoque && marcaCorreta && tipoCorreto && pesquisaCorreta;
+                };
+                view.Refresh();
             }
         }
 
@@ -307,14 +406,25 @@ namespace WMS_RadiadoresLemos_WPF
                     await AtualizarProdutoNoBanco(produtoSelecionado);
 
                     // Atualiza o cache local
-                    Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
-                    // Avisa o usuário que a quantidade foi alterada
-                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Quantidade alterada: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}, Quantidade: {produtoSelecionado.Quantidade}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
                     EstoqueDataGrid.ItemsSource = produtos;
+
+                    // Avisa o usuário que a quantidade foi alterada
+                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -330,10 +440,21 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     // Atualiza a lista e Cache local
                     produtos.Remove(produtoSelecionado);
-                    Cache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
                     // Deleta o produto do banco de dados
                     await DeletarProdutoNoBanco(produtoSelecionado);
+
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Produto deletado: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
@@ -356,6 +477,17 @@ namespace WMS_RadiadoresLemos_WPF
                 var db = DatabaseConnect.Database ?? throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
                 DocumentReference docRef = db.Collection("Produtos").Document(produto.Id);
                 await docRef.DeleteAsync();
+
+                // Adiciona log
+                var log = new LogData
+                {
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Produto deletado: {produto.Nome}, Código: {produto.Codigo}",
+                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                };
+                await LogHistorico.RegistrarLogAsync(log);
             }
             catch (Exception ex)
             {

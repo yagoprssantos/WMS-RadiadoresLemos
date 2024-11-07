@@ -29,7 +29,7 @@ namespace WMS_RadiadoresLemos_WPF
             try
             {
                 TabelaComboBox.Items.Clear();
-                foreach (var tabela in Cache.Tabelas.Keys)
+                foreach (var tabela in DadosCache.Tabelas.Keys)
                 {
                     TabelaComboBox.Items.Add(tabela);
                 }
@@ -65,7 +65,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para atualizar a tabela de dados com os dados do cache
         private void AtualizarTabelaDadosCache(string tabela)
         {
-            if (Cache.Tabelas.TryGetValue(tabela, out List<object>? value))
+            if (DadosCache.Tabelas.TryGetValue(tabela, out List<object>? value))
             {
                 dadosFiltrados = value;
                 DadosDataGrid.ItemsSource = dadosFiltrados;

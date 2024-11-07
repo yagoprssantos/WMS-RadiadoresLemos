@@ -50,12 +50,20 @@ namespace WMS_RadiadoresLemos_WPF
                 VerifyConnectionButton.Visibility = Visibility.Collapsed;
 
                 // Carrega todas as tabelas no cache
-                await CarregarTodasTabelasNoCache(); 
+                await CarregarTodasTabelasNoCache();
 
             }
             else
             {
                 UpdateStatusBar("Erro ao conectar com o banco de dados", Colors.DarkRed);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível conectar ao banco de dados. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do banco de dados\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do banco de dados\n" +
+                                            "- Tente reconectar ou contate o suporte.");
                 VerifyConnectionButton.Visibility = Visibility.Visible;
             }
         }
@@ -87,7 +95,6 @@ namespace WMS_RadiadoresLemos_WPF
         // Função para abrir a aba de Registro de Entrada e Saída
         private void RegistroEntradaSaida_Click(object sender, RoutedEventArgs e)
         {
-            Log("Abrindo aba de Registro de Entrada e Saída");
             ContentArea.Content = null;
             ContentArea.Content = new RegistroEntradaSaidaUserControl();
         }
@@ -95,7 +102,6 @@ namespace WMS_RadiadoresLemos_WPF
         // Função para abrir a aba de Controle de Estoque
         private void ControleEstoque_Click(object sender, RoutedEventArgs e)
         {
-            Log("Abrindo aba de Controle de Estoque");
             ContentArea.Content = null;
             ContentArea.Content = new ControleEstoqueUserControl();
         }
@@ -103,7 +109,6 @@ namespace WMS_RadiadoresLemos_WPF
         // Função para abrir o Dashboard
         private void Dashboard_Click(object sender, RoutedEventArgs e)
         {
-            Log("Abrindo Dashboard");
             ContentArea.Content = null;
             ContentArea.Content = new DashboardUserControl();
         }
@@ -111,7 +116,6 @@ namespace WMS_RadiadoresLemos_WPF
         // Função para abrir a aba de Banco de Dados
         private void BancoDados_Click(object sender, RoutedEventArgs e)
         {
-            Log("Abrindo aba de Banco de Dados");
             ContentArea.Content = null;
             ContentArea.Content = new BancoDadosUserControl();
         }
@@ -119,9 +123,14 @@ namespace WMS_RadiadoresLemos_WPF
         // Função para abrir a aba de Usuários
         private void Usuarios_Click(object sender, RoutedEventArgs e)
         {
-            Log("Abrindo aba de Usuários");
             ContentArea.Content = null;
             ContentArea.Content = new UsuariosUserControl();
+        }
+        // Função para abrir a aba de Notificações
+        private void Notificacoes_Click(object sender, RoutedEventArgs e)
+        {
+            ContentArea.Content = null;
+            ContentArea.Content = new NotificacoesUserControl();
         }
 
         // Botão de logout para retornar à janela de login
@@ -141,7 +150,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
         // Verifica a conexão com o banco de dados e tenta reconectar
         private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -156,13 +164,6 @@ namespace WMS_RadiadoresLemos_WPF
             StatusBar.Background = new SolidColorBrush(color);
         }
 
-        // Função para logar mensagens
-        private void Log(string message)
-        {
-            Console.WriteLine($"{DateTime.Now}: {message}");
-        }
-
-
         // Função para carregar todas as tabelas no cache
         private async Task CarregarTodasTabelasNoCache()
         {
@@ -175,10 +176,11 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Lista de tabelas a serem carregadas no cache
                 var tabelas = new List<string>
-                {
-                    "Produtos",
-                    "Usuários"
-                };
+                    {
+                        "Produtos",
+                        "Usuarios",
+                        "Historico"
+                    };
 
                 // Para cada tabela, 
                 foreach (var tabela in tabelas)
@@ -199,10 +201,16 @@ namespace WMS_RadiadoresLemos_WPF
                             listaObjetos.Add(produto);
                         }
                         // Se a tabela for de usuários, converte o documento para UsuarioData e adiciona à lista
-                        else if (tabela == "Usuários")
+                        else if (tabela == "Usuarios")
                         {
                             var usuario = doc.ConvertTo<UsuarioData>();
                             listaObjetos.Add(usuario);
+                        }
+                        // Se a tabela for de histórico, converte o documento para LogData e adiciona à lista
+                        else if (tabela == "Historico")
+                        {
+                            var log = doc.ConvertTo<LogData>();
+                            listaObjetos.Add(log);
                         }
 
                         else
@@ -213,7 +221,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     // Adiciona a lista de objetos ao cache
-                    Cache.Tabelas[tabela] = listaObjetos;
+                    DadosCache.Tabelas[tabela] = listaObjetos;
                 }
 
                 // Todo esse código resulta em um cache com todas as tabelas carregadas
@@ -226,6 +234,14 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateStatusBar("Erro ao carregar dados no cache - Verifique a conexão com o banco de dados", Colors.DarkRed);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Não foi possível carregar os dados no cache. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do banco de dados\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do banco de dados\n" +
+                                            "- Tente reconectar ou contate o suporte.");
                 VerifyConnectionButton.Visibility = Visibility.Visible;
             }
         }

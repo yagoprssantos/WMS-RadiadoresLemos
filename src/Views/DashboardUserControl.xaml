@@ -38,16 +38,13 @@
             </StackPanel>
 
             <!-- Gráfico de Barras para Exemplo de Produtos Vendidos -->
-            <GroupBox Header="Vendas Recentes" Margin="15" Foreground="White">
-                <lvc:CartesianChart x:Name="GraficoVendas" Height="300" Margin="15">
-                    <lvc:CartesianChart.Series>
-                        <lvc:ColumnSeries Title="Produtos Vendidos" Values="{Binding ProdutosVendidosSeries}" Fill="#FF4081"/>
-                    </lvc:CartesianChart.Series>
+            <GroupBox Header="Marcas com maior estoque" Margin="15" Foreground="White">
+                <lvc:CartesianChart Series="{Binding EstoqueMarcasSeries}" LegendLocation="Right" Height="276">
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Dias" Labels="{Binding DiasVendas}"/>
+                        <lvc:Axis Title="Marcas" Labels="{Binding MarcasLabels}"/>
                     </lvc:CartesianChart.AxisX>
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Quantidade" LabelFormatter="{Binding FormatadorDeEixoY}"/>
+                        <lvc:Axis Title="Quantidade em Estoque" LabelFormatter="{Binding FormatadorDeEixoY}"/>
                     </lvc:CartesianChart.AxisY>
                 </lvc:CartesianChart>
             </GroupBox>

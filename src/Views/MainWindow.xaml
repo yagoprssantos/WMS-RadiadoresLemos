@@ -46,7 +46,14 @@
                         <ToolTip Content="Gerenciar usuários do sistema"/>
                     </Button.ToolTip>
                 </Button>
+                <!-- Botão para abrir a aba de Notificações -->
+                <Button Content="Notificações" Click="Notificacoes_Click" FontSize="16">
+                    <Button.ToolTip>
+                        <ToolTip Content="Configurar notificações do sistema"/>
+                    </Button.ToolTip>
+                </Button>
             </StackPanel>
+            
 
             <!-- Perfil -->
             <Grid Margin="20, 0, 20, 50" Name="Perfil" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
