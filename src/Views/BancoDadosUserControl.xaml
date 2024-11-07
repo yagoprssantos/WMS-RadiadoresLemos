@@ -27,7 +27,8 @@
                         </StackPanel>
                     </GroupBox>
                     <UniformGrid Rows="1" Columns="4" Margin="0,5,0,10" Grid.Row="1">
-                        <Button Content="Exportar Dados" Margin="5"/>
+                        <Button Content="Exportar Dados" Margin="5" 
+                                Click="ExportarDados_Click"/>
                         <Button Content="Importar Dados" Margin="5"/>
                         <Button Content="Backup dos Dados" Margin="5"/>
                         <Button Content="Fazer reconexão" Margin="5"/>

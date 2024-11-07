@@ -3,6 +3,12 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
 using WMS_RadiadoresLemos_WPF.src.Models; // Certifique-se de que o namespace correto está sendo usado
+using Microsoft.Win32; // Para o diálogo de salvar arquivo
+using ClosedXML.Excel; // Adicione esta linha ao topo do arquivo
+using System.IO;
+using System.Windows;
+using Google.Cloud.Firestore;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -96,6 +102,87 @@ namespace WMS_RadiadoresLemos_WPF
             ).ToList();
             DadosDataGrid.ItemsSource = filteredData;
             RemoverUltimaColuna();
+        }
+
+        private async Task<List<object>> ObterDadosProdutosDoFirebaseAsync()
+        {
+            var db = DatabaseConnect.Database; // Supondo que DatabaseConnect.Database esteja configurado com a instância do Firestore
+            var produtos = new List<object>();
+
+            try
+            {
+                var produtosRef = db.Collection("Produtos");
+                var snapshot = await produtosRef.GetSnapshotAsync();
+
+                foreach (var doc in snapshot.Documents)
+                {
+                    // Converte o documento para o tipo ProdutoData (ajuste para o tipo específico que você usa)
+                    var produto = doc.ConvertTo<ProdutoData>();
+                    produtos.Add(produto);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao obter dados de Produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return produtos;
+        }
+        private async void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            // Busca todos os dados da coleção "Produtos" do Firebase
+            var dadosProdutos = await ObterDadosProdutosDoFirebaseAsync();
+
+            if (dadosProdutos == null || !dadosProdutos.Any())
+            {
+                MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Configura o local para salvar o arquivo
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                Title = "Salvar dados como Excel",
+                FileName = "Nathanis"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var workbook = new XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Produtos");
+
+                        // Escrever os cabeçalhos das colunas
+                        var properties = dadosProdutos.First().GetType().GetProperties();
+                        for (int i = 0; i < properties.Length; i++)
+                        {
+                            worksheet.Cell(1, i + 1).Value = properties[i].Name;
+                        }
+
+                        // Escrever cada linha de dados
+                        for (int i = 0; i < dadosProdutos.Count; i++)
+                        {
+                            var item = dadosProdutos[i];
+                            for (int j = 0; j < properties.Length; j++)
+                            {
+                                worksheet.Cell(i + 2, j + 1).Value = properties[j].GetValue(item, null)?.ToString() ?? "";
+                            }
+                        }
+
+                        // Salvar o arquivo Excel
+                        workbook.SaveAs(saveFileDialog.FileName);
+                    }
+
+                    MessageBox.Show("Dados exportados com sucesso como Excel!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         // Evento disparado quando o botão de atualizar é clicado
