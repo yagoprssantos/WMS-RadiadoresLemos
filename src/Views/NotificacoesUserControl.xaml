@@ -4,57 +4,75 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="800"
-             TextBlock.Foreground="White">
+             d:DesignHeight="550" d:DesignWidth="800">
 
-    <Grid>
+    <Grid Margin="10">
         <TabControl>
-            <!-- Aba de Histórico -->
-            <TabItem Header="Histórico" Name="AbaHistorico" FontSize="18">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <Grid Margin="20">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
-                            <TextBlock Text="Histórico do Estoque" FontSize="20" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 10"/>
-                            <DataGrid Name="HistoricoDataGrid"
-                                      AutoGenerateColumns="False"
-                                      IsReadOnly="True"
-                                      SelectionMode="Single"
-                                      SelectionUnit="FullRow"
-                                      HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Stretch">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="*"/>
-                                    <DataGridTextColumn Header="Mensagem" Binding="{Binding Mensagem}" Width="*"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                    </Grid>
-                </ScrollViewer>
+            <!-- Aba de Alerta -->
+            <TabItem Header="Alertas" FontSize="18">
+                <Grid Margin="10">
+                    <TextBlock Text="Notificações de Alerta" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 20"/>
+                    <DataGrid Name="AlertaDataGrid"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              Margin="0, 40, 0, 0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
+                            <DataGridTemplateColumn Header="Detalhes" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Ações" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Acoes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </TabItem>
 
-            <!-- Aba de Alerta -->
-            <TabItem Header="Alerta" Name="AbaAlerta" FontSize="18">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <Grid Margin="20">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
-                            <TextBlock Text="Notificações de Alerta" FontSize="20" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 10"/>
-                            <DataGrid Name="AlertaDataGrid"
-                                      AutoGenerateColumns="False"
-                                      IsReadOnly="True"
-                                      SelectionMode="Single"
-                                      SelectionUnit="FullRow"
-                                      HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Stretch">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="*"/>
-                                    <DataGridTextColumn Header="Alerta" Binding="{Binding Alerta}" Width="*"/>
-                                    <DataGridTextColumn Header="Detalhes" Binding="{Binding Detalhes}" Width="*"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                    </Grid>
-                </ScrollViewer>
+            <!-- Aba de Histórico -->
+            <TabItem Header="Histórico" FontSize="18">
+                <Grid Margin="10">
+                    <TextBlock Text="Histórico do Estoque" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 20"/>
+                    <DataGrid Name="HistoricoDataGrid"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              Margin="0, 40, 0, 0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
+                            <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
+                            <DataGridTemplateColumn Header="Detalhes" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="Auto" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>
 </UserControl>
+    

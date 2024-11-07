@@ -206,6 +206,17 @@ namespace WMS_RadiadoresLemos_WPF
             produtos.Add(data);
             EstoqueDataGrid.ItemsSource = null;
             EstoqueDataGrid.ItemsSource = produtos;
+
+            // Adiciona log
+            var log = new LogData
+            {
+                Data = DateTime.UtcNow,
+                Tipo = "OPERACIONAL",
+                Nivel = "Usuário",
+                Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
+                Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+            };
+            await LogHistorico.RegistrarLogAsync(log);
         }
 
         // Método chamado ao clicar no botão de cadastrar produto
@@ -304,14 +315,24 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza o banco de dados
                     await AtualizarProdutoNoBanco(produtoEditado);
 
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Produto editado: {produtoEditado.Nome}, Código: {produtoEditado.Codigo}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
+
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
                     EstoqueDataGrid.ItemsSource = produtos;
+
+                    // Avisa o usuário que o produto foi editado
+                    MessageBox.Show("Produto editado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-            }
-            else
-            {
-                MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -387,12 +408,23 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza o cache local
                     DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
-                    // Avisa o usuário que a quantidade foi alterada
-                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Quantidade alterada: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}, Quantidade: {produtoSelecionado.Quantidade}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
                     EstoqueDataGrid.ItemsSource = produtos;
+
+                    // Avisa o usuário que a quantidade foi alterada
+                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -412,6 +444,17 @@ namespace WMS_RadiadoresLemos_WPF
 
                     // Deleta o produto do banco de dados
                     await DeletarProdutoNoBanco(produtoSelecionado);
+
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Produto deletado: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     // Atualiza a fonte de dados do DataGrid
                     EstoqueDataGrid.ItemsSource = null;
@@ -434,6 +477,17 @@ namespace WMS_RadiadoresLemos_WPF
                 var db = DatabaseConnect.Database ?? throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
                 DocumentReference docRef = db.Collection("Produtos").Document(produto.Id);
                 await docRef.DeleteAsync();
+
+                // Adiciona log
+                var log = new LogData
+                {
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Produto deletado: {produto.Nome}, Código: {produto.Codigo}",
+                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                };
+                await LogHistorico.RegistrarLogAsync(log);
             }
             catch (Exception ex)
             {

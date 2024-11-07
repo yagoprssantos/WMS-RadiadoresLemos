@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
         Title="EditarProdutoWindow" Height="550" Width="600" FontSize="18"
-        TextBlock.Foreground="White">
+        WindowStartupLocation="CenterScreen"
+        TextBlock.Foreground="White" >
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   Background="{StaticResource BackgroundBrush}">
