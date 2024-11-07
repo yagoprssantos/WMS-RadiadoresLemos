@@ -14,11 +14,12 @@
             <!-- Campo de Texto para Usuário -->
             <TextBlock Foreground="White" Text="Usuário" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
             <TextBox Name="UsernameField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"
-                     VerticalAlignment="Center"/>
+                     VerticalAlignment="Center" KeyDown="UsernameField_KeyDown"/>
 
             <!-- Campo de Texto para Senha -->
             <TextBlock Foreground="White" Text="Senha" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
-            <PasswordBox Name="PasswordField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"/>
+            <PasswordBox Name="PasswordField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"
+                         KeyDown="PasswordField_KeyDown"/>
 
             <StackPanel Orientation="Horizontal" Width="300" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- Botão para Confirmar -->

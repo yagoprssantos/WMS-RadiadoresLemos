@@ -30,8 +30,6 @@ namespace WMS_RadiadoresLemos_WPF
             ExibirTotalUsuarios();
             ExibirTotalProdutos();
             ExibirProdutosBaixoEstoque();
-            ExibirLogsRecentes();
-            ExibirGraficoDeVendas();
             ExibirGraficoDeEstoqueMarcas();
         }
 
@@ -133,6 +131,9 @@ namespace WMS_RadiadoresLemos_WPF
         // Exibe a quantidade de produtos com baixo estoque
         private void ExibirProdutosBaixoEstoque()
         {
+            int produtosBaixoEstoque = VerificarProdutosBaixoEstoque();
+            ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
+        }
 
 
         // Verifica a quantidade de produtos com baixo estoque
@@ -143,22 +144,6 @@ namespace WMS_RadiadoresLemos_WPF
                 return produtos.Count(p => ((ProdutoData)p).Quantidade < 10);
             }
             return 0;
-        }
-
-        // Exibe os logs recentes
-        private void ExibirLogsRecentes()
-        {
-            // TODO: Implementar
-        }
-
-        // Notifica a quantidade de produtos com baixo estoque
-        private void NotificarProdutosBaixoEstoque()
-        {
-            int produtosBaixoEstoque = VerificarProdutosBaixoEstoque();
-            if (produtosBaixoEstoque > 0)
-            {
-                MessageBox.Show($"Existem {produtosBaixoEstoque} produtos com baixo estoque!", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
         }
     }
 }
