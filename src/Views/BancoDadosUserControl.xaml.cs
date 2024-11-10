@@ -37,6 +37,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Erro ao carregar tabelas. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
                                             "- Serviço do banco de dados indisponível",
@@ -64,6 +65,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Erro ao selecionar tabela. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
                                             "- Serviço do banco de dados indisponível",
@@ -90,6 +92,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
                                             "- Serviço do banco de dados indisponível",
@@ -114,6 +117,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 // Ignora exceções ao remover a última coluna
                 AlertaCache.AdicionarAlerta("Aviso",
+                                            ex.Message,
                                             $"Erro ao remover última coluna. Isto é um erro mas não causa interferência no funcionamento do sistema. Possíveis motivos:\n" +
                                             "- Aplicações com bugs\n" +
                                             "- Tabela de dados vazia\n" +
@@ -151,6 +155,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Erro ao filtrar dados. Possíveis motivos:\n" +
                                             "- Sistema com bugs\n" +
                                             "- Caracteres inválidos na pesquisa\n" +
@@ -182,6 +187,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Erro ao obter dados de Produtos. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
                                             "- Configurações incorretas do banco de dados\n" +
@@ -206,6 +212,7 @@ namespace WMS_RadiadoresLemos_WPF
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
                     AlertaCache.AdicionarAlerta("Aviso",
+                                                "",
                                                 "Nenhum dado disponível para exportação.",
                                                 "Verifique se há dados disponíveis para exportação.");
 
@@ -282,6 +289,7 @@ namespace WMS_RadiadoresLemos_WPF
                     catch (Exception ex)
                     {
                         AlertaCache.AdicionarAlerta("Erro",
+                                                    ex.Message,
                                                     $"Erro ao exportar dados. Possíveis motivos:\n" +
                                                     "- Problemas de conexão com a internet\n" +
                                                     "- Configurações incorretas do banco de dados\n" +
@@ -296,6 +304,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
                                             "- Função de exportação removida por terceiros \n" +
                                             "- Tabela de dados vazia ou corrompida",
@@ -323,6 +332,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
                                             "- Componentes da interface corrompidos\n" +
                                             "- Erro ao reconhecer a tabela selecionada\n" +

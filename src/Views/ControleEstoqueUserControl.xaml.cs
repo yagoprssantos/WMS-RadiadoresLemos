@@ -60,6 +60,15 @@ namespace WMS_RadiadoresLemos_WPF
             catch (InvalidOperationException ex)
             {
                 MessageBox.Show($"Erro ao preencher filtros: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao preencher filtros de marca e tipo de produto no Controle de Estoque. Possíveis Motivos\n: " +
+                                            "- Falha na conexão com o banco de dados\n" +
+                                            "- Falha ao carregar os produtos do banco de dados\n" +
+                                            "- Falha ao preencher as listas de marca e tipo de produto",
+                                            "- Verifique a conexão com o banco de dados\n" +
+                                            "- Verifique se os produtos foram carregados corretamente\n" +
+                                            "- Verifique se as listas de marca e tipo de produto foram preenchidas corretamente");
             }
         }
 
@@ -73,6 +82,10 @@ namespace WMS_RadiadoresLemos_WPF
                 EstoqueDataGrid.ItemsSource = produtos;
                 produtosCarregados = true;
                 precisaAtualizarEstoque = false;
+            }
+            else
+            {
+                precisaAtualizarEstoque = true;
             }
         }
 
@@ -99,6 +112,14 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 precisaAtualizarEstoque = true;
                 MessageBox.Show($"Erro ao carregar produtos do banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao carregar produtos do banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
+                                            "- Falha na conexão com o banco de dados\n" +
+                                            "- Falha ao carregar os produtos do banco de dados",
+                                            "- Verifique a conexão com o banco de dados\n" +
+                                            "- Verifique se os produtos foram carregados corretamente\n" +
+                                            "- Tente atualizar a tabela de estoque novamente");
             }
         }
 
@@ -187,6 +208,14 @@ namespace WMS_RadiadoresLemos_WPF
             if (DatabaseConnect.Database == null)
             {
                 MessageBox.Show("Conexão com o banco de dados não estabelecida.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Conexão com o banco de dados não estabelecida.",
+                                            "Erro ao cadastrar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
+                                            "- Falha na conexão com o banco de dados",
+                                            "- Verifique a conexão com o banco de dados");
+
                 return;
             }
 
@@ -233,6 +262,13 @@ namespace WMS_RadiadoresLemos_WPF
                 else
                 {
                     MessageBox.Show("Não é possível cadastrar o produto. Atualize a tabela de estoque primeiro.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    // Adiciona alerta
+                    AlertaCache.AdicionarAlerta("Aviso",
+                                                "Não é possível cadastrar o produto.",
+                                                "Erro ao cadastrar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
+                                                "- Tabela de estoque não atualizada",
+                                                "- Atualize a tabela de estoque antes de cadastrar um novo produto");
                 }
             }
             else
@@ -349,6 +385,15 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao atualizar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
+                                            "- Falha na conexão com o banco de dados\n" +
+                                            "- Falha ao atualizar o produto no banco de dados",
+                                            "- Verifique a conexão com o banco de dados\n" +
+                                            "- Verifique se o produto foi atualizado corretamente");
             }
         }
 
@@ -492,6 +537,15 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao deletar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao deletar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
+                                            "- Falha na conexão com o banco de dados\n" +
+                                            "- Falha ao deletar o produto no banco de dados",
+                                            "- Verifique a conexão com o banco de dados\n" +
+                                            "- Verifique se o produto foi deletado corretamente");
             }
         }
     }

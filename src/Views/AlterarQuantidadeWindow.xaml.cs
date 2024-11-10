@@ -19,6 +19,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             "Não foi possível carregar os dados do produto. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
                                             "- Configurações incorretas do banco de dados\n" +
@@ -50,6 +51,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             "Não foi possível salvar a nova quantidade. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
                                             "- Configurações incorretas do banco de dados\n" +
@@ -70,7 +72,7 @@ namespace WMS_RadiadoresLemos_WPF
                 DialogResult = false; // Cancela a alteração
                 Close();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Força o fechamento da janela em caso de erro
                 Close();
@@ -86,6 +88,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             "Erro ao processar a entrada de texto. Possíveis motivos:\n" +
                                             "- Valor inserido não é numérico\n",
                                             "- Verifique se o valor inserido é numérico\n" +
