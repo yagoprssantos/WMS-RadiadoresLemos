@@ -279,6 +279,17 @@ namespace WMS_RadiadoresLemos_WPF
                             workbook.SaveAs(saveFileDialog.FileName);
                         }
 
+                        // Adiciona log
+                        var log = new LogData
+                        {
+                            Data = DateTime.UtcNow,
+                            Tipo = "INFORMATIVO",
+                            Nivel = "Usuário",
+                            Detalhes = "Exportação de Dados",
+                            Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        };
+                        await LogHistorico.RegistrarLogAsync(log);
+
                         MessageBox.Show("Dados exportados com sucesso como Excel!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)

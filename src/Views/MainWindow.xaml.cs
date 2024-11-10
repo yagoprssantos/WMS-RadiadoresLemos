@@ -160,7 +160,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Botão de logout para retornar à janela de login
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        private async void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -172,6 +172,18 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     // Oculta a janela principal
                     this.Hide();
+
+                    // Adiciona log
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Usuário 'NomeDoUsuario' realizou logout", // Substitua pelo nome do usuário real
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     // Reabre a janela de login
                     ShowLoginWindow();

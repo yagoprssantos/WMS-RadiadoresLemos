@@ -153,6 +153,17 @@ namespace WMS_RadiadoresLemos_WPF
                         await AtualizarProdutoNoBanco(produtoSelecionado);
                         MessageBox.Show($"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}, Quantidade - {quantidade}");
 
+                        // Adiciona log
+                        var log = new LogData
+                        {
+                            Data = DateTime.UtcNow,
+                            Tipo = "OPERACIONAL",
+                            Nivel = "Usuário",
+                            Detalhes = $"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}; Quantidade adicionada - {quantidade};  Quantidade atual - {quantidadeFinal}",
+                            Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        };
+                        await LogHistorico.RegistrarLogAsync(log);
+
                         // Limpar campos após o registro, mantendo o produto selecionado
                         LimparCampos();
                     }

@@ -7,7 +7,7 @@ public class LogData
     public DateTime Data { get; set; }
     [FirestoreProperty]
     public string Tipo { get; set; }
-    // OPERACIONAL, RESTRITIVA, CRÍTICA
+    // OPERACIONAL, CRÍTICO, INFORMATIVO
 
     [FirestoreProperty]
     public string Nivel { get; set; }

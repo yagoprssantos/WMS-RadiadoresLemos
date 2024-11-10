@@ -462,7 +462,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Data = DateTime.UtcNow,
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
-                        Detalhes = $"Quantidade alterada: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}, Quantidade: {produtoSelecionado.Quantidade}",
+                        Detalhes = $"Quantidade alterada do produto '{produtoSelecionado.Nome}', Código: {produtoSelecionado.Codigo}; Nova Quantidade: {produtoSelecionado.Quantidade}",
                         Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
                     };
                     await LogHistorico.RegistrarLogAsync(log);
@@ -497,7 +497,7 @@ namespace WMS_RadiadoresLemos_WPF
                     var log = new LogData
                     {
                         Data = DateTime.UtcNow,
-                        Tipo = "OPERACIONAL",
+                        Tipo = "CRÍTICO",
                         Nivel = "Usuário",
                         Detalhes = $"Produto deletado: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}",
                         Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real

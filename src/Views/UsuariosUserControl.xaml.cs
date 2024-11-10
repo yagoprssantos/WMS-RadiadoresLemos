@@ -167,6 +167,17 @@ namespace WMS_RadiadoresLemos_WPF
                     UsuariosDataGrid.ItemsSource = null;
                     UsuariosDataGrid.ItemsSource = usuarios;
 
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Usuário '{usuarioEditado.Nome}' atualizado.",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
+
                     MessageBox.Show($"Usuário '{usuarioEditado.Nome}' atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -207,6 +218,17 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza a fonte de dados do DataGrid
                     UsuariosDataGrid.ItemsSource = null;
                     UsuariosDataGrid.ItemsSource = usuarios;
+
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "CRITICO",
+                        Nivel = "Usuário",
+                        Detalhes = $"Usuário '{novoUsuario.Nome}' adicionado.",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     MessageBox.Show("Usuário adicionado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -253,6 +275,17 @@ namespace WMS_RadiadoresLemos_WPF
                         // Atualiza a fonte de dados do DataGrid
                         UsuariosDataGrid.ItemsSource = null;
                         UsuariosDataGrid.ItemsSource = usuarios;
+
+                        // Adiciona log
+                        var log = new LogData
+                        {
+                            Data = DateTime.UtcNow,
+                            Tipo = "CRITICO",
+                            Nivel = "Usuário",
+                            Detalhes = $"Usuário '{usuarioSelecionado.Nome}' deletado.",
+                            Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        };
+                        await LogHistorico.RegistrarLogAsync(log);
 
                         MessageBox.Show("Usuário deletado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
