@@ -27,35 +27,57 @@ namespace WMS_RadiadoresLemos_WPF
         // Exibe a janela de login
         private void ShowLoginWindow()
         {
-            LoginWindow loginWindow = new LoginWindow();
-            bool? result = loginWindow.ShowDialog();
-
-            // Se o login aceitar, exibe a janela principal
-            if (result.HasValue && result.Value)
+            try
             {
-                this.Show();
+                LoginWindow loginWindow = new LoginWindow();
+                bool? result = loginWindow.ShowDialog();
+
+                // Se o login aceitar, exibe a janela principal
+                if (result.HasValue && result.Value)
+                {
+                    this.Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao exibir a janela de login: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível exibir a janela de login. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
             }
         }
 
         private async void SetupDatabaseConnection()
         {
-            UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
-
-            // Estabelece a conexão com o banco de dados Firestore
-            DatabaseConnect.SetEnvironmentVarible(); // Certifique-se de que essa função configura corretamente a variável do banco
-
-            if (DatabaseConnect.Database != null)
+            try
             {
-                UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
-                VerifyConnectionButton.Visibility = Visibility.Collapsed;
+                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
 
-                // Carrega todas as tabelas no cache
-                await CarregarTodasTabelasNoCache();
+                // Estabelece a conexão com o banco de dados Firestore
+                DatabaseConnect.SetEnvironmentVarible(); // Certifique-se de que essa função configura corretamente a variável do banco
 
+                if (DatabaseConnect.Database != null)
+                {
+                    UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
+                    VerifyConnectionButton.Visibility = Visibility.Collapsed;
+
+                    // Carrega todas as tabelas no cache
+                    await CarregarTodasTabelasNoCache();
+                }
+                else
+                {
+                    throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
+                }
             }
-            else
+            catch (Exception ex)
             {
                 UpdateStatusBar("Erro ao conectar com o banco de dados", Colors.DarkRed);
+                MessageBox.Show($"Erro ao conectar com o banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível conectar ao banco de dados. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -70,98 +92,279 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void SetupStatusBar()
         {
-            UpdateDateTime();
-            StartDateTimeUpdater();
+            try
+            {
+                UpdateDateTime();
+                StartDateTimeUpdater();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao configurar a barra de status: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível configurar a barra de status. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Atualiza a barra de status com a data e hora atual
         private void UpdateDateTime()
         {
-            StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}  ";
+            try
+            {
+                StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}  ";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar a data e hora: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível atualizar a data e hora. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Inicia o temporizador que atualiza a data e hora a cada segundo
         private void StartDateTimeUpdater()
         {
-            DispatcherTimer timer = new DispatcherTimer
+            try
             {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += (sender, args) => UpdateDateTime();
-            timer.Start();
+                DispatcherTimer timer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(1)
+                };
+                timer.Tick += (sender, args) => UpdateDateTime();
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao iniciar o atualizador de data e hora: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível iniciar o atualizador de data e hora. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Abas
         // Função para abrir a aba de Registro de Entrada e Saída
         private void RegistroEntradaSaida_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new RegistroEntradaSaidaUserControl();
+            try
+            {
+                ContentArea.Content = null;
+                ContentArea.Content = new RegistroEntradaSaidaUserControl();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir a aba de Registro de Entrada e Saída: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível abrir a aba de Registro de Entrada e Saída. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Função para abrir a aba de Controle de Estoque
         private void ControleEstoque_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new ControleEstoqueUserControl();
+            try
+            {
+                ContentArea.Content = null;
+                ContentArea.Content = new ControleEstoqueUserControl();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir a aba de Controle de Estoque: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível abrir a aba de Controle de Estoque. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Função para abrir o Dashboard
         private void Dashboard_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new DashboardUserControl();
+            try
+            {
+                ContentArea.Content = null;
+                ContentArea.Content = new DashboardUserControl();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir o Dashboard: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível abrir o Dashboard. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Função para abrir a aba de Banco de Dados
         private void BancoDados_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new BancoDadosUserControl();
+            try
+            {
+                ContentArea.Content = null;
+                ContentArea.Content = new BancoDadosUserControl();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir a aba de Banco de Dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível abrir a aba de Banco de Dados. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Função para abrir a aba de Usuários
         private void Usuarios_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new UsuariosUserControl();
+            try
+            {
+                ContentArea.Content = null;
+                ContentArea.Content = new UsuariosUserControl();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir a aba de Usuários: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível abrir a aba de Usuários. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
+
         // Função para abrir a aba de Notificações
         private void Notificacoes_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new NotificacoesUserControl();
+            try
+            {
+                ContentArea.Content = null;
+                ContentArea.Content = new NotificacoesUserControl();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir a aba de Notificações: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível abrir a aba de Notificações. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Botão de logout para retornar à janela de login
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            // Exibe uma caixa de diálogo de confirmação
-            MessageBoxResult result = MessageBox.Show("Você tem certeza que deseja sair?", "Confirmar Logout", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            // Se o usuário confirmar, realiza o logout
-            if (result == MessageBoxResult.Yes)
+            try
             {
-                // Oculta a janela principal
-                this.Hide();
+                // Exibe uma caixa de diálogo de confirmação
+                MessageBoxResult result = MessageBox.Show("Você tem certeza que deseja sair?", "Confirmar Logout", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-                // Reabre a janela de login
-                ShowLoginWindow();
+                // Se o usuário confirmar, realiza o logout
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Oculta a janela principal
+                    this.Hide();
+
+                    // Reabre a janela de login
+                    ShowLoginWindow();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao realizar logout: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível realizar o logout. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
             }
         }
 
         // Verifica a conexão com o banco de dados e tenta reconectar
         private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            SetupDatabaseConnection();
-            SetupStatusBar();
+            try
+            {
+                SetupDatabaseConnection();
+                SetupStatusBar();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao verificar a conexão com o banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível verificar a conexão com o banco de dados. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do banco de dados\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do banco de dados\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Atualiza a barra de status com uma mensagem e uma cor
         private void UpdateStatusBar(string message, Color color)
         {
-            StatusBarItem.Content = message;
-            StatusBar.Background = new SolidColorBrush(color);
+            try
+            {
+                StatusBarItem.Content = message;
+                StatusBar.Background = new SolidColorBrush(color);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar a barra de status: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Não foi possível atualizar a barra de status. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do sistema\n" +
+                                            "- Serviço do sistema indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do sistema\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Função para carregar todas as tabelas no cache
@@ -212,7 +415,6 @@ namespace WMS_RadiadoresLemos_WPF
                             var log = doc.ConvertTo<LogData>();
                             listaObjetos.Add(log);
                         }
-
                         else
                         {
                             // Se a tabela não for reconhecida, retorna uma exceção
