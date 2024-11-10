@@ -18,16 +18,18 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Erro ao carregar os dados do produto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             "Não foi possível carregar os dados do produto. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Configurações incorretas do banco de dados\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Verifique as configurações do banco de dados\n" +
-                                            "- Tente reconectar ou contate o suporte.");
-                MessageBox.Show($"Erro ao carregar os dados do produto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                            "- Produto não encontrado;\n" +
+                                            "- Dados do produto corrompidos;\n" +
+                                            "- Problemas de conexão com a internet.\n",
+                                            "- Verifique se o produto existe;\n" +
+                                            "- Verifique se os dados do produto estão corretos;\n" +
+                                            "- Faça a reconexão com banco de dados.");
                 Close();
             }
         }
@@ -50,18 +52,18 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Erro ao salvar a nova quantidade: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             "Não foi possível salvar a nova quantidade. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Configurações incorretas do banco de dados\n" +
-                                            "- Serviço do banco de dados indisponível\n" +
-                                            "- Valor inserido não é numérico",
-                                            "- Confirme se o valor inserido é numérico\n" +
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Verifique as configurações do banco de dados\n" +
-                                            "- Tente reconectar ou contate o suporte.");
-                MessageBox.Show($"Erro ao salvar a nova quantidade: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                            "- Valor inserido não é numérico;\n" +
+                                            "- Valor inserido é negativo;\n" +
+                                            "- Quantidade do produto corrompida.\n",
+                                            "- Verifique se o valor inserido é numérico;\n" +
+                                            "- Verifique se a quantidade do produto está correta e atualizada;\n" +
+                                            "- Insira um valor que seja válido.");
             }
         }
 
@@ -87,14 +89,16 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Erro ao processar a entrada de texto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             "Erro ao processar a entrada de texto. Possíveis motivos:\n" +
-                                            "- Valor inserido não é numérico\n",
-                                            "- Verifique se o valor inserido é numérico\n" +
-                                            "- Verifique se existem espaços ou caracteres inválidos\n" +
-                                            "- Tente reconectar ou contate o suporte.");
-                MessageBox.Show($"Erro ao processar a entrada de texto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                            "- Valor inserido não é numérico;\n" +
+                                            "- Existem espaços ou caracteres inválidos.\n",
+                                            "- Verifique se o valor inserido é numérico;\n" +
+                                            "- Verifique se existem espaços ou caracteres inválidos.");
             }
         }
     }

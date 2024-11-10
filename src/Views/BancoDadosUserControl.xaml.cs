@@ -39,10 +39,10 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             $"Erro ao carregar tabelas. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Tente reconectar ou contate o suporte.");
+                                            "- Não foi possível acessar o cache de dados;\n" +
+                                            "- Problemas de conexão com a internet;\n" +
+                                            "- Serviço do banco de dados indisponível.",
+                                            "- Recarregue a tela de Banco de Dados.");
 
                 Console.WriteLine($"Erro ao carregar tabelas: {ex.Message}");
             }
@@ -67,10 +67,11 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             $"Erro ao selecionar tabela. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Tente reconectar ou contate o suporte.");
+                                            "- Tabela não encontrada;\n" +
+                                            "- Tabela com dados corrompidos;\n" +
+                                            "- Serviço do banco de dados indisponível.",
+                                            "- Verifique se a tabela selecionada está disponível\n" +
+                                            "- Recarregue a tela de Banco de Dados.");
 
                 Console.WriteLine($"Erro ao selecionar tabela: {ex.Message}");
             }
@@ -94,10 +95,11 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Tente reconectar ou contate o suporte.");
+                                            "- Tabela corrompida;\n" +
+                                            "- Dados não encontrados;\n" +
+                                            "- Serviço do banco de dados indisponível.",
+                                            "- Verifique se a tabela selecionada está disponível\n" +
+                                            "- Recarregue a tela de Banco de Dados.");
 
                 Console.WriteLine($"Erro ao atualizar tabela de dados: {ex.Message}");
             }
@@ -119,12 +121,11 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Aviso",
                                             ex.Message,
                                             $"Erro ao remover última coluna. Isto é um erro mas não causa interferência no funcionamento do sistema. Possíveis motivos:\n" +
-                                            "- Aplicações com bugs\n" +
-                                            "- Tabela de dados vazia\n" +
-                                            "- Problema ao carregar dados\n" +
-                                            "- Impossibilidade de remover a última coluna",
-                                            "- Feche e abra a tela de Banco de Dados\n" +
-                                            "- Tente reiniciar a aplicação");
+                                            "- Aplicações com bugs;\n" +
+                                            "- Tabela de dados vazia;\n" +
+                                            "- Problema ao carregar dados;\n" +
+                                            "- Impossibilidade de remover a última coluna.",
+                                            "- Feche e abra a tela de Banco de Dados");
 
                 Console.WriteLine($"Erro ao remover última coluna: {ex.Message}");
             }
@@ -157,11 +158,11 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             $"Erro ao filtrar dados. Possíveis motivos:\n" +
-                                            "- Sistema com bugs\n" +
-                                            "- Caracteres inválidos na pesquisa\n" +
-                                            "- Problema ao carregar dados",
-                                            "- Feche e abra a tela de Banco de Dados\n" +
-                                            "- Tente reiniciar a aplicação");
+                                            "- Sistema com bugs;\n" +
+                                            "- Caracteres inválidos na pesquisa;\n" +
+                                            "- Problema ao carregar dados.",
+                                            "- Feche e abra a tela de Banco de Dados;\n" +
+                                            "- Tente reiniciar a aplicação.");
 
                 Console.WriteLine($"Erro ao filtrar dados: {ex.Message}");
             }
@@ -189,12 +190,11 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             $"Erro ao obter dados de Produtos. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Configurações incorretas do banco de dados\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Verifique as configurações do banco de dados\n" +
-                                            "- Tente reconectar ou contate o suporte.");
+                                            "- Problemas de conexão com a internet;\n" +
+                                            "- Configurações incorretas do banco de dados;\n" +
+                                            "- Serviço do banco de dados indisponível.",
+                                            "- Verifique sua conexão com a internet;\n" +
+                                            "- Verifique as configurações do banco de dados.");
 
                 MessageBox.Show($"Erro ao obter dados de Produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -211,11 +211,6 @@ namespace WMS_RadiadoresLemos_WPF
 
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
-                    AlertaCache.AdicionarAlerta("Aviso",
-                                                "",
-                                                "Nenhum dado disponível para exportação.",
-                                                "Verifique se há dados disponíveis para exportação.");
-
                     MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
@@ -291,12 +286,12 @@ namespace WMS_RadiadoresLemos_WPF
                         AlertaCache.AdicionarAlerta("Erro",
                                                     ex.Message,
                                                     $"Erro ao exportar dados. Possíveis motivos:\n" +
-                                                    "- Problemas de conexão com a internet\n" +
-                                                    "- Configurações incorretas do banco de dados\n" +
-                                                    "- Serviço do banco de dados indisponível",
-                                                    "- Verifique sua conexão com a internet\n" +
-                                                    "- Verifique as configurações do banco de dados\n" +
-                                                    "- Tente reconectar ou contate o suporte.");
+                                                    "- Problemas ao salvar o arquivo;\n" +
+                                                    "- Dados corrompidos;\n" +
+                                                    "- Erro ao acessar os dados.",
+                                                    "- Verifique se o arquivo realmente foi salvo;\n" +
+                                                    "- Verifique se os dados estão corretos.");
+
                         MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
@@ -306,9 +301,9 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
-                                            "- Função de exportação removida por terceiros \n" +
-                                            "- Tabela de dados vazia ou corrompida",
-                                            "- Verifique se a função de exportação está disponível\n" +
+                                            "- Função de exportação removida por terceiros;\n" +
+                                            "- Tabela de dados vazia ou corrompida.",
+                                            "- Verifique se a função de exportação está disponível;\n" +
                                             "- Verifique se há dados disponíveis para exportação.");
 
                 MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -334,12 +329,11 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message,
                                             $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
-                                            "- Componentes da interface corrompidos\n" +
-                                            "- Erro ao reconhecer a tabela selecionada\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Feche e abra a tela de Banco de Dados\n" +
-                                            "- Reinicie a aplicação\n" +
-                                            "- Tente reconectar ou contate o suporte.");
+                                            "- Componentes da interface corrompidos;\n" +
+                                            "- Erro ao reconhecer a tabela selecionada;\n" +
+                                            "- Serviço do banco de dados indisponível.",
+                                            "- Feche e abra a tela de Banco de Dados;\n" +
+                                            "- Reinicie a aplicação.");
 
                 Console.WriteLine($"Erro ao atualizar DataGrid: {ex.Message}");
             }

@@ -43,6 +43,15 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar produtos: {ex.Message}");
+
+                // Adicionar alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao carregar produtos do cache. Possíveis motivos:\n" +
+                                            "- Falha na conexão com o banco de dados.\n" +
+                                            "- Não foi possível carregar os produtos do cache.",
+                                            "- Verifique a conexão com a internet.\n" +
+                                            "- Reinicie o aplicativo.");
             }
         }
 
@@ -156,6 +165,19 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}");
+
+                // Adicionar alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
+                                            "- Produto inválido ou não selecionado.\n" +
+                                            "- Quantidade inválida ou insuficiente.\n" +
+                                            "- Falha na conexão com o banco de dados.\n" +
+                                            "- Não foi possível atualizar o produto no banco de dados.",
+                                            "- Verifique se o produto foi selecionado corretamente.\n" +
+                                            "- Verifique se a quantidade um valor é válido.\n" +
+                                            "- Verifique a conexão com a internet.\n" +
+                                            "- Reinicie o aplicativo.");
             }
         }
 
@@ -173,6 +195,15 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}");
+
+                // Adicionar alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao atualizar produto no banco de dados. Possíveis motivos:\n" +
+                                            "- Falha na conexão com o banco de dados.\n" +
+                                            "- Não foi possível atualizar o produto no banco de dados.",
+                                            "- Verifique a conexão com a internet.\n" +
+                                            "- Reinicie o aplicativo.");
             }
         }
 
