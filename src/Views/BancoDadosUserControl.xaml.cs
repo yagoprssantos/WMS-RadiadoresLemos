@@ -144,7 +144,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 Filter = "Excel Workbook (*.xlsx)|*.xlsx",
                 Title = "Salvar dados como Excel",
-                FileName = "Nathanis"
+                FileName = "radiadoreslemosdb-export.xlsx"
             };
 
             if (saveFileDialog.ShowDialog() == true)
@@ -153,22 +153,49 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     using (var workbook = new XLWorkbook())
                     {
-                        var worksheet = workbook.Worksheets.Add("Produtos");
-
-                        // Escrever os cabeçalhos das colunas
-                        var properties = dadosProdutos.First().GetType().GetProperties();
-                        for (int i = 0; i < properties.Length; i++)
+                        foreach (var tabela in DadosCache.Tabelas.Keys)
                         {
-                            worksheet.Cell(1, i + 1).Value = properties[i].Name;
-                        }
+                            var dadosTabela = DadosCache.Tabelas[tabela];
+                            var worksheet = workbook.Worksheets.Add(tabela);
 
-                        // Escrever cada linha de dados
-                        for (int i = 0; i < dadosProdutos.Count; i++)
-                        {
-                            var item = dadosProdutos[i];
-                            for (int j = 0; j < properties.Length; j++)
+                            if (dadosTabela.Any())
                             {
-                                worksheet.Cell(i + 2, j + 1).Value = properties[j].GetValue(item, null)?.ToString() ?? "";
+                                // Escrever os cabeçalhos das colunas
+                                var properties = dadosTabela.First().GetType().GetProperties();
+                                for (int i = 0; i < properties.Length; i++)
+                                {
+                                    var cell = worksheet.Cell(1, i + 1);
+                                    cell.Value = properties[i].Name;
+                                    cell.Style.Fill.BackgroundColor = XLColor.UltramarineBlue;
+                                    cell.Style.Font.FontColor = XLColor.White;
+                                    cell.Style.Font.Bold = true;
+                                    cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                }
+
+                                // Escrever cada linha de dados
+                                for (int i = 0; i < dadosTabela.Count; i++)
+                                {
+                                    var item = dadosTabela[i];
+                                    for (int j = 0; j < properties.Length; j++)
+                                    {
+                                        var cell = worksheet.Cell(i + 2, j + 1);
+                                        cell.Value = properties[j].GetValue(item, null)?.ToString() ?? "";
+                                        cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+                                        // Alternar cor de fundo entre branco e cinza claro
+                                        if (i % 2 == 0)
+                                        {
+                                            cell.Style.Fill.BackgroundColor = XLColor.White;
+                                        }
+                                        else
+                                        {
+                                            cell.Style.Fill.BackgroundColor = XLColor.Gainsboro;
+                                        }
+                                    }
+                                }
+
+                                // Ajustar a largura das colunas
+                                worksheet.Columns().AdjustToContents();
                             }
                         }
 
@@ -185,8 +212,8 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Evento disparado quando o botão de atualizar é clicado
-        private void AtualizarDataGrid_Click(object sender, System.Windows.RoutedEventArgs e)
+            // Evento disparado quando o botão de atualizar é clicado
+            private void AtualizarDataGrid_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
