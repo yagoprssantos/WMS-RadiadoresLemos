@@ -36,7 +36,13 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                // Log de erro ou exibição de mensagem para o usuário
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Erro ao carregar tabelas. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+
                 Console.WriteLine($"Erro ao carregar tabelas: {ex.Message}");
             }
         }
@@ -57,7 +63,13 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                // Log de erro ou exibição de mensagem para o usuário
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Erro ao selecionar tabela. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+
                 Console.WriteLine($"Erro ao selecionar tabela: {ex.Message}");
             }
         }
@@ -65,43 +77,89 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para atualizar a tabela de dados com os dados do cache
         private void AtualizarTabelaDadosCache(string tabela)
         {
-            if (DadosCache.Tabelas.TryGetValue(tabela, out List<object>? value))
+            try
             {
-                dadosFiltrados = value;
-                DadosDataGrid.ItemsSource = dadosFiltrados;
-                dadosCarregados = true;
-                RemoverUltimaColuna();
+                if (DadosCache.Tabelas.TryGetValue(tabela, out List<object>? value))
+                {
+                    dadosFiltrados = value;
+                    DadosDataGrid.ItemsSource = dadosFiltrados;
+                    dadosCarregados = true;
+                    RemoverUltimaColuna();
+                }
+            }
+            catch (Exception ex)
+            {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+
+                Console.WriteLine($"Erro ao atualizar tabela de dados: {ex.Message}");
             }
         }
 
         // Método para remover a última coluna do DataGrid
         private void RemoverUltimaColuna()
         {
-            if (DadosDataGrid.Columns.Count > 0)
+            try
             {
-                DadosDataGrid.Columns.RemoveAt(DadosDataGrid.Columns.Count - 1);
+                if (DadosDataGrid.Columns.Count > 0)
+                {
+                    DadosDataGrid.Columns.RemoveAt(DadosDataGrid.Columns.Count - 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ignora exceções ao remover a última coluna
+                AlertaCache.AdicionarAlerta("Aviso",
+                                            $"Erro ao remover última coluna. Isto é um erro mas não causa interferência no funcionamento do sistema. Possíveis motivos:\n" +
+                                            "- Aplicações com bugs\n" +
+                                            "- Tabela de dados vazia\n" +
+                                            "- Problema ao carregar dados\n" +
+                                            "- Impossibilidade de remover a última coluna",
+                                            "- Feche e abra a tela de Banco de Dados\n" +
+                                            "- Tente reiniciar a aplicação");
+
+                Console.WriteLine($"Erro ao remover última coluna: {ex.Message}");
             }
         }
 
         // Evento disparado quando o texto de pesquisa é alterado
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!dadosCarregados && TabelaComboBox.SelectedItem != null)
+            try
             {
-                string? tabelaSelecionada = TabelaComboBox.SelectedItem?.ToString();
-                if (tabelaSelecionada != null)
+                if (!dadosCarregados && TabelaComboBox.SelectedItem != null)
                 {
-                    AtualizarTabelaDadosCache(tabelaSelecionada);
+                    string? tabelaSelecionada = TabelaComboBox.SelectedItem?.ToString();
+                    if (tabelaSelecionada != null)
+                    {
+                        AtualizarTabelaDadosCache(tabelaSelecionada);
+                    }
                 }
-            }
 
-            string searchText = SearchBox.Text.ToLower();
-            var filteredData = dadosFiltrados.Where(item =>
-                item.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Any(prop => prop.GetValue(item)?.ToString()?.ToLower().Contains(searchText) == true)
-            ).ToList();
-            DadosDataGrid.ItemsSource = filteredData;
-            RemoverUltimaColuna();
+                string searchText = SearchBox.Text.ToLower();
+                var filteredData = dadosFiltrados.Where(item =>
+                    item.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Any(prop => prop.GetValue(item)?.ToString()?.ToLower().Contains(searchText) == true)
+                ).ToList();
+                DadosDataGrid.ItemsSource = filteredData;
+                RemoverUltimaColuna();
+            }
+            catch (Exception ex)
+            {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Erro ao filtrar dados. Possíveis motivos:\n" +
+                                            "- Sistema com bugs\n" +
+                                            "- Caracteres inválidos na pesquisa\n" +
+                                            "- Problema ao carregar dados",
+                                            "- Feche e abra a tela de Banco de Dados\n" +
+                                            "- Tente reiniciar a aplicação");
+
+                Console.WriteLine($"Erro ao filtrar dados: {ex.Message}");
+            }
         }
 
         private async Task<List<object>> ObterDadosProdutosDoFirebaseAsync()
@@ -123,97 +181,133 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Erro ao obter dados de Produtos. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet\n" +
+                                            "- Configurações incorretas do banco de dados\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Verifique sua conexão com a internet\n" +
+                                            "- Verifique as configurações do banco de dados\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+
                 MessageBox.Show($"Erro ao obter dados de Produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return produtos;
         }
+
         private async void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            // Busca todos os dados da coleção "Produtos" do Firebase
-            var dadosProdutos = await ObterDadosProdutosDoFirebaseAsync();
-
-            if (dadosProdutos == null || !dadosProdutos.Any())
+            try
             {
-                MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+                // Busca todos os dados da coleção "Produtos" do Firebase
+                var dadosProdutos = await ObterDadosProdutosDoFirebaseAsync();
 
-            // Configura o local para salvar o arquivo
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-                Title = "Salvar dados como Excel",
-                FileName = "radiadoreslemosdb-export.xlsx"
-            };
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                try
+                if (dadosProdutos == null || !dadosProdutos.Any())
                 {
-                    using (var workbook = new XLWorkbook())
+                    AlertaCache.AdicionarAlerta("Aviso",
+                                                "Nenhum dado disponível para exportação.",
+                                                "Verifique se há dados disponíveis para exportação.");
+
+                    MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Configura o local para salvar o arquivo
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                    Title = "Salvar dados como Excel",
+                    FileName = "radiadoreslemosdb-export.xlsx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    try
                     {
-                        foreach (var tabela in DadosCache.Tabelas.Keys)
+                        using (var workbook = new XLWorkbook())
                         {
-                            var dadosTabela = DadosCache.Tabelas[tabela];
-                            var worksheet = workbook.Worksheets.Add(tabela);
-
-                            if (dadosTabela.Any())
+                            foreach (var tabela in DadosCache.Tabelas.Keys)
                             {
-                                // Escrever os cabeçalhos das colunas
-                                var properties = dadosTabela.First().GetType().GetProperties();
-                                for (int i = 0; i < properties.Length; i++)
-                                {
-                                    var cell = worksheet.Cell(1, i + 1);
-                                    cell.Value = properties[i].Name;
-                                    cell.Style.Fill.BackgroundColor = XLColor.UltramarineBlue;
-                                    cell.Style.Font.FontColor = XLColor.White;
-                                    cell.Style.Font.Bold = true;
-                                    cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                                }
+                                var dadosTabela = DadosCache.Tabelas[tabela];
+                                var worksheet = workbook.Worksheets.Add(tabela);
 
-                                // Escrever cada linha de dados
-                                for (int i = 0; i < dadosTabela.Count; i++)
+                                if (dadosTabela.Any())
                                 {
-                                    var item = dadosTabela[i];
-                                    for (int j = 0; j < properties.Length; j++)
+                                    // Escrever os cabeçalhos das colunas
+                                    var properties = dadosTabela.First().GetType().GetProperties();
+                                    for (int i = 0; i < properties.Length; i++)
                                     {
-                                        var cell = worksheet.Cell(i + 2, j + 1);
-                                        cell.Value = properties[j].GetValue(item, null)?.ToString() ?? "";
+                                        var cell = worksheet.Cell(1, i + 1);
+                                        cell.Value = properties[i].Name;
+                                        cell.Style.Fill.BackgroundColor = XLColor.UltramarineBlue;
+                                        cell.Style.Font.FontColor = XLColor.White;
+                                        cell.Style.Font.Bold = true;
                                         cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                    }
 
-                                        // Alternar cor de fundo entre branco e cinza claro
-                                        if (i % 2 == 0)
+                                    // Escrever cada linha de dados
+                                    for (int i = 0; i < dadosTabela.Count; i++)
+                                    {
+                                        var item = dadosTabela[i];
+                                        for (int j = 0; j < properties.Length; j++)
                                         {
-                                            cell.Style.Fill.BackgroundColor = XLColor.White;
-                                        }
-                                        else
-                                        {
-                                            cell.Style.Fill.BackgroundColor = XLColor.Gainsboro;
+                                            var cell = worksheet.Cell(i + 2, j + 1);
+                                            cell.Value = properties[j].GetValue(item, null)?.ToString() ?? "";
+                                            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+                                            // Alternar cor de fundo entre branco e cinza claro
+                                            if (i % 2 == 0)
+                                            {
+                                                cell.Style.Fill.BackgroundColor = XLColor.White;
+                                            }
+                                            else
+                                            {
+                                                cell.Style.Fill.BackgroundColor = XLColor.Gainsboro;
+                                            }
                                         }
                                     }
-                                }
 
-                                // Ajustar a largura das colunas
-                                worksheet.Columns().AdjustToContents();
+                                    // Ajustar a largura das colunas
+                                    worksheet.Columns().AdjustToContents();
+                                }
                             }
+
+                            // Salvar o arquivo Excel
+                            workbook.SaveAs(saveFileDialog.FileName);
                         }
 
-                        // Salvar o arquivo Excel
-                        workbook.SaveAs(saveFileDialog.FileName);
+                        MessageBox.Show("Dados exportados com sucesso como Excel!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
+                    catch (Exception ex)
+                    {
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    $"Erro ao exportar dados. Possíveis motivos:\n" +
+                                                    "- Problemas de conexão com a internet\n" +
+                                                    "- Configurações incorretas do banco de dados\n" +
+                                                    "- Serviço do banco de dados indisponível",
+                                                    "- Verifique sua conexão com a internet\n" +
+                                                    "- Verifique as configurações do banco de dados\n" +
+                                                    "- Tente reconectar ou contate o suporte.");
+                        MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
+                                            "- Função de exportação removida por terceiros \n" +
+                                            "- Tabela de dados vazia ou corrompida",
+                                            "- Verifique se a função de exportação está disponível\n" +
+                                            "- Verifique se há dados disponíveis para exportação.");
 
-                    MessageBox.Show("Dados exportados com sucesso como Excel!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-            // Evento disparado quando o botão de atualizar é clicado
-            private void AtualizarDataGrid_Click(object sender, System.Windows.RoutedEventArgs e)
+        // Evento disparado quando o botão de atualizar é clicado
+        private void AtualizarDataGrid_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
@@ -228,7 +322,15 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                // Log de erro ou exibição de mensagem para o usuário
+                AlertaCache.AdicionarAlerta("Erro",
+                                            $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
+                                            "- Componentes da interface corrompidos\n" +
+                                            "- Erro ao reconhecer a tabela selecionada\n" +
+                                            "- Serviço do banco de dados indisponível",
+                                            "- Feche e abra a tela de Banco de Dados\n" +
+                                            "- Reinicie a aplicação\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+
                 Console.WriteLine($"Erro ao atualizar DataGrid: {ex.Message}");
             }
         }

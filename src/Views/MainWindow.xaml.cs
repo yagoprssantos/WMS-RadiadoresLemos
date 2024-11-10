@@ -34,14 +34,8 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao exibir a janela de login: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                AlertaCache.AdicionarAlerta("Erro",
-                                            "Não foi possível exibir a janela de login. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Configurações incorretas do sistema\n" +
-                                            "- Serviço do sistema indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Verifique as configurações do sistema\n" +
-                                            "- Tente reconectar ou contate o suporte.");
+                // Fecha a aplicação se não for possível exibir a janela de login
+                Application.Current.Shutdown();
             }
         }
 
@@ -113,7 +107,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao atualizar a data e hora: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível atualizar a data e hora. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -139,7 +132,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar o atualizador de data e hora: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível iniciar o atualizador de data e hora. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -162,7 +154,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao abrir a aba de Registro de Entrada e Saída: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível abrir a aba de Registro de Entrada e Saída. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -184,7 +175,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao abrir a aba de Controle de Estoque: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível abrir a aba de Controle de Estoque. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -206,7 +196,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao abrir o Dashboard: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível abrir o Dashboard. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -228,7 +217,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao abrir a aba de Banco de Dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível abrir a aba de Banco de Dados. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -250,7 +238,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao abrir a aba de Usuários: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível abrir a aba de Usuários. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -272,7 +259,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao abrir a aba de Notificações: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível abrir a aba de Notificações. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -348,7 +334,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao atualizar a barra de status: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             "Não foi possível atualizar a barra de status. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet\n" +
@@ -437,6 +422,7 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique sua conexão com a internet\n" +
                                             "- Verifique as configurações do banco de dados\n" +
                                             "- Tente reconectar ou contate o suporte.");
+
                 VerifyConnectionButton.Visibility = Visibility.Visible;
             }
         }
