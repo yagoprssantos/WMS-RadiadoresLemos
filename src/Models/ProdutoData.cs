@@ -23,6 +23,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         public required string Codigo { get; set; }
 
         [FirestoreProperty]
+        public double Preco { get; set; }
+
+        [FirestoreProperty]
         public int Quantidade { get; set; }
 
 

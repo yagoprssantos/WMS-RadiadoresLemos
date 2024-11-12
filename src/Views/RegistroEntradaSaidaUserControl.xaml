@@ -22,6 +22,10 @@
                 <TextBox Name="QuantidadeTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
                          PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting"/>
 
+                <TextBlock Text="Preço por unidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
+                <TextBox Name="PrecoTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
+                         PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting"/>
+
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="20"
                             Width="200" Margin="10" Background="#4CAF50" Foreground="White"/>

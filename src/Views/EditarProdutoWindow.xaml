@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="550" Width="600" FontSize="18"
+        Title="EditarProdutoWindow" Height="600" Width="600" FontSize="18"
         WindowStartupLocation="CenterScreen"
         TextBlock.Foreground="White" >
 
@@ -37,6 +37,11 @@
                 <TextBlock Text="Código do Produto:" Margin="0,0,0,5"
                            Foreground="White"/>
                 <TextBox Name="CodigoProduto" Margin="0,0,0,15" TextChanged="TextBox_TextChanged"/>
+                
+                <!-- Preço -->
+                <TextBlock Text="Preço do Produto:" Margin="0,0,0,5"
+                           Foreground="White"/>
+                <TextBox Name="PrecoProduto" Margin="0,0,0,15" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting" TextChanged="TextBox_TextChanged"/>
 
                 <!-- Quantidade -->
                 <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"

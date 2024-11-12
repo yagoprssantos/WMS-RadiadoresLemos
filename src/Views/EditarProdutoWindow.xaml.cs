@@ -41,6 +41,7 @@ namespace WMS_RadiadoresLemos_WPF
                 TipoProduto.Text = produto.Tipo;
                 MarcaProduto.Text = produto.Marca;
                 CodigoProduto.Text = produto.Codigo;
+                PrecoProduto.Text = produto.Preco.ToString();
                 QuantidadeInicial.Text = produto.Quantidade.ToString();
             }
             catch (Exception ex)
@@ -74,6 +75,7 @@ namespace WMS_RadiadoresLemos_WPF
             produto.Tipo = TipoProduto.Text;
             produto.Marca = MarcaProduto.Text;
             produto.Codigo = CodigoProduto.Text;
+            produto.Preco = double.Parse(PrecoProduto.Text);
             produto.Quantidade = int.Parse(QuantidadeInicial.Text);
         }
 
@@ -121,6 +123,25 @@ namespace WMS_RadiadoresLemos_WPF
         private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             HandlePasting(e, "[^a-zA-Z ]+");
+        }
+
+        private void PrecoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Text == ",")
+            {
+                if (((TextBox)sender).Text.Contains(","))
+                {
+                    e.Handled = true;
+                }
+                return;
+            }
+
+            e.Handled = !IsTextAllowed(e.Text, "[^0-9,]+");
+        }
+
+        private void PrecoProduto_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^0-9,]+");
         }
 
         // Verifica se o texto é permitido com base no padrão fornecido

@@ -122,7 +122,7 @@ namespace WMS_RadiadoresLemos_WPF
 
         // Verifica se o texto é um texto de placeholder
         private static bool IsPlaceholderText(string text) =>
-            text is "Nome do Produto" or "Tipo do Produto" or "Marca do Produto" or "Quantidade";
+            text is "Nome do Produto" or "Tipo do Produto" or "Marca do Produto" or "Preço do Produto" or "Quantidade";
 
         // Retorna o texto de placeholder baseado no nome do TextBox
         private static string GetPlaceholderText(string textBoxName) => textBoxName switch
@@ -130,6 +130,7 @@ namespace WMS_RadiadoresLemos_WPF
             "NomeProduto" => "Nome do Produto",
             "TipoProduto" => "Tipo do Produto",
             "MarcaProduto" => "Marca do Produto",
+            "PrecoProduto" => "Preço do Produto",
             "QuantidadeInicial" => "Quantidade",
             _ => string.Empty
         };
@@ -149,6 +150,14 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para validar a colagem de texto no TextBox de marca do produto
         private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e) =>
             HandlePasting(e, "[^a-zA-Z ]+");
+
+        // Método para validar a entrada de texto no TextBox de preço do produto (incluindo decimais e uma única vírgula)
+        private void PrecoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
+            e.Handled = !IsTextAllowed(e.Text, "[^0-9.,]+");
+
+        // Método para validar a colagem de texto no TextBox de preço do produto (incluindo decimais e uma única vírgula)
+        private void PrecoProduto_Pasting(object sender, DataObjectPastingEventArgs e) =>
+            HandlePasting(e, "[^0-9.,]+");
 
         // Verifica se o texto é permitido baseado no padrão regex
         private static bool IsTextAllowed(string text, string pattern) =>
@@ -178,6 +187,7 @@ namespace WMS_RadiadoresLemos_WPF
             Tipo = TipoProduto.Text.Trim(),
             Marca = MarcaProduto.Text.Trim(),
             Codigo = CodigoProduto.Text.Trim(),
+            Preco = double.Parse(PrecoProduto.Text.Trim()),
             Quantidade = int.Parse(QuantidadeInicial.Text.Trim())
         };
 
@@ -247,6 +257,7 @@ namespace WMS_RadiadoresLemos_WPF
             !string.IsNullOrEmpty(TipoProduto.Text) &&
             !string.IsNullOrEmpty(MarcaProduto.Text) &&
             !string.IsNullOrEmpty(CodigoProduto.Text) &&
+            !string.IsNullOrEmpty(PrecoProduto.Text) &&
             !string.IsNullOrEmpty(QuantidadeInicial.Text);
 
         // Método para limpar os campos de cadastro
@@ -256,6 +267,7 @@ namespace WMS_RadiadoresLemos_WPF
             TipoProduto.Text = string.Empty;
             MarcaProduto.Text = string.Empty;
             CodigoProduto.Text = string.Empty;
+            PrecoProduto.Text = string.Empty;
             QuantidadeInicial.Text = string.Empty;
         }
 

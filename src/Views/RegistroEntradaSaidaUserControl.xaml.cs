@@ -80,6 +80,7 @@ namespace WMS_RadiadoresLemos_WPF
                                     $"Tipo: {produtoSelecionado.Tipo}\n" +
                                     $"Marca: {produtoSelecionado.Marca}\n" +
                                     $"Código: {produtoSelecionado.Codigo}\n" +
+                                    $"Preço: {produtoSelecionado.Preco}\n" +
                                     $"Quantidade: {produtoSelecionado.Quantidade}");
                 }
                 else
@@ -126,6 +127,14 @@ namespace WMS_RadiadoresLemos_WPF
                     if (quantidadeFinal < 0)
                     {
                         quantidadeFinal = 0;
+                    }
+
+                    double preco = produtoSelecionado.Preco;
+
+                    // Garantir que o preço do produto não seja negativo
+                    if (preco < 0)
+                    {
+                        preco = 0;
                     }
 
                     // Diálogo de confirmação
@@ -192,6 +201,34 @@ namespace WMS_RadiadoresLemos_WPF
         private void QuantidadeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             if (e.DataObject.GetDataPresent(typeof(string)) && !int.TryParse((string)e.DataObject.GetData(typeof(string)), out _))
+            {
+                e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+        // Método para validar a entrada de texto na caixa de preço (incluindo decimais e uma única vírgula)
+        private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Text == ",")
+            {
+                if (((TextBox)sender).Text.Contains(","))
+                {
+                    e.Handled = true;
+                }
+                return;
+            }
+
+            e.Handled = !double.TryParse(e.Text, out _);
+        }
+
+        // Método para validar a colagem de texto na caixa de preço
+        private void PrecoTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)) && !double.TryParse((string)e.DataObject.GetData(typeof(string)), out _))
             {
                 e.CancelCommand();
             }

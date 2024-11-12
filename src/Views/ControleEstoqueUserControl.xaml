@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="800"
+             d:DesignHeight="630" d:DesignWidth="800"
              TextBlock.Foreground="White">
 
     <Grid>
@@ -28,6 +28,9 @@
 
                             <TextBlock Text="Código do Produto:" Margin="0,0,0,5" Foreground="White"/>
                             <TextBox Name="CodigoProduto" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Preço do Produto:" Margin="0,0,0,5" Foreground="White"/>
+                            <TextBox Name="PrecoProduto" Margin="0,0,0,15" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting"/>
 
                             <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5" Foreground="White"/>
                             <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting"/>
@@ -66,6 +69,7 @@
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True" Width="*"/>
+                            <DataGridTextColumn Header="Preço" Binding="{Binding Preco}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" IsReadOnly="False" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
