@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -58,6 +59,17 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao preencher campos de usuário. Possíveis motivos:\n" +
+                                            "- O usuário não foi encontrado;\n" +
+                                            "- O usuário não foi passado corretamente para a janela de edição;\n" +
+                                            "- Ocorreu um erro ao preencher os campos da janela de edição.",
+                                            "- Verifique se o usuário foi encontrado no banco de dados;\n" +
+                                            "- Verifique se suas informações estão corretamente preenchidas;\n" +
+                                            "- Verifique conexão com o banco de dados.");
             }
         }
 
@@ -76,6 +88,17 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao salvar usuário: {ex.Message}");
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao salvar usuário. Possíveis motivos:\n" +
+                                            "- O usuário não foi encontrado;\n" +
+                                            "- O usuário não foi passado corretamente para a janela de edição;\n" +
+                                            "- Ocorreu um erro ao salvar os campos da janela de edição.",
+                                            "- Verifique se o usuário foi encontrado no banco de dados;\n" +
+                                            "- Verifique se suas informações estão corretamente preenchidas;\n" +
+                                            "- Verifique conexão com o banco de dados.");
             }
         }
 
@@ -104,6 +127,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao cancelar: {ex.Message}");
+                Close();
             }
         }
 

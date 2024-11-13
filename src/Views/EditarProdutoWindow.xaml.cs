@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -47,6 +48,17 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao preencher campos da janela de edição de produto. Possíveis motivos:\n" +
+                                            "- Dados do produto não encontrados;\n" +
+                                            "- Impossibilidade de acessar os dados do produto;\n" +
+                                            "- Erro ao preencher campos da janela de edição de produto.",
+                                            "- Verifique se os dados do produto estão corretos;\n" +
+                                            "- Verifique se o produto existe no banco de dados;\n" +
+                                            "- Verifique se o banco de dados está acessível.");
             }
         }
 
@@ -65,6 +77,17 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao salvar produto: {ex.Message}");
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao salvar produto. Possíveis motivos:\n" +
+                                            "- Dados do produto não são válidos;\n" +
+                                            "- Produto inexistente no banco de dados;\n" +
+                                            "- Banco de dados inacessível.",
+                                            "- Verifique se os dados do produto estão corretos;\n" +
+                                            "- Verifique se o produto existe no banco de dados;\n" +
+                                            "- Verifique se o banco de dados está acessível.");
             }
         }
 
@@ -91,9 +114,9 @@ namespace WMS_RadiadoresLemos_WPF
                 DialogResult = false;
                 Close();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Erro ao cancelar: {ex.Message}");
+                Close();
             }
         }
 

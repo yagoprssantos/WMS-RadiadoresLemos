@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -57,7 +58,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para tentar o login
-        private void TentarLogin()
+        private async void TentarLogin()
         {
             string username = UsernameField.Text;
             string password = PasswordField.Password;
@@ -68,6 +69,17 @@ namespace WMS_RadiadoresLemos_WPF
                 // Login bem-sucedido
                 DialogResult = true;
                 this.Close();
+
+                // Adiciona log
+                var log = new LogData
+                {
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Usuário {username} fez login",
+                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                };
+                await LogHistorico.RegistrarLogAsync(log);
             }
             else
             {

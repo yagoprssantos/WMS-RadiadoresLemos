@@ -47,8 +47,12 @@
                         <TextBlock Text="Selecione a Tabela:" FontWeight="Bold" Margin="5" VerticalAlignment="Center" Grid.Column="0"
                                    Foreground="White"/>
                         <ComboBox x:Name="TabelaComboBox" Width="Auto" Margin="5" Grid.Column="1" SelectionChanged="TabelaComboBox_SelectionChanged">
-                            <ComboBoxItem Content="Produtos"/>
-                            <ComboBoxItem Content="Usuários"/>
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                    <Setter Property="VerticalContentAlignment" Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
                         </ComboBox>
                     </Grid>
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,10">

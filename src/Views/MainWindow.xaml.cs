@@ -1,11 +1,4 @@
-﻿using Google.Cloud.Firestore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using WMS_RadiadoresLemos_WPF.src.Models;
@@ -27,51 +20,83 @@ namespace WMS_RadiadoresLemos_WPF
         // Exibe a janela de login
         private void ShowLoginWindow()
         {
-            LoginWindow loginWindow = new LoginWindow();
-            bool? result = loginWindow.ShowDialog();
-
-            // Se o login aceitar, exibe a janela principal
-            if (result.HasValue && result.Value)
+            try
             {
-                this.Show();
+                LoginWindow loginWindow = new LoginWindow();
+                bool? result = loginWindow.ShowDialog();
+
+                // Se o login aceitar, exibe a janela principal
+                if (result.HasValue && result.Value)
+                {
+                    this.Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao exibir a janela de login: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Fecha a aplicação se não for possível exibir a janela de login
+                Application.Current.Shutdown();
             }
         }
 
         private async void SetupDatabaseConnection()
         {
-            UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
-
-            // Estabelece a conexão com o banco de dados Firestore
-            DatabaseConnect.SetEnvironmentVarible(); // Certifique-se de que essa função configura corretamente a variável do banco
-
-            if (DatabaseConnect.Database != null)
+            try
             {
+                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
+
+                // Estabelece a conexão com o banco de dados Firestore
+                DatabaseConnect.SetEnvironmentVarible();
+
                 UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
                 VerifyConnectionButton.Visibility = Visibility.Collapsed;
 
                 // Carrega todas as tabelas no cache
                 await CarregarTodasTabelasNoCache();
-
             }
-            else
+            catch (Exception ex)
             {
                 UpdateStatusBar("Erro ao conectar com o banco de dados", Colors.DarkRed);
+                MessageBox.Show($"Erro ao conectar com o banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             "Não foi possível conectar ao banco de dados. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Configurações incorretas do banco de dados\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Verifique as configurações do banco de dados\n" +
+                                            "- Problemas de conexão com a internet;\n" +
+                                            "- Configurações incorretas do banco de dados;\n" +
+                                            "- Serviço do banco de dados indisponível.",
+                                            "- Verifique sua conexão com a internet;\n" +
+                                            "- Verifique as configurações do banco de dados;\n" +
                                             "- Tente reconectar ou contate o suporte.");
+
                 VerifyConnectionButton.Visibility = Visibility.Visible;
             }
         }
 
         private void SetupStatusBar()
         {
-            UpdateDateTime();
-            StartDateTimeUpdater();
+            try
+            {
+                UpdateDateTime();
+                StartDateTimeUpdater();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao configurar a barra de status: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Não foi possível configurar a barra de status. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com a internet;\n" +
+                                            "- Configurações incorretas do sistema;\n" +
+                                            "- Serviço do sistema indisponível.",
+                                            "- Verifique sua conexão com a internet;\n" +
+                                            "- Verifique as configurações do sistema;\n" +
+                                            "- Tente reconectar ou contate o suporte.");
+            }
         }
 
         // Atualiza a barra de status com a data e hora atual
@@ -126,6 +151,7 @@ namespace WMS_RadiadoresLemos_WPF
             ContentArea.Content = null;
             ContentArea.Content = new UsuariosUserControl();
         }
+
         // Função para abrir a aba de Notificações
         private void Notificacoes_Click(object sender, RoutedEventArgs e)
         {
@@ -134,19 +160,48 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Botão de logout para retornar à janela de login
-        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        private async void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            // Exibe uma caixa de diálogo de confirmação
-            MessageBoxResult result = MessageBox.Show("Você tem certeza que deseja sair?", "Confirmar Logout", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            // Se o usuário confirmar, realiza o logout
-            if (result == MessageBoxResult.Yes)
+            try
             {
-                // Oculta a janela principal
-                this.Hide();
+                // Exibe uma caixa de diálogo de confirmação
+                MessageBoxResult result = MessageBox.Show("Você tem certeza que deseja sair?", "Confirmar Logout", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-                // Reabre a janela de login
-                ShowLoginWindow();
+                // Se o usuário confirmar, realiza o logout
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Oculta a janela principal
+                    this.Hide();
+
+                    // Adiciona log
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Usuário 'NomeDoUsuario' realizou logout", // Substitua pelo nome do usuário real
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
+
+                    // Reabre a janela de login
+                    ShowLoginWindow();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao realizar logout: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Não foi possível realizar o logout. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com o sistema;\n" +
+                                            "- Configurações incorretas do sistema;\n" +
+                                            "- Serviço do sistema indisponível.",
+                                            "- Tente novamente;\n" +
+                                            "- Feche a aplicação e abra novamente.");
             }
         }
 
@@ -212,7 +267,6 @@ namespace WMS_RadiadoresLemos_WPF
                             var log = doc.ConvertTo<LogData>();
                             listaObjetos.Add(log);
                         }
-
                         else
                         {
                             // Se a tabela não for reconhecida, retorna uma exceção
@@ -234,14 +288,18 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateStatusBar("Erro ao carregar dados no cache - Verifique a conexão com o banco de dados", Colors.DarkRed);
+
+                // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
                                             $"Não foi possível carregar os dados no cache. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet\n" +
-                                            "- Configurações incorretas do banco de dados\n" +
-                                            "- Serviço do banco de dados indisponível",
-                                            "- Verifique sua conexão com a internet\n" +
-                                            "- Verifique as configurações do banco de dados\n" +
+                                            "- Problemas de conexão com a internet;\n" +
+                                            "- Configurações incorretas do banco de dados;\n" +
+                                            "- Serviço do banco de dados indisponível.",
+                                            "- Verifique sua conexão com a internet;\n" +
+                                            "- Verifique as configurações do banco de dados;\n" +
                                             "- Tente reconectar ou contate o suporte.");
+
                 VerifyConnectionButton.Visibility = Visibility.Visible;
             }
         }

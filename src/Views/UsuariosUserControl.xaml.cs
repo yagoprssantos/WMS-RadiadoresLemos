@@ -66,6 +66,17 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 precisaAtualizarUsuarios = true;
                 MessageBox.Show($"Erro ao carregar usuários do banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message,
+                                            "Erro ao carregar usuários do banco de dados. Possíveis motivos:\n" +
+                                            "- Falha na conexão com o banco de dados.\n" +
+                                            "- Falha na leitura dos dados do banco de dados.\n" +
+                                            "- Falha na conversão dos dados do banco de dados.",
+                                            "- Verifique a conexão com o banco de dados.\n" +
+                                            "- Verifique se os dados estão corretos e acessíveis.\n" +
+                                            "- Verifique se os dados estão no formato correto.");
             }
         }
 
@@ -139,11 +150,33 @@ namespace WMS_RadiadoresLemos_WPF
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Erro ao atualizar usuário no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                        // Adiciona alerta
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    ex.Message,
+                                                    "Erro ao atualizar usuário no banco de dados. Possíveis motivos:\n" +
+                                                    "- Dados inválidos.\n" +
+                                                    "- Falha na conexão com o banco de dados.\n" +
+                                                    "- Falha na escrita dos dados no banco de dados.",
+                                                    "- Verifique se os dados estão no formato correto.\n" +
+                                                    "- Verifique a conexão com o banco de dados.\n" +
+                                                    "- Verifique se os dados estão corretos e acessíveis.");
                     }
 
                     // Atualiza a fonte de dados do DataGrid
                     UsuariosDataGrid.ItemsSource = null;
                     UsuariosDataGrid.ItemsSource = usuarios;
+
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Usuário '{usuarioEditado.Nome}' atualizado.",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
                     MessageBox.Show($"Usuário '{usuarioEditado.Nome}' atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -186,11 +219,33 @@ namespace WMS_RadiadoresLemos_WPF
                     UsuariosDataGrid.ItemsSource = null;
                     UsuariosDataGrid.ItemsSource = usuarios;
 
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "CRITICO",
+                        Nivel = "Usuário",
+                        Detalhes = $"Usuário '{novoUsuario.Nome}' adicionado.",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
+
                     MessageBox.Show("Usuário adicionado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Erro ao adicionar usuário ao banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    // Adiciona alerta
+                    AlertaCache.AdicionarAlerta("Erro",
+                                                ex.Message,
+                                                "Erro ao adicionar usuário ao banco de dados. Possíveis motivos:\n" +
+                                                "- Dados inválidos.\n" +
+                                                "- Falha na conexão com o banco de dados.\n" +
+                                                "- Falha na escrita dos dados no banco de dados.",
+                                                "- Verifique se os dados estão no formato correto.\n" +
+                                                "- Verifique a conexão com o banco de dados.\n" +
+                                                "- Verifique se os dados estão corretos e acessíveis.");
                 }
             }
         }
@@ -221,11 +276,32 @@ namespace WMS_RadiadoresLemos_WPF
                         UsuariosDataGrid.ItemsSource = null;
                         UsuariosDataGrid.ItemsSource = usuarios;
 
+                        // Adiciona log
+                        var log = new LogData
+                        {
+                            Data = DateTime.UtcNow,
+                            Tipo = "CRITICO",
+                            Nivel = "Usuário",
+                            Detalhes = $"Usuário '{usuarioSelecionado.Nome}' deletado.",
+                            Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        };
+                        await LogHistorico.RegistrarLogAsync(log);
+
                         MessageBox.Show("Usuário deletado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Erro ao deletar usuário do banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                        // Adiciona alerta
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    ex.Message,
+                                                    "Erro ao deletar usuário do banco de dados. Possíveis motivos:\n" +
+                                                    "- Sem permissão para deletar usuário.\n" +
+                                                    "- Falha na conexão com o banco de dados.\n" +
+                                                    "- Falha na exclusão dos dados do banco de dados.",
+                                                    "- Verifique a conexão com o banco de dados.\n" +
+                                                    "- Verifique se os dados estão corretos e acessíveis.");
                     }
                 }
             }
