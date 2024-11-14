@@ -46,7 +46,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adicionar alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao carregar produtos do cache. Possíveis motivos:\n" +
                                             "- Falha na conexão com o banco de dados.\n" +
                                             "- Não foi possível carregar os produtos do cache.",
@@ -75,6 +75,27 @@ namespace WMS_RadiadoresLemos_WPF
 
             ProdutoComboBox.IsDropDownOpen = produtosFiltrados.Count > 0;
         }
+
+
+        // Método para confirmar se o produto selecionado é válido
+        private void ProdutoComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string inputText = ProdutoComboBox.Text;
+
+            if (ProdutoComboBox.SelectedItem is string selectedProductName)
+            {
+                inputText = selectedProductName;
+            }
+
+            if (!string.IsNullOrEmpty(inputText) && !produtoNomeParaId.ContainsKey(inputText))
+            {
+                MessageBox.Show("Produto inválido.");
+                ProdutoComboBox.Text = string.Empty;
+                ProdutoComboBox.SelectedItem = null;
+                ProdutoComboBox.Focus();
+            }
+        }
+
 
         // Método que é chamado quando a seleção do ComboBox é alterada
         private void ProdutoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -158,7 +179,10 @@ namespace WMS_RadiadoresLemos_WPF
 
                     if (resultado == MessageBoxResult.Yes)
                     {
+                        // Atualiza a quantidade do produto
                         produtoSelecionado.Quantidade = quantidadeFinal;
+
+                        // Atualiza o produto no banco de dados
                         await AtualizarProdutoNoBanco(produtoSelecionado);
                         MessageBox.Show($"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}, Quantidade - {quantidade}");
 
@@ -188,7 +212,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adicionar alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
                                             "- Produto inválido ou não selecionado.\n" +
                                             "- Quantidade inválida ou insuficiente.\n" +
@@ -218,7 +242,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adicionar alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao atualizar produto no banco de dados. Possíveis motivos:\n" +
                                             "- Falha na conexão com o banco de dados.\n" +
                                             "- Não foi possível atualizar o produto no banco de dados.",
@@ -251,6 +275,21 @@ namespace WMS_RadiadoresLemos_WPF
                 e.CancelCommand();
             }
         }
+        private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (int.TryParse(textBox.Text, out int quantidade))
+                {
+                    textBox.Text = quantidade.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
+                }
+                else
+                {
+                    MessageBox.Show("Quantidade inválida.");
+                    textBox.Clear();
+                }
+            }
+        }
 
         // Método para validar a entrada de texto na caixa de preço (incluindo decimais e uma única vírgula)
         private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -277,6 +316,23 @@ namespace WMS_RadiadoresLemos_WPF
             else
             {
                 e.CancelCommand();
+            }
+        }
+
+        // Método para formatar o texto da caixa de preço ao perder o foco (1.000,00)
+        private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (double.TryParse(textBox.Text, out double preco))
+                {
+                    textBox.Text = preco.ToString("N2", new System.Globalization.CultureInfo("pt-BR"));
+                }
+                else
+                {
+                    MessageBox.Show("Preço inválido.");
+                    textBox.Clear();
+                }
             }
         }
     }

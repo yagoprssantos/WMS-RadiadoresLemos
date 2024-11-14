@@ -26,11 +26,10 @@
                             <TextBlock Text="{Binding ConnectionStatus}"/>
                         </StackPanel>
                     </GroupBox>
-                    <UniformGrid Rows="1" Columns="4" Margin="0,5,0,10" Grid.Row="1">
+                    <UniformGrid Rows="1" Columns="3" Margin="0,5,0,10" Grid.Row="1">
                         <Button Content="Exportar Dados" Margin="5" 
                                 Click="ExportarDados_Click"/>
                         <Button Content="Importar Dados" Margin="5"/>
-                        <Button Content="Backup dos Dados" Margin="5"/>
                         <Button Content="Fazer reconexão" Margin="5"/>
                     </UniformGrid>
                 </Grid>
@@ -72,7 +71,8 @@
                                 Padding="0" Margin="7, 0, 0, 0"
                                 FontSize="33" Grid.Column="2"/>
                     </Grid>
-                    <DataGrid x:Name="DadosDataGrid" AutoGenerateColumns="True" Margin="5" DockPanel.Dock="Bottom"/>
+                    <DataGrid x:Name="DadosDataGrid" AutoGenerateColumns="True" Margin="5" AlternatingRowBackground="Gainsboro" AlternationCount="2"
+                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" IsReadOnly="True" ColumnWidth="*" />
                 </DockPanel>
             </TabItem>
         </TabControl>

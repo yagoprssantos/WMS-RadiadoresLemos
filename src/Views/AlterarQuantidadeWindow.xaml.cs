@@ -22,7 +22,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Não foi possível carregar os dados do produto. Possíveis motivos:\n" +
                                             "- Produto não encontrado;\n" +
                                             "- Dados do produto corrompidos;\n" +
@@ -56,7 +56,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Não foi possível salvar a nova quantidade. Possíveis motivos:\n" +
                                             "- Valor inserido não é numérico;\n" +
                                             "- Valor inserido é negativo;\n" +
@@ -93,7 +93,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao processar a entrada de texto. Possíveis motivos:\n" +
                                             "- Valor inserido não é numérico;\n" +
                                             "- Existem espaços ou caracteres inválidos.\n",

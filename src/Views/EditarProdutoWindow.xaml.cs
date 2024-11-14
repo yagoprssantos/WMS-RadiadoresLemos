@@ -42,8 +42,8 @@ namespace WMS_RadiadoresLemos_WPF
                 TipoProduto.Text = produto.Tipo;
                 MarcaProduto.Text = produto.Marca;
                 CodigoProduto.Text = produto.Codigo;
-                PrecoProduto.Text = produto.Preco.ToString();
-                QuantidadeInicial.Text = produto.Quantidade.ToString();
+                PrecoProduto.Text = produto.Preco.ToString("F2");
+                QuantidadeInicial.Text = produto.Quantidade.ToString("N0");
             }
             catch (Exception ex)
             {
@@ -51,7 +51,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao preencher campos da janela de edição de produto. Possíveis motivos:\n" +
                                             "- Dados do produto não encontrados;\n" +
                                             "- Impossibilidade de acessar os dados do produto;\n" +
@@ -80,7 +80,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao salvar produto. Possíveis motivos:\n" +
                                             "- Dados do produto não são válidos;\n" +
                                             "- Produto inexistente no banco de dados;\n" +

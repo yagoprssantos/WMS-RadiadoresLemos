@@ -13,18 +13,18 @@
                 <TextBlock Text="Registro de Entrada/Saída" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20" TextAlignment="Center"/>
 
                 <TextBlock Text="Produto:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
-                <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" Background="White" Foreground="Black" IsEditable="True" FontSize="18" 
+                <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" Background="White" Foreground="Black" IsEditable="True" FontSize="18" LostFocus="ProdutoComboBox_LostFocus"
                           StaysOpenOnEdit="True" IsTextSearchEnabled="False" TextBoxBase.TextChanged="SearchTextBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged">
                     <!-- Produtos serão carregados do banco de dados -->
                 </ComboBox>
 
                 <TextBlock Text="Quantidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
                 <TextBox Name="QuantidadeTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
-                         PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting"/>
+                         PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
 
                 <TextBlock Text="Preço por unidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
                 <TextBox Name="PrecoTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
-                         PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting"/>
+                         PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="20"

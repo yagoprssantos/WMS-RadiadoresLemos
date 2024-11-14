@@ -63,7 +63,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao preencher filtros de marca e tipo de produto no Controle de Estoque. Possíveis Motivos\n: " +
                                             "- Não foi possível carregar os produtos;\n" +
                                             "- Filtro de marca ou tipo não encontrado.",
@@ -116,8 +116,8 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
-                                            "Erro ao carregar produtos do banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
+                                            ex.Message.ToString(),
+                                            "Erro ao carregar produtos do banco de dados no Controle de Estoque. Possíveis Motivos:\n " +
                                             "- Falha na conexão com o banco de dados;\n" +
                                             "- Falha ao carregar os produtos do banco de dados.",
                                             "- Verifique a conexão com o banco de dados;\n" +
@@ -167,6 +167,23 @@ namespace WMS_RadiadoresLemos_WPF
         private void QuantidadeInicial_Pasting(object sender, DataObjectPastingEventArgs e) =>
             HandlePasting(e, "[^0-9]+");
 
+        // Método para formatar o texto da caixa de quantidade ao perder o foco (1.000)
+        private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (int.TryParse(textBox.Text, out int quantidade))
+                {
+                    textBox.Text = quantidade.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
+                }
+                else
+                {
+                    MessageBox.Show("Quantidade inválida.");
+                    textBox.Clear();
+                }
+            }
+        }
+
         // Método para validar a entrada de texto no TextBox de marca do produto
         private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
             e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
@@ -177,11 +194,28 @@ namespace WMS_RadiadoresLemos_WPF
 
         // Método para validar a entrada de texto no TextBox de preço do produto (incluindo decimais e uma única vírgula)
         private void PrecoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
-            e.Handled = !IsTextAllowed(e.Text, "[^0-9.,]+");
+            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
 
         // Método para validar a colagem de texto no TextBox de preço do produto (incluindo decimais e uma única vírgula)
         private void PrecoProduto_Pasting(object sender, DataObjectPastingEventArgs e) =>
-            HandlePasting(e, "[^0-9.,]+");
+            HandlePasting(e, "[^0-9]+");
+
+        // Método para formatar o texto da caixa de preço ao perder o foco (1.000,00)
+        private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (double.TryParse(textBox.Text, out double preco))
+                {
+                    textBox.Text = preco.ToString("N2", new System.Globalization.CultureInfo("pt-BR"));
+                }
+                else
+                {
+                    MessageBox.Show("Preço inválido.");
+                    textBox.Clear();
+                }
+            }
+        }
 
         // Verifica se o texto é permitido baseado no padrão regex
         private static bool IsTextAllowed(string text, string pattern) =>
@@ -211,8 +245,12 @@ namespace WMS_RadiadoresLemos_WPF
             Tipo = TipoProduto.Text.Trim(),
             Marca = MarcaProduto.Text.Trim(),
             Codigo = CodigoProduto.Text.Trim(),
-            Preco = double.Parse(PrecoProduto.Text.Trim()),
-            Quantidade = int.Parse(QuantidadeInicial.Text.Trim())
+
+            // Remove a formatação do preço (1.000,00 -> 1000.00)
+            Preco = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", ".")),
+
+            // Remove a formatação da quantidade (1.000 -> 1000)
+            Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", ""))
         };
 
         // Método para cadastrar um novo produto no banco de dados
@@ -262,26 +300,25 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método chamado ao clicar no botão de cadastrar produto
-        private void CadastrarProduto_Click(object sender, RoutedEventArgs e)
+        private async void CadastrarProduto_Click(object sender, RoutedEventArgs e)
         {
             if (CamposPreenchidos())
             {
                 if (!precisaAtualizarEstoque)
                 {
+                    // Se a tabela de estoque não precisa ser atualizada, cadastra o produto
                     CadastrarProdutoNoBanco();
                     MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     LimparCamposCadastro();
                 }
                 else
                 {
-                    MessageBox.Show("Não é possível cadastrar o produto. Atualize a tabela de estoque primeiro.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    // Se a tabela de estoque precisa ser atualizada, atualiza a tabela e cadastra o produto
+                    await AtualizarTabelaEstoqueBanco();
 
-                    // Adiciona alerta
-                    AlertaCache.AdicionarAlerta("Aviso",
-                                                "Não é possível cadastrar o produto.",
-                                                "Erro ao cadastrar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
-                                                "- Tabela de estoque não atualizada.",
-                                                "- Atualize a tabela de estoque antes de cadastrar um novo produto.");
+                    CadastrarProdutoNoBanco();
+                    MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LimparCamposCadastro();
                 }
             }
             else
@@ -403,7 +440,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao atualizar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
                                             "- Falha na conexão com o banco de dados;\n" +
                                             "- Falha ao atualizar o produto no banco de dados.",
@@ -451,6 +488,7 @@ namespace WMS_RadiadoresLemos_WPF
         private async void AtualizarDataGrid_Click(object sender, RoutedEventArgs e)
         {
             await AtualizarTabelaEstoqueBanco();
+            LimparCamposCadastro();
             MessageBox.Show("Tabela de estoque atualizada.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -555,7 +593,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao deletar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
                                             "- Falha na conexão com o banco de dados;\n" +
                                             "- Falha ao deletar o produto no banco de dados.",

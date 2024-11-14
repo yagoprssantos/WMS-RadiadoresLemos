@@ -69,7 +69,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao carregar usuários do banco de dados. Possíveis motivos:\n" +
                                             "- Falha na conexão com o banco de dados.\n" +
                                             "- Falha na leitura dos dados do banco de dados.\n" +
@@ -153,7 +153,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Adiciona alerta
                         AlertaCache.AdicionarAlerta("Erro",
-                                                    ex.Message,
+                                                    ex.Message.ToString(),
                                                     "Erro ao atualizar usuário no banco de dados. Possíveis motivos:\n" +
                                                     "- Dados inválidos.\n" +
                                                     "- Falha na conexão com o banco de dados.\n" +
@@ -238,7 +238,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                     // Adiciona alerta
                     AlertaCache.AdicionarAlerta("Erro",
-                                                ex.Message,
+                                                ex.Message.ToString(),
                                                 "Erro ao adicionar usuário ao banco de dados. Possíveis motivos:\n" +
                                                 "- Dados inválidos.\n" +
                                                 "- Falha na conexão com o banco de dados.\n" +
@@ -295,7 +295,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Adiciona alerta
                         AlertaCache.AdicionarAlerta("Erro",
-                                                    ex.Message,
+                                                    ex.Message.ToString(),
                                                     "Erro ao deletar usuário do banco de dados. Possíveis motivos:\n" +
                                                     "- Sem permissão para deletar usuário.\n" +
                                                     "- Falha na conexão com o banco de dados.\n" +

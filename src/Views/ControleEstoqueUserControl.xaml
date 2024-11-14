@@ -11,7 +11,7 @@
         <TabControl>
             <!-- Aba de Cadastrar Produtos -->
             <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ScrollViewer VerticalScrollBarVisibility="Hidden">
                     <Grid Margin="20">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
                             <TextBlock Text="Nome do Produto:" Margin="0,0,0,5" Foreground="White"/>
@@ -30,10 +30,10 @@
                             <TextBox Name="CodigoProduto" Margin="0,0,0,15"/>
 
                             <TextBlock Text="Preço do Produto:" Margin="0,0,0,5" Foreground="White"/>
-                            <TextBox Name="PrecoProduto" Margin="0,0,0,15" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting"/>
+                            <TextBox Name="PrecoProduto" Margin="0,0,0,15" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
 
                             <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5" Foreground="White"/>
-                            <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting"/>
+                            <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
 
                             <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20"/>
                         </StackPanel>
@@ -63,16 +63,19 @@
                         <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" Foreground="White" Margin="7, 0, 0, 0" FontSize="33" Grid.Column="3"/>
                     </Grid>
 
-                    <DataGrid Name="EstoqueDataGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto">
+                    <DataGrid Name="EstoqueDataGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" VerticalScrollBarVisibility="Visible"
+                              Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" AlternatingRowBackground="Gainsboro" AlternationCount="2"
+                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" ColumnWidth="*">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="Preço" Binding="{Binding Preco}" IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" IsReadOnly="False" Width="*"/>
+                            <DataGridTextColumn Header="Preço" Binding="{Binding Preco, StringFormat={}{0:C2}}" IsReadOnly="True" Width="*" />
+                            <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade, StringFormat={}{0:N0}}" IsReadOnly="False" Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>
+
                 </DockPanel>
             </TabItem>
         </TabControl>

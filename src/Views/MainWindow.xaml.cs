@@ -14,6 +14,7 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
             ShowLoginWindow();
             SetupDatabaseConnection();
+            RegistrarEntradaLog();
             SetupStatusBar();
         }
 
@@ -30,6 +31,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     this.Show();
                 }
+
             }
             catch (Exception ex)
             {
@@ -37,6 +39,38 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Fecha a aplicação se não for possível exibir a janela de login
                 Application.Current.Shutdown();
+            }
+        }
+
+        // Registra a entrada do usuário no log
+        private async void RegistrarEntradaLog()
+        {
+            try
+            {
+                // Adiciona log
+                var log = new LogData
+                {
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Usuário 'NomeDoUsuario' realizou login", // Substitua pelo nome do usuário real
+                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                };
+                await LogHistorico.RegistrarLogAsync(log);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar a entrada do usuário no log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            "Não foi possível registrar a entrada do usuário no log. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com o sistema;\n" +
+                                            "- Configurações incorretas do sistema;\n" +
+                                            "- Serviço do sistema indisponível.",
+                                            "- Tente novamente;\n" +
+                                            "- Feche a aplicação e abra novamente.");
             }
         }
 
@@ -62,7 +96,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Não foi possível conectar ao banco de dados. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet;\n" +
                                             "- Configurações incorretas do banco de dados;\n" +
@@ -88,7 +122,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Não foi possível configurar a barra de status. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet;\n" +
                                             "- Configurações incorretas do sistema;\n" +
@@ -195,7 +229,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Não foi possível realizar o logout. Possíveis motivos:\n" +
                                             "- Problemas de conexão com o sistema;\n" +
                                             "- Configurações incorretas do sistema;\n" +
@@ -291,7 +325,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             $"Não foi possível carregar os dados no cache. Possíveis motivos:\n" +
                                             "- Problemas de conexão com a internet;\n" +
                                             "- Configurações incorretas do banco de dados;\n" +

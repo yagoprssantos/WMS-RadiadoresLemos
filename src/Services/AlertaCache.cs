@@ -13,7 +13,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             { "Aviso", new List<AlertaData>() }
         };
 
-        public static void AdicionarAlerta(string tipo, string mensagem, string sysmsg, string acoes)
+        public static void AdicionarAlerta(string tipo, string sysmsg, string mensagem, string acoes)
         {
             if (Alertas.ContainsKey(tipo))
             {
@@ -21,7 +21,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 {
                     Data = DateTime.Now.ToString("dd/MM/yyyy"),
                     Tipo = tipo,
-                    MensagemdoSistema = sysmsg,
+                    Sistema = sysmsg,
                     Detalhes = mensagem,
                     Acoes = acoes // Pode ser preenchido conforme necessário
                 });

@@ -8,6 +8,8 @@ namespace WMS_RadiadoresLemos_WPF
 {
     public partial class LoginWindow : Window
     {
+        public string Username { get; private set; }
+
         public LoginWindow()
         {
             InitializeComponent();
@@ -58,7 +60,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para tentar o login
-        private async void TentarLogin()
+        private void TentarLogin()
         {
             string username = UsernameField.Text;
             string password = PasswordField.Password;
@@ -67,19 +69,9 @@ namespace WMS_RadiadoresLemos_WPF
             if (username == "admin" && password == "admin")
             {
                 // Login bem-sucedido
+                Username = username;
                 DialogResult = true;
                 this.Close();
-
-                // Adiciona log
-                var log = new LogData
-                {
-                    Data = DateTime.UtcNow,
-                    Tipo = "OPERACIONAL",
-                    Nivel = "Usuário",
-                    Detalhes = $"Usuário {username} fez login",
-                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
-                };
-                await LogHistorico.RegistrarLogAsync(log);
             }
             else
             {

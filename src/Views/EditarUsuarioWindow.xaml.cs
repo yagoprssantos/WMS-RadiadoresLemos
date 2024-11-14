@@ -62,7 +62,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao preencher campos de usuário. Possíveis motivos:\n" +
                                             "- O usuário não foi encontrado;\n" +
                                             "- O usuário não foi passado corretamente para a janela de edição;\n" +
@@ -91,7 +91,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message,
+                                            ex.Message.ToString(),
                                             "Erro ao salvar usuário. Possíveis motivos:\n" +
                                             "- O usuário não foi encontrado;\n" +
                                             "- O usuário não foi passado corretamente para a janela de edição;\n" +
