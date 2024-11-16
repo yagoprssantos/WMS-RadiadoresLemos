@@ -7,7 +7,7 @@
              d:DesignHeight="550" d:DesignWidth="800"
              TextBlock.Foreground="White">
 
-    <Grid Margin="20">
+    <Grid Margin="10">
         <Border CornerRadius="10" Padding="30" Margin="50" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxWidth="1000">
             <StackPanel Width="Auto" VerticalAlignment="Stretch">
                 <TextBlock Text="Registro de Entrada/Saída" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20" TextAlignment="Center"/>
