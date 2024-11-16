@@ -8,39 +8,56 @@ namespace WMS_RadiadoresLemos_WPF
 {
     public partial class MainWindow : Window
     {
+        private bool isLogoutInitiated = false;
+
         public MainWindow()
         {
             // Inicia processo de login
             InitializeComponent();
-            ShowLoginWindow();
             SetupDatabaseConnection();
             RegistrarEntradaLog();
             SetupStatusBar();
+
+            this.Closing += Window_Closing;
         }
 
-        // Exibe a janela de login
-        private void ShowLoginWindow()
+
+        // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
+        // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
+        private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            // Verifica se o logout foi iniciado pelo botão
+            if (isLogoutInitiated) return;
+
             try
             {
-                LoginWindow loginWindow = new LoginWindow();
-                bool? result = loginWindow.ShowDialog();
-
-                // Se o login aceitar, exibe a janela principal
-                if (result.HasValue && result.Value)
+                // Adiciona log
+                var log = new LogData
                 {
-                    this.Show();
-                }
-
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Usuário 'NomeDoUsuario' realizou logout", // Substitua pelo nome do usuário real
+                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                };
+                await LogHistorico.RegistrarLogAsync(log);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao exibir a janela de login: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao registrar a saída do usuário no log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                // Fecha a aplicação se não for possível exibir a janela de login
-                Application.Current.Shutdown();
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            "Não foi possível registrar a saída do usuário no log. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com o sistema;\n" +
+                                            "- Configurações incorretas do sistema;\n" +
+                                            "- Serviço do sistema indisponível.",
+                                            "- Tente novamente;\n" +
+                                            "- Feche a aplicação e abra novamente.");
             }
         }
+
 
         // Registra a entrada do usuário no log
         private async void RegistrarEntradaLog()
@@ -204,10 +221,12 @@ namespace WMS_RadiadoresLemos_WPF
                 // Se o usuário confirmar, realiza o logout
                 if (result == MessageBoxResult.Yes)
                 {
+                    // Define a variável de controle como true
+                    isLogoutInitiated = true;
+
                     // Oculta a janela principal
                     this.Hide();
 
-                    // Adiciona log
                     // Adiciona log
                     var log = new LogData
                     {
@@ -220,7 +239,11 @@ namespace WMS_RadiadoresLemos_WPF
                     await LogHistorico.RegistrarLogAsync(log);
 
                     // Reabre a janela de login
-                    ShowLoginWindow();
+                    LoginWindow loginWindow = new LoginWindow();
+                    loginWindow.Show();
+
+                    // Fecha a janela principal
+                    this.Close();
                 }
             }
             catch (Exception ex)
@@ -238,6 +261,8 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Feche a aplicação e abra novamente.");
             }
         }
+
+
 
         // Verifica a conexão com o banco de dados e tenta reconectar
         private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
