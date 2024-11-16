@@ -7,6 +7,7 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 namespace WMS_RadiadoresLemos_WPF
 {
     public partial class LoginWindow : Window
+
     {
         public string Username { get; private set; }
 
@@ -29,18 +30,6 @@ namespace WMS_RadiadoresLemos_WPF
             Application.Current.Shutdown();
         }
 
-        // Definir condição de fechamento
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-
-            // Fechar a aplicação se a janela de login for fechada sem sucesso no login
-            if (DialogResult != true)
-            {
-                Application.Current.Shutdown();
-            }
-        }
-
         // Manipulador de eventos para a tecla "Enter" no campo de usuário
         private void UsernameField_KeyDown(object sender, KeyEventArgs e)
         {
@@ -59,7 +48,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Método para tentar o login
         private void TentarLogin()
         {
             string username = UsernameField.Text;
@@ -70,7 +58,13 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 // Login bem-sucedido
                 Username = username;
-                DialogResult = true;
+                this.Hide();
+
+                // Inicia a janela principal
+                MainWindow mainWindow = new MainWindow();
+                mainWindow.Show();
+
+                // Fecha o login
                 this.Close();
             }
             else
