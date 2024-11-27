@@ -29,7 +29,8 @@
                     <UniformGrid Rows="1" Columns="3" Margin="0,5,0,10" Grid.Row="1">
                         <Button Content="Exportar Dados" Margin="5" 
                                 Click="ExportarDados_Click"/>
-                        <Button Content="Importar Dados" Margin="5"/>
+                        <Button Content="Importar Dados" Margin="5"
+                                Click="ImportarDados_Click"/>
                         <Button Content="Fazer reconexão" Margin="5"/>
                     </UniformGrid>
                 </Grid>
@@ -83,5 +84,15 @@
                 </DockPanel>
             </TabItem>
         </TabControl>
+        <!-- Barra de Progresso -->
+        <Grid Name="ShowProgressBar" Background="#80000000" Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="White" Height="Auto" Width="600">
+                <TextBlock Text="Processando..." FontWeight="Bold" FontSize="20" Margin="0, 20, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ProgressBar x:Name="ProgressBar" Height="20" Width="500" Margin="0, 0, 0, 30"
+                     VerticalAlignment="Center" HorizontalAlignment="Center" 
+                     Minimum="0" Maximum="100" Value="{Binding ProgressValue}"/>
+            </StackPanel>
+        </Grid>
+
     </Grid>
 </UserControl>

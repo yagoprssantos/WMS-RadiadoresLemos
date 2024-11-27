@@ -283,9 +283,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                var db = DatabaseConnect.Database;
-                if (db == null) throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
-
+                var db = DatabaseConnect.Database ?? throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
                 UpdateStatusBar("Carregando dados no cache...", Colors.DarkOrange);
 
                 // Lista de tabelas a serem carregadas no cache

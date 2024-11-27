@@ -17,6 +17,15 @@ namespace WMS_RadiadoresLemos_WPF
         private List<object> dadosFiltrados = new List<object>();
         private bool dadosCarregados = false;
 
+        public static readonly DependencyProperty ProgressValueProperty =
+            DependencyProperty.Register("ProgressValue", typeof(double), typeof(BancoDadosUserControl), new PropertyMetadata(0.0));
+
+        public double ProgressValue
+        {
+            get { return (double)GetValue(ProgressValueProperty); }
+            set { SetValue(ProgressValueProperty, value); }
+        }
+
         public BancoDadosUserControl()
         {
             InitializeComponent();
@@ -202,16 +211,22 @@ namespace WMS_RadiadoresLemos_WPF
             return produtos;
         }
 
+        // TODO: Criar tela de loading
         private async void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
+                // Exibir a ProgressBar
+                ProgressBar.Visibility = Visibility.Visible;
+                ProgressValue = 0;
+
                 // Busca todos os dados da coleção "Produtos" do Firebase
                 var dadosProdutos = await ObterDadosProdutosDoFirebaseAsync();
 
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
                     MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ProgressBar.Visibility = Visibility.Collapsed;
                     return;
                 }
 
@@ -229,6 +244,9 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         using (var workbook = new XLWorkbook())
                         {
+                            int totalTabelas = DadosCache.Tabelas.Keys.Count;
+                            int tabelaAtual = 0;
+
                             foreach (var tabela in DadosCache.Tabelas.Keys)
                             {
                                 var dadosTabela = DadosCache.Tabelas[tabela];
@@ -273,6 +291,10 @@ namespace WMS_RadiadoresLemos_WPF
                                     // Ajustar a largura das colunas
                                     worksheet.Columns().AdjustToContents();
                                 }
+
+                                // Atualizar o progresso
+                                tabelaAtual++;
+                                ProgressValue = (double)tabelaAtual / totalTabelas * 100;
                             }
 
                             // Salvar o arquivo Excel
@@ -306,6 +328,9 @@ namespace WMS_RadiadoresLemos_WPF
                         MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
+
+                // Ocultar a ProgressBar
+                ProgressBar.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
@@ -318,6 +343,7 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique se há dados disponíveis para exportação.");
 
                 MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                ProgressBar.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -347,6 +373,213 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Reinicie a aplicação.");
 
                 Console.WriteLine($"Erro ao atualizar DataGrid: {ex.Message}");
+            }
+        }
+
+        // TODO: Criar tela de loading
+        private async void ImportarDados_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                Title = "Importar dados do Excel"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName;
+
+                // Perguntar ao usuário se deseja substituir todos os dados ou adicionar novos dados
+                var result = MessageBox.Show("Deseja substituir todos os dados existentes?", "Importar Dados", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    await SubstituirTodosOsDadosAsync(filePath);
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    await AdicionarNovosDadosAsync(filePath);
+                }
+            }
+        }
+
+        private async Task SubstituirTodosOsDadosAsync(string filePath)
+        {
+            var db = DatabaseConnect.Database;
+
+            try
+            {
+                ShowProgressBar.Visibility = Visibility.Visible;
+                ProgressValue = 0;
+
+                var data = new List<Dictionary<string, object>>();
+                using (var workbook = new XLWorkbook(filePath))
+                {
+                    var worksheet = workbook.Worksheet("Produtos");
+                    if (worksheet == null)
+                    {
+                        MessageBox.Show("A planilha 'Produtos' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var firstRow = worksheet.FirstRowUsed();
+                    if (firstRow != null)
+                    {
+                        var headers = firstRow.Cells().Select(cell => cell.GetValue<string>()).ToList();
+
+                        if (!headers.Contains("Codigo"))
+                        {
+                            MessageBox.Show("A planilha não contém a coluna 'Codigo'.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+
+                        foreach (var row in worksheet.RowsUsed().Skip(1))
+                        {
+                            var rowData = new Dictionary<string, object>();
+                            for (int i = 0; i < headers.Count; i++)
+                            {
+                                var cellValue = row.Cell(i + 1).GetValue<string>();
+                                if (double.TryParse(cellValue, out double numericValue))
+                                {
+                                    rowData[headers[i]] = numericValue;
+                                }
+                                else
+                                {
+                                    rowData[headers[i]] = cellValue;
+                                }
+                            }
+                            data.Add(rowData);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("A planilha está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                var produtosRef = db.Collection("Produtos");
+                var snapshot = await produtosRef.GetSnapshotAsync();
+
+                foreach (var doc in snapshot.Documents)
+                {
+                    await doc.Reference.DeleteAsync();
+                }
+
+                int totalItems = data.Count;
+                int processedItems = 0;
+
+                foreach (var item in data)
+                {
+                    if (item.ContainsKey("Codigo") && item["Codigo"] != null)
+                    {
+                        string? codigo = item["Codigo"]?.ToString();
+                        if (!string.IsNullOrEmpty(codigo))
+                        {
+                            var docRef = db.Collection("Produtos").Document(codigo);
+                            await docRef.SetAsync(item);
+                        }
+                    }
+
+                    processedItems++;
+                    ProgressValue = (double)processedItems / totalItems * 100;
+                }
+
+                MessageBox.Show("Todos os dados foram substituídos com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao substituir dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async Task AdicionarNovosDadosAsync(string filePath)
+        {
+            var db = DatabaseConnect.Database;
+
+            try
+            {
+                ShowProgressBar.Visibility = Visibility.Visible;
+                ProgressValue = 0;
+
+                var data = new List<Dictionary<string, object>>();
+                using (var workbook = new XLWorkbook(filePath))
+                {
+                    var worksheet = workbook.Worksheet("Produtos");
+                    if (worksheet == null)
+                    {
+                        MessageBox.Show("A planilha 'Produtos' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var firstRow = worksheet.FirstRowUsed();
+                    if (firstRow != null)
+                    {
+                        var headers = firstRow.Cells().Select(cell => cell.GetValue<string>()).ToList();
+
+                        if (!headers.Contains("Codigo"))
+                        {
+                            MessageBox.Show("A planilha não contém a coluna 'Codigo'.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+
+                        foreach (var row in worksheet.RowsUsed().Skip(1))
+                        {
+                            var rowData = new Dictionary<string, object>();
+                            for (int i = 0; i < headers.Count; i++)
+                            {
+                                var cellValue = row.Cell(i + 1).GetValue<string>();
+                                if (double.TryParse(cellValue, out double numericValue))
+                                {
+                                    rowData[headers[i]] = numericValue;
+                                }
+                                else
+                                {
+                                    rowData[headers[i]] = cellValue;
+                                }
+                            }
+                            data.Add(rowData);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("A planilha está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                int totalItems = data.Count;
+                int processedItems = 0;
+
+                foreach (var item in data)
+                {
+                    if (item.ContainsKey("Codigo") && item["Codigo"] != null)
+                    {
+                        string? codigo = item["Codigo"]?.ToString();
+                        if (!string.IsNullOrEmpty(codigo))
+                        {
+                            var docRef = db.Collection("Produtos").Document(codigo);
+                            await docRef.SetAsync(item);
+                        }
+                    }
+
+                    processedItems++;
+                    ProgressValue = (double)processedItems / totalItems * 100;
+                }
+
+                MessageBox.Show("Novos dados foram adicionados com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao adicionar novos dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowProgressBar.Visibility = Visibility.Collapsed;
             }
         }
     }
