@@ -14,7 +14,7 @@
             <TextBox FontSize="16" Height="35" x:Name="EmailTextBox" TextChanged="TextBox_TextChanged" />
 
             <TextBlock Text="Matrícula:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
-            <TextBox FontSize="16" Height="35" x:Name="MatriculaTextBox" TextChanged="TextBox_TextChanged" PreviewTextInput="MatriculaTextBox_PreviewTextInput" />
+            <TextBox FontSize="16" Height="35" x:Name="MatriculaTextBox" IsReadOnly="True" />
 
             <TextBlock Text="Senha:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
             <PasswordBox FontSize="16" Height="35" x:Name="SenhaPasswordBox" PasswordChanged="SenhaPasswordBox_PasswordChanged" />

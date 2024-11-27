@@ -29,9 +29,9 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     Nome = string.Empty,
                     Email = string.Empty,
-                    Matrícula = string.Empty,
+                    Matrícula = GerarMatricula("Usuário"), // Gera a matrícula com base no cargo
                     Senha = string.Empty,
-                    Cargo = string.Empty
+                    Cargo = "Usuário"
                 };
             }
             else
@@ -41,6 +41,7 @@ namespace WMS_RadiadoresLemos_WPF
 
             PreencherCampos();
         }
+
 
         // Preenche os campos da interface com os dados do usuário
         private void PreencherCampos()
@@ -138,17 +139,6 @@ namespace WMS_RadiadoresLemos_WPF
             return result == MessageBoxResult.No;
         }
 
-        // Restrições de entrada de texto nos TextBoxes
-        private void MatriculaTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
-        }
-
-        private void MatriculaTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^0-9]+");
-        }
-
         private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
@@ -188,6 +178,7 @@ namespace WMS_RadiadoresLemos_WPF
             if (PermissaoComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
             {
                 usuario.Cargo = selectedItem.Content.ToString() ?? string.Empty;
+                usuario.Matrícula = GerarMatricula(usuario.Cargo); // Atualiza a matrícula com base no novo cargo
                 isModified = true;
             }
         }
@@ -214,11 +205,6 @@ namespace WMS_RadiadoresLemos_WPF
             if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
             {
                 MessageBox.Show("O campo Email deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(MatriculaTextBox.Text))
-            {
-                MessageBox.Show("O campo Matrícula deve ser preenchido.");
                 return false;
             }
             if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
@@ -249,7 +235,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             return usuario.Nome != NomeTextBox.Text ||
                    usuario.Email != EmailTextBox.Text ||
-                   usuario.Matrícula != MatriculaTextBox.Text ||
                    usuario.Senha != SenhaPasswordBox.Password ||
                    usuario.Cargo != ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString();
         }
@@ -262,6 +247,23 @@ namespace WMS_RadiadoresLemos_WPF
                 e.Cancel = true;
             }
             base.OnClosing(e);
+        }
+
+        // Método para gerar a matrícula do usuário com base no cargo
+        private string GerarMatricula(string cargo)
+        {
+            string prefixo = cargo switch
+            {
+                "Administrador" => "ADM",
+                "Usuário" => "USR",
+                "Convidado" => "CVD",
+                _ => "UNK"
+            };
+
+            string ano = DateTime.Now.Year.ToString().Substring(2, 2);
+            string numeroContado = new Random().Next(1000, 9999).ToString();
+
+            return $"{prefixo}{ano}{numeroContado}";
         }
     }
 }
