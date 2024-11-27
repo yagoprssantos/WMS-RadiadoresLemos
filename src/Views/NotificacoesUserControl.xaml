@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="550" d:DesignWidth="800">
 
-    <Grid Margin="10">
+    <Grid>
         <TabControl>
             <!-- Aba de Alerta -->
             <TabItem Header="Alertas" FontSize="18">
@@ -21,6 +21,7 @@
                               SelectionUnit="FullRow"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
+                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               Margin="0, 40, 0, 0">
                         <DataGrid.Columns>

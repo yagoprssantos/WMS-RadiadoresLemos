@@ -117,7 +117,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (isModified && ConfirmarSaidaSemSalvar())
+                if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
                 {
                     return;
                 }
@@ -242,6 +242,26 @@ namespace WMS_RadiadoresLemos_WPF
                     return item;
             }
             return new ComboBoxItem { Content = string.Empty };
+        }
+
+        // Método para verificar se houve modificações nos campos
+        private bool VerificarModificacoes()
+        {
+            return usuario.Nome != NomeTextBox.Text ||
+                   usuario.Email != EmailTextBox.Text ||
+                   usuario.Matrícula != MatriculaTextBox.Text ||
+                   usuario.Senha != SenhaPasswordBox.Password ||
+                   usuario.Cargo != ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString();
+        }
+
+        // Evento disparado ao tentar fechar a janela
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+            {
+                e.Cancel = true;
+            }
+            base.OnClosing(e);
         }
     }
 }
