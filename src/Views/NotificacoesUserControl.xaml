@@ -11,7 +11,6 @@
             <!-- Aba de Alerta -->
             <TabItem Header="Alertas" FontSize="18">
                 <Grid Margin="10">
-                    <TextBlock Text="Notificações de Alerta" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 20"/>
                     <DataGrid Name="AlertaDataGrid"
                               AutoGenerateColumns="False"
                               AlternatingRowBackground="Gainsboro" AlternationCount="2"
@@ -23,7 +22,7 @@
                               VerticalAlignment="Stretch"
                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              Margin="0, 40, 0, 0">
+                              Margin="10">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" MinWidth="70"/>
@@ -56,7 +55,6 @@
             <!-- Aba de Histórico -->
             <TabItem Header="Histórico" FontSize="18">
                 <Grid Margin="10">
-                    <TextBlock Text="Histórico do Estoque" FontSize="24" Foreground="White" HorizontalAlignment="Center" Margin="0, 0, 0, 20"/>
                     <DataGrid Name="HistoricoDataGrid"
                               AutoGenerateColumns="False"
                               AlternatingRowBackground="Gainsboro" AlternationCount="2"
@@ -67,7 +65,7 @@
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              Margin="0, 40, 0, 0">
+                              Margin="10">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />

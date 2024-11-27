@@ -100,6 +100,8 @@ namespace WMS_RadiadoresLemos_WPF
             produto.Codigo = CodigoProduto.Text;
             produto.Preco = double.Parse(PrecoProduto.Text);
             produto.Quantidade = int.Parse(QuantidadeInicial.Text);
+            
+            isModified = false;
         }
 
         // Evento disparado ao clicar no botão de cancelar
