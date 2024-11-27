@@ -8,10 +8,12 @@
         Title="Alterar Quantidade" Height="250" Width="300"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
