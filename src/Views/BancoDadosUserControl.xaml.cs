@@ -9,6 +9,8 @@ using System.IO;
 using System.Windows;
 using Google.Cloud.Firestore;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -17,18 +19,10 @@ namespace WMS_RadiadoresLemos_WPF
         private List<object> dadosFiltrados = new List<object>();
         private bool dadosCarregados = false;
 
-        public static readonly DependencyProperty ProgressValueProperty =
-            DependencyProperty.Register("ProgressValue", typeof(double), typeof(BancoDadosUserControl), new PropertyMetadata(0.0));
-
-        public double ProgressValue
-        {
-            get { return (double)GetValue(ProgressValueProperty); }
-            set { SetValue(ProgressValueProperty, value); }
-        }
-
         public BancoDadosUserControl()
         {
             InitializeComponent();
+            DataContext = this;
             CarregarTabelas();
         }
 
@@ -196,6 +190,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Erro ao obter dados de Produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao obter dados de Produtos. Possíveis motivos:\n" +
@@ -204,33 +199,36 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Serviço do banco de dados indisponível.",
                                             "- Verifique sua conexão com a internet;\n" +
                                             "- Verifique as configurações do banco de dados.");
-
-                MessageBox.Show($"Erro ao obter dados de Produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return produtos;
         }
 
-        // TODO: Criar tela de loading
+        // Evento disparado quando o botão de exportar é clicado
         private async void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
-                // Exibir a ProgressBar
-                ProgressBar.Visibility = Visibility.Visible;
-                ProgressValue = 0;
+                ShowProgressBar.Visibility = Visibility.Visible;
+                ProgressBar.Value = 0;
 
-                // Busca todos os dados da coleção "Produtos" do Firebase
                 var dadosProdutos = await ObterDadosProdutosDoFirebaseAsync();
 
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
                     MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    ProgressBar.Visibility = Visibility.Collapsed;
+                    AlertaCache.AdicionarAlerta("Erro",
+                                                "Nenhum dado disponível para exportação.",
+                                                $"Erro ao exportar dados. Possíveis motivos:\n" +
+                                                "- Dados não encontrados;\n" +
+                                                "- Dados corrompidos;\n" +
+                                                "- Erro ao acessar os dados.",
+                                                "- Verifique se há dados disponíveis para exportação.");
+
+                    ShowProgressBar.Visibility = Visibility.Collapsed;
                     return;
                 }
 
-                // Configura o local para salvar o arquivo
                 SaveFileDialog saveFileDialog = new SaveFileDialog
                 {
                     Filter = "Excel Workbook (*.xlsx)|*.xlsx",
@@ -242,73 +240,73 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     try
                     {
-                        using (var workbook = new XLWorkbook())
+                        await Task.Run(() =>
                         {
-                            int totalTabelas = DadosCache.Tabelas.Keys.Count;
-                            int tabelaAtual = 0;
-
-                            foreach (var tabela in DadosCache.Tabelas.Keys)
+                            using (var workbook = new XLWorkbook())
                             {
-                                var dadosTabela = DadosCache.Tabelas[tabela];
-                                var worksheet = workbook.Worksheets.Add(tabela);
+                                int totalTabelas = DadosCache.Tabelas.Keys.Count;
+                                int tabelaAtual = 0;
 
-                                if (dadosTabela.Any())
+                                foreach (var tabela in DadosCache.Tabelas.Keys)
                                 {
-                                    // Escrever os cabeçalhos das colunas
-                                    var properties = dadosTabela.First().GetType().GetProperties();
-                                    for (int i = 0; i < properties.Length; i++)
-                                    {
-                                        var cell = worksheet.Cell(1, i + 1);
-                                        cell.Value = properties[i].Name;
-                                        cell.Style.Fill.BackgroundColor = XLColor.UltramarineBlue;
-                                        cell.Style.Font.FontColor = XLColor.White;
-                                        cell.Style.Font.Bold = true;
-                                        cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                                    }
+                                    var dadosTabela = DadosCache.Tabelas[tabela];
+                                    var worksheet = workbook.Worksheets.Add(tabela);
 
-                                    // Escrever cada linha de dados
-                                    for (int i = 0; i < dadosTabela.Count; i++)
+                                    if (dadosTabela.Any())
                                     {
-                                        var item = dadosTabela[i];
-                                        for (int j = 0; j < properties.Length; j++)
+                                        var properties = dadosTabela.First().GetType().GetProperties();
+                                        for (int i = 0; i < properties.Length; i++)
                                         {
-                                            var cell = worksheet.Cell(i + 2, j + 1);
-                                            cell.Value = properties[j].GetValue(item, null)?.ToString() ?? "";
+                                            var cell = worksheet.Cell(1, i + 1);
+                                            cell.Value = properties[i].Name;
+                                            cell.Style.Fill.BackgroundColor = XLColor.UltramarineBlue;
+                                            cell.Style.Font.FontColor = XLColor.White;
+                                            cell.Style.Font.Bold = true;
                                             cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                        }
 
-                                            // Alternar cor de fundo entre branco e cinza claro
-                                            if (i % 2 == 0)
+                                        for (int i = 0; i < dadosTabela.Count; i++)
+                                        {
+                                            var item = dadosTabela[i];
+                                            for (int j = 0; j < properties.Length; j++)
                                             {
-                                                cell.Style.Fill.BackgroundColor = XLColor.White;
-                                            }
-                                            else
-                                            {
-                                                cell.Style.Fill.BackgroundColor = XLColor.Gainsboro;
+                                                var cell = worksheet.Cell(i + 2, j + 1);
+                                                cell.Value = properties[j].GetValue(item, null)?.ToString() ?? "";
+                                                cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+                                                if (i % 2 == 0)
+                                                {
+                                                    cell.Style.Fill.BackgroundColor = XLColor.White;
+                                                }
+                                                else
+                                                {
+                                                    cell.Style.Fill.BackgroundColor = XLColor.Gainsboro;
+                                                }
                                             }
                                         }
+
+                                        worksheet.Columns().AdjustToContents();
                                     }
 
-                                    // Ajustar a largura das colunas
-                                    worksheet.Columns().AdjustToContents();
+                                    tabelaAtual++;
+                                    Dispatcher.Invoke(() =>
+                                    {
+                                        ProgressBar.Value = (double)tabelaAtual / totalTabelas * 100;
+                                        ProgressBarMessage.Text = $"Exportando dados da tabela {tabelaAtual} de {totalTabelas}...";
+                                    });
                                 }
 
-                                // Atualizar o progresso
-                                tabelaAtual++;
-                                ProgressValue = (double)tabelaAtual / totalTabelas * 100;
+                                workbook.SaveAs(saveFileDialog.FileName);
                             }
+                        });
 
-                            // Salvar o arquivo Excel
-                            workbook.SaveAs(saveFileDialog.FileName);
-                        }
-
-                        // Adiciona log
                         var log = new LogData
                         {
                             Data = DateTime.UtcNow,
                             Tipo = "INFORMATIVO",
                             Nivel = "Usuário",
                             Detalhes = "Exportação de Dados",
-                            Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                            Usuario = "NomeDoUsuario"
                         };
                         await LogHistorico.RegistrarLogAsync(log);
 
@@ -316,6 +314,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                     catch (Exception ex)
                     {
+                        MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         AlertaCache.AdicionarAlerta("Erro",
                                                     ex.Message.ToString(),
                                                     $"Erro ao exportar dados. Possíveis motivos:\n" +
@@ -324,16 +323,14 @@ namespace WMS_RadiadoresLemos_WPF
                                                     "- Erro ao acessar os dados.",
                                                     "- Verifique se o arquivo realmente foi salvo;\n" +
                                                     "- Verifique se os dados estão corretos.");
-
-                        MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
 
-                // Ocultar a ProgressBar
-                ProgressBar.Visibility = Visibility.Collapsed;
+                ShowProgressBar.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
@@ -342,10 +339,10 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique se a função de exportação está disponível;\n" +
                                             "- Verifique se há dados disponíveis para exportação.");
 
-                MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                ProgressBar.Visibility = Visibility.Collapsed;
+                ShowProgressBar.Visibility = Visibility.Collapsed;
             }
         }
+
 
         // Evento disparado quando o botão de atualizar é clicado
         private void AtualizarDataGrid_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -389,8 +386,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 string filePath = openFileDialog.FileName;
 
-                // Perguntar ao usuário se deseja substituir todos os dados ou adicionar novos dados
-                var result = MessageBox.Show("Deseja substituir todos os dados existentes?", "Importar Dados", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                MessageBoxResult result = MessageBox.Show("Deseja substituir todos os dados ou adicionar novos dados?", "Importar Dados", MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
 
                 if (result == MessageBoxResult.Yes)
                 {
@@ -401,6 +397,16 @@ namespace WMS_RadiadoresLemos_WPF
                     await AdicionarNovosDadosAsync(filePath);
                 }
             }
+            else
+            {
+                MessageBox.Show("Nenhum arquivo selecionado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Nenhum arquivo selecionado.",
+                                            $"Erro ao importar dados. Possíveis motivos:\n" +
+                                            "- Nenhum arquivo selecionado;\n" +
+                                            "- Cancelamento da operação.",
+                                            "- Selecione um arquivo e tente novamente.");
+            }
         }
 
         private async Task SubstituirTodosOsDadosAsync(string filePath)
@@ -410,7 +416,8 @@ namespace WMS_RadiadoresLemos_WPF
             try
             {
                 ShowProgressBar.Visibility = Visibility.Visible;
-                ProgressValue = 0;
+                ProgressBar.Value = 0;
+                ProgressBarMessage.Text = "Iniciando a substituição dos dados...";
 
                 var data = new List<Dictionary<string, object>>();
                 using (var workbook = new XLWorkbook(filePath))
@@ -419,6 +426,14 @@ namespace WMS_RadiadoresLemos_WPF
                     if (worksheet == null)
                     {
                         MessageBox.Show("A planilha 'Produtos' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    "Planilha 'Produtos' não encontrada.",
+                                                    $"Erro ao substituir dados. Possíveis motivos:\n" +
+                                                    "- Planilha 'Produtos' não encontrada;\n" +
+                                                    "- Erro ao acessar os dados.",
+                                                    "- Verifique se a planilha 'Produtos' está presente.");
+
+                        ShowProgressBar.Visibility = Visibility.Collapsed;
                         return;
                     }
 
@@ -430,6 +445,14 @@ namespace WMS_RadiadoresLemos_WPF
                         if (!headers.Contains("Codigo"))
                         {
                             MessageBox.Show("A planilha não contém a coluna 'Codigo'.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            AlertaCache.AdicionarAlerta("Erro",
+                                                        "Coluna 'Codigo' não encontrada.",
+                                                        $"Erro ao substituir dados. Possíveis motivos:\n" +
+                                                        "- Coluna 'Codigo' não encontrada;\n" +
+                                                        "- Erro ao acessar os dados.",
+                                                        "- Verifique se a coluna 'Codigo' está presente na planilha.");
+
+                            ShowProgressBar.Visibility = Visibility.Collapsed;
                             return;
                         }
 
@@ -454,21 +477,35 @@ namespace WMS_RadiadoresLemos_WPF
                     else
                     {
                         MessageBox.Show("A planilha está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    "Planilha vazia ou sem cabeçalho.",
+                                                    $"Erro ao substituir dados. Possíveis motivos:\n" +
+                                                    "- Planilha vazia;\n" +
+                                                    "- Planilha sem cabeçalho;\n" +
+                                                    "- Erro ao acessar os dados.",
+                                                    "- Verifique se a planilha contém dados;\n" +
+                                                    "- Verifique se a planilha contém um cabeçalho.");
+
+                        ShowProgressBar.Visibility = Visibility.Collapsed;
                         return;
                     }
                 }
 
+                ProgressBarMessage.Text = "Excluindo dados antigos...";
                 var produtosRef = db.Collection("Produtos");
                 var snapshot = await produtosRef.GetSnapshotAsync();
 
                 foreach (var doc in snapshot.Documents)
                 {
                     await doc.Reference.DeleteAsync();
+                    ProgressBar.Value += 1.0 / snapshot.Count * 100;
                 }
 
+                ProgressBar.Value = 0;
                 int totalItems = data.Count;
                 int processedItems = 0;
 
+                ProgressBarMessage.Text = "Adicionando novos dados...";
                 foreach (var item in data)
                 {
                     if (item.ContainsKey("Codigo") && item["Codigo"] != null)
@@ -482,7 +519,8 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     processedItems++;
-                    ProgressValue = (double)processedItems / totalItems * 100;
+                    ProgressBar.Value = (double)processedItems / totalItems * 100;
+                    ProgressBarMessage.Text = $"Processando item {processedItems} de {totalItems}...";
                 }
 
                 MessageBox.Show("Todos os dados foram substituídos com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -490,11 +528,21 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao substituir dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            $"Erro ao substituir dados. Possíveis motivos:\n" +
+                                            "- Dados corrompidos;\n" +
+                                            "- Erro ao acessar os dados;\n" +
+                                            "- Problemas ao salvar os dados.",
+                                            "- Verifique se os dados estão corretos;\n" +
+                                            "- Verifique se o arquivo foi salvo corretamente.");
             }
             finally
             {
                 ShowProgressBar.Visibility = Visibility.Collapsed;
+                ProgressBarMessage.Text = "Processo concluído.";
             }
+
         }
 
         private async Task AdicionarNovosDadosAsync(string filePath)
@@ -504,7 +552,8 @@ namespace WMS_RadiadoresLemos_WPF
             try
             {
                 ShowProgressBar.Visibility = Visibility.Visible;
-                ProgressValue = 0;
+                ProgressBar.Value = 0;
+                ProgressBarMessage.Text = "Iniciando a adição de novos dados...";
 
                 var data = new List<Dictionary<string, object>>();
                 using (var workbook = new XLWorkbook(filePath))
@@ -513,6 +562,14 @@ namespace WMS_RadiadoresLemos_WPF
                     if (worksheet == null)
                     {
                         MessageBox.Show("A planilha 'Produtos' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    "Planilha 'Produtos' não encontrada.",
+                                                    $"Erro ao adicionar novos dados. Possíveis motivos:\n" +
+                                                    "- Planilha 'Produtos' não encontrada;\n" +
+                                                    "- Erro ao acessar os dados.",
+                                                    "- Verifique se a planilha 'Produtos' está presente.");
+
+                        ShowProgressBar.Visibility = Visibility.Collapsed;
                         return;
                     }
 
@@ -524,6 +581,14 @@ namespace WMS_RadiadoresLemos_WPF
                         if (!headers.Contains("Codigo"))
                         {
                             MessageBox.Show("A planilha não contém a coluna 'Codigo'.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            AlertaCache.AdicionarAlerta("Erro",
+                                                    "Coluna 'Codigo' não encontrada.",
+                                                    $"Erro ao adicionar novos dados. Possíveis motivos:\n" +
+                                                    "- Coluna 'Codigo' não encontrada;\n" +
+                                                    "- Erro ao acessar os dados.",
+                                                    "- Verifique se a coluna 'Codigo' está presente na planilha.");
+
+                            ShowProgressBar.Visibility = Visibility.Collapsed;
                             return;
                         }
 
@@ -548,6 +613,16 @@ namespace WMS_RadiadoresLemos_WPF
                     else
                     {
                         MessageBox.Show("A planilha está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    "Planilha vazia ou sem cabeçalho.",
+                                                    $"Erro ao adicionar novos dados. Possíveis motivos:\n" +
+                                                    "- Planilha vazia;\n" +
+                                                    "- Planilha sem cabeçalho;\n" +
+                                                    "- Erro ao acessar os dados.",
+                                                    "- Verifique se a planilha contém dados;\n" +
+                                                    "- Verifique se a planilha contém um cabeçalho.");
+
+                        ShowProgressBar.Visibility = Visibility.Collapsed;
                         return;
                     }
                 }
@@ -555,6 +630,7 @@ namespace WMS_RadiadoresLemos_WPF
                 int totalItems = data.Count;
                 int processedItems = 0;
 
+                ProgressBarMessage.Text = "Adicionando novos dados...";
                 foreach (var item in data)
                 {
                     if (item.ContainsKey("Codigo") && item["Codigo"] != null)
@@ -568,7 +644,11 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     processedItems++;
-                    ProgressValue = (double)processedItems / totalItems * 100;
+
+                    // Acrescenta 1 a mais para o progresso para que o valor máximo seja 100
+                    ProgressBar.Value = (double)(processedItems + 1) / totalItems * 100;
+
+                    ProgressBarMessage.Text = $"Processando item {processedItems} de {totalItems}...";
                 }
 
                 MessageBox.Show("Novos dados foram adicionados com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -576,11 +656,21 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao adicionar novos dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            $"Erro ao adicionar novos dados. Possíveis motivos:\n" +
+                                            "- Dados corrompidos;\n" +
+                                            "- Erro ao acessar os dados;\n" +
+                                            "- Problemas ao salvar os dados.",
+                                            "- Verifique se os dados estão corretos;\n" +
+                                            "- Verifique se o arquivo foi salvo corretamente.");
             }
             finally
             {
                 ShowProgressBar.Visibility = Visibility.Collapsed;
+                ProgressBarMessage.Text = "Processo concluído.";
             }
         }
+
     }
 }

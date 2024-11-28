@@ -21,8 +21,7 @@
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              Margin="10">
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" MinWidth="70"/>
@@ -64,8 +63,7 @@
                               SelectionUnit="FullRow"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              Margin="10">
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
