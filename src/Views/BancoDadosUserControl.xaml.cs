@@ -171,7 +171,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private async Task<List<object>> ObterDadosProdutosDoFirebaseAsync()
+        private async Task<List<object>> ObterDadosDoFirebaseAsync()
         {
             var db = DatabaseConnect.Database; // Supondo que DatabaseConnect.Database esteja configurado com a instância do Firestore
             var produtos = new List<object>();
@@ -212,7 +212,7 @@ namespace WMS_RadiadoresLemos_WPF
                 ShowProgressBar.Visibility = Visibility.Visible;
                 ProgressBar.Value = 0;
 
-                var dadosProdutos = await ObterDadosProdutosDoFirebaseAsync();
+                var dadosProdutos = await ObterDadosDoFirebaseAsync();
 
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
@@ -396,6 +396,10 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     await AdicionarNovosDadosAsync(filePath);
                 }
+
+                // Atualiza Cache de Dados
+                AtualizarCache();
+
             }
             else
             {
@@ -644,10 +648,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     processedItems++;
-
-                    // Acrescenta 1 a mais para o progresso para que o valor máximo seja 100
-                    ProgressBar.Value = (double)(processedItems + 1) / totalItems * 100;
-
+                    ProgressBar.Value = (double)processedItems / totalItems * 100;
                     ProgressBarMessage.Text = $"Processando item {processedItems} de {totalItems}...";
                 }
 
@@ -672,5 +673,55 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+
+        // Método para atualizar o cache de dados
+        private async void AtualizarCache()
+        {
+            try
+            {
+                // Configura o ambiente para conectar ao Firestore
+                DatabaseConnect.SetEnvironmentVarible();
+
+                // Obtém a instância do Firestore
+                var db = DatabaseConnect.Database;
+
+                if (db == null)
+                {
+                    MessageBox.Show("Não foi possível conectar ao Firestore.");
+                    return;
+                }
+
+                // Limpa o cache atual
+                DadosCache.Tabelas.Clear();
+
+                // Obtém todas as coleções do Firestore
+                var colecoes = await db.ListRootCollectionsAsync().ToListAsync();
+
+                foreach (var colecao in colecoes)
+                {
+                    var documentos = await colecao.ListDocumentsAsync().ToListAsync();
+                    var dados = new List<object>();
+
+                    foreach (var documento in documentos)
+                    {
+                        var snapshot = await documento.GetSnapshotAsync();
+                        if (snapshot.Exists)
+                        {
+                            dados.Add(snapshot.ToDictionary());
+                        }
+                    }
+
+                    // Adiciona os dados da coleção ao cache
+                    DadosCache.Tabelas[colecao.Id] = dados;
+                }
+
+                dadosCarregados = true;
+                MessageBox.Show("Cache atualizado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar o cache: {ex.Message}");
+            }
+        }
     }
 }
