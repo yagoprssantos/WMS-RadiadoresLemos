@@ -100,6 +100,8 @@ namespace WMS_RadiadoresLemos_WPF
             produto.Codigo = CodigoProduto.Text;
             produto.Preco = double.Parse(PrecoProduto.Text);
             produto.Quantidade = int.Parse(QuantidadeInicial.Text);
+            
+            isModified = false;
         }
 
         // Evento disparado ao clicar no botão de cancelar
@@ -235,6 +237,27 @@ namespace WMS_RadiadoresLemos_WPF
                 return false;
             }
             return true;
+        }
+
+        // Método para verificar se houve modificações nos campos
+        private bool VerificarModificacoes()
+        {
+            return produto.Nome != NomeProduto.Text ||
+                   produto.Tipo != TipoProduto.Text ||
+                   produto.Marca != MarcaProduto.Text ||
+                   produto.Codigo != CodigoProduto.Text ||
+                   produto.Preco.ToString("F2") != PrecoProduto.Text ||
+                   produto.Quantidade.ToString("N0") != QuantidadeInicial.Text;
+        }
+
+        // Evento disparado ao tentar fechar a janela
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+            {
+                e.Cancel = true;
+            }
+            base.OnClosing(e);
         }
     }
 }

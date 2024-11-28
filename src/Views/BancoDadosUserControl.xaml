@@ -10,7 +10,7 @@
     <Grid Margin="10">
         <TabControl>
             <!-- Primeira Aba: Ferramentas de Banco de Dados -->
-            <TabItem Header="Ferramentas">
+            <TabItem Header="Ferramentas" FontSize="18">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -30,14 +30,15 @@
                     <UniformGrid Rows="1" Columns="3" Margin="0,5,0,10" Grid.Row="1">
                         <Button Content="Exportar Dados" Margin="5" 
                                 Click="ExportarDados_Click"/>
-                        <Button Content="Importar Dados" Margin="5"/>
+                        <Button Content="Importar Dados" Margin="5"
+                                Click="ImportarDados_Click"/>
                         <Button Content="Fazer reconexão" Margin="5"/>
                     </UniformGrid>
                 </Grid>
             </TabItem>
 
             <!-- Segunda Aba: Visualização de Dados -->
-            <TabItem Header="Visualizar Dados">
+            <TabItem Header="Visualizar Dados" FontSize="18">
                 <DockPanel Margin="10">
                     <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -72,10 +73,28 @@
                                 Padding="0" Margin="7, 0, 0, 0"
                                 FontSize="33" Grid.Column="2"/>
                     </Grid>
-                    <DataGrid x:Name="DadosDataGrid" AutoGenerateColumns="True" Margin="5" AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" IsReadOnly="True" ColumnWidth="*" />
+                    <DataGrid x:Name="DadosDataGrid"
+                              AutoGenerateColumns="True" IsReadOnly="True" 
+                              SelectionMode="Single" SelectionUnit="FullRow"
+                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                              Margin="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
+                              AlternatingRowBackground="Gainsboro" AlternationCount="2"
+                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
+                              ColumnWidth="Auto">
+                    </DataGrid>
                 </DockPanel>
             </TabItem>
         </TabControl>
+        <!-- Barra de Progresso -->
+        <Grid Name="ShowProgressBar" Background="#80000000" Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="White" Height="Auto" Width="600">
+                <TextBlock Text="Processando Informações. Por favor, Aguarde" FontWeight="Bold" FontSize="20" Margin="0, 20, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Name="ProgressBarMessage" Text="Aguardando próxima ação..." FontWeight="Bold" FontSize="16" Margin="0, 0, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ProgressBar Name="ProgressBar" Height="20" Width="500" Margin="0, 0, 0, 30"
+                     VerticalAlignment="Center" HorizontalAlignment="Center" 
+                     Minimum="0" Maximum="100" Value="0"/>
+            </StackPanel>
+        </Grid>
+
     </Grid>
 </UserControl>

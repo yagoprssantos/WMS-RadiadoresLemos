@@ -63,9 +63,14 @@
                         <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" Foreground="White" Margin="7, 0, 0, 0" FontSize="33" Grid.Column="3"/>
                     </Grid>
 
-                    <DataGrid Name="EstoqueDataGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" VerticalScrollBarVisibility="Visible"
-                              Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" ColumnWidth="*">
+                    <DataGrid Name="EstoqueDataGrid"
+                              AutoGenerateColumns="False" IsReadOnly="True" 
+                              SelectionMode="Single" SelectionUnit="FullRow"
+                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                              Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
+                              AlternatingRowBackground="Gainsboro" AlternationCount="2"
+                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
+                              ColumnWidth="*">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>

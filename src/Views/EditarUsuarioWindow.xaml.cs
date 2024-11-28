@@ -13,6 +13,7 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private UsuarioData usuario;
         private bool isModified = false;
+        private bool isConfirmingExit = false;
 
         // Propriedade pública para acessar o usuário editado
         public UsuarioData Usuario => usuario;
@@ -29,9 +30,9 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     Nome = string.Empty,
                     Email = string.Empty,
-                    Matrícula = string.Empty,
+                    Matrícula = GerarMatricula("Usuário"), // Gera a matrícula com base no cargo
                     Senha = string.Empty,
-                    Cargo = string.Empty
+                    Cargo = "Usuário"
                 };
             }
             else
@@ -117,7 +118,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (isModified && ConfirmarSaidaSemSalvar())
+                if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
                 {
                     return;
                 }
@@ -134,29 +135,78 @@ namespace WMS_RadiadoresLemos_WPF
         // Confirma se o usuário deseja sair sem salvar as alterações
         private bool ConfirmarSaidaSemSalvar()
         {
+            if (isConfirmingExit)
+            {
+                return false;
+            }
+
+            isConfirmingExit = true;
             var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
+            isConfirmingExit = false;
+
             return result == MessageBoxResult.No;
         }
 
-        // Restrições de entrada de texto nos TextBoxes
-        private void MatriculaTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        // Evento disparado ao tentar fechar a janela
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
+            if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+            {
+                e.Cancel = true;
+            }
+            base.OnClosing(e);
         }
 
-        private void MatriculaTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        // Método para verificar se houve modificações nos campos
+        private bool VerificarModificacoes()
         {
-            HandlePasting(e, "[^0-9]+");
+            return usuario.Nome != NomeTextBox.Text ||
+                   usuario.Email != EmailTextBox.Text ||
+                   usuario.Senha != SenhaPasswordBox.Password ||
+                   usuario.Cargo != ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString();
         }
 
-        private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        // Valida os campos antes de salvar
+        private bool ValidarCampos()
         {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
+            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
+            {
+                MessageBox.Show("O campo Nome deve ser preenchido.");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
+            {
+                MessageBox.Show("O campo Email deve ser preenchido.");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
+            {
+                MessageBox.Show("O campo Senha deve ser preenchido.");
+                return false;
+            }
+            if (PermissaoComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("O campo Cargo deve ser selecionado.");
+                return false;
+            }
+            return true;
         }
 
-        private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        // Método para gerar a matrícula do usuário com base no cargo
+        private string GerarMatricula(string cargo)
         {
-            HandlePasting(e, "[^a-zA-Z ]+");
+            string prefixo = cargo switch
+            {
+                "Administrador" => "ADM",
+                "Usuário" => "USR",
+                "Convidado" => "CVD",
+                _ => "UNK"
+            };
+
+            string ano = DateTime.Now.Year.ToString().Substring(2, 2);
+            string numeroContado = new Random().Next(1000, 9999).ToString();
+
+            return $"{prefixo}{ano}{numeroContado}";
         }
 
         // Verifica se o texto é permitido com base no padrão fornecido
@@ -187,7 +237,9 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (PermissaoComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
             {
-                usuario.Cargo = selectedItem.Content.ToString() ?? string.Empty;
+                usuario.Cargo = selectedItem.Content.ToString() ??  string.Empty;
+                usuario.Matrícula = GerarMatricula(usuario.Cargo); // Atualiza a matrícula com base no novo cargo
+                MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
                 isModified = true;
             }
         }
@@ -203,37 +255,6 @@ namespace WMS_RadiadoresLemos_WPF
             isModified = true;
         }
 
-        // Valida os campos antes de salvar
-        private bool ValidarCampos()
-        {
-            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
-            {
-                MessageBox.Show("O campo Nome deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
-            {
-                MessageBox.Show("O campo Email deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(MatriculaTextBox.Text))
-            {
-                MessageBox.Show("O campo Matrícula deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
-            {
-                MessageBox.Show("O campo Senha deve ser preenchido.");
-                return false;
-            }
-            if (PermissaoComboBox.SelectedItem == null)
-            {
-                MessageBox.Show("O campo Cargo deve ser selecionado.");
-                return false;
-            }
-            return true;
-        }
-
         private ComboBoxItem GetComboBoxItemByContent(string content)
         {
             foreach (ComboBoxItem item in PermissaoComboBox.Items)
@@ -242,6 +263,16 @@ namespace WMS_RadiadoresLemos_WPF
                     return item;
             }
             return new ComboBoxItem { Content = string.Empty };
+        }
+
+        private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
+        }
+
+        private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^a-zA-Z ]+");
         }
     }
 }
