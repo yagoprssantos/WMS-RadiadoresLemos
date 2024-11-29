@@ -13,6 +13,7 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private ProdutoData produto;
         private bool isModified = false;
+        private bool isConfirmingExit = false;
         private List<ProdutoData> produtos;
 
         // Propriedade pública para acessar o produto editado
@@ -113,11 +114,18 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     return;
                 }
+                isConfirmingExit = false;
                 DialogResult = false;
                 Close();
             }
             catch (Exception)
             {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Edição de produto.",
+                                            "Erro ao cancelar edição de produto. Possíveis motivos:\n" +
+                                            "- Erro ao fechar janela de edição de produto;\n" +
+                                            "- Impossibilidade de fechar janela de edição de produto.",
+                                            "- Verifique se a janela de edição de produto está aberta.");
                 Close();
             }
         }
@@ -253,9 +261,14 @@ namespace WMS_RadiadoresLemos_WPF
         // Evento disparado ao tentar fechar a janela
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+            if (!isConfirmingExit && VerificarModificacoes())
             {
-                e.Cancel = true;
+                isConfirmingExit = true;
+                if (ConfirmarSaidaSemSalvar())
+                {
+                    e.Cancel = true;
+                }
+                isConfirmingExit = false;
             }
             base.OnClosing(e);
         }

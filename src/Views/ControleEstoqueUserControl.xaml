@@ -8,7 +8,11 @@
              TextBlock.Foreground="White">
 
     <Grid>
-        <TabControl>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="269*"/>
+            <ColumnDefinition Width="531*"/>
+        </Grid.ColumnDefinitions>
+        <TabControl Grid.ColumnSpan="2">
             <!-- Aba de Cadastrar Produtos -->
             <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
@@ -69,8 +73,9 @@
                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                               Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
                               AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
-                              ColumnWidth="*">
+                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
+                              ColumnWidth="*"
+                              MouseDoubleClick="EstoqueDataGrid_MouseDoubleClick">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>
@@ -85,7 +90,7 @@
             </TabItem>
         </TabControl>
 
-        <Popup x:Name="PainelFiltrosPopup" Placement="Mouse" StaysOpen="True">
+        <Popup x:Name="PainelFiltrosPopup" Placement="Mouse" StaysOpen="True" Grid.ColumnSpan="2">
             <Border Background="{StaticResource ButtonBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}"
                     BorderThickness="2" Padding="10">
                 <StackPanel Width="250" Margin="10">
@@ -94,7 +99,7 @@
                         <CheckBox x:Name="EmEstoqueCheckBox" Foreground="White"
                                   VerticalAlignment="Center" HorizontalAlignment="Center"
                                   Checked="Filtro_Changed" Unchecked="Filtro_Changed" 
-                                  FontSize="16" Padding="5"/>   
+                                  FontSize="16" Padding="5"/>
                         <TextBlock Text="Ver apenas itens em estoque" MouseLeftButtonDown="Filtro_Changed"
                                    VerticalAlignment="Center" Foreground="White" FontSize="16" />
                     </StackPanel>
