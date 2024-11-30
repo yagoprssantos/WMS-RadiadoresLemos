@@ -7,6 +7,7 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class AlterarQuantidadeWindow : Window
     {
         public int Quantidade { get; private set; }
+        private bool isConfirmingExit = false;
 
         public AlterarQuantidadeWindow(ProdutoData produto)
         {
@@ -43,6 +44,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     Quantidade = novaQuantidade;
                     DialogResult = true; // Define o resultado como "OK" para confirmar o salvamento
+                    isConfirmingExit = true;
                     Close();
                 }
                 else
@@ -72,6 +74,7 @@ namespace WMS_RadiadoresLemos_WPF
             try
             {
                 DialogResult = false; // Cancela a alteração
+                isConfirmingExit = true;
                 Close();
             }
             catch (Exception)
@@ -100,6 +103,19 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique se o valor inserido é numérico;\n" +
                                             "- Verifique se existem espaços ou caracteres inválidos.");
             }
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (!isConfirmingExit)
+            {
+                var result = MessageBox.Show("Você tem certeza que deseja sair sem salvar?", "Confirmação de Saída", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                }
+            }
+            base.OnClosing(e);
         }
     }
 }

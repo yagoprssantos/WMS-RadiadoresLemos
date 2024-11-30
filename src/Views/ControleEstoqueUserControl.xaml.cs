@@ -601,5 +601,48 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique se o produto foi deletado corretamente.");
             }
         }
+
+        // Método para abrir edição de produto ao dar duplo clique na linha da tabela
+        private async void EstoqueDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
+            {
+                EditarProdutoWindow editarProdutoWindow = new(produtoSelecionado);
+                if (editarProdutoWindow.ShowDialog() == true)
+                {
+                    // Atualiza o produto na lista local
+                    var produtoEditado = editarProdutoWindow.Produto;
+                    var index = produtos.FindIndex(p => p.Id == produtoEditado.Id);
+                    if (index >= 0)
+                    {
+                        produtos[index] = produtoEditado;
+                    }
+
+                    // Atualiza o cache local
+                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
+
+                    // Atualiza o banco de dados
+                    await AtualizarProdutoNoBanco(produtoEditado);
+
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Produto editado: {produtoEditado.Nome}, Código: {produtoEditado.Codigo}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
+
+                    // Atualiza a fonte de dados do DataGrid
+                    EstoqueDataGrid.ItemsSource = null;
+                    EstoqueDataGrid.ItemsSource = produtos;
+
+                    // Avisa o usuário que o produto foi editado
+                    MessageBox.Show("Produto editado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
     }
 }

@@ -34,7 +34,8 @@
                         Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
                         AlternatingRowBackground="Gainsboro" AlternationCount="2"
                         CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
-                        ColumnWidth="*">
+                        ColumnWidth="*"
+                        MouseDoubleClick="UsuariosDataGrid_MouseDoubleClick">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*" MaxWidth="500"/>
                     <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="Auto" MaxWidth="500"/>

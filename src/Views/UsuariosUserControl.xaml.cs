@@ -310,5 +310,76 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show("Selecione um usuário para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
+
+        // Método para abrir edição de usuário ao dar duplo clique
+        private async void UsuariosDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (UsuariosDataGrid.SelectedItem is UsuarioData usuarioSelecionado)
+            {
+                var editarUsuarioWindow = new EditarUsuarioWindow(usuarioSelecionado);
+                if (editarUsuarioWindow.ShowDialog() == true)
+                {
+                    // Atualiza o usuário na lista local
+                    var usuarioEditado = new UsuarioData
+                    {
+                        Id = usuarioSelecionado.Id,
+                        Nome = editarUsuarioWindow.NomeTextBox.Text,
+                        Email = editarUsuarioWindow.EmailTextBox.Text,
+                        Matrícula = editarUsuarioWindow.MatriculaTextBox.Text,
+                        Senha = editarUsuarioWindow.SenhaPasswordBox.Password,
+                        Cargo = (editarUsuarioWindow.PermissaoComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty
+                    };
+
+                    var index = usuarios.FindIndex(u => u.Id == usuarioEditado.Id);
+                    if (index >= 0)
+                    {
+                        usuarios[index] = usuarioEditado;
+                    }
+
+                    // Atualiza o cache local
+                    DadosCache.Tabelas["Usuarios"] = usuarios.Cast<object>().ToList();
+
+                    // Atualiza o banco de dados
+                    try
+                    {
+                        var db = DatabaseConnect.Database ?? throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
+                        var docRef = db.Collection("Usuarios").Document(usuarioEditado.Id);
+                        await docRef.SetAsync(usuarioEditado);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Erro ao atualizar usuário no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                        // Adiciona alerta
+                        AlertaCache.AdicionarAlerta("Erro",
+                                                    ex.Message.ToString(),
+                                                    "Erro ao atualizar usuário no banco de dados. Possíveis motivos:\n" +
+                                                    "- Dados inválidos.\n" +
+                                                    "- Falha na conexão com o banco de dados.\n" +
+                                                    "- Falha na escrita dos dados no banco de dados.",
+                                                    "- Verifique se os dados estão no formato correto.\n" +
+                                                    "- Verifique a conexão com o banco de dados.\n" +
+                                                    "- Verifique se os dados estão corretos e acessíveis.");
+                    }
+
+                    // Atualiza a fonte de dados do DataGrid
+                    UsuariosDataGrid.ItemsSource = null;
+                    UsuariosDataGrid.ItemsSource = usuarios;
+
+                    // Adiciona log
+                    var log = new LogData
+                    {
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"Usuário '{usuarioEditado.Nome}' atualizado.",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
+
+                    MessageBox.Show($"Usuário '{usuarioEditado.Nome}' atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
     }
 }

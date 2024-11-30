@@ -17,7 +17,7 @@
         <DockPanel Grid.Column="0" Background="{StaticResource PanelBackgroundBrush}">
             <StackPanel Name="BarraLateral" Margin="10" DockPanel.Dock="Top">
                 <!-- Botão para abrir a aba de Registro -->
-                <Button Content="Registro Entrada/Saida" Click="RegistroEntradaSaida_Click" FontSize="16">
+                <Button Content="Registro de Entrada/Saída" Click="RegistroEntradaSaida_Click" FontSize="16">
                     <Button.ToolTip>
                         <ToolTip Content="Registrar entrada e saída de produtos"/>
                     </Button.ToolTip>
@@ -25,7 +25,7 @@
                 <!-- Botão para abrir a aba de Estoque -->
                 <Button Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16">
                     <Button.ToolTip>
-                        <ToolTip Content="Registrar entrada e saída de produtos"/>
+                        <ToolTip Content="Visualizar e gerenciar o estoque"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir o Dashboard -->
@@ -41,7 +41,7 @@
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir a aba de Usuários -->
-                <Button Content="Usuários" Click="Usuarios_Click" FontSize="16">
+                <Button Content="Gerenciar Usuários" Click="Usuarios_Click" FontSize="16">
                     <Button.ToolTip>
                         <ToolTip Content="Gerenciar usuários do sistema"/>
                     </Button.ToolTip>

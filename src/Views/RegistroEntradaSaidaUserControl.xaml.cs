@@ -20,16 +20,23 @@ namespace WMS_RadiadoresLemos_WPF
         private ObservableCollection<string> produtosFiltrados = new ObservableCollection<string>();
         private Dictionary<string, string> produtoNomeParaId = new Dictionary<string, string>();
         private ProdutoData? produtoSelecionado;
+        private bool usePositiveNumber = true;
 
         // Construtor da classe que inicializa os componentes e carrega os produtos
         public RegistroEntradaSaidaUserControl()
         {
             InitializeComponent();
             ProdutoComboBox.ItemsSource = produtosFiltrados;
-            CarregarProdutos();
+            Setup();
         }
 
-        // Método para carregar produtos do cache
+        private void Setup()
+        {
+            CarregarProdutos();
+            ToggleVisibility(false);
+        }
+
+        // Método assíncrono para carregar produtos do cache
         private void CarregarProdutos()
         {
             try
@@ -55,6 +62,35 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para alternar a visibilidade dos detalhes do produto
+        private void ToggleVisibility(bool isVisible)
+        {
+            var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+
+            // Títulos
+            AntesTextBlock.Visibility = visibility;
+            DepoisTextBlock.Visibility = visibility;
+
+            // Detalhes depois
+            NomeDepoisTextoTextBlock.Visibility = visibility;
+            NomeDepoisDadoTextBlock.Visibility = visibility;
+
+            TipoDepoisTextoTextBlock.Visibility = visibility;
+            TipoDepoisDadoTextBlock.Visibility = visibility;
+
+            MarcaDepoisTextoTextBlock.Visibility = visibility;
+            MarcaDepoisDadoTextBlock.Visibility = visibility;
+
+            CodigoDepoisTextoTextBlock.Visibility = visibility;
+            CodigoDepoisDadoTextBlock.Visibility = visibility;
+
+            PrecoDepoisTextoTextBlock.Visibility = visibility;
+            PrecoDepoisDadoTextBlock.Visibility = visibility;
+
+            QuantidadeDepoisTextoTextBlock.Visibility = visibility;
+            QuantidadeDepoisDadoTextBlock.Visibility = visibility;
+        }
+
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -76,7 +112,6 @@ namespace WMS_RadiadoresLemos_WPF
             ProdutoComboBox.IsDropDownOpen = produtosFiltrados.Count > 0;
         }
 
-
         // Método para confirmar se o produto selecionado é válido
         private void ProdutoComboBox_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -96,7 +131,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
         // Método que é chamado quando a seleção do ComboBox é alterada
         private void ProdutoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -105,13 +139,7 @@ namespace WMS_RadiadoresLemos_WPF
                 produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == selectedProductName);
                 if (produtoSelecionado != null)
                 {
-                    MessageBox.Show($"Produto selecionado:\n" +
-                                    $"Nome: {produtoSelecionado.Nome}\n" +
-                                    $"Tipo: {produtoSelecionado.Tipo}\n" +
-                                    $"Marca: {produtoSelecionado.Marca}\n" +
-                                    $"Código: {produtoSelecionado.Codigo}\n" +
-                                    $"Preço: {produtoSelecionado.Preco}\n" +
-                                    $"Quantidade: {produtoSelecionado.Quantidade}");
+                    AtualizarDetalhesProduto(produtoSelecionado);
                 }
                 else
                 {
@@ -120,16 +148,123 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Método assíncrono para registrar a entrada de produtos
-        private async void RegistrarEntrada_Click(object sender, RoutedEventArgs e)
+        // Método para atualizar os detalhes do produto selecionado
+        private void AtualizarDetalhesProduto(ProdutoData produto)
         {
-            await RegistrarMovimentacaoAsync(true);
+            // Mostrar os detalhes atuais do produto (TextBlock1)
+            NomeAtualDadoTextBlock.Text = produto.Nome;
+            TipoAtualDadoTextBlock.Text = produto.Tipo;
+            MarcaAtualDadoTextBlock.Text = produto.Marca;
+            CodigoAtualDadoTextBlock.Text = produto.Codigo;
+            QuantidadeAtualDadoTextBlock.Text = produto.Quantidade.ToString();
+            PrecoAtualDadoTextBlock.Text = produto.Preco.ToString("C");
+
+            // Se quantidade e preço forem vazios, não atualiza valores depois
+            if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
+            {
+                return;
+            }
+
+            // Mostrar os detalhes depois do produto (TextBlock2)
+            NomeDepoisDadoTextBlock.Text = produto.Nome;
+            TipoDepoisDadoTextBlock.Text = produto.Tipo;
+            MarcaDepoisDadoTextBlock.Text = produto.Marca;
+            CodigoDepoisDadoTextBlock.Text = produto.Codigo;
+
+            // Se a quantidade e preço forem um número válido, atualiza a quantidade e o preço depois
+            if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
+            {
+                // Mostrar a quantidade alterado do produto (calculado) dependendo se é entrada ou saída
+                if (usePositiveNumber)
+                {
+                    // Entrada
+                    QuantidadeDepoisDadoTextBlock.Text = (produto.Quantidade + quantidadeAlterada).ToString();
+                }
+                else
+                {
+                    // Saída
+                    QuantidadeDepoisDadoTextBlock.Text = (produto.Quantidade - quantidadeAlterada).ToString();
+                }
+
+                // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
+                double preco = produto.Preco;
+                double precoNovo = double.Parse(PrecoTextBox.Text);
+                int quantidade = int.Parse(QuantidadeDepoisDadoTextBlock.Text);
+                double precoDepois = (preco * produto.Quantidade + precoNovo * quantidade) / (produto.Quantidade + quantidade);
+                PrecoDepoisDadoTextBlock.Text = precoDepois.ToString("C");
+            }
+            else
+            {
+                MessageBox.Show("Por favor, insira um valor numérico válido para a quantidade.");
+            }
+        }
+
+
+        // Método assíncrono para registrar a entrada de produtos
+        private void RegistrarEntrada_Click(object sender, RoutedEventArgs e)
+        {
+            usePositiveNumber = true;
+
+            if (produtoSelecionado != null)
+            {
+                AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            ToggleVisibility(true);
+            ConfirmarRegistroButton.Visibility = Visibility.Visible;
+            CancelarRegistroButton.Visibility = Visibility.Visible;
+            RegistrarEntradaButton.Visibility = Visibility.Collapsed;
+            RegistrarSaidaButton.Visibility = Visibility.Collapsed;
         }
 
         // Método assíncrono para registrar a saída de produtos
-        private async void RegistrarSaida_Click(object sender, RoutedEventArgs e)
+        private void RegistrarSaida_Click(object sender, RoutedEventArgs e)
         {
-            await RegistrarMovimentacaoAsync(false);
+            usePositiveNumber = false;
+
+            if (produtoSelecionado != null)
+            {
+                AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            ToggleVisibility(true);
+            ConfirmarRegistroButton.Visibility = Visibility.Visible;
+            CancelarRegistroButton.Visibility = Visibility.Visible;
+            RegistrarEntradaButton.Visibility = Visibility.Collapsed;
+            RegistrarSaidaButton.Visibility = Visibility.Collapsed;
+        }
+
+        // Método para confirmar a ação de registro
+        private async void ConfirmarAcao_Click(object sender, RoutedEventArgs e)
+        {
+            if (usePositiveNumber)
+            {
+                await RegistrarMovimentacaoAsync(true);
+            }
+            else
+            {
+                await RegistrarMovimentacaoAsync(false);
+            }
+
+            ToggleVisibility(false);
+            ConfirmarRegistroButton.Visibility = Visibility.Collapsed;
+            CancelarRegistroButton.Visibility = Visibility.Collapsed;
+            RegistrarEntradaButton.Visibility = Visibility.Visible;
+            RegistrarSaidaButton.Visibility = Visibility.Visible;
+
+            usePositiveNumber = true;
+        }
+
+        // Método para cancelar a ação de registro
+        private void CancelarAcao_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleVisibility(false);
+            ConfirmarRegistroButton.Visibility = Visibility.Collapsed;
+            CancelarRegistroButton.Visibility = Visibility.Collapsed;
+            RegistrarEntradaButton.Visibility = Visibility.Visible;
+            RegistrarSaidaButton.Visibility = Visibility.Visible;
+
+            usePositiveNumber = true;
         }
 
         // Método assíncrono para registrar a movimentação de produtos
@@ -167,39 +302,29 @@ namespace WMS_RadiadoresLemos_WPF
                         preco = 0;
                     }
 
-                    // Diálogo de confirmação
-                    var resultado = MessageBox.Show(
-                        $"Produto: {produtoSelecionado.Nome}\n" +
-                        $"Quantidade Atual: {produtoSelecionado.Quantidade}\n" +
-                        $"Quantidade {(isEntrada ? "Após Entrada" : "Após Saída")}: {quantidadeFinal}\n\n" +
-                        "Deseja confirmar a operação?",
-                        "Confirmação",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
+                    // Atualiza a quantidade do produto
+                    produtoSelecionado.Quantidade = quantidadeFinal;
 
-                    if (resultado == MessageBoxResult.Yes)
+                    // Atualiza o produto no banco de dados
+                    await AtualizarProdutoNoBanco(produtoSelecionado);
+                    MessageBox.Show($"{(isEntrada ? "Entrada" : "Saída")} registrada com sucesso");
+
+                    // Adiciona log
+                    var log = new LogData
                     {
-                        // Atualiza a quantidade do produto
-                        produtoSelecionado.Quantidade = quantidadeFinal;
+                        Data = DateTime.UtcNow,
+                        Tipo = "OPERACIONAL",
+                        Nivel = "Usuário",
+                        Detalhes = $"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}; Quantidade adicionada - {quantidade};  Quantidade atual - {quantidadeFinal}",
+                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    };
+                    await LogHistorico.RegistrarLogAsync(log);
 
-                        // Atualiza o produto no banco de dados
-                        await AtualizarProdutoNoBanco(produtoSelecionado);
-                        MessageBox.Show($"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}, Quantidade - {quantidade}");
+                    // Limpar campos após o registro, mantendo o produto selecionado
+                    LimparCampos();
 
-                        // Adiciona log
-                        var log = new LogData
-                        {
-                            Data = DateTime.UtcNow,
-                            Tipo = "OPERACIONAL",
-                            Nivel = "Usuário",
-                            Detalhes = $"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}; Quantidade adicionada - {quantidade};  Quantidade atual - {quantidadeFinal}",
-                            Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
-                        };
-                        await LogHistorico.RegistrarLogAsync(log);
-
-                        // Limpar campos após o registro, mantendo o produto selecionado
-                        LimparCampos();
-                    }
+                    // Atualizar detalhes do produto
+                    AtualizarDetalhesProduto(produtoSelecionado);
                 }
                 else
                 {
@@ -255,15 +380,14 @@ namespace WMS_RadiadoresLemos_WPF
         private void LimparCampos()
         {
             QuantidadeTextBox.Clear();
+            PrecoTextBox.Clear();
         }
 
-        // Método para validar a entrada de texto na caixa de quantidade
+        // Métodos para validar a entrada de texto na caixa de quantidade (apenas números inteiros)
         private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !int.TryParse(e.Text, out _);
         }
-
-        // Método para validar a colagem de texto na caixa de quantidade
         private void QuantidadeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             if (e.DataObject.GetDataPresent(typeof(string)) && !int.TryParse((string)e.DataObject.GetData(typeof(string)), out _))
@@ -277,7 +401,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
         private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox)
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
                 if (int.TryParse(textBox.Text, out int quantidade))
                 {
@@ -291,7 +415,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Método para validar a entrada de texto na caixa de preço (incluindo decimais e uma única vírgula)
+        // Métodos para validar a entrada de texto na caixa de preço (apenas números decimais)
         private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (e.Text == ",")
@@ -305,8 +429,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             e.Handled = !double.TryParse(e.Text, out _);
         }
-
-        // Método para validar a colagem de texto na caixa de preço
         private void PrecoTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             if (e.DataObject.GetDataPresent(typeof(string)) && !double.TryParse((string)e.DataObject.GetData(typeof(string)), out _))
@@ -318,11 +440,9 @@ namespace WMS_RadiadoresLemos_WPF
                 e.CancelCommand();
             }
         }
-
-        // Método para formatar o texto da caixa de preço ao perder o foco (1.000,00)
         private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox)
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
                 if (double.TryParse(textBox.Text, out double preco))
                 {
