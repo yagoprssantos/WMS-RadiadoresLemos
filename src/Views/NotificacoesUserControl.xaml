@@ -82,7 +82,6 @@
             </TabItem>
             
             <!-- Aba de Movimentações -->
-            <!-- Aba de Movimentações -->
             <TabItem Header="Movimentações" FontSize="18">
                 <Grid Margin="10">
                     <DataGrid Name="MovimentacoesDataGrid"
@@ -99,6 +98,7 @@
                             <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
                             <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
+                            <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
                             <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataHora}" Width="Auto" />
                         </DataGrid.Columns>
                     </DataGrid>

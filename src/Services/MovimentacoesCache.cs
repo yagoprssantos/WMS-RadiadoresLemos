@@ -40,7 +40,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     DadosCache.Tabelas["Movimentacoes"] = new List<object>();
                 }
                 DadosCache.Tabelas["Movimentacoes"].Add(movimentacao);
-                Console.WriteLine("Movimenta��o registrada com sucesso no cache.");
+                Console.WriteLine("Movimentação registrada com sucesso no cache.");
 
                 await RemoverMovimentacoesAntigasAsync(movimentacoesRef);
             }

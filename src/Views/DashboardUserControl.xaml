@@ -89,19 +89,7 @@
                             <StackPanel Orientation="Horizontal" Margin="10">
                                 <TextBlock Text="Período:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
                                 <ComboBox x:Name="SelecionarPeriodoLucroMensal" Width="200" SelectedIndex="0" SelectionChanged="SelecionarPeriodoLucroMensal_SelectionChanged">
-                                    <!-- Meses -->
-                                    <ComboBoxItem Content="Janeiro"/>
-                                    <ComboBoxItem Content="Fevereiro"/>
-                                    <ComboBoxItem Content="Março"/>
-                                    <ComboBoxItem Content="Abril"/>
-                                    <ComboBoxItem Content="Maio"/>
-                                    <ComboBoxItem Content="Junho"/>
-                                    <ComboBoxItem Content="Julho"/>
-                                    <ComboBoxItem Content="Agosto"/>
-                                    <ComboBoxItem Content="Setembro"/>
-                                    <ComboBoxItem Content="Outubro"/>
-                                    <ComboBoxItem Content="Novembro"/>
-                                    <ComboBoxItem Content="Dezembro"/>
+                                    <ComboBoxItem Content="Sem filtros"/>
                                 </ComboBox>
                             </StackPanel>
                             <lvc:CartesianChart Series="{Binding LucroMensalSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
@@ -117,6 +105,7 @@
                             </lvc:CartesianChart>
                         </StackPanel>
                     </TabItem>
+
 
                     <!-- Aba 5: Gráfico de Barras - Marcas com maior estoque -->
                     <TabItem Header="Marcas com maior estoque">

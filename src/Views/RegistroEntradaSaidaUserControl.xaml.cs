@@ -149,7 +149,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para atualizar os detalhes do produto selecionado
-        private void AtualizarDetalhesProduto(ProdutoData produto)
+        private bool AtualizarDetalhesProduto(ProdutoData produto)
         {
             // Mostrar os detalhes atuais do produto (TextBlock1)
             NomeAtualDadoTextBlock.Text = produto.Nome;
@@ -157,12 +157,12 @@ namespace WMS_RadiadoresLemos_WPF
             MarcaAtualDadoTextBlock.Text = produto.Marca;
             CodigoAtualDadoTextBlock.Text = produto.Codigo;
             QuantidadeAtualDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoAtualDadoTextBlock.Text = produto.Preco.ToString("C");
+            PrecoAtualDadoTextBlock.Text = produto.Preço.ToString("C");
 
             // Se quantidade e preço forem vazios, não atualiza valores depois
             if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
             {
-                return;
+                return false;
             }
 
             // Mostrar os detalhes depois do produto (TextBlock2)
@@ -174,20 +174,38 @@ namespace WMS_RadiadoresLemos_WPF
             // Se a quantidade e preço forem um número válido, atualiza a quantidade e o preço depois
             if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
             {
-                // Mostrar a quantidade alterado do produto (calculado) dependendo se é entrada ou saída
+                int quantidadeFinal;
                 if (usePositiveNumber)
                 {
                     // Entrada
-                    QuantidadeDepoisDadoTextBlock.Text = (produto.Quantidade + quantidadeAlterada).ToString();
+                    quantidadeFinal = produto.Quantidade + quantidadeAlterada;
                 }
                 else
                 {
                     // Saída
-                    QuantidadeDepoisDadoTextBlock.Text = (produto.Quantidade - quantidadeAlterada).ToString();
+                    quantidadeFinal = produto.Quantidade - quantidadeAlterada;
                 }
 
+                if (quantidadeFinal < 0)
+                {
+                    // Avisa que quantidade não pode ser negativa e retorna
+                    MessageBox.Show("Não existem produtos suficientes no Estoque");
+
+                    // Adiciona alerta
+                    AlertaCache.AdicionarAlerta("Erro",
+                                                "Quantidade insuficiente",
+                                                "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
+                                                "- Quantidade insuficiente no estoque.",
+                                                "- Verifique a quantidade disponível no estoque.\n" +
+                                                "- Verifique se a quantidade inserida é válida.\n" +
+                                                "- Atualize a quantidade de produtos no estoque.");
+                    return false;
+                }
+
+                QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
+
                 // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
-                double preco = produto.Preco;
+                double preco = produto.Preço;
                 double precoNovo = double.Parse(PrecoTextBox.Text);
                 int quantidade = int.Parse(QuantidadeDepoisDadoTextBlock.Text);
                 double precoDepois = (preco * produto.Quantidade + precoNovo * quantidade) / (produto.Quantidade + quantidade);
@@ -196,8 +214,12 @@ namespace WMS_RadiadoresLemos_WPF
             else
             {
                 MessageBox.Show("Por favor, insira um valor numérico válido para a quantidade.");
+                return false;
             }
+
+            return true;
         }
+
 
 
         // Método assíncrono para registrar a entrada de produtos
@@ -205,9 +227,16 @@ namespace WMS_RadiadoresLemos_WPF
         {
             usePositiveNumber = true;
 
+            bool detalhesAtualizados = false;
+
             if (produtoSelecionado != null)
             {
-                AtualizarDetalhesProduto(produtoSelecionado);
+                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            if (!detalhesAtualizados)
+            {
+                return;
             }
 
             ToggleVisibility(true);
@@ -217,14 +246,22 @@ namespace WMS_RadiadoresLemos_WPF
             RegistrarSaidaButton.Visibility = Visibility.Collapsed;
         }
 
+
         // Método assíncrono para registrar a saída de produtos
         private void RegistrarSaida_Click(object sender, RoutedEventArgs e)
         {
             usePositiveNumber = false;
 
+            bool detalhesAtualizados = false;
+
             if (produtoSelecionado != null)
             {
-                AtualizarDetalhesProduto(produtoSelecionado);
+                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            if (!detalhesAtualizados)
+            {
+                return;
             }
 
             ToggleVisibility(true);
@@ -237,13 +274,25 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para confirmar a ação de registro
         private async void ConfirmarAcao_Click(object sender, RoutedEventArgs e)
         {
+            if (produtoSelecionado == null)
+            {
+                MessageBox.Show("Nenhum produto selecionado.");
+                return;
+            }
+
+            if (!int.TryParse(QuantidadeTextBox.Text, out int quantidade) || !double.TryParse(PrecoTextBox.Text, out double preco))
+            {
+                MessageBox.Show("Por favor, insira valores válidos para quantidade e preço.");
+                return;
+            }
+
             if (usePositiveNumber)
             {
-                await RegistrarMovimentacaoAsync(true);
+                await RegistrarMovimentacaoAsync(true, quantidade, preco);
             }
             else
             {
-                await RegistrarMovimentacaoAsync(false);
+                await RegistrarMovimentacaoAsync(false, quantidade, preco);
             }
 
             ToggleVisibility(false);
@@ -251,8 +300,7 @@ namespace WMS_RadiadoresLemos_WPF
             CancelarRegistroButton.Visibility = Visibility.Collapsed;
             RegistrarEntradaButton.Visibility = Visibility.Visible;
             RegistrarSaidaButton.Visibility = Visibility.Visible;
-
-            usePositiveNumber = true;
+            LimparCampos();
         }
 
         // Método para cancelar a ação de registro
@@ -268,56 +316,41 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método assíncrono para registrar a movimentação de produtos
-        // Método assíncrono para registrar a movimentação de produtos
-        private async Task RegistrarMovimentacaoAsync(bool isEntrada)
+        private async Task RegistrarMovimentacaoAsync(bool isEntrada, int quantidadeMovimentacao, double precoMovimentacao)
         {
             try
             {
+                // Verificar se o produto selecionado é válido
                 if (produtoSelecionado != null)
                 {
-                    if (!int.TryParse(QuantidadeTextBox.Text, out int quantidade))
+                    if (produtoSelecionado == null)
                     {
-                        MessageBox.Show("Quantidade inválida.");
+                        MessageBox.Show("Nenhum produto selecionado.");
                         return;
                     }
 
-                    if (!isEntrada && produtoSelecionado.Quantidade < quantidade)
+                    // Atualiza a quantidade do produto
+                    produtoSelecionado.Quantidade = isEntrada ? produtoSelecionado.Quantidade + quantidadeMovimentacao : produtoSelecionado.Quantidade - quantidadeMovimentacao;
+
+                    // Atualiza o preço do produto com o valor calculado no PrecoDepoisDadoTextBlock
+                    if (double.TryParse(PrecoDepoisDadoTextBlock.Text, System.Globalization.NumberStyles.Currency, null, out double precoAtualizado))
                     {
-                        MessageBox.Show("Quantidade insuficiente em estoque.");
-                        return;
+                        produtoSelecionado.Preço = precoAtualizado;
                     }
 
-                    int quantidadeFinal = produtoSelecionado.Quantidade + (isEntrada ? quantidade : -quantidade);
-
-                    // Garantir que a quantidade final nunca seja menor do que zero
-                    if (quantidadeFinal < 0)
-                    {
-                        quantidadeFinal = 0;
-                    }
-
-                    double preco = produtoSelecionado.Preco;
-
-                    // Garantir que o preço do produto não seja negativo
-                    if (preco < 0)
-                    {
-                        preco = 0;
-                    }
-
-                    // Cria uma nova instância de MovimentacaoData
+                    // Cria um objeto de movimentação com os dados fornecidos
                     var movimentacao = new MovimentacaoData
                     {
                         ProdutoId = produtoSelecionado.Id,
-                        Tipo = isEntrada ? "Entrada" : "Saída",
-                        Preço = preco,
-                        Quantidade = quantidade,
-                        DataHora = DateTime.UtcNow
+                        Quantidade = quantidadeMovimentacao,
+                        Preço = precoMovimentacao,
+                        DataHora = DateTime.Now,
+                        Tipo = isEntrada ? "Entrada" : "Saída"
                     };
+
 
                     // Adiciona a movimentação ao cache e ao Firestore
                     await MovimentacoesCache.RegistrarMovimentacaoAsync(movimentacao);
-
-                    // Atualiza a quantidade do produto
-                    produtoSelecionado.Quantidade = quantidadeFinal;
 
                     // Atualiza o produto no banco de dados
                     await AtualizarProdutoNoBanco(produtoSelecionado);
@@ -329,7 +362,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Data = DateTime.UtcNow,
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
-                        Detalhes = $"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}; Quantidade adicionada - {quantidade};  Quantidade atual - {quantidadeFinal}",
+                        Detalhes = $"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}; Quantidade - {quantidadeMovimentacao}; Preço - {precoMovimentacao}",
                         Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
                     };
                     await LogHistorico.RegistrarLogAsync(log);

@@ -31,6 +31,10 @@ namespace WMS_RadiadoresLemos_WPF
         // Propriedade para armazenar os logs
         public ObservableCollection<object> Logs { get; set; } = new ObservableCollection<object>();
 
+        // Dicionário para armazenar as cores dos produtos
+        private Dictionary<string, SolidColorBrush> produtoCores = new Dictionary<string, SolidColorBrush>();
+
+
         public DashboardUserControl()
         {
             InitializeComponent();
@@ -38,11 +42,57 @@ namespace WMS_RadiadoresLemos_WPF
             CarregarDados();
         }
 
+        // Função para gerar uma cor única
+        private SolidColorBrush GerarCorUnica(int index)
+        {
+            // Usar a paleta HSL para gerar cores mais vivas
+            double hue = (index * 137.508) % 360; // Usar o número áureo para distribuir uniformemente as cores
+            double saturation = 0.7 + 0.3 * ((index / 360) % 2); // Alternar entre 0.7 e 1.0 para saturação
+            double lightness = 0.5 + 0.2 * ((index / 720) % 2); // Alternar entre 0.5 e 0.7 para luminosidade
+
+            // Converter HSL para RGB
+            (byte r, byte g, byte b) = HslToRgb(hue, saturation, lightness);
+
+            return new SolidColorBrush(Color.FromRgb(r, g, b));
+        }
+
+        // Função para obter a cor de um produto
+        private SolidColorBrush ObterCorProduto(string produtoId)
+        {
+            if (!produtoCores.ContainsKey(produtoId))
+            {
+                produtoCores[produtoId] = GerarCorUnica(produtoCores.Count);
+            }
+            return produtoCores[produtoId];
+        }
+
+
         // Função para carregar os dados do dashboard
         private void CarregarDados()
         {
             ExibirContadores();
             ExibirGraficos();
+        }
+
+        // Função para carregar o ComboBox de Lucro Mensal
+        private void CarregarComboBoxLucroMensal()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            {
+                var meses = movimentacoes
+                    .Select(m => ((MovimentacaoData)m).DataHora.ToString("MMM/yyyy"))
+                    .Distinct()
+                    .OrderBy(m => DateTime.ParseExact(m, "MMM/yyyy", null))
+                    .ToList();
+
+                SelecionarPeriodoLucroMensal.Items.Clear();
+                SelecionarPeriodoLucroMensal.Items.Add(new ComboBoxItem { Content = "Sem filtros" });
+
+                foreach (var mes in meses)
+                {
+                    SelecionarPeriodoLucroMensal.Items.Add(new ComboBoxItem { Content = mes });
+                }
+            }
         }
 
         // Exibe os contadores do dashboard
@@ -59,7 +109,7 @@ namespace WMS_RadiadoresLemos_WPF
             GraficoMovimentacaoProdutos();
             GraficoTendenciaMovimentacao();
             GraficoProdutosMaiorMovimentacao();
-            GraficoLucroMensal("Janeiro");
+            GraficoLucroMensal("Sem filtros");
             GraficoEstoqueMarcas();
             GraficoProdutosVendidos("Hoje");
         }
@@ -114,27 +164,16 @@ namespace WMS_RadiadoresLemos_WPF
 
                 EstoqueMarcasSeries.Clear();
 
-                int colorIndex = 0;
-                var colors = new List<SolidColorBrush>
-        {
-            new SolidColorBrush(Color.FromRgb(33, 150, 243)), // Blue
-            new SolidColorBrush(Color.FromRgb(76, 175, 80)),  // Green
-            new SolidColorBrush(Color.FromRgb(255, 193, 7)),  // Yellow
-            new SolidColorBrush(Color.FromRgb(244, 67, 54)),  // Red
-            new SolidColorBrush(Color.FromRgb(156, 39, 176))  // Purple
-        };
-
                 foreach (var marca in topMarcas)
                 {
                     EstoqueMarcasSeries.Add(new ColumnSeries
                     {
                         Title = marca.Key,
                         Values = new ChartValues<int> { marca.Value },
-                        Fill = colors[colorIndex % colors.Count],
+                        Fill = ObterCorProduto(marca.Key),
                         ColumnPadding = 10, // Adiciona espaçamento entre as barras
                         MaxColumnWidth = 100 // Define o limite máximo da largura das colunas
                     });
-                    colorIndex++;
                 }
 
                 MarcasLabels = topMarcas.Select(m => m.Key).ToArray();
@@ -226,38 +265,34 @@ namespace WMS_RadiadoresLemos_WPF
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
                 var movimentacao = movimentacoes
-                    .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
-                    .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
-                    .OrderByDescending(m => m.Quantidade)
-                    .Take(5)
+                    .GroupBy(m => new { ((MovimentacaoData)m).ProdutoId, ((MovimentacaoData)m).Tipo })
+                    .Select(g => new { g.Key.ProdutoId, g.Key.Tipo, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
                     .ToList();
+
+                var entradas = movimentacao.Where(m => m.Tipo == "Entrada").OrderByDescending(m => m.Quantidade).Take(5).ToList();
+                var saidas = movimentacao.Where(m => m.Tipo == "Saída").OrderByDescending(m => m.Quantidade).Take(5).ToList();
 
                 MovimentacaoProdutosSeries.Clear();
 
-                int colorIndex = 0;
-                var colors = new List<SolidColorBrush>
+                MovimentacaoProdutosSeries.Add(new ColumnSeries
                 {
-                    new SolidColorBrush(Color.FromRgb(33, 150, 243)), // Blue
-                    new SolidColorBrush(Color.FromRgb(76, 175, 80)),  // Green
-                    new SolidColorBrush(Color.FromRgb(255, 193, 7)),  // Yellow
-                    new SolidColorBrush(Color.FromRgb(244, 67, 54)),  // Red
-                    new SolidColorBrush(Color.FromRgb(156, 39, 176))  // Purple
-                };
+                    Title = "Entradas",
+                    Values = new ChartValues<int>(entradas.Select(e => e.Quantidade)),
+                    Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Verde
+                    ColumnPadding = 10,
+                    MaxColumnWidth = 100
+                });
 
-                foreach (var item in movimentacao)
+                MovimentacaoProdutosSeries.Add(new ColumnSeries
                 {
-                    MovimentacaoProdutosSeries.Add(new ColumnSeries
-                    {
-                        Title = item.ProdutoId,
-                        Values = new ChartValues<int> { item.Quantidade },
-                        Fill = colors[colorIndex % colors.Count],
-                        ColumnPadding = 10,
-                        MaxColumnWidth = 100
-                    });
-                    colorIndex++;
-                }
+                    Title = "Saídas",
+                    Values = new ChartValues<int>(saidas.Select(s => s.Quantidade)),
+                    Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Vermelho
+                    ColumnPadding = 10,
+                    MaxColumnWidth = 100
+                });
 
-                ProdutosLabels = movimentacao.Select(m => m.ProdutoId).ToArray();
+                ProdutosLabels = entradas.Select(e => e.ProdutoId).Union(saidas.Select(s => s.ProdutoId)).Distinct().ToArray();
             }
             else
             {
@@ -298,7 +333,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             DataContext = this;
         }
-
         // Exibe o gráfico de produtos com maior movimentação
         private void GraficoProdutosMaiorMovimentacao()
         {
@@ -313,26 +347,15 @@ namespace WMS_RadiadoresLemos_WPF
 
                 ProdutosMaiorMovimentacaoSeries.Clear();
 
-                int colorIndex = 0;
-                var colors = new List<SolidColorBrush>
-                {
-                    new SolidColorBrush(Color.FromRgb(33, 150, 243)), // Blue
-                    new SolidColorBrush(Color.FromRgb(76, 175, 80)),  // Green
-                    new SolidColorBrush(Color.FromRgb(255, 193, 7)),  // Yellow
-                    new SolidColorBrush(Color.FromRgb(244, 67, 54)),  // Red
-                    new SolidColorBrush(Color.FromRgb(156, 39, 176))  // Purple
-                };
-
                 foreach (var item in maiorMovimentacao)
                 {
                     ProdutosMaiorMovimentacaoSeries.Add(new PieSeries
                     {
                         Title = item.ProdutoId,
                         Values = new ChartValues<int> { item.Quantidade },
-                        Fill = colors[colorIndex % colors.Count],
+                        Fill = ObterCorProduto(item.ProdutoId),
                         DataLabels = true
                     });
-                    colorIndex++;
                 }
 
                 ProdutosLabels = maiorMovimentacao.Select(m => m.ProdutoId).ToArray();
@@ -346,70 +369,42 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Exibe o gráfico de lucro mensal
-        private void GraficoLucroMensal(string mes)
+        private void GraficoLucroMensal(string? mesSelecionado)
         {
-            // Obter todas as movimentações do cache
-            var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
-
-            // Verificar se há movimentações
-            if (movimentacoes == null || !movimentacoes.Any())
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
-                Console.WriteLine("Nenhuma movimentação encontrada no cache.");
-                return;
-            }
+                var lucroMensal = movimentacoes
+                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída")
+                    .GroupBy(m => ((MovimentacaoData)m).DataHora.ToString("MMM/yyyy"))
+                    .Select(g => new { Mes = g.Key, Lucro = g.Sum(m => ((MovimentacaoData)m).Quantidade * ((MovimentacaoData)m).Preço) })
+                    .OrderBy(l => DateTime.ParseExact(l.Mes, "MMM/yyyy", null))
+                    .ToList();
 
-            // Filtrar as movimentações pelo mês desejado
-            var lucroMensal = movimentacoes
-                .Where(m => m.DataHora.ToString("MMMM", new System.Globalization.CultureInfo("pt-BR")).Equals(mes, StringComparison.OrdinalIgnoreCase) && m.Tipo == "Saída")
-                .GroupBy(m => m.DataHora.Date)
-                .Select(g => new { Data = g.Key, Lucro = g.Sum(m => m.Quantidade * 10) }) // Supondo que o lucro por unidade seja 10
-                .OrderBy(l => l.Data)
-                .ToList();
-
-            // Verificar se há dados após a filtragem
-            if (!lucroMensal.Any())
-            {
-                Console.WriteLine($"Nenhum dado de lucro encontrado para o mês: {mes}");
-                return;
-            }
-
-            // Limpar a série existente
-            LucroMensalSeries.Clear();
-
-            // Definir cores para as colunas
-            int colorIndex = 0;
-            var colors = new List<SolidColorBrush>
-            {
-                new SolidColorBrush(Color.FromRgb(33, 150, 243)), // Azul
-                new SolidColorBrush(Color.FromRgb(76, 175, 80)),  // Verde
-                new SolidColorBrush(Color.FromRgb(255, 193, 7)),  // Amarelo
-                new SolidColorBrush(Color.FromRgb(244, 67, 54)),  // Vermelho
-                new SolidColorBrush(Color.FromRgb(156, 39, 176))  // Roxo
-            };
-
-            // Adicionar os dados ao gráfico
-            foreach (var item in lucroMensal)
-            {
-                LucroMensalSeries.Add(new ColumnSeries
+                if (!string.IsNullOrEmpty(mesSelecionado) && mesSelecionado != "Sem filtros")
                 {
-                    Title = item.Data.ToString("dd/MM/yyyy"),
-                    Values = new ChartValues<int> { item.Lucro },
-                    Fill = colors[colorIndex % colors.Count],
-                    ColumnPadding = 10,
-                    MaxColumnWidth = 100
+                    lucroMensal = lucroMensal.Where(l => l.Mes == mesSelecionado).ToList();
+                }
+
+                LucroMensalSeries.Clear();
+
+                LucroMensalSeries.Add(new LineSeries
+                {
+                    Title = "Lucro Mensal",
+                    Values = new ChartValues<double>(lucroMensal.Select(l => l.Lucro)),
+                    PointGeometry = DefaultGeometries.Circle,
+                    PointGeometrySize = 10,
+                    Fill = new SolidColorBrush(Color.FromRgb(33, 150, 243)) // Azul
                 });
-                colorIndex++;
+
+                MesesLabels = lucroMensal.Select(l => l.Mes).ToArray();
+            }
+            else
+            {
+                Console.WriteLine("Tabela 'Movimentacoes' não encontrada no cache de dados.");
             }
 
-            // Atualizar os rótulos do eixo X
-            MesesLabels = lucroMensal.Select(l => l.Data.ToString("dd/MM/yyyy")).ToArray();
-
-            // Atualizar o DataContext para refletir as mudanças
-            DataContext = null;
             DataContext = this;
         }
-
-
 
         private void SelecionarPeriodoLucroMensal_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -418,6 +413,46 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 GraficoLucroMensal(periodoSelecionado.Content.ToString());
             }
+        }
+
+
+        private (byte, byte, byte) HslToRgb(double h, double s, double l)
+        {
+            double c = (1 - Math.Abs(2 * l - 1)) * s;
+            double x = c * (1 - Math.Abs((h / 60) % 2 - 1));
+            double m = l - c / 2;
+            double r = 0, g = 0, b = 0;
+
+            if (h >= 0 && h < 60)
+            {
+                r = c; g = x; b = 0;
+            }
+            else if (h >= 60 && h < 120)
+            {
+                r = x; g = c; b = 0;
+            }
+            else if (h >= 120 && h < 180)
+            {
+                r = 0; g = c; b = x;
+            }
+            else if (h >= 180 && h < 240)
+            {
+                r = 0; g = x; b = c;
+            }
+            else if (h >= 240 && h < 300)
+            {
+                r = x; g = 0; b = c;
+            }
+            else if (h >= 300 && h < 360)
+            {
+                r = c; g = 0; b = x;
+            }
+
+            byte R = (byte)((r + m) * 255);
+            byte G = (byte)((g + m) * 255);
+            byte B = (byte)((b + m) * 255);
+
+            return (R, G, B);
         }
     }
 }

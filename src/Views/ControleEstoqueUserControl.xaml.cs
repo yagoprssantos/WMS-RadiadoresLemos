@@ -247,7 +247,7 @@ namespace WMS_RadiadoresLemos_WPF
             Codigo = CodigoProduto.Text.Trim(),
 
             // Remove a formatação do preço (1.000,00 -> 1000.00)
-            Preco = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", ".")),
+            Preço = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", ".")),
 
             // Remove a formatação da quantidade (1.000 -> 1000)
             Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", ""))

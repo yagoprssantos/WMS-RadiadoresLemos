@@ -43,7 +43,7 @@ namespace WMS_RadiadoresLemos_WPF
                 TipoProduto.Text = produto.Tipo;
                 MarcaProduto.Text = produto.Marca;
                 CodigoProduto.Text = produto.Codigo;
-                PrecoProduto.Text = produto.Preco.ToString("F2");
+                PrecoProduto.Text = produto.Preço.ToString("F2");
                 QuantidadeInicial.Text = produto.Quantidade.ToString("N0");
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace WMS_RadiadoresLemos_WPF
             produto.Tipo = TipoProduto.Text;
             produto.Marca = MarcaProduto.Text;
             produto.Codigo = CodigoProduto.Text;
-            produto.Preco = double.Parse(PrecoProduto.Text);
+            produto.Preço = double.Parse(PrecoProduto.Text);
             produto.Quantidade = int.Parse(QuantidadeInicial.Text);
             
             isModified = false;
@@ -254,7 +254,7 @@ namespace WMS_RadiadoresLemos_WPF
                    produto.Tipo != TipoProduto.Text ||
                    produto.Marca != MarcaProduto.Text ||
                    produto.Codigo != CodigoProduto.Text ||
-                   produto.Preco.ToString("F2") != PrecoProduto.Text ||
+                   produto.Preço.ToString("F2") != PrecoProduto.Text ||
                    produto.Quantidade.ToString("N0") != QuantidadeInicial.Text;
         }
 
