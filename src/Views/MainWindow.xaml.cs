@@ -102,11 +102,16 @@ namespace WMS_RadiadoresLemos_WPF
                 // Estabelece a conexão com o banco de dados Firestore
                 DatabaseConnect.SetEnvironmentVarible();
 
-                UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
-                VerifyConnectionButton.Visibility = Visibility.Collapsed;
-
                 // Carrega todas as tabelas no cache
                 await CarregarTodasTabelasNoCache();
+
+                // Inicializa os arquivos locais com dados do banco de dados, se ainda não existirem
+                DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                await gerenciadorDeArquivos.InicializarArquivosAsync();
+
+                // Finaliza a conexão com o banco de dados
+                UpdateStatusBar("Conexão com o banco de dados estabelecida", Colors.DarkGreen);
+                VerifyConnectionButton.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {

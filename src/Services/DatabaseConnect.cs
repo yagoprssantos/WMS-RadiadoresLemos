@@ -38,7 +38,5 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             Database = FirestoreDb.Create("radiadoreslemos-ea8c6");
             File.Delete(filepath);
         }
-
-
     }
 }
