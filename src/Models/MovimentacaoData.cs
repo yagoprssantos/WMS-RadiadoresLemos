@@ -12,6 +12,10 @@ public class MovimentacaoData
     // Tipo da movimentação (Entrada ou Saída)
 
     [FirestoreProperty]
+    public required double Preço { get; set; }
+    // Valor unitário do produto movimentado
+
+    [FirestoreProperty]
     public required int Quantidade { get; set; }
     // Quantidade movimentada
 

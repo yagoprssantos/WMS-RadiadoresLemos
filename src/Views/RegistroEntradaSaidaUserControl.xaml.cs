@@ -268,6 +268,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método assíncrono para registrar a movimentação de produtos
+        // Método assíncrono para registrar a movimentação de produtos
         private async Task RegistrarMovimentacaoAsync(bool isEntrada)
         {
             try
@@ -301,6 +302,19 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         preco = 0;
                     }
+
+                    // Cria uma nova instância de MovimentacaoData
+                    var movimentacao = new MovimentacaoData
+                    {
+                        ProdutoId = produtoSelecionado.Id,
+                        Tipo = isEntrada ? "Entrada" : "Saída",
+                        Preço = preco,
+                        Quantidade = quantidade,
+                        DataHora = DateTime.UtcNow
+                    };
+
+                    // Adiciona a movimentação ao cache e ao Firestore
+                    await MovimentacoesCache.RegistrarMovimentacaoAsync(movimentacao);
 
                     // Atualiza a quantidade do produto
                     produtoSelecionado.Quantidade = quantidadeFinal;

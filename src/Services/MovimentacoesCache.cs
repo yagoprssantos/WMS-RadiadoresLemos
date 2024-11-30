@@ -9,9 +9,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 {
     public static class MovimentacoesCache
     {
-        private const int MaxMovimentacoes = 500;
+        private const int MaxMovimentacoes = 1000;
 
-        // Fun��o para registrar uma movimenta��o no cache e no Firestore
+        // Fun��o para registrar uma movimentação no cache e no Firestore
         public static async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao)
         {
             if (movimentacao == null)
@@ -34,7 +34,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 await movimentacoesRef.AddAsync(movimentacao);
                 Console.WriteLine("Movimenta��o registrada com sucesso no Firestore.");
 
-                // Adiciona a movimenta��o ao cache
+                // Adiciona a movimentação ao cache
                 if (!DadosCache.Tabelas.ContainsKey("Movimentacoes"))
                 {
                     DadosCache.Tabelas["Movimentacoes"] = new List<object>();
@@ -54,7 +54,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        // Fun��o para obter todas as movimenta��es do cache
+        // Fun��o para obter todas as movimentações do cache
         public static List<MovimentacaoData> ObterMovimentacoes()
         {
             if (!DadosCache.Tabelas.ContainsKey("Movimentacoes"))
@@ -80,7 +80,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        // Fun��o para remover movimenta��es antigas se houver mais de MaxMovimentacoes
+        // Fun��o para remover movimentações antigas se houver mais de MaxMovimentacoes
         private static async Task RemoverMovimentacoesAntigasAsync(CollectionReference movimentacoesRef)
         {
             try
