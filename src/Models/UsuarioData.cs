@@ -8,12 +8,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [FirestoreProperty]
         public required string Nome { get; set; }
         [FirestoreProperty]
+
         public required string Email { get; set; }
         [FirestoreProperty]
+
         public required string Matrícula { get; set; }
         [FirestoreProperty]
+
         public required string Senha { get; set; }
         [FirestoreProperty]
+
         public required string Cargo { get; set; }
 
 
