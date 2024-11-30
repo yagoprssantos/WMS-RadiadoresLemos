@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Google.Cloud.Firestore;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -56,13 +57,15 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchText = ProdutoComboBox.Text.ToLower();
-            var filteredProducts = produtos
-                .Where(p => p.Nome.ToLower().Contains(searchText))
-                .Select(p => p.Nome)
-                .ToList();
+            var filteredProducts = await Task.Run(() =>
+                produtos
+                    .Where(p => p.Nome.ToLower().Contains(searchText))
+                    .Select(p => p.Nome)
+                    .ToList()
+            );
 
             if (!filteredProducts.SequenceEqual(produtosFiltrados))
             {
@@ -105,13 +108,8 @@ namespace WMS_RadiadoresLemos_WPF
                 produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == selectedProductName);
                 if (produtoSelecionado != null)
                 {
-                    MessageBox.Show($"Produto selecionado:\n" +
-                                    $"Nome: {produtoSelecionado.Nome}\n" +
-                                    $"Tipo: {produtoSelecionado.Tipo}\n" +
-                                    $"Marca: {produtoSelecionado.Marca}\n" +
-                                    $"Código: {produtoSelecionado.Codigo}\n" +
-                                    $"Preço: {produtoSelecionado.Preco}\n" +
-                                    $"Quantidade: {produtoSelecionado.Quantidade}");
+                    var detalhesProdutoWindow = new DetalhesProdutoWindow(produtoSelecionado);
+                    detalhesProdutoWindow.ShowDialog();
                 }
                 else
                 {
@@ -119,6 +117,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
             }
         }
+
 
         // Método assíncrono para registrar a entrada de produtos
         private async void RegistrarEntrada_Click(object sender, RoutedEventArgs e)
@@ -167,17 +166,8 @@ namespace WMS_RadiadoresLemos_WPF
                         preco = 0;
                     }
 
-                    // Diálogo de confirmação
-                    var resultado = MessageBox.Show(
-                        $"Produto: {produtoSelecionado.Nome}\n" +
-                        $"Quantidade Atual: {produtoSelecionado.Quantidade}\n" +
-                        $"Quantidade {(isEntrada ? "Após Entrada" : "Após Saída")}: {quantidadeFinal}\n\n" +
-                        "Deseja confirmar a operação?",
-                        "Confirmação",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-
-                    if (resultado == MessageBoxResult.Yes)
+                    var confirmarRegistroWindow = new ConfirmarRegistroWindow(produtoSelecionado, quantidadeFinal, isEntrada);
+                    if (confirmarRegistroWindow.ShowDialog() == true)
                     {
                         // Atualiza a quantidade do produto
                         produtoSelecionado.Quantidade = quantidadeFinal;
@@ -200,6 +190,7 @@ namespace WMS_RadiadoresLemos_WPF
                         // Limpar campos após o registro, mantendo o produto selecionado
                         LimparCampos();
                     }
+
                 }
                 else
                 {
@@ -255,6 +246,9 @@ namespace WMS_RadiadoresLemos_WPF
         private void LimparCampos()
         {
             QuantidadeTextBox.Clear();
+            PrecoTextBox.Clear();
+            ProdutoComboBox.SelectedItem = null;
+            ProdutoComboBox.Text = string.Empty;
         }
 
         // Método para validar a entrada de texto na caixa de quantidade
@@ -277,7 +271,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
         private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox)
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
                 if (int.TryParse(textBox.Text, out int quantidade))
                 {
@@ -322,7 +316,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para formatar o texto da caixa de preço ao perder o foco (1.000,00)
         private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox)
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
                 if (double.TryParse(textBox.Text, out double preco))
                 {
