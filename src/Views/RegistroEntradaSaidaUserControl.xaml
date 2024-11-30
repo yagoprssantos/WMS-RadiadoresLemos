@@ -4,36 +4,109 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="800"
+             d:DesignHeight="800" d:DesignWidth="800"
              TextBlock.Foreground="White"
              Background="{StaticResource BackgroundBrush}">
 
-    <Grid Margin="20">
-        <Border CornerRadius="10" Padding="30" Margin="50" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxWidth="800">
-            <StackPanel Width="Auto" VerticalAlignment="Stretch">
-                <TextBlock Text="Registro de Entrada/Saída" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20" TextAlignment="Center"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-                <TextBlock Text="Produto:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
-                <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" Background="White" Foreground="Black" IsEditable="True" FontSize="18" LostFocus="ProdutoComboBox_LostFocus"
-                          StaysOpenOnEdit="True" IsTextSearchEnabled="False" TextBoxBase.TextChanged="SearchTextBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged">
-                    <!-- Produtos serão carregados do banco de dados -->
-                </ComboBox>
+            <Border Grid.Row="0" CornerRadius="10" Padding="30" Margin="50, 0, 50, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" MaxWidth="800">
+                <!-- Registro de Entrada/Saída -->
+                <StackPanel Width="Auto" VerticalAlignment="Top">
+                    <TextBlock Text="Registro de Entrada/Saída" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20" TextAlignment="Center"/>
 
-                <TextBlock Text="Quantidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
-                <TextBox Name="QuantidadeTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
-                         PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
+                    <TextBlock Text="Produto:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
+                    <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" Background="White" Foreground="Black" IsEditable="True" FontSize="18" LostFocus="ProdutoComboBox_LostFocus"
+                              StaysOpenOnEdit="True" IsTextSearchEnabled="False" TextBoxBase.TextChanged="SearchTextBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged"/>
+                    <TextBlock Text="Quantidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
+                    <TextBox Name="QuantidadeTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
+                             PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
 
-                <TextBlock Text="Preço por unidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
-                <TextBox Name="PrecoTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
-                         PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
+                    <TextBlock Text="Preço por unidade:" Margin="0,0,0,5" Foreground="White" FontSize="18"/>
+                    <TextBox Name="PrecoTextBox" Margin="0,0,0,15" Background="White" Foreground="Black" FontSize="18"
+                             PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                    <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="20"
-                            Width="200" Margin="10" Background="#4CAF50" Foreground="White"/>
-                    <Button Content="Registrar Saída" Click="RegistrarSaida_Click" FontSize="20"
-                            Width="200" Margin="10" Background="#F44336" Foreground="White"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                        <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="20" Foreground="White"
+                                Visibility="Visible" Width="200" Margin="10" Background="#4CAF50" x:Name="RegistrarEntradaButton"/>
+                        <Button Content="Registrar Saída" Click="RegistrarSaida_Click" FontSize="20" Foreground="White"
+                                Visibility="Visible" Width="200" Margin="10" Background="#F44336" x:Name="RegistrarSaidaButton"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 20, 0, 0">
+                        <Button Content="Confirmar registro" HorizontalContentAlignment="Center"
+                                FontSize="20" Width="200" Margin="10" Background="{StaticResource ButtonBackgroundBrush}" Foreground="White"
+                                Visibility="Collapsed" Click="ConfirmarAcao_Click" x:Name="ConfirmarRegistroButton"/>
+                        <Button Content="Cancelar registro" HorizontalContentAlignment="Center"
+                                FontSize="20" Width="200" Margin="10" Style="{StaticResource CancelButtonStyle}" Foreground="White"
+                                Visibility="Collapsed" Click="CancelarAcao_Click" x:Name="CancelarRegistroButton"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </Border>
-    </Grid>
+            </Border>
+
+            <Border Grid.Row="1" CornerRadius="10" Padding="0" Margin="40, 0, 40, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" MaxWidth="800">
+                <!-- Detalhes do Produto -->
+                <StackPanel Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Títulos ANTES e DEPOIS -->
+                        <TextBlock Text="Antes" Grid.Row="0" Grid.Column="1" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="18" x:Name="AntesTextBlock"/>
+                        <TextBlock Text="Depois" Grid.Row="0" Grid.Column="4" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="18" x:Name="DepoisTextBlock"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Nome:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProdutoAntes.Nome}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="NomeAtualDadoTextBlock"/>
+                        <TextBlock Grid.Row="1" Grid.Column="3" Text="Nome:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="NomeDepoisTextoTextBlock"/>
+                        <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding ProdutoDepois.Nome}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="NomeDepoisDadoTextBlock"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProdutoAntes.Tipo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="TipoAtualDadoTextBlock"/>
+                        <TextBlock Grid.Row="2" Grid.Column="3" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="TipoDepoisTextoTextBlock"/>
+                        <TextBlock Grid.Row="2" Grid.Column="4" Text="{Binding ProdutoDepois.Tipo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="TipoDepoisDadoTextBlock"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProdutoAntes.Marca}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="MarcaAtualDadoTextBlock"/>
+                        <TextBlock Grid.Row="3" Grid.Column="3" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="MarcaDepoisTextoTextBlock"/>
+                        <TextBlock Grid.Row="3" Grid.Column="4" Text="{Binding ProdutoDepois.Marca}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="MarcaDepoisDadoTextBlock"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProdutoAntes.Codigo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="CodigoAtualDadoTextBlock"/>
+                        <TextBlock Grid.Row="4" Grid.Column="3" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="CodigoDepoisTextoTextBlock"/>
+                        <TextBlock Grid.Row="4" Grid.Column="4" Text="{Binding ProdutoDepois.Codigo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="CodigoDepoisDadoTextBlock"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ProdutoAntes.Preco, StringFormat={}{0:C}}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="PrecoAtualDadoTextBlock"/>
+                        <TextBlock Grid.Row="5" Grid.Column="3" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="PrecoDepoisTextoTextBlock"/>
+                        <TextBlock Grid.Row="5" Grid.Column="4" Text="{Binding ProdutoDepois.Preco, StringFormat={}{0:C}}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="PrecoDepoisDadoTextBlock"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding ProdutoAntes.Quantidade}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="QuantidadeAtualDadoTextBlock"/>
+                        <TextBlock Grid.Row="6" Grid.Column="3" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="QuantidadeDepoisTextoTextBlock"/>
+                        <TextBlock Grid.Row="6" Grid.Column="4" Text="{Binding ProdutoDepois.Quantidade}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="QuantidadeDepoisDadoTextBlock"/>
+
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
