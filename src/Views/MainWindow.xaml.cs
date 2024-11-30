@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
@@ -9,6 +10,7 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class MainWindow : Window
     {
         private bool isLogoutInitiated = false;
+        private int _notificationCount = 0;
 
         public MainWindow()
         {
@@ -18,13 +20,14 @@ namespace WMS_RadiadoresLemos_WPF
             RegistrarEntradaLog();
             SetupStatusBar();
 
+            // Adiciona o evento de alerta adicionado
+            AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
+
             this.Closing += Window_Closing;
         }
 
-
         // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
-        // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
-        private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private async void Window_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             // Verifica se o logout foi iniciado pelo botão
             if (isLogoutInitiated) return;
@@ -57,7 +60,6 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Feche a aplicação e abra novamente.");
             }
         }
-
 
         // Registra a entrada do usuário no log
         private async void RegistrarEntradaLog()
@@ -262,8 +264,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-
         // Verifica a conexão com o banco de dados e tenta reconectar
         private void VerifyConnectionButton_Click(object sender, RoutedEventArgs e)
         {
@@ -360,5 +360,55 @@ namespace WMS_RadiadoresLemos_WPF
                 VerifyConnectionButton.Visibility = Visibility.Visible;
             }
         }
+
+        private void OnAlertaAdicionado(AlertaData alerta)
+        {
+            // Incrementa a contagem de notificações
+            _notificationCount++;
+
+            // Tornar o ícone de notificação visível
+            NotificationButton.Visibility = Visibility.Visible;
+
+            // Altera a cor do ícone de notificação para vermelho por 2 segundos e depois fica vermelho
+            ColorAnimation colorAnimation = new ColorAnimation
+            {
+                From = Colors.Transparent,
+                To = (Color)ColorConverter.ConvertFromString("#990000"),
+                Duration = new Duration(TimeSpan.FromSeconds(0.5)),
+                AutoReverse = true,
+                RepeatBehavior = new RepeatBehavior(4) // Pisca 4 vezes (2 segundos)
+            };
+
+            // Aplica a animação ao fundo do botão de notificação
+            NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
+            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+
+            // Define a cor final como vermelho após a animação
+            colorAnimation.AutoReverse = false;
+            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+
+            // Atualizar o ToolTip com a quantidade de notificações
+            NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
+        }
+
+        private void NotificationButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Limpar a contagem de notificações
+            _notificationCount = 0;
+
+            // Tornar o fundo do botão de notificação transparente
+            NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
+
+            // Abrir a aba de notificações
+            ContentArea.Content = null;
+            ContentArea.Content = new NotificacoesUserControl();
+        }
+
+        private void NotificationButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            // Atualizar o ToolTip com a quantidade de notificações
+            NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
+        }
+
     }
 }
