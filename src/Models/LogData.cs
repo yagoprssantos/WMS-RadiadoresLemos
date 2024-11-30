@@ -4,19 +4,22 @@
 public class LogData
 {
     [FirestoreProperty]
-    public DateTime Data { get; set; }
+    public required DateTime Data { get; set; }
+    // Data e hora da alteração
     [FirestoreProperty]
-    public string Tipo { get; set; }
-    // OPERACIONAL, CRÍTICO, INFORMATIVO
+
+    public required string Tipo { get; set; }
+    // OPERACIONAL, RESTRITIVA, CRÍTICA
 
     [FirestoreProperty]
-    public string Nivel { get; set; }
+    public required string Nivel { get; set; }
     // Cargo do usuário
 
     [FirestoreProperty]
-    public string Detalhes { get; set; }
+    public required string Detalhes { get; set; }
     // Qual foi a alteração propriamente dita
 
     [FirestoreProperty]
-    public string Usuario { get; set; }
+    public required string Usuario { get; set; }
+    // Nome do usuário que fez a alteração
 }
