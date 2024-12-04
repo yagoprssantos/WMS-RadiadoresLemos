@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -12,18 +13,34 @@ namespace WMS_RadiadoresLemos_WPF
         private bool isLogoutInitiated = false;
         private int _notificationCount = 0;
 
+        // Variável para armazenar o usuário logado
+        public static UsuarioData UsuarioLogado { get; set; }
+
         public MainWindow()
         {
             // Inicia processo de login
             InitializeComponent();
-            SetupDatabaseConnection();
-            RegistrarEntradaLog();
-            SetupStatusBar();
+            StartApplication();
 
             // Adiciona o evento de alerta adicionado
             AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
 
             this.Closing += Window_Closing;
+        }
+
+        private void StartApplication()
+        {
+            // Inicializa a conexão com o banco de dados
+            SetupDatabaseConnection();
+
+            // Registra a entrada do usuário no log
+            RegistrarEntradaLog();
+
+            // Adiciona o usuário logado
+            SetupUsuarioLogado();
+
+            // Configura a barra de status
+            SetupStatusBar();
         }
 
         // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
@@ -66,14 +83,17 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
+                // Verifica se o usuário logado é nulo
+                if (UsuarioLogado == null) return;
+
                 // Adiciona log
                 var log = new LogData
                 {
                     Data = DateTime.UtcNow,
                     Tipo = "OPERACIONAL",
                     Nivel = "Usuário",
-                    Detalhes = $"Usuário 'NomeDoUsuario' realizou login", // Substitua pelo nome do usuário real
-                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    Detalhes = $"Usuário {UsuarioLogado?.Nome} entrou no sistema",
+                    Usuario = UsuarioLogado?.Nome ?? "Usuário não identificado"
                 };
                 await LogHistorico.RegistrarLogAsync(log);
             }
@@ -90,6 +110,27 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Serviço do sistema indisponível.",
                                             "- Tente novamente;\n" +
                                             "- Feche a aplicação e abra novamente.");
+            }
+        }
+
+        // Adiciona o usuário logado na tela
+        private void SetupUsuarioLogado()
+        {
+            if (UsuarioLogado != null)
+            {
+                // Atualiza o TextBlock com o nome do usuário
+                var nomeTextBlock = (TextBlock)Perfil.FindName("NomeUsuarioTextBlock");
+                if (nomeTextBlock != null)
+                {
+                    nomeTextBlock.Text = UsuarioLogado.Nome;
+                }
+
+                // Atualiza o TextBlock com a matrícula do usuário
+                var matriculaTextBlock = (TextBlock)Perfil.FindName("MatriculaTextBlock");
+                if (matriculaTextBlock != null)
+                {
+                    matriculaTextBlock.Text = UsuarioLogado.Matrícula;
+                }
             }
         }
 
@@ -351,7 +392,7 @@ namespace WMS_RadiadoresLemos_WPF
                 // O cache é um dicionário onde a chave é o nome da tabela e o valor é uma lista de objetos,
                 // onde cada objeto é um documento da tabela. Isso permite um acesso rápido e offline aos dados.
 
-                UpdateStatusBar("Dados carregados no cache com sucesso - Pronto para uso", Colors.DarkGreen);
+                UpdateStatusBar("Dados carregados no cache - Pronto para uso", Colors.DarkGreen);
             }
             catch (Exception ex)
             {
@@ -373,6 +414,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Função que representa a animação de notificação de alerta
         private void OnAlertaAdicionado(AlertaData alerta)
         {
             // Incrementa a contagem de notificações
@@ -403,6 +445,7 @@ namespace WMS_RadiadoresLemos_WPF
             NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
         }
 
+        // Função para abrir a aba de notificações
         private void NotificationButton_Click(object sender, RoutedEventArgs e)
         {
             // Limpar a contagem de notificações

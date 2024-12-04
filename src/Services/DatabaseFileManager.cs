@@ -15,10 +15,10 @@ public class DatabaseFileManager
     private const string DiretorioArquivos = "DadosBancoDeDadosOffline";
 
     // Caminhos dos arquivos JSON
-    private string CaminhoArquivoUsuarios => Path.Combine(DiretorioArquivos, "usuarios.json");
-    private string CaminhoArquivoProdutos => Path.Combine(DiretorioArquivos, "produtos.json");
-    private string CaminhoArquivoLogs => Path.Combine(DiretorioArquivos, "logs.json");
-    private string CaminhoArquivoMovimentacoes => Path.Combine(DiretorioArquivos, "movimentacoes.json");
+    public string CaminhoArquivoUsuarios { get; private set; } = Path.Combine(DiretorioArquivos, "usuarios.json");
+    public string CaminhoArquivoProdutos { get; private set; } = Path.Combine(DiretorioArquivos, "produtos.json");
+    public string CaminhoArquivoLogs { get; private set; } = Path.Combine(DiretorioArquivos, "logs.json");
+    public string CaminhoArquivoMovimentacoes { get; private set; } = Path.Combine(DiretorioArquivos, "movimentacoes.json");
 
     public DatabaseFileManager()
     {
@@ -84,7 +84,7 @@ public class DatabaseFileManager
         }
     }
 
-    private async Task<List<T>> ObterColecaoDoBancoDeDadosAsync<T>(string nomeColecao)
+    public async Task<List<T>> ObterColecaoDoBancoDeDadosAsync<T>(string nomeColecao)
     {
         // Obtém uma coleção de documentos do banco de dados Firestore
         QuerySnapshot querySnapshot = await _firestoreDb.Collection(nomeColecao).GetSnapshotAsync();
