@@ -133,7 +133,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para atualizar os detalhes do produto selecionado
-        private void AtualizarDetalhesProduto(ProdutoData produto)
+        private bool AtualizarDetalhesProduto(ProdutoData produto)
         {
             // Mostrar os detalhes atuais do produto (TextBlock1)
             NomeAtualDadoTextBlock.Text = produto.Nome;
@@ -141,12 +141,12 @@ namespace WMS_RadiadoresLemos_WPF
             MarcaAtualDadoTextBlock.Text = produto.Marca;
             CodigoAtualDadoTextBlock.Text = produto.Codigo;
             QuantidadeAtualDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoAtualDadoTextBlock.Text = produto.Preco.ToString("C");
+            PrecoAtualDadoTextBlock.Text = produto.Preço.ToString("C");
 
             // Se quantidade e preço forem vazios, não atualiza valores depois
             if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
             {
-                return;
+                return false;
             }
 
             // Mostrar os detalhes depois do produto (TextBlock2)
@@ -158,20 +158,38 @@ namespace WMS_RadiadoresLemos_WPF
             // Se a quantidade e preço forem um número válido, atualiza a quantidade e o preço depois
             if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
             {
-                // Mostrar a quantidade alterado do produto (calculado) dependendo se é entrada ou saída
+                int quantidadeFinal;
                 if (usePositiveNumber)
                 {
                     // Entrada
-                    QuantidadeDepoisDadoTextBlock.Text = (produto.Quantidade + quantidadeAlterada).ToString();
+                    quantidadeFinal = produto.Quantidade + quantidadeAlterada;
                 }
                 else
                 {
                     // Saída
-                    QuantidadeDepoisDadoTextBlock.Text = (produto.Quantidade - quantidadeAlterada).ToString();
+                    quantidadeFinal = produto.Quantidade - quantidadeAlterada;
                 }
 
+                if (quantidadeFinal < 0)
+                {
+                    // Avisa que quantidade não pode ser negativa e retorna
+                    MessageBox.Show("Não existem produtos suficientes no Estoque");
+
+                    // Adiciona alerta
+                    AlertaCache.AdicionarAlerta("Erro",
+                                                "Quantidade insuficiente",
+                                                "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
+                                                "- Quantidade insuficiente no estoque.",
+                                                "- Verifique a quantidade disponível no estoque.\n" +
+                                                "- Verifique se a quantidade inserida é válida.\n" +
+                                                "- Atualize a quantidade de produtos no estoque.");
+                    return false;
+                }
+
+                QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
+
                 // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
-                double preco = produto.Preco;
+                double preco = produto.Preço;
                 double precoNovo = double.Parse(PrecoTextBox.Text);
                 int quantidade = int.Parse(QuantidadeDepoisDadoTextBlock.Text);
                 double precoDepois = (preco * produto.Quantidade + precoNovo * quantidade) / (produto.Quantidade + quantidade);
@@ -180,8 +198,12 @@ namespace WMS_RadiadoresLemos_WPF
             else
             {
                 MessageBox.Show("Por favor, insira um valor numérico válido para a quantidade.");
+                return false;
             }
+
+            return true;
         }
+
 
 
         // Método assíncrono para registrar a entrada de produtos
@@ -189,9 +211,16 @@ namespace WMS_RadiadoresLemos_WPF
         {
             usePositiveNumber = true;
 
+            bool detalhesAtualizados = false;
+
             if (produtoSelecionado != null)
             {
-                AtualizarDetalhesProduto(produtoSelecionado);
+                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            if (!detalhesAtualizados)
+            {
+                return;
             }
 
             ToggleVisibility(true);
@@ -200,15 +229,23 @@ namespace WMS_RadiadoresLemos_WPF
             RegistrarEntradaButton.Visibility = Visibility.Collapsed;
             RegistrarSaidaButton.Visibility = Visibility.Collapsed;
         }
+
 
         // Método assíncrono para registrar a saída de produtos
         private void RegistrarSaida_Click(object sender, RoutedEventArgs e)
         {
             usePositiveNumber = false;
 
+            bool detalhesAtualizados = false;
+
             if (produtoSelecionado != null)
             {
-                AtualizarDetalhesProduto(produtoSelecionado);
+                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            if (!detalhesAtualizados)
+            {
+                return;
             }
 
             ToggleVisibility(true);
@@ -217,6 +254,7 @@ namespace WMS_RadiadoresLemos_WPF
             RegistrarEntradaButton.Visibility = Visibility.Collapsed;
             RegistrarSaidaButton.Visibility = Visibility.Collapsed;
         }
+
 
         // Método para confirmar a ação de registro
         private async void ConfirmarAcao_Click(object sender, RoutedEventArgs e)
@@ -278,7 +316,7 @@ namespace WMS_RadiadoresLemos_WPF
                         quantidadeFinal = 0;
                     }
 
-                    double preco = produtoSelecionado.Preco;
+                    double preco = produtoSelecionado.Preço;
 
                     // Garantir que o preço do produto não seja negativo
                     if (preco < 0)
