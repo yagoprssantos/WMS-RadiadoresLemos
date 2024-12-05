@@ -53,7 +53,7 @@
                     </Button.ToolTip>
                 </Button>
             </StackPanel>
-            
+
 
             <!-- Perfil -->
             <Grid Margin="20, 0, 20, 50" Name="Perfil" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
@@ -90,14 +90,15 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
 
             <!-- Informações de Status -->
-            <StatusBarItem Name="StatusBarItem" Foreground="{StaticResource ButtonForegroundBrush}" HorizontalAlignment="Left" Grid.Column="0" Margin="5, 0, 0, 0"/>
+            <StatusBarItem Name="StatusBarItem" Foreground="{StaticResource ButtonForegroundBrush}" HorizontalAlignment="Left" Grid.Column="0" Margin="15, 0, 0, 0"/>
 
             <!-- Botão para reconectar no centro da status bar -->
             <StatusBarItem Grid.Column="1">
@@ -107,12 +108,28 @@
                         Visibility="Collapsed"
                         Padding="0" Margin="0" FontSize="16"
                         Foreground="White" Background="Transparent"
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                        HorizontalAlignment="Right" VerticalAlignment="Center">
+                </Button>
+            </StatusBarItem>
+
+            <!-- Ícone de Notificação -->
+            <StatusBarItem Grid.Column="2" Margin="0, 0, 20, 0">
+                <Button Name="NotificationButton" 
+                        Content="🔔" 
+                        Click="NotificationButton_Click" 
+                        MouseEnter="NotificationButton_MouseEnter"
+                        Visibility="Visible"
+                        Padding="0" Margin="0" FontSize="16"
+                        Foreground="White" Background="Transparent"
+                        HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Button.ToolTip>
+                        <ToolTip Name="NotificationToolTip" />
+                    </Button.ToolTip>
                 </Button>
             </StatusBarItem>
 
             <!-- Data e Hora -->
-            <StatusBarItem Name="StatusBarDateTime" Foreground="{StaticResource ButtonForegroundBrush}" HorizontalAlignment="Right" Grid.Column="2"/>
+            <StatusBarItem Name="StatusBarDateTime" Foreground="{StaticResource ButtonForegroundBrush}" HorizontalAlignment="Right" Grid.Column="3"/>
         </StatusBar>
     </Grid>
 </Window>
