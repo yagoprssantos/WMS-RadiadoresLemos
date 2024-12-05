@@ -291,7 +291,8 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         "Produtos",
                         "Usuarios",
-                        "Historico"
+                        "Historico",
+                        "Movimentacoes"
                     };
 
                 // Para cada tabela, 
@@ -323,6 +324,12 @@ namespace WMS_RadiadoresLemos_WPF
                         {
                             var log = doc.ConvertTo<LogData>();
                             listaObjetos.Add(log);
+                        }
+                        // Se a tabela for de movimentações, converte o documento para MovimentacaoData e adiciona à lista
+                        else if (tabela == "Movimentacoes")
+                        {
+                            var movimentacao = doc.ConvertTo<MovimentacaoData>();
+                            listaObjetos.Add(movimentacao);
                         }
                         else
                         {

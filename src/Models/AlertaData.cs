@@ -2,10 +2,19 @@
 {
     public class AlertaData
     {
-        public string Data { get; set; } // Data e hora da notificação
-        public string Tipo { get; set; } // Tipo de notificação
-        public string Sistema { get; set; } // Mensagem do sistema
-        public string Detalhes { get; set; } // Detalhes da notificação
-        public string Acoes { get; set; } // Ações recomendadas
+        public required string Data { get; set; }
+        // Data e hora da notificação
+
+        public required string Tipo { get; set; }
+        // Tipo de notificação
+
+        public required string Sistema { get; set; }
+        // Sistema que gerou a notificação
+
+        public required string Detalhes { get; set; }
+        // Detalhes da notificação - possíveis causas, o que aconteceu
+
+        public required string Acoes { get; set; }
+        // Ações recomendadas - o que consideramos que deve ser feito
     }
 }

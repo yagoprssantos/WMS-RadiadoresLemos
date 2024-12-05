@@ -20,6 +20,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             CarregarHistorico();
             CarregarAlertas();
+            CarregarMovimentacoes();
         }
 
         // Método para carregar dados no DataGrid de Histórico
@@ -42,6 +43,13 @@ namespace WMS_RadiadoresLemos_WPF
             }
 
             AlertaDataGrid.ItemsSource = alertas;
+        }
+
+        // Método para carregar dados no DataGrid de Movimentações
+        private async void CarregarMovimentacoes()
+        {
+            var movimentacoes = await Task.Run(() => MovimentacoesCache.ObterMovimentacoes());
+            MovimentacoesDataGrid.ItemsSource = movimentacoes;
         }
     }
 }
