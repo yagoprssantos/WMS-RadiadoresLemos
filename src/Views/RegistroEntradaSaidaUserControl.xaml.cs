@@ -72,23 +72,7 @@ namespace WMS_RadiadoresLemos_WPF
             DepoisTextBlock.Visibility = visibility;
 
             // Detalhes depois
-            NomeDepoisTextoTextBlock.Visibility = visibility;
-            NomeDepoisDadoTextBlock.Visibility = visibility;
-
-            TipoDepoisTextoTextBlock.Visibility = visibility;
-            TipoDepoisDadoTextBlock.Visibility = visibility;
-
-            MarcaDepoisTextoTextBlock.Visibility = visibility;
-            MarcaDepoisDadoTextBlock.Visibility = visibility;
-
-            CodigoDepoisTextoTextBlock.Visibility = visibility;
-            CodigoDepoisDadoTextBlock.Visibility = visibility;
-
-            PrecoDepoisTextoTextBlock.Visibility = visibility;
-            PrecoDepoisDadoTextBlock.Visibility = visibility;
-
-            QuantidadeDepoisTextoTextBlock.Visibility = visibility;
-            QuantidadeDepoisDadoTextBlock.Visibility = visibility;
+            DepoisGrid.Visibility = visibility;
         }
 
         // Método que é chamado quando o texto da caixa de pesquisa é alterado

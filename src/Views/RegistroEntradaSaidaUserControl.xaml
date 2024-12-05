@@ -32,13 +32,13 @@
                              PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                        <!-- Antes de selecionar tipo de registro -->
                         <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="20" Foreground="White"
                                 Visibility="Visible" Width="200" Margin="10" Background="#4CAF50" x:Name="RegistrarEntradaButton"/>
                         <Button Content="Registrar Saída" Click="RegistrarSaida_Click" FontSize="20" Foreground="White"
                                 Visibility="Visible" Width="200" Margin="10" Background="#F44336" x:Name="RegistrarSaidaButton"/>
-                    </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 20, 0, 0">
+                        <!-- Após selecionar tipo de registro -->
                         <Button Content="Confirmar registro" HorizontalContentAlignment="Center"
                                 FontSize="20" Width="200" Margin="10" Background="{StaticResource ButtonBackgroundBrush}" Foreground="White"
                                 Visibility="Collapsed" Click="ConfirmarAcao_Click" x:Name="ConfirmarRegistroButton"/>
@@ -49,63 +49,79 @@
                 </StackPanel>
             </Border>
 
+            <!-- Detalhes do Produto -->
             <Border Grid.Row="1" CornerRadius="10" Padding="0" Margin="40, 0, 40, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" MaxWidth="800">
-                <!-- Detalhes do Produto -->
-                <StackPanel Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Stretch">
-                    <Grid Margin="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="15"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                <GroupBox Header="Detalhes do Produto" Margin="10" VerticalAlignment="Top" HorizontalAlignment="Center">
+                    <StackPanel Width="Auto" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
+                        <TextBlock Text="Antes" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="18" x:Name="AntesTextBlock"/>
+                        <Grid Margin="5" x:Name="AntesGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" MinWidth="200"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                        <!-- Títulos ANTES e DEPOIS -->
-                        <TextBlock Text="Antes" Grid.Row="0" Grid.Column="1" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="18" x:Name="AntesTextBlock"/>
-                        <TextBlock Text="Depois" Grid.Row="0" Grid.Column="4" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="18" x:Name="DepoisTextBlock"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProdutoAntes.Nome}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="NomeAtualDadoTextBlock"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Nome:" FontWeight="Bold" Margin="5" FontSize="16"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProdutoAntes.Nome}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="NomeAtualDadoTextBlock"/>
-                        <TextBlock Grid.Row="1" Grid.Column="3" Text="Nome:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="NomeDepoisTextoTextBlock"/>
-                        <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding ProdutoDepois.Nome}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="NomeDepoisDadoTextBlock"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProdutoAntes.Tipo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="TipoAtualDadoTextBlock"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProdutoAntes.Tipo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="TipoAtualDadoTextBlock"/>
-                        <TextBlock Grid.Row="2" Grid.Column="3" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="TipoDepoisTextoTextBlock"/>
-                        <TextBlock Grid.Row="2" Grid.Column="4" Text="{Binding ProdutoDepois.Tipo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="TipoDepoisDadoTextBlock"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProdutoAntes.Marca}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="MarcaAtualDadoTextBlock"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProdutoAntes.Marca}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="MarcaAtualDadoTextBlock"/>
-                        <TextBlock Grid.Row="3" Grid.Column="3" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="MarcaDepoisTextoTextBlock"/>
-                        <TextBlock Grid.Row="3" Grid.Column="4" Text="{Binding ProdutoDepois.Marca}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="MarcaDepoisDadoTextBlock"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProdutoAntes.Codigo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="CodigoAtualDadoTextBlock"/>
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProdutoAntes.Codigo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="CodigoAtualDadoTextBlock"/>
-                        <TextBlock Grid.Row="4" Grid.Column="3" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="CodigoDepoisTextoTextBlock"/>
-                        <TextBlock Grid.Row="4" Grid.Column="4" Text="{Binding ProdutoDepois.Codigo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="CodigoDepoisDadoTextBlock"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProdutoAntes.Preco, StringFormat={}{0:C}}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="PrecoAtualDadoTextBlock"/>
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ProdutoAntes.Preco, StringFormat={}{0:C}}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="PrecoAtualDadoTextBlock"/>
-                        <TextBlock Grid.Row="5" Grid.Column="3" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="PrecoDepoisTextoTextBlock"/>
-                        <TextBlock Grid.Row="5" Grid.Column="4" Text="{Binding ProdutoDepois.Preco, StringFormat={}{0:C}}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="PrecoDepoisDadoTextBlock"/>
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ProdutoAntes.Quantidade}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="QuantidadeAtualDadoTextBlock"/>
+                        </Grid>
 
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding ProdutoAntes.Quantidade}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="QuantidadeAtualDadoTextBlock"/>
-                        <TextBlock Grid.Row="6" Grid.Column="3" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="QuantidadeDepoisTextoTextBlock"/>
-                        <TextBlock Grid.Row="6" Grid.Column="4" Text="{Binding ProdutoDepois.Quantidade}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="QuantidadeDepoisDadoTextBlock"/>
+                        <TextBlock Text="Depois" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="18" x:Name="DepoisTextBlock"/>
+                        <Grid Margin="5" x:Name="DepoisGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" MinWidth="200"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                    </Grid>
-                </StackPanel>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="NomeDepoisTextoTextBlock"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProdutoDepois.Nome}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="NomeDepoisDadoTextBlock"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="TipoDepoisTextoTextBlock"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProdutoDepois.Tipo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="TipoDepoisDadoTextBlock"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="MarcaDepoisTextoTextBlock"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProdutoDepois.Marca}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="MarcaDepoisDadoTextBlock"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="CodigoDepoisTextoTextBlock"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProdutoDepois.Codigo}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="CodigoDepoisDadoTextBlock"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="PrecoDepoisTextoTextBlock"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProdutoDepois.Preco, StringFormat={}{0:C}}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="PrecoDepoisDadoTextBlock"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16" x:Name="QuantidadeDepoisTextoTextBlock"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ProdutoDepois.Quantidade}" Margin="5" Background="White" Foreground="Black" Padding="2" FontSize="16" x:Name="QuantidadeDepoisDadoTextBlock"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
             </Border>
         </Grid>
     </ScrollViewer>
