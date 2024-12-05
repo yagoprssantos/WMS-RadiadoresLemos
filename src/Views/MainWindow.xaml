@@ -54,12 +54,10 @@
                 </Button>
             </StackPanel>
 
-
             <!-- Perfil -->
-            <Grid Margin="20, 0, 20, 50" Name="Perfil" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
+            <Grid Margin="20, 0, 20, 50" Name="Perfil" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Background="{StaticResource BackgroundBrush}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition Width="17*"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -68,10 +66,10 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Name="NomeUsuarioTextBlock" Text="Nome do Usuário" FontSize="16" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
-                <TextBlock Name="MatriculaTextBlock" Text="Matrícula" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,21,0,0" Grid.RowSpan="2" />
+                <TextBlock Name="NomeUsuarioTextBlock" Text="Nome do Usuário" FontSize="16" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Margin="15"/>
+                <TextBlock Name="MatriculaTextBlock" Text="Matrícula" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,5,0,10" Grid.Row="1" />
                 <Button Content="Logout" Click="LogoutButton_Click" FontSize="16" 
-                        Margin="0,10,0,0" Width="100" Grid.Row="2" Grid.Column="2"
+                        Width="100" Grid.Row="2" Grid.Column="2"
                         Style="{StaticResource CancelButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Sair do sistema"/>

@@ -14,7 +14,7 @@ namespace WMS_RadiadoresLemos_WPF
         private int _notificationCount = 0;
 
         // Variável para armazenar o usuário logado
-        public static UsuarioData UsuarioLogado { get; set; }
+        public static UsuarioData? UsuarioLogado { get; set; }
 
         public MainWindow()
         {
@@ -51,6 +51,9 @@ namespace WMS_RadiadoresLemos_WPF
 
             try
             {
+                // Remove usuário logado
+                UsuarioLogado = null;
+
                 // Adiciona log
                 var log = new LogData
                 {
@@ -274,6 +277,9 @@ namespace WMS_RadiadoresLemos_WPF
 
                     // Oculta a janela principal
                     this.Hide();
+
+                    // Remove usuário logado
+                    UsuarioLogado = null;
 
                     // Adiciona log
                     var log = new LogData

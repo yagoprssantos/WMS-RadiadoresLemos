@@ -77,7 +77,7 @@
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="Preço" Binding="{Binding Preco, StringFormat={}{0:C2}}" IsReadOnly="True" Width="*" />
+                            <DataGridTextColumn Header="Preço" Binding="{Binding Preço, StringFormat={}{0:C2}}" IsReadOnly="True" Width="*" />
                             <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade, StringFormat={}{0:N0}}" IsReadOnly="False" Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>

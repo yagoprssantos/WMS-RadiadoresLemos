@@ -59,7 +59,7 @@ namespace WMS_RadiadoresLemos_WPF
 
             // 1. Verificar se o usuário existe nos arquivos JSON
             List<UsuarioData> usuarios = await CarregarUsuariosDoArquivoAsync();
-            UsuarioData? usuarioValido = usuarios.Find(u => u.Nome == username && u.Senha == password);
+            UsuarioData? usuarioValido = usuarios.Find(u => (u.Nome == username || u.Matrícula == username) && u.Senha == password);
 
             if (usuarioValido != null)
             {
@@ -68,14 +68,29 @@ namespace WMS_RadiadoresLemos_WPF
             }
 
             // 2. Tentar conectar com o banco de dados e verificar lá
-            usuarioValido = await VerificarUsuarioNoBancoDeDadosAsync(username, password);
-
-            if (usuarioValido != null)
+            try
             {
-                // 3. Atualizar arquivos JSON
-                await AtualizarUsuariosNoArquivoAsync(usuarios);
-                LoginBemSucedido(usuarioValido);
-                return;
+                usuarioValido = await VerificarUsuarioNoBancoDeDadosAsync(username, password);
+
+                if (usuarioValido != null)
+                {
+                    // 3. Atualizar arquivos JSON
+                    await _databaseFileManager.AtualizarArquivosAsync();
+                    // Recarregar os usuários do arquivo atualizado
+                    usuarios = await CarregarUsuariosDoArquivoAsync();
+                    usuarioValido = usuarios.Find(u => (u.Nome == username || u.Matrícula == username) && u.Senha == password);
+
+                    if (usuarioValido != null)
+                    {
+                        LoginBemSucedido(usuarioValido);
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log de erro
+                Console.WriteLine($"Erro ao verificar usuário no banco de dados: {ex.Message}");
             }
 
             // 4. Exibir mensagem de erro
@@ -98,14 +113,7 @@ namespace WMS_RadiadoresLemos_WPF
         private async Task<UsuarioData?> VerificarUsuarioNoBancoDeDadosAsync(string username, string password)
         {
             List<UsuarioData> usuarios = await _databaseFileManager.ObterColecaoDoBancoDeDadosAsync<UsuarioData>("usuarios");
-            return usuarios.Find(u => u.Nome == username && u.Senha == password);
-        }
-
-        private async Task AtualizarUsuariosNoArquivoAsync(List<UsuarioData> usuarios)
-        {
-            string caminhoArquivoUsuarios = _databaseFileManager.CaminhoArquivoUsuarios;
-            string json = JsonSerializer.Serialize(usuarios);
-            await File.WriteAllTextAsync(caminhoArquivoUsuarios, json);
+            return usuarios.Find(u => (u.Nome == username || u.Matrícula == username) && u.Senha == password);
         }
 
         private void LoginBemSucedido(UsuarioData usuario)

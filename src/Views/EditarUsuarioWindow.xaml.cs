@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,8 +13,9 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class EditarUsuarioWindow : Window
     {
         private UsuarioData usuario;
-        private bool isModified = false;
         private bool isConfirmingExit = false;
+        private bool isModified = false;
+        private bool isNewUser = false;
 
         // Propriedade pública para acessar o usuário editado
         public UsuarioData Usuario => usuario;
@@ -25,14 +27,22 @@ namespace WMS_RadiadoresLemos_WPF
 
             if (usuario == null)
             {
+                isNewUser = true;
                 // Cria usuario vazio com valores padrão
+                string novaMatricula;
+                do
+                {
+                    novaMatricula = GerarMatricula("Usuário");
+                } while (MatriculaExiste(novaMatricula));
+
                 this.usuario = new UsuarioData
                 {
                     Nome = string.Empty,
                     Email = string.Empty,
-                    Matrícula = GerarMatricula("Usuário"), // Gera a matrícula com base no cargo
+                    Matrícula = novaMatricula, // Gera a matrícula com base no cargo e ano atual
                     Senha = string.Empty,
-                    Cargo = "Usuário"
+                    Cargo = "Usuário",
+                    Id = Guid.NewGuid().ToString()
                 };
             }
             else
@@ -41,6 +51,33 @@ namespace WMS_RadiadoresLemos_WPF
             }
 
             PreencherCampos();
+        }
+
+        // Método para verificar se a matrícula já existe
+        private bool MatriculaExiste(string matricula)
+        {
+            if (DadosCache.Tabelas.TryGetValue("Usuarios", out var usuarios))
+            {
+                return usuarios.OfType<UsuarioData>().Any(u => u.Matrícula == matricula);
+            }
+            return false;
+        }
+
+        // Método para gerar a matrícula do usuário com base no cargo e ano atual
+        private string GerarMatricula(string cargo)
+        {
+            string prefixo = cargo switch
+            {
+                "Administrador" => "ADM",
+                "Usuário" => "USR",
+                _ => "UNK"
+            };
+
+            string ano = DateTime.Now.Year.ToString().Substring(2, 2);
+            Random random = new Random();
+            string posicao = random.Next(0, 100).ToString("D2");
+
+            return $"{prefixo}{ano}{posicao}";
         }
 
         // Preenche os campos da interface com os dados do usuário
@@ -118,7 +155,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+                if (isModified && VerificarModificacoes() && ConfirmarSaidaSemSalvar())
                 {
                     return;
                 }
@@ -150,7 +187,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Evento disparado ao tentar fechar a janela
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            if (VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+            if (isModified && VerificarModificacoes() && ConfirmarSaidaSemSalvar())
             {
                 e.Cancel = true;
             }
@@ -192,57 +229,29 @@ namespace WMS_RadiadoresLemos_WPF
             return true;
         }
 
-        // Método para gerar a matrícula do usuário com base no cargo
-        private string GerarMatricula(string cargo)
-        {
-            string prefixo = cargo switch
-            {
-                "Administrador" => "ADM",
-                "Usuário" => "USR",
-                "Convidado" => "CVD",
-                _ => "UNK"
-            };
-
-            string ano = DateTime.Now.Year.ToString().Substring(2, 2);
-            string numeroContado = new Random().Next(1000, 9999).ToString();
-
-            return $"{prefixo}{ano}{numeroContado}";
-        }
-
-        // Verifica se o texto é permitido com base no padrão fornecido
-        private static bool IsTextAllowed(string text, string pattern)
-        {
-            return !Regex.IsMatch(text, pattern);
-        }
-
-        // Lida com a colagem de texto, verificando se o texto colado é permitido
-        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
-        {
-            if (e.DataObject.GetDataPresent(typeof(string)))
-            {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                if (!IsTextAllowed(text, pattern))
-                {
-                    e.CancelCommand();
-                }
-            }
-            else
-            {
-                e.CancelCommand();
-            }
-        }
-
         // Evento disparado ao mudar a seleção do cargo do usuário
         private void PermissaoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (PermissaoComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
             {
-                usuario.Cargo = selectedItem.Content.ToString() ??  string.Empty;
-                usuario.Matrícula = GerarMatricula(usuario.Cargo); // Atualiza a matrícula com base no novo cargo
-                MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                usuario.Cargo = selectedItem.Content.ToString() ?? string.Empty;
+
+                if (isNewUser)
+                {
+                    string novaMatricula;
+                    do
+                    {
+                        novaMatricula = GerarMatricula(usuario.Cargo);
+                    } while (MatriculaExiste(novaMatricula));
+
+                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                }
+
                 isModified = true;
             }
         }
+
 
         // Evento disparado ao modificar qualquer campo de texto
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -273,6 +282,29 @@ namespace WMS_RadiadoresLemos_WPF
         private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             HandlePasting(e, "[^a-zA-Z ]+");
+        }
+
+        // Verifica se o texto é permitido com base no padrão fornecido
+        private static bool IsTextAllowed(string text, string pattern)
+        {
+            return !Regex.IsMatch(text, pattern);
+        }
+
+        // Lida com a colagem de texto, verificando se o texto colado é permitido
+        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsTextAllowed(text, pattern))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
         }
     }
 }
