@@ -9,7 +9,7 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 
 public class DatabaseFileManager
 {
-    private FirestoreDb _firestoreDb;
+    private FirestoreDb? _firestoreDb;
 
     // Pasta onde os arquivos JSON serão salvos
     private const string DiretorioArquivos = "DadosBancoDeDadosOffline";
@@ -38,63 +38,91 @@ public class DatabaseFileManager
 
     public async Task InicializarArquivosAsync()
     {
-        // Inicializa os arquivos locais com dados do banco de dados, se ainda não existirem
-        if (!File.Exists(CaminhoArquivoUsuarios))
+        try
         {
-            // Obtém os dados do banco de dados e salva em um arquivo JSON
-            List<UsuarioData> usuarios = await ObterColecaoDoBancoDeDadosAsync<UsuarioData>("usuarios");
-            await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
-        }
-        if (!File.Exists(CaminhoArquivoProdutos))
-        {
-            List<ProdutoData> produtos = await ObterColecaoDoBancoDeDadosAsync<ProdutoData>("produtos");
-            await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
-        }
+            // Inicializa os arquivos locais com dados do banco de dados, se ainda não existirem
+            if (!File.Exists(CaminhoArquivoUsuarios))
+            {
+                // Obtém os dados do banco de dados e salva em um arquivo JSON
+                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("usuarios");
+                await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
+            }
+            if (!File.Exists(CaminhoArquivoProdutos))
+            {
+                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("produtos");
+                await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
+            }
 
-        if (!File.Exists(CaminhoArquivoLogs))
-        {
-            List<LogData> logs = await ObterColecaoDoBancoDeDadosAsync<LogData>("logs");
-            await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
-        }
+            if (!File.Exists(CaminhoArquivoLogs))
+            {
+                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("logs");
+                await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
+            }
 
-        if (!File.Exists(CaminhoArquivoMovimentacoes))
+            if (!File.Exists(CaminhoArquivoMovimentacoes))
+            {
+                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("movimentacoes");
+                await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
+            }
+        }
+        catch (Exception ex)
         {
-            List<MovimentacaoData> movimentacoes = await ObterColecaoDoBancoDeDadosAsync<MovimentacaoData>("movimentacoes");
-            await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
+            // Log de erro
+            Console.WriteLine($"Erro ao inicializar arquivos: {ex.Message}");
         }
     }
 
     public async Task AtualizarArquivosAsync()
     {
-        // Atualiza os arquivos locais com os dados mais recentes do banco de dados
-        if (_firestoreDb != null)
+        try
         {
-            // Se houver conexão com o banco de dados, reescreve os arquivos locais atualizando-os
-            List<UsuarioData> usuarios = await ObterColecaoDoBancoDeDadosAsync<UsuarioData>("Usuarios");
-            await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
+            // Atualiza os arquivos locais com os dados mais recentes do banco de dados
+            if (_firestoreDb != null)
+            {
+                // Se houver conexão com o banco de dados, reescreve os arquivos locais atualizando-os
+                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("Usuarios");
+                await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
 
-            List<ProdutoData> produtos = await ObterColecaoDoBancoDeDadosAsync<ProdutoData>("Produtos");
-            await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
+                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("Produtos");
+                await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
 
-            List<LogData> logs = await ObterColecaoDoBancoDeDadosAsync<LogData>("Historico");
-            await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
+                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("Historico");
+                await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
 
-            List<MovimentacaoData> movimentacoes = await ObterColecaoDoBancoDeDadosAsync<MovimentacaoData>("Movimentacoes");
-            await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
+                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("Movimentacoes");
+                await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao atualizar arquivos: {ex.Message}");
         }
     }
 
-    public async Task<List<T>> ObterColecaoDoBancoDeDadosAsync<T>(string nomeColecao)
+    public async Task<List<T>> ObterColecaoFirebaseDB<T>(string nomeColecao)
     {
-        // Obtém uma coleção de documentos do banco de dados Firestore
-        QuerySnapshot querySnapshot = await _firestoreDb.Collection(nomeColecao).GetSnapshotAsync();
         List<T> dados = new List<T>();
 
-        foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+        if (_firestoreDb != null)
         {
-            // Desserializa os documentos em objetos do tipo T
-            T dado = documentSnapshot.ConvertTo<T>();
-            dados.Add(dado);
+            try
+            {
+                // Obtém uma coleção de documentos do banco de dados Firestore
+                QuerySnapshot querySnapshot = await _firestoreDb.Collection(nomeColecao).GetSnapshotAsync();
+
+                foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+                {
+                    // Desserializa os documentos em objetos do tipo T
+                    T dado = documentSnapshot.ConvertTo<T>();
+                    dados.Add(dado);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log de erro
+                Console.WriteLine($"Erro ao obter coleção do banco de dados: {ex.Message}");
+            }
         }
 
         return dados;
@@ -102,20 +130,27 @@ public class DatabaseFileManager
 
     private async Task SalvarNoArquivoAsync<T>(string caminhoArquivo, List<T> dados)
     {
-        // Este método salva os dados em um arquivo JSON no caminho especificado
-        // Primeiro converte os dados em JSON
-        string json = JsonSerializer.Serialize(dados);
+        try
+        {
+            // Este método salva os dados em um arquivo JSON no caminho especificado
+            // Primeiro converte os dados em JSON
+            string json = JsonSerializer.Serialize(dados);
 
-        // Depois, caso o arquivo tenha sido serializado corretamente, salva o JSON no arquivo
-        if (!string.IsNullOrEmpty(json) || !string.IsNullOrWhiteSpace(json) || json != "[]")
-        {
-            await File.WriteAllTextAsync(caminhoArquivo, json);
+            // Depois, caso o arquivo tenha sido serializado corretamente, salva o JSON no arquivo
+            if (!string.IsNullOrEmpty(json))
+            {
+                await File.WriteAllTextAsync(caminhoArquivo, json);
+            }
+            else
+            {
+                // Se o JSON estiver vazio, lança uma exceção
+                throw new Exception("Erro ao salvar os dados no arquivo JSON.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            // Se o JSON estiver vazio, lança uma exceção
-            MessageBox.Show("Erro ao salvar os dados no arquivo JSON.");
-            throw new System.Exception("Erro ao salvar os dados no arquivo JSON.");
+            // Log de erro
+            Console.WriteLine($"Erro ao salvar no arquivo {caminhoArquivo}: {ex.Message}");
         }
     }
 }
