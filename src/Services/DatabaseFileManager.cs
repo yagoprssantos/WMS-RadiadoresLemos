@@ -44,24 +44,24 @@ public class DatabaseFileManager
             if (!File.Exists(CaminhoArquivoUsuarios))
             {
                 // Obtém os dados do banco de dados e salva em um arquivo JSON
-                List<UsuarioData> usuarios = await ObterColecaoDoBancoDeDadosAsync<UsuarioData>("usuarios");
+                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("usuarios");
                 await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
             }
             if (!File.Exists(CaminhoArquivoProdutos))
             {
-                List<ProdutoData> produtos = await ObterColecaoDoBancoDeDadosAsync<ProdutoData>("produtos");
+                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("produtos");
                 await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
             }
 
             if (!File.Exists(CaminhoArquivoLogs))
             {
-                List<LogData> logs = await ObterColecaoDoBancoDeDadosAsync<LogData>("logs");
+                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("logs");
                 await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
             }
 
             if (!File.Exists(CaminhoArquivoMovimentacoes))
             {
-                List<MovimentacaoData> movimentacoes = await ObterColecaoDoBancoDeDadosAsync<MovimentacaoData>("movimentacoes");
+                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("movimentacoes");
                 await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
             }
         }
@@ -80,16 +80,16 @@ public class DatabaseFileManager
             if (_firestoreDb != null)
             {
                 // Se houver conexão com o banco de dados, reescreve os arquivos locais atualizando-os
-                List<UsuarioData> usuarios = await ObterColecaoDoBancoDeDadosAsync<UsuarioData>("usuarios");
+                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("Usuarios");
                 await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
 
-                List<ProdutoData> produtos = await ObterColecaoDoBancoDeDadosAsync<ProdutoData>("produtos");
+                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("Produtos");
                 await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
 
-                List<LogData> logs = await ObterColecaoDoBancoDeDadosAsync<LogData>("logs");
+                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("Historico");
                 await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
 
-                List<MovimentacaoData> movimentacoes = await ObterColecaoDoBancoDeDadosAsync<MovimentacaoData>("movimentacoes");
+                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("Movimentacoes");
                 await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
             }
         }
@@ -100,7 +100,7 @@ public class DatabaseFileManager
         }
     }
 
-    public async Task<List<T>> ObterColecaoDoBancoDeDadosAsync<T>(string nomeColecao)
+    public async Task<List<T>> ObterColecaoFirebaseDB<T>(string nomeColecao)
     {
         List<T> dados = new List<T>();
 
@@ -137,7 +137,7 @@ public class DatabaseFileManager
             string json = JsonSerializer.Serialize(dados);
 
             // Depois, caso o arquivo tenha sido serializado corretamente, salva o JSON no arquivo
-            if (!string.IsNullOrEmpty(json) && json != "[]")
+            if (!string.IsNullOrEmpty(json))
             {
                 await File.WriteAllTextAsync(caminhoArquivo, json);
             }
