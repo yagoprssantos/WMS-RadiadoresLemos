@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="500" d:DesignWidth="800">
 
     <Grid Margin="10">
         <TabControl>
@@ -17,7 +17,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <GroupBox Header="Informações de Conexão" Grid.Row="0" Margin="10"
-                              Foreground="White">
+                  Foreground="White">
                         <StackPanel Margin="10">
                             <TextBlock Text="Servidor: " FontWeight="Bold"/>
                             <TextBlock Text="{Binding ServerInfo}"/>
@@ -25,14 +25,17 @@
                             <TextBlock Text="{Binding DatabaseInfo}"/>
                             <TextBlock Text="Status da Conexão: " FontWeight="Bold"/>
                             <TextBlock Text="{Binding ConnectionStatus}"/>
+                            <TextBlock Text="Tipo de Banco de Dados: " FontWeight="Bold"/>
+                            <TextBlock Text="{Binding DatabaseType}"/>
+                            <TextBlock Text="Última Conexão Realizada: " FontWeight="Bold"/>
+                            <TextBlock Text="{Binding LastConnectionTime}"/>
                         </StackPanel>
                     </GroupBox>
-                    <UniformGrid Rows="1" Columns="3" Margin="0,5,0,10" Grid.Row="1">
-                        <Button Content="Exportar Dados" Margin="5" 
-                                Click="ExportarDados_Click"/>
-                        <Button Content="Importar Dados" Margin="5"
-                                Click="ImportarDados_Click"/>
-                        <Button Content="Fazer reconexão" Margin="5"/>
+                    <UniformGrid Rows="1" Columns="4" Margin="0,5,0,10" Grid.Row="1">
+                        <Button Content="Exportar" Margin="5" Click="ExportarDados_Click"/>
+                        <Button Content="Importar" Margin="5" Click="ImportarDados_Click"/>
+                        <Button Content="Reconectar" Margin="5" Click="Reconectar_Click"/>
+                        <Button Content="Gerar Tabela" Margin="5" Click="GerarTabela_Click"/>
                     </UniformGrid>
                 </Grid>
             </TabItem>
@@ -85,6 +88,7 @@
                 </DockPanel>
             </TabItem>
         </TabControl>
+        
         <!-- Barra de Progresso -->
         <Grid Name="ShowProgressBar" Background="#80000000" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="White" Height="Auto" Width="600">
@@ -96,5 +100,45 @@
             </StackPanel>
         </Grid>
 
+        <!-- Popup para Configurações de Exportação -->
+        <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="False" IsOpen="{Binding IsExportConfigPopupOpen}">
+            <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="15">
+                <StackPanel>
+                    <!-- Textos ajustáveis de acordo com função -->
+                    <TextBlock Text="Configurações para Exportar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+
+                    <!-- Tabelas adicionadas de acordo com arquivo/função -->
+                    <TextBlock Text="Selecione as Tabelas que deseja exportar:" FontWeight="Bold" FontSize="16"/>
+                    <ListBox x:Name="ExportTabelasListBox" SelectionMode="Multiple" Height="100"/>
+
+                    <Button Content="Confirmar exportação" Margin="5" Click="ConfirmarExportacao_Click"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Popup para Configurações de Importação -->
+        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" IsOpen="{Binding IsImportConfigPopupOpen}">
+            <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="15">
+                <StackPanel>
+                    <!-- Textos ajustáveis de acordo com função -->
+                    <TextBlock Text="Configurações para Importar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+
+                    <!-- Tabelas adicionadas de acordo com arquivo/função -->
+                    <TextBlock Text="Selecione as Tabelas que deseja importar:" FontWeight="Bold" FontSize="16"/>
+                    <ListBox x:Name="ImportTabelasListBox" SelectionMode="Multiple" Height="100"/>
+
+                    <!-- ComboBox com opções para importação-->
+                    <TextBlock Text="Escolha um método de importação:" FontWeight="Bold" FontSize="16" Margin="0,10,0,0"/>
+                    <ComboBox x:Name="ImportComboBox" Margin="0,0,0,10">
+                        <ComboBoxItem Content="Substituir Dados"/>
+                        <ComboBoxItem Content="Adicionar Dados"/>
+                    </ComboBox>
+
+                    <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" FontWeight="Bold" FontSize="12" Foreground="Red" Margin="0,0,0,10"/>
+                    <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" FontWeight="Bold" FontSize="16" Foreground="Red" Margin="0,0,0,10"/>
+                    <Button Content="Confirmar importação" Margin="5" Click="ConfirmarImportacao_Click"/>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </UserControl>
