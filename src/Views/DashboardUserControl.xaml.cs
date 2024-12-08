@@ -88,10 +88,14 @@ namespace WMS_RadiadoresLemos_WPF
                 SelecionarPeriodoLucroMensal.Items.Clear();
                 SelecionarPeriodoLucroMensal.Items.Add(new ComboBoxItem { Content = "Sem filtros" });
 
+                // Adiciona os meses existentes nas movimentações ao ComboBox
                 foreach (var mes in meses)
                 {
                     SelecionarPeriodoLucroMensal.Items.Add(new ComboBoxItem { Content = mes });
                 }
+
+                // Seleciona o primeiro item por padrão
+                SelecionarPeriodoLucroMensal.SelectedIndex = 0;
             }
         }
 
@@ -282,7 +286,7 @@ namespace WMS_RadiadoresLemos_WPF
                     Values = new ChartValues<int>(vendas.Select(v => v.Quantidade)),
                     PointGeometry = DefaultGeometries.Circle,
                     PointGeometrySize = 10,
-                    Fill = new SolidColorBrush(Color.FromRgb(33, 150, 243)) // Blue
+                    Fill = new SolidColorBrush(Color.FromRgb(33, 150, 243)) // Azul
                 });
 
                 PeriodoLabels = vendas.Select(v => v.Data.ToString("dd/MM/yyyy")).ToArray();
@@ -297,8 +301,8 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void SelecionarPeriodoProdutosVendidos_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var periodoSelecionado = (sender as ComboBox)?.SelectedItem as ComboBoxItem;
-            if (periodoSelecionado != null)
+            var comboBox = sender as ComboBox;
+            if (comboBox?.SelectedItem is ComboBoxItem periodoSelecionado && periodoSelecionado.Content != null)
             {
                 GraficoProdutosVendidos(periodoSelecionado.Content.ToString());
             }
