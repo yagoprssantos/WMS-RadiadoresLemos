@@ -306,7 +306,7 @@ namespace WMS_RadiadoresLemos_WPF
                             Tipo = "INFORMATIVO",
                             Nivel = "Usuário",
                             Detalhes = "Exportação de Dados",
-                            Usuario = "NomeDoUsuario"
+                            Usuario = MainWindow.UsuarioLogado.Nome
                         };
                         await LogHistorico.RegistrarLogAsync(log);
 

@@ -51,8 +51,8 @@ namespace WMS_RadiadoresLemos_WPF
 
             try
             {
-                // Remove usuário logado
-                UsuarioLogado = null;
+                // Verifica se o usuário logado é nulo
+                if (UsuarioLogado == null) return;
 
                 // Adiciona log
                 var log = new LogData
@@ -60,10 +60,13 @@ namespace WMS_RadiadoresLemos_WPF
                     Data = DateTime.UtcNow,
                     Tipo = "OPERACIONAL",
                     Nivel = "Usuário",
-                    Detalhes = $"Usuário 'NomeDoUsuario' realizou logout", // Substitua pelo nome do usuário real
-                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    Detalhes = $"Usuário {UsuarioLogado.Nome} realizou logout",
+                    Usuario = UsuarioLogado.Nome
                 };
                 await LogHistorico.RegistrarLogAsync(log);
+
+                // Remove usuário logado
+                UsuarioLogado = null;
             }
             catch (Exception ex)
             {
@@ -278,19 +281,23 @@ namespace WMS_RadiadoresLemos_WPF
                     // Oculta a janela principal
                     this.Hide();
 
-                    // Remove usuário logado
-                    UsuarioLogado = null;
-
-                    // Adiciona log
-                    var log = new LogData
+                    // Verifica se o usuário logado é nulo
+                    if (UsuarioLogado != null)
                     {
-                        Data = DateTime.UtcNow,
-                        Tipo = "OPERACIONAL",
-                        Nivel = "Usuário",
-                        Detalhes = $"Usuário 'NomeDoUsuario' realizou logout", // Substitua pelo nome do usuário real
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
-                    };
-                    await LogHistorico.RegistrarLogAsync(log);
+                        // Adiciona log
+                        var log = new LogData
+                        {
+                            Data = DateTime.UtcNow,
+                            Tipo = "OPERACIONAL",
+                            Nivel = "Usuário",
+                            Detalhes = $"Usuário {UsuarioLogado.Nome} realizou logout",
+                            Usuario = UsuarioLogado.Nome
+                        };
+                        await LogHistorico.RegistrarLogAsync(log);
+
+                        // Remove usuário logado
+                        UsuarioLogado = null;
+                    }
 
                     // Reabre a janela de login
                     LoginWindow loginWindow = new LoginWindow();

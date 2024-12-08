@@ -13,7 +13,7 @@
         </Grid.RowDefinitions>
 
         <!-- Título do Dashboard -->
-        <TextBlock Text="Dashboard" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+        <TextBlock Text="Dashboard" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
 
         <!-- Painéis para Contadores e Resumos -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
@@ -22,18 +22,49 @@
                 <!-- Contadores (Usuários, Produtos, etc.) -->
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0, 0, 0, 20">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                        <!-- Total de Produtos -->
                         <Border Background="#388E3C" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="Total de Produtos" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
                                 <TextBlock x:Name="TotalProdutosTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
                             </StackPanel>
                         </Border>
+                        <!-- Total de Produtos com Baixo Estoque -->
                         <Border Background="#FF5722" Padding="20" CornerRadius="15"  Margin="15" Width="Auto" MinWidth="150" Height="120">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="Baixo em Estoque" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
                                 <TextBlock x:Name="ProdutosBaixoEstoqueTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
                             </StackPanel>
                         </Border>
+                        <!-- Total de Marcas -->
+                        <Border Background="#E91E63" Padding="20" CornerRadius="15"  Margin="15" Width="Auto" MinWidth="150" Height="120">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="Total de Marcas" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
+                                <TextBlock x:Name="TotalMarcasTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Total de Movimentações -->
+                        <Border Background="#9C27B0" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="Total de Movimentações" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
+                                <TextBlock x:Name="TotalMovimentacoesTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Total de Entradas -->
+                        <Border Background="#3F51B5" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="Total de Entradas" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
+                                <TextBlock x:Name="TotalEntradasTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Total de Saídas -->
+                        <Border Background="#009688" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="Total de Saídas" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
+                                <TextBlock x:Name="TotalSaidasTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Total de Usuários -->
                         <Border Background="#1976D2" Padding="20" CornerRadius="15"  Margin="15" Width="Auto" MinWidth="150" Height="120">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock Text="Total de Usuários" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
@@ -42,6 +73,7 @@
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
+                
                 <!-- Gráficos em Abas -->
                 <TabControl Margin="15">
                     <!-- Aba 1: Gráfico de Barras - Movimentação de Produtos -->
@@ -88,9 +120,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="10">
                                 <TextBlock Text="Período:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
-                                <ComboBox x:Name="SelecionarPeriodoLucroMensal" Width="200" SelectedIndex="0" SelectionChanged="SelecionarPeriodoLucroMensal_SelectionChanged">
-                                    <ComboBoxItem Content="Sem filtros"/>
-                                </ComboBox>
+                                <ComboBox x:Name="SelecionarPeriodoLucroMensal" Width="200" SelectedIndex="0" SelectionChanged="SelecionarPeriodoLucroMensal_SelectionChanged"/>
                             </StackPanel>
                             <lvc:CartesianChart Series="{Binding LucroMensalSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
                                 <lvc:CartesianChart.DataTooltip>

@@ -72,6 +72,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             ExibirContadores();
             ExibirGraficos();
+            CarregarComboBoxLucroMensal();
         }
 
         // Função para carregar o ComboBox de Lucro Mensal
@@ -86,12 +87,16 @@ namespace WMS_RadiadoresLemos_WPF
                     .ToList();
 
                 SelecionarPeriodoLucroMensal.Items.Clear();
-                SelecionarPeriodoLucroMensal.Items.Add(new ComboBoxItem { Content = "Sem filtros" });
+                SelecionarPeriodoLucroMensal.Items.Add("Sem filtros");
 
+                // Adiciona os meses existentes nas movimentações ao ComboBox
                 foreach (var mes in meses)
                 {
-                    SelecionarPeriodoLucroMensal.Items.Add(new ComboBoxItem { Content = mes });
+                    SelecionarPeriodoLucroMensal.Items.Add(mes);
                 }
+
+                // Seleciona o primeiro item por padrão
+                SelecionarPeriodoLucroMensal.SelectedIndex = 0;
             }
         }
 
@@ -101,6 +106,10 @@ namespace WMS_RadiadoresLemos_WPF
             TotalUsuarios();
             TotalProdutos();
             BaixoEstoque();
+            TotalMarcas();
+            TotalMovimentacoes();
+            TotalEntradas();
+            TotalSaidas();
         }
 
         // Exibe os gráficos do dashboard
@@ -140,6 +149,47 @@ namespace WMS_RadiadoresLemos_WPF
             int produtosBaixoEstoque = VerificarBaixoEstoque();
             ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
         }
+
+        // Exibe o total de marcas
+        private void TotalMarcas()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
+            {
+                int totalMarcas = produtos.Select(p => ((ProdutoData)p).Marca).Distinct().Count();
+                TotalMarcasTextBlock.Text = totalMarcas.ToString();
+            }
+        }
+
+        // Exibe o total de movimentações
+        private void TotalMovimentacoes()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            {
+                int totalMovimentacoes = movimentacoes.Count;
+                TotalMovimentacoesTextBlock.Text = totalMovimentacoes.ToString();
+            }
+        }
+
+        // Exibe o total de entradas
+        private void TotalEntradas()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            {
+                int totalEntradas = movimentacoes.Count(m => ((MovimentacaoData)m).Tipo == "Entrada");
+                TotalEntradasTextBlock.Text = totalEntradas.ToString();
+            }
+        }
+
+        // Exibe o total de saídas
+        private void TotalSaidas()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            {
+                int totalSaidas = movimentacoes.Count(m => ((MovimentacaoData)m).Tipo == "Saída");
+                TotalSaidasTextBlock.Text = totalSaidas.ToString();
+            }
+        }
+
 
         // Exibe o gráfico de barras com as marcas de maior estoque
         private void GraficoEstoqueMarcas()
@@ -222,25 +272,35 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
-                var vendas = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).DataHora.ToString("MMMM") == periodo)
-                    .GroupBy(m => ((MovimentacaoData)m).DataHora.Date)
-                    .Select(g => new { Data = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
-                    .OrderBy(v => v.Data)
+                DateTime dataInicio = periodo switch
+                {
+                    "Hoje" => DateTime.Today,
+                    "Última Semana" => DateTime.Today.AddDays(-7),
+                    "Último Mês" => DateTime.Today.AddMonths(-1),
+                    "Último Ano" => DateTime.Today.AddYears(-1),
+                    _ => DateTime.MinValue
+                };
+
+                var produtosVendidos = movimentacoes
+                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).DataHora >= dataInicio)
+                    .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
+                    .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
+                    .OrderByDescending(p => p.Quantidade)
                     .ToList();
 
                 ProdutosVendidosSeries.Clear();
 
-                ProdutosVendidosSeries.Add(new LineSeries
+                foreach (var produto in produtosVendidos)
                 {
-                    Title = "Produtos Vendidos",
-                    Values = new ChartValues<int>(vendas.Select(v => v.Quantidade)),
-                    PointGeometry = DefaultGeometries.Circle,
-                    PointGeometrySize = 10,
-                    Fill = new SolidColorBrush(Color.FromRgb(33, 150, 243)) // Blue
-                });
+                    ProdutosVendidosSeries.Add(new ColumnSeries
+                    {
+                        Title = produto.ProdutoId,
+                        Values = new ChartValues<int> { produto.Quantidade },
+                        Fill = ObterCorProduto(produto.ProdutoId)
+                    });
+                }
 
-                PeriodoLabels = vendas.Select(v => v.Data.ToString("dd/MM/yyyy")).ToArray();
+                ProdutosLabels = produtosVendidos.Select(p => p.ProdutoId).ToArray();
             }
             else
             {
@@ -252,10 +312,14 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void SelecionarPeriodoProdutosVendidos_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var periodoSelecionado = (sender as ComboBox)?.SelectedItem as ComboBoxItem;
-            if (periodoSelecionado != null)
+            var comboBox = sender as ComboBox;
+            if (comboBox?.SelectedItem is ComboBoxItem periodoSelecionado && periodoSelecionado.Content != null)
             {
-                GraficoProdutosVendidos(periodoSelecionado.Content.ToString());
+                var periodo = periodoSelecionado.Content.ToString();
+                if (!string.IsNullOrEmpty(periodo))
+                {
+                    GraficoProdutosVendidos(periodo);
+                }
             }
         }
 
@@ -382,14 +446,15 @@ namespace WMS_RadiadoresLemos_WPF
 
                 if (!string.IsNullOrEmpty(mesSelecionado) && mesSelecionado != "Sem filtros")
                 {
-                    lucroMensal = lucroMensal.Where(l => l.Mes == mesSelecionado).ToList();
+                    var dataSelecionada = DateTime.ParseExact(mesSelecionado, "MMM/yyyy", null);
+                    lucroMensal = lucroMensal.Where(l => DateTime.ParseExact(l.Mes, "MMM/yyyy", null) <= dataSelecionada).ToList();
                 }
 
                 LucroMensalSeries.Clear();
 
                 LucroMensalSeries.Add(new LineSeries
                 {
-                    Title = "Lucro Mensal",
+                    Title = "Lucro Mensal Acumulado",
                     Values = new ChartValues<double>(lucroMensal.Select(l => l.Lucro)),
                     PointGeometry = DefaultGeometries.Circle,
                     PointGeometrySize = 10,
@@ -405,6 +470,7 @@ namespace WMS_RadiadoresLemos_WPF
 
             DataContext = this;
         }
+
 
         private void SelecionarPeriodoLucroMensal_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
