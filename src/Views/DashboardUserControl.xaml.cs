@@ -101,6 +101,11 @@ namespace WMS_RadiadoresLemos_WPF
             TotalUsuarios();
             TotalProdutos();
             BaixoEstoque();
+            TotalMarcas();
+            TotalVendas();
+            TotalMovimentacoes();
+            TotalEntradas();
+            TotalSaidas();
         }
 
         // Exibe os gráficos do dashboard
@@ -140,6 +145,47 @@ namespace WMS_RadiadoresLemos_WPF
             int produtosBaixoEstoque = VerificarBaixoEstoque();
             ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
         }
+
+        // Exibe o total de marcas
+        private void TotalMarcas()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
+            {
+                int totalMarcas = produtos.Select(p => ((ProdutoData)p).Marca).Distinct().Count();
+                TotalMarcasTextBlock.Text = totalMarcas.ToString();
+            }
+        }
+
+        // Exibe o total de movimentações
+        private void TotalMovimentacoes()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            {
+                int totalMovimentacoes = movimentacoes.Count;
+                TotalMovimentacoesTextBlock.Text = totalMovimentacoes.ToString();
+            }
+        }
+
+        // Exibe o total de entradas
+        private void TotalEntradas()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            {
+                int totalEntradas = movimentacoes.Count(m => ((MovimentacaoData)m).Tipo == "Entrada");
+                TotalEntradasTextBlock.Text = totalEntradas.ToString();
+            }
+        }
+
+        // Exibe o total de saídas
+        private void TotalSaidas()
+        {
+            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            {
+                int totalSaidas = movimentacoes.Count(m => ((MovimentacaoData)m).Tipo == "Saída");
+                TotalSaidasTextBlock.Text = totalSaidas.ToString();
+            }
+        }
+
 
         // Exibe o gráfico de barras com as marcas de maior estoque
         private void GraficoEstoqueMarcas()
