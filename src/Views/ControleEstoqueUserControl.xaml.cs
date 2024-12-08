@@ -294,7 +294,7 @@ namespace WMS_RadiadoresLemos_WPF
                 Tipo = "OPERACIONAL",
                 Nivel = "Usuário",
                 Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
-                Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                Usuario = MainWindow.UsuarioLogado.Nome
             };
             await LogHistorico.RegistrarLogAsync(log);
         }
@@ -410,7 +410,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Produto editado: {produtoEditado.Nome}, Código: {produtoEditado.Codigo}",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 
@@ -513,7 +513,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Quantidade alterada do produto '{produtoSelecionado.Nome}', Código: {produtoSelecionado.Codigo}; Nova Quantidade: {produtoSelecionado.Quantidade}",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 
@@ -550,7 +550,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "CRÍTICO",
                         Nivel = "Usuário",
                         Detalhes = $"Produto deletado: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 
@@ -583,7 +583,7 @@ namespace WMS_RadiadoresLemos_WPF
                     Tipo = "OPERACIONAL",
                     Nivel = "Usuário",
                     Detalhes = $"Produto deletado: {produto.Nome}, Código: {produto.Codigo}",
-                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    Usuario = MainWindow.UsuarioLogado.Nome
                 };
                 await LogHistorico.RegistrarLogAsync(log);
             }
@@ -631,7 +631,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Produto editado: {produtoEditado.Nome}, Código: {produtoEditado.Codigo}",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 

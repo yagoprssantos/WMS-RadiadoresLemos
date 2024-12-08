@@ -60,8 +60,8 @@ namespace WMS_RadiadoresLemos_WPF
                     Data = DateTime.UtcNow,
                     Tipo = "OPERACIONAL",
                     Nivel = "Usuário",
-                    Detalhes = $"Usuário 'NomeDoUsuario' realizou logout", // Substitua pelo nome do usuário real
-                    Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                    Detalhes = $"Usuário {UsuarioLogado.Nome} realizou logout", // Substitua pelo nome do usuário real
+                    Usuario = UsuarioLogado.Nome
                 };
                 await LogHistorico.RegistrarLogAsync(log);
             }
@@ -287,8 +287,8 @@ namespace WMS_RadiadoresLemos_WPF
                         Data = DateTime.UtcNow,
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
-                        Detalhes = $"Usuário 'NomeDoUsuario' realizou logout", // Substitua pelo nome do usuário real
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Detalhes = $"Usuário {UsuarioLogado.Nome} realizou logout", // Substitua pelo nome do usuário real
+                        Usuario = UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 

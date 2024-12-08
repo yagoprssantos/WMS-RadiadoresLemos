@@ -102,7 +102,6 @@ namespace WMS_RadiadoresLemos_WPF
             TotalProdutos();
             BaixoEstoque();
             TotalMarcas();
-            TotalVendas();
             TotalMovimentacoes();
             TotalEntradas();
             TotalSaidas();

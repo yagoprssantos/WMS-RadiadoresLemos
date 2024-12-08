@@ -174,7 +174,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Usuário '{usuarioEditado.Nome}' atualizado.",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 
@@ -226,7 +226,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "CRITICO",
                         Nivel = "Usuário",
                         Detalhes = $"Usuário '{novoUsuario.Nome}' adicionado.",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 
@@ -283,7 +283,7 @@ namespace WMS_RadiadoresLemos_WPF
                             Tipo = "CRITICO",
                             Nivel = "Usuário",
                             Detalhes = $"Usuário '{usuarioSelecionado.Nome}' deletado.",
-                            Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                            Usuario = MainWindow.UsuarioLogado.Nome
                         };
                         await LogHistorico.RegistrarLogAsync(log);
 
@@ -373,7 +373,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"Usuário '{usuarioEditado.Nome}' atualizado.",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 

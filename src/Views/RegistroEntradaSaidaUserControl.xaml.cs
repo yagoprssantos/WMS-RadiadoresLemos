@@ -332,7 +332,7 @@ namespace WMS_RadiadoresLemos_WPF
                         ProdutoId = produtoSelecionado.Id,
                         Quantidade = quantidadeMovimentacao,
                         Preço = precoMovimentacao,
-                        DataHora = DateTime.Now,
+                        DataHora = DateTime.UtcNow,
                         Tipo = isEntrada ? "Entrada" : "Saída"
                     };
 
@@ -351,7 +351,7 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = "OPERACIONAL",
                         Nivel = "Usuário",
                         Detalhes = $"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}; Quantidade - {quantidadeMovimentacao}; Preço - {precoMovimentacao}",
-                        Usuario = "NomeDoUsuario" // Substitua pelo nome do usuário real
+                        Usuario = MainWindow.UsuarioLogado.Nome
                     };
                     await LogHistorico.RegistrarLogAsync(log);
 
