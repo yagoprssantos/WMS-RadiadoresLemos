@@ -1,4 +1,5 @@
 ﻿using Google.Cloud.Firestore;
+using Newtonsoft.Json.Bson;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,6 +27,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         }";
 
         static string filepath = "";
+        public static bool IsConnected { get; set; } = false;
 
         public static FirestoreDb? Database { get; private set; }
 
@@ -37,6 +39,27 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", filepath);
             Database = FirestoreDb.Create("radiadoreslemos-ea8c6");
             File.Delete(filepath);
+        }
+
+        public static void TestConnection()
+        {
+            try
+            {
+                var collection = Database?.Collection("Test");
+                collection?.AddAsync(new { Test = "Test" });
+                IsConnected = true;
+                collection?.GetSnapshotAsync().Result.Documents.First().Reference.DeleteAsync();
+            }
+            catch (Exception)
+            {
+                IsConnected = false;
+            }
+        }
+
+        public static void Disconnect()
+        {
+            Database = null;
+            IsConnected = false;
         }
     }
 }

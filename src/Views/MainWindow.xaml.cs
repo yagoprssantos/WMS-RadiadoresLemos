@@ -18,10 +18,6 @@ namespace WMS_RadiadoresLemos_WPF
         // Variável para armazenar o usuário logado
         public static UsuarioData? UsuarioLogado { get; set; }
 
-        // Propriedade estática para armazenar o status da conexão com o banco de dados
-        public static bool ConectadoDB { get; set; }
-        
-
         public MainWindow()
         {
             // Inicia processo de login
@@ -36,7 +32,6 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void StartApplication()
         {
-            // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
             // Inicializa a conexão com o banco de dados
             SetupDatabaseConnection();
 
@@ -60,6 +55,9 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 // Verifica se o usuário logado é nulo
                 if (UsuarioLogado == null) return;
+
+                // Desconecta do banco de dados
+                DatabaseConnect.Disconnect();
 
                 // Adiciona log
                 var log = new LogData
@@ -156,21 +154,19 @@ namespace WMS_RadiadoresLemos_WPF
                 // Estabelece a conexão com o banco de dados Firestore
                 DatabaseConnect.SetEnvironmentVarible();
 
+                // Testa a conexão com o banco de dados
+                DatabaseConnect.TestConnection();
+
                 // Carrega todas as tabelas no cache
                 await CarregarTodasTabelasNoCache();
 
                 // Inicializa os arquivos locais com dados do banco de dados, se ainda não existirem
+                // A PRIMEIRA CONEXÃO DEVE SER FEITA USANDO INTERNET, CASO CONTRÁRIO, NÃO SERÁ POSSÍVEL SINCRONIZAR OS DADOS
                 DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
                 await gerenciadorDeArquivos.InicializarArquivosAsync();
-
-                //variavel banco conectado
-                ConectadoDB = true;
             }
             catch (Exception ex)
             {
-                //variavel banco conectado
-                ConectadoDB = false;
-
                 UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
                 MessageBox.Show($"Erro ao carregar dados, com banco de dados e com arquivos locais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
@@ -281,6 +277,9 @@ namespace WMS_RadiadoresLemos_WPF
                     // Define a variável de controle como true
                     isLogoutInitiated = true;
 
+                    // Desconecta do banco de dados
+                    DatabaseConnect.Disconnect();
+
                     // Oculta a janela principal
                     this.Hide();
 
@@ -341,7 +340,6 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
-        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Função para carregar todas as tabelas no cache
         private async Task CarregarTodasTabelasNoCache()
         {
@@ -352,12 +350,12 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Lista de tabelas a serem carregadas no cache
                 var tabelas = new List<string>
-        {
-            "Produtos",
-            "Usuarios",
-            "Historico",
-            "Movimentacoes"
-        };
+                {
+                    "Produtos",
+                    "Usuarios",
+                    "Historico",
+                    "Movimentacoes"
+                };
 
                 var dbFileManager = new DatabaseFileManager();
 
@@ -366,8 +364,8 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var listaObjetos = new List<object>();
 
-                    // TODO: alterar de volta para != para conexão funcionar
-                    if (db != null)
+                    // Se houver conexão com o banco de dados, carrega os dados do banco
+                    if (db != null && DatabaseConnect.IsConnected)
                     {
                         // Pega a referência da tabela
                         var tabelaRef = db.Collection(tabela);

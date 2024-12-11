@@ -36,6 +36,7 @@ public class DatabaseFileManager
         }
     }
 
+    // Função para inicializar os arquivos locais com os dados do banco de dados
     public async Task InicializarArquivosAsync()
     {
         try
@@ -72,6 +73,7 @@ public class DatabaseFileManager
         }
     }
 
+    // Função para atualizar os arquivos locais com os dados mais recentes do banco de dados
     public async Task AtualizarArquivosAsync()
     {
         try
@@ -100,6 +102,7 @@ public class DatabaseFileManager
         }
     }
 
+    // Função para obter uma coleção de documentos do banco de dados Firestore
     public async Task<List<T>> ObterColecaoFirebaseDB<T>(string nomeColecao)
     {
         List<T> dados = new List<T>();
@@ -128,7 +131,102 @@ public class DatabaseFileManager
         return dados;
     }
 
-    private async Task SalvarNoArquivoAsync<T>(string caminhoArquivo, List<T> dados)
+    // Função para obter os dados de um arquivo JSON
+    public async static Task<List<T>> ObterDadosDoArquivoAsync<T>(string caminhoArquivo)
+    {
+        try
+        {
+            // Lê o arquivo JSON
+            string json = await File.ReadAllTextAsync(caminhoArquivo);
+
+            // Desserializa o JSON em uma lista de objetos do tipo T
+            List<T> dados = JsonSerializer.Deserialize<List<T>>(json);
+
+            return dados;
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao obter dados do arquivo {caminhoArquivo}: {ex.Message}");
+            return new List<T>();
+        }
+    }
+
+    // Funções de adicionar, remover e atualizar dados no banco de dados local
+    public async static Task AdicionarDadoAsync<T>(string caminhoArquivo, T dado)
+    {
+        try
+        {
+            // Lê o arquivo JSON
+            string json = await File.ReadAllTextAsync(caminhoArquivo);
+
+            // Desserializa o JSON em uma lista de objetos do tipo T
+            List<T> dados = JsonSerializer.Deserialize<List<T>>(json);
+
+            // Adiciona o novo dado à lista
+            dados.Add(dado);
+
+            // Salva a lista atualizada no arquivo
+            await SalvarNoArquivoAsync(caminhoArquivo, dados);
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao adicionar dado ao arquivo {caminhoArquivo}: {ex.Message}");
+        }
+    }
+
+    // Função para remover um dado do arquivo JSON
+    public async Task RemoverDadoAsync<T>(string caminhoArquivo, T dado)
+    {
+        try
+        {
+            // Lê o arquivo JSON
+            string json = await File.ReadAllTextAsync(caminhoArquivo);
+
+            // Desserializa o JSON em uma lista de objetos do tipo T
+            List<T> dados = JsonSerializer.Deserialize<List<T>>(json);
+
+            // Remove o dado da lista
+            dados.Remove(dado);
+
+            // Salva a lista atualizada no arquivo
+            await SalvarNoArquivoAsync(caminhoArquivo, dados);
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao remover dado do arquivo {caminhoArquivo}: {ex.Message}");
+        }
+    }
+
+    // Função para atualizar um dado no arquivo JSON
+    public async Task AtualizarDadoAsync<T>(string caminhoArquivo, T dado)
+    {
+        try
+        {
+            // Lê o arquivo JSON
+            string json = await File.ReadAllTextAsync(caminhoArquivo);
+
+            // Desserializa o JSON em uma lista de objetos do tipo T
+            List<T> dados = JsonSerializer.Deserialize<List<T>>(json);
+
+            // Atualiza o dado na lista
+            int index = dados.FindIndex(d => d.Equals(dado));
+            dados[index] = dado;
+
+            // Salva a lista atualizada no arquivo
+            await SalvarNoArquivoAsync(caminhoArquivo, dados);
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao atualizar dado no arquivo {caminhoArquivo}: {ex.Message}");
+        }
+    }
+
+    // Função para salvar os dados em um arquivo JSON
+    private async static Task SalvarNoArquivoAsync<T>(string caminhoArquivo, List<T> dados)
     {
         try
         {

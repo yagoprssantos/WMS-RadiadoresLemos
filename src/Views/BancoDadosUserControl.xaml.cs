@@ -21,25 +21,11 @@ namespace WMS_RadiadoresLemos_WPF
         private string ConnectionStatus;
         
 
-
-
         public BancoDadosUserControl()
         {
             InitializeComponent();
             DataContext = this;
             CarregarTabelas();
-
-
-            // Tentando fazer a verificação de conexão com o banco de dados mas essa bosta nn vai ( coloquei em qualquer lugar como um teste)
-            if (MainWindow.ConectadoDB == true)
-            {
-                ConnectionStatus = "Conectado";
-            }
-            else
-            {
-                ConnectionStatus = "Desconectado";
-            }
-
         }
 
         // Método para carregar as tabelas no ComboBox
