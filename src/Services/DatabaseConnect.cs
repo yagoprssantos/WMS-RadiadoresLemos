@@ -43,12 +43,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 
         public static void TestConnection()
         {
+            var collection = Database?.Collection("Test");
+
             try
             {
-                var collection = Database?.Collection("Test");
-                collection?.AddAsync(new { Test = "Test" });
+                // Adiciona um documento de teste
+                var docRef = collection?.AddAsync(new { Test = "Test" }).Result;
                 IsConnected = true;
-                collection?.GetSnapshotAsync().Result.Documents.First().Reference.DeleteAsync();
+
+                // Remove o documento de teste
+                docRef?.DeleteAsync().Wait();
             }
             catch (Exception)
             {

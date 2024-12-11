@@ -72,6 +72,10 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Remove usuário logado
                 UsuarioLogado = null;
+
+                // Salva o cache nos arquivos JSON
+                DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
             }
             catch (Exception ex)
             {
@@ -88,6 +92,7 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Feche a aplicação e abra novamente.");
             }
         }
+
 
         // Registra a entrada do usuário no log
         private async void RegistrarEntradaLog()
@@ -299,6 +304,10 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Remove usuário logado
                         UsuarioLogado = null;
+
+                        // Salva o cache nos arquivos JSON
+                        DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                        await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
                     }
 
                     // Reabre a janela de login

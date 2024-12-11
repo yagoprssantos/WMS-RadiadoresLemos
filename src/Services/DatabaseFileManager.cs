@@ -251,4 +251,42 @@ public class DatabaseFileManager
             Console.WriteLine($"Erro ao salvar no arquivo {caminhoArquivo}: {ex.Message}");
         }
     }
+
+    // Função para salvar o cache nos arquivos JSON
+    public async Task SalvarCacheNosArquivosAsync()
+    {
+        try
+        {
+            // Salva os dados do cache nos arquivos JSON
+            if (DadosCache.Tabelas.ContainsKey("Usuarios"))
+            {
+                List<UsuarioData> usuarios = DadosCache.Tabelas["Usuarios"].Cast<UsuarioData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
+            }
+
+            if (DadosCache.Tabelas.ContainsKey("Produtos"))
+            {
+                List<ProdutoData> produtos = DadosCache.Tabelas["Produtos"].Cast<ProdutoData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
+            }
+
+            if (DadosCache.Tabelas.ContainsKey("Historico"))
+            {
+                List<LogData> logs = DadosCache.Tabelas["Historico"].Cast<LogData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
+            }
+
+            if (DadosCache.Tabelas.ContainsKey("Movimentacoes"))
+            {
+                List<MovimentacaoData> movimentacoes = DadosCache.Tabelas["Movimentacoes"].Cast<MovimentacaoData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao salvar cache nos arquivos: {ex.Message}");
+        }
+    }
+
 }
