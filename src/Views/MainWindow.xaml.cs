@@ -94,19 +94,8 @@ namespace WMS_RadiadoresLemos_WPF
                 await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
                 await gerenciadorDeArquivos.SincronizarDadosComBancoAsync();
 
-                // Atualiza a barra de status
-                UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
-                UpdateConnectionStatus("Conectado");
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Aviso",
-                                            "Sincronização Completa - " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
-                                            "Os dados foram carregados do banco de dados com sucesso.",
-                                            "É possível sair da aplicação com segurança");
-
-                // Para os timers
-                _saveCacheTimer.Stop();
-                _connectDatabaseTimer.Stop();
+                // Desativa o modo offline
+                desativarModoOffline();
 
                 // Oculta barra de carregamento
                 LoadingScreen.Visibility = Visibility.Collapsed;
@@ -117,7 +106,7 @@ namespace WMS_RadiadoresLemos_WPF
                 Console.WriteLine($"Erro ao conectar ao banco de dados: {ex.Message}");
 
                 // Atualiza a barra de status
-                UpdateStatusBar("Erro ao conectar ao banco de dados", Colors.DarkRed);
+                UpdateStatusBar("Erro ao conectar ao banco de dados", Colors.Purple);
 
                 // Espera 3 segundos
                 await Task.Delay(3000);
@@ -553,18 +542,8 @@ namespace WMS_RadiadoresLemos_WPF
                             }
                         }
 
-                        // Adiciona alerta
-                        AlertaCache.AdicionarAlerta("Aviso",
-                                                    "Falha na conexão com o banco de dados",
-                                                    "Não foi possível conectar ao banco de dados. No entanto, os dados foram carregados dos arquivos locais.",
-                                                    "Reconecte para sincronizar informações (existe uma tentativa de conexão a cada 1 minuto)");
-
-                        UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
-                        UpdateConnectionStatus("Desconectado");
-
-                        // Inicia timers
-                        _saveCacheTimer.Start();
-                        _connectDatabaseTimer.Start();
+                        // Inicia o processo de "Modo Offline"
+                        ativarModoOffline();
                     }
 
                     // Adiciona a lista de objetos ao cache
@@ -652,14 +631,52 @@ namespace WMS_RadiadoresLemos_WPF
         private void ConnectionButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             // Atualizar o ToolTip com base na conexão com o banco de dados
-            if (DatabaseConnect.Database != null)
+            if (DatabaseConnect.IsConnected)
             {
-                ConnectionToolTip.Content = "Conectado ao banco de dados - usando dados online";
+                ConnectionToolTip.Content = "Conectado ao Banco de Dados";
             }
             else
             {
-                ConnectionToolTip.Content = "Desconectado do banco de dados - usando arquivos locais offline. Reconecte para sincronizar informações";
+                ConnectionToolTip.Content = "Desconectado do Banco de Dados";
             }
+        }
+
+
+        // Função para iniciar processo de "Modo Offline"
+        public void ativarModoOffline()
+        {
+            // Inicia o processo de "Modo Offline"
+            _saveCacheTimer.Start();
+            _connectDatabaseTimer.Start();
+
+            // Adiciona alerta
+            AlertaCache.AdicionarAlerta("Aviso",
+                                        "Falha na conexão com o banco de dados",
+                                        "Não foi possível conectar ao banco de dados. No entanto, os dados foram carregados dos arquivos locais.",
+                                        "Reconecte para sincronizar informações (existe uma tentativa de conexão a cada 1 minuto)");
+
+            UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
+            UpdateConnectionStatus("Desconectado");
+
+            // Desliga conexão
+            DatabaseConnect.Disconnect();
+            DatabaseConnect.IsConnected = false;
+        }
+        public void desativarModoOffline()
+        {
+            // Finaliza o processo de "Modo Offline"
+            _saveCacheTimer.Stop();
+            _connectDatabaseTimer.Stop();
+
+            // Atualiza a barra de status
+            UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
+            UpdateConnectionStatus("Conectado");
+
+            // Adiciona alerta
+            AlertaCache.AdicionarAlerta("Aviso",
+                                        "Sincronização Completa - " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                                        "Os dados foram carregados do banco de dados com sucesso.",
+                                        "É possível sair da aplicação com segurança");
         }
     }
 }

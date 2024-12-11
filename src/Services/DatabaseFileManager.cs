@@ -23,6 +23,7 @@ public class DatabaseFileManager
     public DatabaseFileManager()
     {
         // Configura a variável de ambiente para a conexão com o banco de dados
+        // PRECISA ESTAR CONECTADO COM A INTERNET PARA FUNCIONAR
         DatabaseConnect.SetEnvironmentVarible();
         if (DatabaseConnect.Database != null)
         {
@@ -45,24 +46,24 @@ public class DatabaseFileManager
             if (!File.Exists(CaminhoArquivoUsuarios))
             {
                 // Obtém os dados do banco de dados e salva em um arquivo JSON
-                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("usuarios");
+                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("Usuarios");
                 await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
             }
             if (!File.Exists(CaminhoArquivoProdutos))
             {
-                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("produtos");
+                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("Produtos");
                 await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
             }
 
             if (!File.Exists(CaminhoArquivoLogs))
             {
-                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("logs");
+                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("Historico");
                 await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
             }
 
             if (!File.Exists(CaminhoArquivoMovimentacoes))
             {
-                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("movimentacoes");
+                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("Movimentacoes");
                 await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
             }
         }
@@ -313,6 +314,24 @@ public class DatabaseFileManager
                 // Log de erro
                 Console.WriteLine($"Erro ao sincronizar coleção com o banco de dados: {ex.Message}");
             }
+        }
+    }
+
+    // Função para retornar caminho do arquivo JSON de uma tabela
+    public string ObterCaminhoArquivo(string tabela)
+    {
+        switch (tabela)
+        {
+            case "Usuarios":
+                return CaminhoArquivoUsuarios;
+            case "Produtos":
+                return CaminhoArquivoProdutos;
+            case "Historico":
+                return CaminhoArquivoLogs;
+            case "Movimentacoes":
+                return CaminhoArquivoMovimentacoes;
+            default:
+                return "";
         }
     }
 }
