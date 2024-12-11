@@ -51,7 +51,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Aviso",
-                                            "Cache salvo com sucesso" + DateOnly.FromDateTime(DateTime.Now).ToString(),
+                                            "Arquivos locais sincornizados - " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
                                             "Os dados foram salvos nos arquivos locais com sucesso.",
                                             "É possível sair da aplicação com segurança");
             }
@@ -74,6 +74,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 // Atualiza a barra de status
                 UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
+                UpdateConnectionStatus("Conectando...");
 
                 // Tenta conectar ao banco de dados
                 DatabaseConnect.SetEnvironmentVarible();
@@ -81,6 +82,9 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Deixa carregamento visível
                 LoadingScreen.Visibility = Visibility.Visible;
+
+                // Fecha qualquer aba que esteja aberta
+                ContentArea.Content = null;
 
                 // Altera a barra de status
                 UpdateStatusBar("Sincronizando dados com o banco de dados...", Colors.Blue);
@@ -96,13 +100,16 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Aviso",
-                                            "Conexão com banco de dados estabelecida" + DateOnly.FromDateTime(DateTime.Now).ToString(),
+                                            "Sincronização Completa - " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
                                             "Os dados foram carregados do banco de dados com sucesso.",
                                             "É possível sair da aplicação com segurança");
 
                 // Para os timers
                 _saveCacheTimer.Stop();
                 _connectDatabaseTimer.Stop();
+
+                // Oculta barra de carregamento
+                LoadingScreen.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
@@ -545,6 +552,12 @@ namespace WMS_RadiadoresLemos_WPF
                                 listaObjetos.AddRange(objetos);
                             }
                         }
+
+                        // Adiciona alerta
+                        AlertaCache.AdicionarAlerta("Aviso",
+                                                    "Falha na conexão com o banco de dados",
+                                                    "Não foi possível conectar ao banco de dados. No entanto, os dados foram carregados dos arquivos locais.",
+                                                    "Reconecte para sincronizar informações (existe uma tentativa de conexão a cada 1 minuto)");
 
                         UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
                         UpdateConnectionStatus("Desconectado");
