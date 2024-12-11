@@ -18,6 +18,10 @@ namespace WMS_RadiadoresLemos_WPF
         // Variável para armazenar o usuário logado
         public static UsuarioData? UsuarioLogado { get; set; }
 
+        // Propriedade estática para armazenar o status da conexão com o banco de dados
+        public static bool ConectadoDB { get; set; }
+        
+
         public MainWindow()
         {
             // Inicia processo de login
@@ -158,9 +162,15 @@ namespace WMS_RadiadoresLemos_WPF
                 // Inicializa os arquivos locais com dados do banco de dados, se ainda não existirem
                 DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
                 await gerenciadorDeArquivos.InicializarArquivosAsync();
+
+                //variavel banco conectado
+                ConectadoDB = true;
             }
             catch (Exception ex)
             {
+                //variavel banco conectado
+                ConectadoDB = false;
+
                 UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
                 MessageBox.Show($"Erro ao carregar dados, com banco de dados e com arquivos locais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
