@@ -72,9 +72,18 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
+                // Atualiza a barra de status
+                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
+
                 // Tenta conectar ao banco de dados
                 DatabaseConnect.SetEnvironmentVarible();
                 DatabaseConnect.TestConnection();
+
+                // Deixa carregamento visível
+                LoadingScreen.Visibility = Visibility.Visible;
+
+                // Altera a barra de status
+                UpdateStatusBar("Sincronizando dados com o banco de dados...", Colors.Blue);
 
                 // Sincroniza arquivos cache enviando para o banco de dados
                 DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
@@ -99,6 +108,15 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 // Log de erro
                 Console.WriteLine($"Erro ao conectar ao banco de dados: {ex.Message}");
+
+                // Atualiza a barra de status
+                UpdateStatusBar("Erro ao conectar ao banco de dados", Colors.DarkRed);
+
+                // Espera 3 segundos
+                await Task.Delay(3000);
+
+                // Altera a barra de status
+                UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
             }
         }
 

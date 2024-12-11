@@ -207,25 +207,25 @@ public class DatabaseFileManager
                 if (File.Exists(CaminhoArquivoUsuarios))
                 {
                     List<UsuarioData> usuarios = await LerDoArquivoAsync<UsuarioData>(CaminhoArquivoUsuarios);
-                    await SincronizarColecaoFirebaseDB(usuarios, "Usuarios");
+                    await SincronizarFirebaseDB(usuarios, "Usuarios");
                 }
 
                 if (File.Exists(CaminhoArquivoProdutos))
                 {
                     List<ProdutoData> produtos = await LerDoArquivoAsync<ProdutoData>(CaminhoArquivoProdutos);
-                    await SincronizarColecaoFirebaseDB(produtos, "Produtos");
+                    await SincronizarFirebaseDB(produtos, "Produtos");
                 }
 
                 if (File.Exists(CaminhoArquivoLogs))
                 {
                     List<LogData> logs = await LerDoArquivoAsync<LogData>(CaminhoArquivoLogs);
-                    await SincronizarColecaoFirebaseDB(logs, "Historico");
+                    await SincronizarFirebaseDB(logs, "Historico");
                 }
 
                 if (File.Exists(CaminhoArquivoMovimentacoes))
                 {
                     List<MovimentacaoData> movimentacoes = await LerDoArquivoAsync<MovimentacaoData>(CaminhoArquivoMovimentacoes);
-                    await SincronizarColecaoFirebaseDB(movimentacoes, "Movimentacoes");
+                    await SincronizarFirebaseDB(movimentacoes, "Movimentacoes");
                 }
             }
         }
@@ -268,14 +268,14 @@ public class DatabaseFileManager
     }
 
     // Função para sincronizar uma coleção de documentos com o banco de dados Firestore
-    public async Task SincronizarColecaoFirebaseDB<T>(List<T> dados, string nomeColecao)
+    public async Task SincronizarFirebaseDB<T>(List<T> dados, string tabela) where T : class
     {
         if (_firestoreDb != null)
         {
             try
             {
                 // Deleta todos os documentos da coleção
-                QuerySnapshot querySnapshot = await _firestoreDb.Collection(nomeColecao).GetSnapshotAsync();
+                QuerySnapshot querySnapshot = await _firestoreDb.Collection(tabela).GetSnapshotAsync();
                 foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
                 {
                     await documentSnapshot.Reference.DeleteAsync();
@@ -284,7 +284,28 @@ public class DatabaseFileManager
                 // Adiciona os novos documentos à coleção
                 foreach (T dado in dados)
                 {
-                    await _firestoreDb.Collection(nomeColecao).AddAsync(dado);
+                    // Verifica se o objeto possui a propriedade "Id"
+                    var idProperty = typeof(T).GetProperty("Id");
+                    if (idProperty != null)
+                    {
+                        string? id = idProperty.GetValue(dado)?.ToString();
+                        if (!string.IsNullOrEmpty(id))
+                        {
+                            // Adiciona o documento com o ID especificado
+                            DocumentReference docRef = _firestoreDb.Collection(tabela).Document(id);
+                            await docRef.SetAsync(dado);
+                        }
+                        else
+                        {
+                            // Adiciona o documento com um ID gerado automaticamente
+                            await _firestoreDb.Collection(tabela).AddAsync(dado);
+                        }
+                    }
+                    else
+                    {
+                        // Adiciona o documento com um ID gerado automaticamente
+                        await _firestoreDb.Collection(tabela).AddAsync(dado);
+                    }
                 }
             }
             catch (Exception ex)
