@@ -21,6 +21,8 @@ namespace WMS_RadiadoresLemos_WPF
         private Dictionary<string, string> produtoNomeParaId = new Dictionary<string, string>();
         private ProdutoData? produtoSelecionado;
         private bool usePositiveNumber = true;
+        private static readonly string CaminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
+
 
         // Construtor da classe que inicializa os componentes e carrega os produtos
         public RegistroEntradaSaidaUserControl()
@@ -50,6 +52,9 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar produtos: {ex.Message}");
+                AtivarModoOffline();
+                produtos = LerDadosDoArquivo();
+                produtoNomeParaId = produtos.ToDictionary(p => p.Nome, p => p.Id);
 
                 // Adicionar alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -385,6 +390,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método assíncrono para atualizar o produto no banco de dados
         private async Task AtualizarProdutoNoBanco(ProdutoData produto)
         {

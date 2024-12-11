@@ -18,6 +18,8 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private List<object> dadosFiltrados = new List<object>();
         private bool dadosCarregados = false;
+        private string ConnectionStatus;
+        
 
         public BancoDadosUserControl()
         {
@@ -80,6 +82,8 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+
+        
         // Método para atualizar a tabela de dados com os dados do cache
         private void AtualizarTabelaDadosCache(string tabela)
         {
@@ -413,6 +417,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async Task SubstituirTodosOsDadosAsync(string filePath)
         {
             var db = DatabaseConnect.Database;
@@ -548,7 +553,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
 
         }
-
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async Task AdicionarNovosDadosAsync(string filePath)
         {
             var db = DatabaseConnect.Database;
@@ -674,6 +679,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método para atualizar o cache de dados
         private async void AtualizarCache()
         {
