@@ -52,9 +52,6 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar produtos: {ex.Message}");
-                AtivarModoOffline();
-                produtos = LerDadosDoArquivo();
-                produtoNomeParaId = produtos.ToDictionary(p => p.Nome, p => p.Id);
 
                 // Adicionar alerta
                 AlertaCache.AdicionarAlerta("Erro",
