@@ -385,6 +385,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método assíncrono para atualizar o produto no banco de dados
         private async Task AtualizarProdutoNoBanco(ProdutoData produto)
         {

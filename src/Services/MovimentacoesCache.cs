@@ -11,6 +11,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
     {
         private const int MaxMovimentacoes = 1000;
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Fun��o para registrar uma movimentação no cache e no Firestore
         public static async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao)
         {
@@ -54,6 +55,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Fun��o para obter todas as movimentações do cache
         public static List<MovimentacaoData> ObterMovimentacoes()
         {
@@ -80,6 +82,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Fun��o para remover movimentações antigas se houver mais de MaxMovimentacoes
         private static async Task RemoverMovimentacoesAntigasAsync(CollectionReference movimentacoesRef)
         {

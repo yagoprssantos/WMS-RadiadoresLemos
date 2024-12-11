@@ -32,6 +32,7 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void StartApplication()
         {
+            // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
             // Inicializa a conexão com o banco de dados
             SetupDatabaseConnection();
 
@@ -330,6 +331,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Função para carregar todas as tabelas no cache
         private async Task CarregarTodasTabelasNoCache()
         {

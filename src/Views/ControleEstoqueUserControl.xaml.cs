@@ -90,6 +90,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método para atualizar a tabela de estoque com os produtos do banco de dados
         private async Task AtualizarTabelaEstoqueBanco()
         {
@@ -253,6 +254,7 @@ namespace WMS_RadiadoresLemos_WPF
             Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", ""))
         };
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método para cadastrar um novo produto no banco de dados
         private async void CadastrarProdutoNoBanco()
         {
@@ -424,6 +426,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método para atualizar um produto no banco de dados
         private static async Task AtualizarProdutoNoBanco(ProdutoData produto)
         {
@@ -567,6 +570,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método para deletar um produto no banco de dados
         private async Task DeletarProdutoNoBanco(ProdutoData produto)
         {

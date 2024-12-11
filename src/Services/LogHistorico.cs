@@ -11,6 +11,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
     {
         private const int MaxLogs = 100;
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Função para registrar um log no cache e no Firestore
         public static async Task RegistrarLogAsync(LogData log)
         {
@@ -54,6 +55,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Função para obter todos os logs do cache
         public static List<LogData> ObterLogs()
         {
@@ -80,6 +82,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Função para remover logs antigos se houver mais de MaxLogs
         private static async Task RemoverLogsAntigosAsync(CollectionReference logsRef)
         {

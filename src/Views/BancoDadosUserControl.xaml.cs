@@ -413,6 +413,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async Task SubstituirTodosOsDadosAsync(string filePath)
         {
             var db = DatabaseConnect.Database;
@@ -548,7 +549,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
 
         }
-
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async Task AdicionarNovosDadosAsync(string filePath)
         {
             var db = DatabaseConnect.Database;
@@ -674,6 +675,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         // Método para atualizar o cache de dados
         private async void AtualizarCache()
         {
