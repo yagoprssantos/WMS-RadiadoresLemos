@@ -14,6 +14,7 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private bool isLogoutInitiated = false;
         private int _notificationCount = 0;
+        private DispatcherTimer _saveCacheTimer;
 
         // Variável para armazenar o usuário logado
         public static UsuarioData? UsuarioLogado { get; set; }
@@ -28,6 +29,39 @@ namespace WMS_RadiadoresLemos_WPF
             AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
 
             this.Closing += Window_Closing;
+
+            // Configura o timer para salvar o cache periodicamente
+            _saveCacheTimer = new DispatcherTimer();
+            _saveCacheTimer.Interval = TimeSpan.FromMinutes(5); // Salva o cache a cada 5 minutos
+            _saveCacheTimer.Tick += SaveCacheTimer_Tick;
+            _saveCacheTimer.Start();
+        }
+        private async void SaveCacheTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Sincroniza arquivos
+                DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Aviso",
+                                            "Cache salvo com sucesso" + DateOnly.FromDateTime(DateTime.Now).ToString(),
+                                            "Os dados foram salvos nos arquivos locais com sucesso.",
+                                            "É possível sair da aplicação com segurança");
+            }
+            catch (Exception ex)
+            {
+                AlertaCache.AdicionarAlerta("Aviso",
+                                            ex.Message.ToString(),
+                                            "Não foi possível salvar alterações. Possíveis motivos:\n" +
+                                            "- Arquivo corrompido;\n" +
+                                            "- Falta de permissões;\n" +
+                                            "- Espaço em disco insuficiente;\n" +
+                                            "- Erro de rede;\n" +
+                                            "- Problema de compatibilidade;",
+                                            "- Recomendasse ficar na aplicação até que tudo fique sincronizado");
+            }
         }
 
         private void StartApplication()
@@ -72,6 +106,9 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Remove usuário logado
                 UsuarioLogado = null;
+
+                // Para o timer de salvamento de cache
+                _saveCacheTimer.Stop();
 
                 // Salva o cache nos arquivos JSON
                 DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
@@ -304,6 +341,9 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Remove usuário logado
                         UsuarioLogado = null;
+
+                        // Para o timer de salvamento de cache
+                        _saveCacheTimer.Stop();
 
                         // Salva o cache nos arquivos JSON
                         DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();

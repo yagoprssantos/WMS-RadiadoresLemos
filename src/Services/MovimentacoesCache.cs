@@ -26,20 +26,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 var db = DatabaseConnect.Database;
                 if (db == null)
                 {
-                    // Se não conectar com banco, alterna para "modo offline"
-                    Console.WriteLine("Banco de dados não disponível. Salvando movimentação em arquivo JSON.");
-
-                    // Adiciona a movimentação ao cache
-                    var movimentacoes = ObterMovimentacoes();
-                    movimentacoes.Add(movimentacao);
-
-                    // Captura caminho do arquivo de movimentações
-                    var databaseFileManager = new DatabaseFileManager();
-                    var CaminhoArquivoMovimentacoes = databaseFileManager.CaminhoArquivoMovimentacoes;
-
-                    // Salva as movimentações em um arquivo JSON
-                    await DatabaseFileManager.AdicionarDadoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
-
+                    Console.WriteLine("Erro ao conectar ao Firestore.");
                     return;
                 }
 
