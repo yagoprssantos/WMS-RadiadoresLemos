@@ -14,6 +14,8 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private bool isLogoutInitiated = false;
         private int _notificationCount = 0;
+        private DispatcherTimer _saveCacheTimer;
+        private DispatcherTimer _connectDatabaseTimer;
 
         // Variável para armazenar o usuário logado
         public static UsuarioData? UsuarioLogado { get; set; }
@@ -28,6 +30,90 @@ namespace WMS_RadiadoresLemos_WPF
             AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
 
             this.Closing += Window_Closing;
+
+            // Configura o timer para salvar o cache periodicamente
+            _saveCacheTimer = new DispatcherTimer();
+            _saveCacheTimer.Interval = TimeSpan.FromMinutes(5); // Salva o cache a cada 5 minutos
+            _saveCacheTimer.Tick += SaveCacheTimer_Tick;
+
+            // Configura cache para conectar com banco periodicamente
+            _connectDatabaseTimer = new DispatcherTimer();
+            _connectDatabaseTimer.Interval = TimeSpan.FromMinutes(1); // Tenta conectar a cada 1 minuto
+            _connectDatabaseTimer.Tick += ConnectDatabaseTimer_Tick;
+        }
+        private async void SaveCacheTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Sincroniza arquivos
+                DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Aviso",
+                                            "Arquivos locais sincornizados - " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                                            "Os dados foram salvos nos arquivos locais com sucesso.",
+                                            "É possível sair da aplicação com segurança");
+            }
+            catch (Exception ex)
+            {
+                AlertaCache.AdicionarAlerta("Aviso",
+                                            ex.Message.ToString(),
+                                            "Não foi possível salvar alterações. Possíveis motivos:\n" +
+                                            "- Arquivo corrompido;\n" +
+                                            "- Falta de permissões;\n" +
+                                            "- Espaço em disco insuficiente;\n" +
+                                            "- Erro de rede;\n" +
+                                            "- Problema de compatibilidade;",
+                                            "- Recomendasse ficar na aplicação até que tudo fique sincronizado");
+            }
+        }
+        private async void ConnectDatabaseTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Atualiza a barra de status
+                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
+                UpdateConnectionStatus("Conectando...");
+
+                // Tenta conectar ao banco de dados
+                DatabaseConnect.SetEnvironmentVarible();
+                DatabaseConnect.TestConnection();
+
+                // Deixa carregamento visível
+                LoadingScreen.Visibility = Visibility.Visible;
+
+                // Fecha qualquer aba que esteja aberta
+                ContentArea.Content = null;
+
+                // Altera a barra de status
+                UpdateStatusBar("Sincronizando dados com o banco de dados...", Colors.Blue);
+
+                // Sincroniza arquivos cache enviando para o banco de dados
+                DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
+                await gerenciadorDeArquivos.SincronizarDadosComBancoAsync();
+
+                // Desativa o modo offline
+                desativarModoOffline();
+
+                // Oculta barra de carregamento
+                LoadingScreen.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                // Log de erro
+                Console.WriteLine($"Erro ao conectar ao banco de dados: {ex.Message}");
+
+                // Atualiza a barra de status
+                UpdateStatusBar("Erro ao conectar ao banco de dados", Colors.Purple);
+
+                // Espera 3 segundos
+                await Task.Delay(3000);
+
+                // Altera a barra de status
+                UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
+            }
         }
 
         private void StartApplication()
@@ -56,6 +142,9 @@ namespace WMS_RadiadoresLemos_WPF
                 // Verifica se o usuário logado é nulo
                 if (UsuarioLogado == null) return;
 
+                // Desconecta do banco de dados
+                DatabaseConnect.Disconnect();
+
                 // Adiciona log
                 var log = new LogData
                 {
@@ -69,6 +158,14 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Remove usuário logado
                 UsuarioLogado = null;
+
+                // Para timers
+                _saveCacheTimer.Stop();
+                _connectDatabaseTimer.Stop();
+
+                // Salva o cache nos arquivos JSON
+                DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
             }
             catch (Exception ex)
             {
@@ -85,6 +182,7 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Feche a aplicação e abra novamente.");
             }
         }
+
 
         // Registra a entrada do usuário no log
         private async void RegistrarEntradaLog()
@@ -151,15 +249,20 @@ namespace WMS_RadiadoresLemos_WPF
                 // Estabelece a conexão com o banco de dados Firestore
                 DatabaseConnect.SetEnvironmentVarible();
 
+                // Testa a conexão com o banco de dados
+                DatabaseConnect.TestConnection();
+
                 // Carrega todas as tabelas no cache
                 await CarregarTodasTabelasNoCache();
 
                 // Inicializa os arquivos locais com dados do banco de dados, se ainda não existirem
+                // A PRIMEIRA CONEXÃO DEVE SER FEITA USANDO INTERNET, CASO CONTRÁRIO, NÃO SERÁ POSSÍVEL SINCRONIZAR OS DADOS
                 DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
                 await gerenciadorDeArquivos.InicializarArquivosAsync();
             }
             catch (Exception ex)
             {
+                _connectDatabaseTimer.Start();
                 UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
                 MessageBox.Show($"Erro ao carregar dados, com banco de dados e com arquivos locais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
@@ -270,6 +373,9 @@ namespace WMS_RadiadoresLemos_WPF
                     // Define a variável de controle como true
                     isLogoutInitiated = true;
 
+                    // Desconecta do banco de dados
+                    DatabaseConnect.Disconnect();
+
                     // Oculta a janela principal
                     this.Hide();
 
@@ -289,6 +395,14 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Remove usuário logado
                         UsuarioLogado = null;
+
+                        // Para timers
+                        _saveCacheTimer.Stop();
+                        _connectDatabaseTimer.Stop();
+
+                        // Salva o cache nos arquivos JSON
+                        DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                        await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
                     }
 
                     // Reabre a janela de login
@@ -340,12 +454,12 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Lista de tabelas a serem carregadas no cache
                 var tabelas = new List<string>
-        {
-            "Produtos",
-            "Usuarios",
-            "Historico",
-            "Movimentacoes"
-        };
+                {
+                    "Produtos",
+                    "Usuarios",
+                    "Historico",
+                    "Movimentacoes"
+                };
 
                 var dbFileManager = new DatabaseFileManager();
 
@@ -354,8 +468,8 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var listaObjetos = new List<object>();
 
-                    // TODO: alterar de volta para != para conexão funcionar
-                    if (db != null)
+                    // Se houver conexão com o banco de dados, carrega os dados do banco
+                    if (db != null && DatabaseConnect.IsConnected)
                     {
                         // Pega a referência da tabela
                         var tabelaRef = db.Collection(tabela);
@@ -395,7 +509,7 @@ namespace WMS_RadiadoresLemos_WPF
                             }
                         }
 
-                        UpdateStatusBar("Dados carregados no cache - Banco de dados", Colors.DarkGreen);
+                        UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
                         UpdateConnectionStatus("Conectado");
                     }
                     else
@@ -428,8 +542,8 @@ namespace WMS_RadiadoresLemos_WPF
                             }
                         }
 
-                        UpdateStatusBar("Dados carregados do arquivo - Usando arquivos locais", Colors.Purple);
-                        UpdateConnectionStatus("Desconectado");
+                        // Inicia o processo de "Modo Offline"
+                        ativarModoOffline();
                     }
 
                     // Adiciona a lista de objetos ao cache
@@ -439,7 +553,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                UpdateStatusBar("Erro ao carregar dados no cache", Colors.DarkRed);
+                UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -517,14 +631,52 @@ namespace WMS_RadiadoresLemos_WPF
         private void ConnectionButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             // Atualizar o ToolTip com base na conexão com o banco de dados
-            if (DatabaseConnect.Database != null)
+            if (DatabaseConnect.IsConnected)
             {
-                ConnectionToolTip.Content = "Conectado ao banco de dados - usando dados online";
+                ConnectionToolTip.Content = "Conectado ao Banco de Dados";
             }
             else
             {
-                ConnectionToolTip.Content = "Desconectado do banco de dados - usando arquivos locais offline. Reconecte para sincronizar informações";
+                ConnectionToolTip.Content = "Desconectado do Banco de Dados";
             }
+        }
+
+
+        // Função para iniciar processo de "Modo Offline"
+        public void ativarModoOffline()
+        {
+            // Inicia o processo de "Modo Offline"
+            _saveCacheTimer.Start();
+            _connectDatabaseTimer.Start();
+
+            // Adiciona alerta
+            AlertaCache.AdicionarAlerta("Aviso",
+                                        "Falha na conexão com o banco de dados",
+                                        "Não foi possível conectar ao banco de dados. No entanto, os dados foram carregados dos arquivos locais.",
+                                        "Reconecte para sincronizar informações (existe uma tentativa de conexão a cada 1 minuto)");
+
+            UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
+            UpdateConnectionStatus("Desconectado");
+
+            // Desliga conexão
+            DatabaseConnect.Disconnect();
+            DatabaseConnect.IsConnected = false;
+        }
+        public void desativarModoOffline()
+        {
+            // Finaliza o processo de "Modo Offline"
+            _saveCacheTimer.Stop();
+            _connectDatabaseTimer.Stop();
+
+            // Atualiza a barra de status
+            UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
+            UpdateConnectionStatus("Conectado");
+
+            // Adiciona alerta
+            AlertaCache.AdicionarAlerta("Aviso",
+                                        "Sincronização Completa - " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                                        "Os dados foram carregados do banco de dados com sucesso.",
+                                        "É possível sair da aplicação com segurança");
         }
     }
 }

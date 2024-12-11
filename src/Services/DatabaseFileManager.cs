@@ -23,6 +23,7 @@ public class DatabaseFileManager
     public DatabaseFileManager()
     {
         // Configura a variável de ambiente para a conexão com o banco de dados
+        // PRECISA ESTAR CONECTADO COM A INTERNET PARA FUNCIONAR
         DatabaseConnect.SetEnvironmentVarible();
         if (DatabaseConnect.Database != null)
         {
@@ -36,6 +37,7 @@ public class DatabaseFileManager
         }
     }
 
+    // Função para inicializar os arquivos locais com os dados do banco de dados
     public async Task InicializarArquivosAsync()
     {
         try
@@ -44,24 +46,24 @@ public class DatabaseFileManager
             if (!File.Exists(CaminhoArquivoUsuarios))
             {
                 // Obtém os dados do banco de dados e salva em um arquivo JSON
-                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("usuarios");
+                List<UsuarioData> usuarios = await ObterColecaoFirebaseDB<UsuarioData>("Usuarios");
                 await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
             }
             if (!File.Exists(CaminhoArquivoProdutos))
             {
-                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("produtos");
+                List<ProdutoData> produtos = await ObterColecaoFirebaseDB<ProdutoData>("Produtos");
                 await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
             }
 
             if (!File.Exists(CaminhoArquivoLogs))
             {
-                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("logs");
+                List<LogData> logs = await ObterColecaoFirebaseDB<LogData>("Historico");
                 await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
             }
 
             if (!File.Exists(CaminhoArquivoMovimentacoes))
             {
-                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("movimentacoes");
+                List<MovimentacaoData> movimentacoes = await ObterColecaoFirebaseDB<MovimentacaoData>("Movimentacoes");
                 await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
             }
         }
@@ -72,6 +74,7 @@ public class DatabaseFileManager
         }
     }
 
+    // Função para atualizar os arquivos locais com os dados mais recentes do banco de dados
     public async Task AtualizarArquivosAsync()
     {
         try
@@ -100,6 +103,7 @@ public class DatabaseFileManager
         }
     }
 
+    // Função para obter uma coleção de documentos do banco de dados Firestore
     public async Task<List<T>> ObterColecaoFirebaseDB<T>(string nomeColecao)
     {
         List<T> dados = new List<T>();
@@ -128,7 +132,8 @@ public class DatabaseFileManager
         return dados;
     }
 
-    private async Task SalvarNoArquivoAsync<T>(string caminhoArquivo, List<T> dados)
+    // Função para salvar os dados em um arquivo JSON
+    private async static Task SalvarNoArquivoAsync<T>(string caminhoArquivo, List<T> dados)
     {
         try
         {
@@ -151,6 +156,182 @@ public class DatabaseFileManager
         {
             // Log de erro
             Console.WriteLine($"Erro ao salvar no arquivo {caminhoArquivo}: {ex.Message}");
+        }
+    }
+
+    // Função para salvar o cache nos arquivos JSON
+    public async Task SalvarCacheNosArquivosAsync()
+    {
+        try
+        {
+            // Salva os dados do cache nos arquivos JSON
+            if (DadosCache.Tabelas.ContainsKey("Usuarios"))
+            {
+                List<UsuarioData> usuarios = DadosCache.Tabelas["Usuarios"].Cast<UsuarioData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoUsuarios, usuarios);
+            }
+
+            if (DadosCache.Tabelas.ContainsKey("Produtos"))
+            {
+                List<ProdutoData> produtos = DadosCache.Tabelas["Produtos"].Cast<ProdutoData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoProdutos, produtos);
+            }
+
+            if (DadosCache.Tabelas.ContainsKey("Historico"))
+            {
+                List<LogData> logs = DadosCache.Tabelas["Historico"].Cast<LogData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoLogs, logs);
+            }
+
+            if (DadosCache.Tabelas.ContainsKey("Movimentacoes"))
+            {
+                List<MovimentacaoData> movimentacoes = DadosCache.Tabelas["Movimentacoes"].Cast<MovimentacaoData>().ToList();
+                await SalvarNoArquivoAsync(CaminhoArquivoMovimentacoes, movimentacoes);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao salvar cache nos arquivos: {ex.Message}");
+        }
+    }
+
+    // Função para sincronizar dados com o banco, enviando os dados locais para o Firestore
+    public async Task SincronizarDadosComBancoAsync()
+    {
+        try
+        {
+            // Sincroniza os dados locais com o banco de dados
+            if (_firestoreDb != null)
+            {
+                // Sincroniza os dados locais com o banco de dados
+                if (File.Exists(CaminhoArquivoUsuarios))
+                {
+                    List<UsuarioData> usuarios = await LerDoArquivoAsync<UsuarioData>(CaminhoArquivoUsuarios);
+                    await SincronizarFirebaseDB(usuarios, "Usuarios");
+                }
+
+                if (File.Exists(CaminhoArquivoProdutos))
+                {
+                    List<ProdutoData> produtos = await LerDoArquivoAsync<ProdutoData>(CaminhoArquivoProdutos);
+                    await SincronizarFirebaseDB(produtos, "Produtos");
+                }
+
+                if (File.Exists(CaminhoArquivoLogs))
+                {
+                    List<LogData> logs = await LerDoArquivoAsync<LogData>(CaminhoArquivoLogs);
+                    await SincronizarFirebaseDB(logs, "Historico");
+                }
+
+                if (File.Exists(CaminhoArquivoMovimentacoes))
+                {
+                    List<MovimentacaoData> movimentacoes = await LerDoArquivoAsync<MovimentacaoData>(CaminhoArquivoMovimentacoes);
+                    await SincronizarFirebaseDB(movimentacoes, "Movimentacoes");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao sincronizar dados com o banco: {ex.Message}");
+        }
+    }
+
+    // Função para ler os dados de um arquivo JSON
+    private async static Task<List<T>> LerDoArquivoAsync<T>(string caminhoArquivo)
+    {
+        List<T> dados = new List<T>();
+
+        try
+        {
+            // Este método lê os dados de um arquivo JSON no caminho especificado
+            // Primeiro lê o JSON do arquivo
+            string json = await File.ReadAllTextAsync(caminhoArquivo);
+
+            // Depois, caso o arquivo tenha sido lido corretamente, desserializa o JSON
+            if (!string.IsNullOrEmpty(json))
+            {
+                dados = JsonSerializer.Deserialize<List<T>>(json);
+            }
+            else
+            {
+                // Se o JSON estiver vazio, lança uma exceção
+                throw new Exception("Erro ao ler os dados do arquivo JSON.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao ler do arquivo {caminhoArquivo}: {ex.Message}");
+        }
+
+        return dados;
+    }
+
+    // Função para sincronizar uma coleção de documentos com o banco de dados Firestore
+    public async Task SincronizarFirebaseDB<T>(List<T> dados, string tabela) where T : class
+    {
+        if (_firestoreDb != null)
+        {
+            try
+            {
+                // Deleta todos os documentos da coleção
+                QuerySnapshot querySnapshot = await _firestoreDb.Collection(tabela).GetSnapshotAsync();
+                foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+                {
+                    await documentSnapshot.Reference.DeleteAsync();
+                }
+
+                // Adiciona os novos documentos à coleção
+                foreach (T dado in dados)
+                {
+                    // Verifica se o objeto possui a propriedade "Id"
+                    var idProperty = typeof(T).GetProperty("Id");
+                    if (idProperty != null)
+                    {
+                        string? id = idProperty.GetValue(dado)?.ToString();
+                        if (!string.IsNullOrEmpty(id))
+                        {
+                            // Adiciona o documento com o ID especificado
+                            DocumentReference docRef = _firestoreDb.Collection(tabela).Document(id);
+                            await docRef.SetAsync(dado);
+                        }
+                        else
+                        {
+                            // Adiciona o documento com um ID gerado automaticamente
+                            await _firestoreDb.Collection(tabela).AddAsync(dado);
+                        }
+                    }
+                    else
+                    {
+                        // Adiciona o documento com um ID gerado automaticamente
+                        await _firestoreDb.Collection(tabela).AddAsync(dado);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log de erro
+                Console.WriteLine($"Erro ao sincronizar coleção com o banco de dados: {ex.Message}");
+            }
+        }
+    }
+
+    // Função para retornar caminho do arquivo JSON de uma tabela
+    public string ObterCaminhoArquivo(string tabela)
+    {
+        switch (tabela)
+        {
+            case "Usuarios":
+                return CaminhoArquivoUsuarios;
+            case "Produtos":
+                return CaminhoArquivoProdutos;
+            case "Historico":
+                return CaminhoArquivoLogs;
+            case "Movimentacoes":
+                return CaminhoArquivoMovimentacoes;
+            default:
+                return "";
         }
     }
 }

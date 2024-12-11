@@ -81,6 +81,15 @@
         <!-- Área de Conteúdo -->
         <ContentControl Grid.Column="1" Name="ContentArea" Margin="10, 10, 10, 40"/>
 
+        <!-- Tela de Loading -->
+        <Grid Grid.Row="0" Grid.ColumnSpan="2" Name="LoadingScreen" Background="#80000000" Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Sincronizando com Banco de Dados..." Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="Esta ação pode demorar alguns minutos" Foreground="White" FontSize="16" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                <ProgressBar Width="500" Height="20" IsIndeterminate="True" Margin="0,20,0,0"/>
+            </StackPanel>
+        </Grid>
+
         <!-- Barra de Status -->
         <StatusBar Name="StatusBar" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Background="{StaticResource PrimaryBrush}" FontSize="16">
             <StatusBar.ItemsPanel>
@@ -103,13 +112,13 @@
             <!-- Ícone de Notificação -->
             <StatusBarItem Grid.Column="2" Margin="0, 0, 20, 0">
                 <Button Name="NotificationButton" 
-                        Content="🔔" 
-                        Click="NotificationButton_Click" 
-                        MouseEnter="NotificationButton_MouseEnter"
-                        Visibility="Visible"
-                        Padding="0" Margin="0" FontSize="16"
-                        Foreground="White" Background="Transparent"
-                        HorizontalAlignment="Left" VerticalAlignment="Center">
+                 Content="🔔" 
+                 Click="NotificationButton_Click" 
+                 MouseEnter="NotificationButton_MouseEnter"
+                 Visibility="Visible"
+                 Padding="0" Margin="0" FontSize="16"
+                 Foreground="White" Background="Transparent"
+                 HorizontalAlignment="Left" VerticalAlignment="Center">
                     <Button.ToolTip>
                         <ToolTip Name="NotificationToolTip" />
                     </Button.ToolTip>
@@ -119,12 +128,12 @@
             <!-- Ícone de Conexão -->
             <StatusBarItem Grid.Column="3" Margin="0, 0, 20, 0">
                 <Button Name="ConnectionButton" 
-                        Click="ConnectionButton_Click"
-                        MouseEnter="ConnectionButton_MouseEnter"
-                        Visibility="Visible"
-                        Padding="0" Margin="0" FontSize="16"
-                        Foreground="White" Background="Transparent"
-                        HorizontalAlignment="Left" VerticalAlignment="Center">
+                 Click="ConnectionButton_Click"
+                 MouseEnter="ConnectionButton_MouseEnter"
+                 Visibility="Visible"
+                 Padding="0" Margin="0" FontSize="16"
+                 Foreground="White" Background="Transparent"
+                 HorizontalAlignment="Left" VerticalAlignment="Center">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Name="ConnectionIcon" Text="📶"/>
@@ -140,5 +149,6 @@
             <!-- Data e Hora -->
             <StatusBarItem Name="StatusBarDateTime" Foreground="{StaticResource ButtonForegroundBrush}" HorizontalAlignment="Right" Grid.Column="4"/>
         </StatusBar>
+
     </Grid>
 </Window>

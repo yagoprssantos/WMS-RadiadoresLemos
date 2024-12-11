@@ -113,6 +113,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async void EditarUsuario_Click(object sender, RoutedEventArgs e)
         {
             if (UsuariosDataGrid.SelectedItem is UsuarioData usuarioSelecionado)
@@ -187,6 +188,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async void AdicionarUsuario_Click(object sender, RoutedEventArgs e)
         {
             var adicionarUsuarioWindow = new EditarUsuarioWindow(null);
@@ -250,6 +252,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async void DeletarUsuario_Click(object sender, RoutedEventArgs e)
         {
             if (UsuariosDataGrid.SelectedItem is UsuarioData usuarioSelecionado)
@@ -339,6 +342,7 @@ namespace WMS_RadiadoresLemos_WPF
                     // Atualiza o cache local
                     DadosCache.Tabelas["Usuarios"] = usuarios.Cast<object>().ToList();
 
+                    // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
                     // Atualiza o banco de dados
                     try
                     {

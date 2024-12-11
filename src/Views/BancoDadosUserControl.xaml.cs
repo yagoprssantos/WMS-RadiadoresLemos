@@ -20,6 +20,7 @@ namespace WMS_RadiadoresLemos_WPF
         private List<object> dadosFiltrados = new List<object>();
         private bool dadosCarregados = false;
         private List<string> tabelasSelecionadas = new List<string>();
+        private string ConnectionStatus;
 
         public BancoDadosUserControl()
         {
@@ -82,6 +83,8 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+
+        
         // Método para atualizar a tabela de dados com os dados do cache
         private void AtualizarTabelaDadosCache(string tabela)
         {
@@ -513,7 +516,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
         // Função para ou substituir todos os dados ou adicionar novos dados
         private async Task SubstituirTodosOsDadosAsync(string filePath)
         {
@@ -623,7 +625,7 @@ namespace WMS_RadiadoresLemos_WPF
                 ProgressBarMessage.Text = "Processo concluído.";
             }
         }
-
+        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async Task AdicionarNovosDadosAsync(string filePath)
         {
             var db = DatabaseConnect.Database;
@@ -740,7 +742,6 @@ namespace WMS_RadiadoresLemos_WPF
                 ProgressBarMessage.Text = "Processo concluído.";
             }
         }
-
 
         // Evento disparado quando o botão de reconectar é clicado
         private async void Reconectar_Click(object sender, RoutedEventArgs e)
@@ -870,7 +871,6 @@ namespace WMS_RadiadoresLemos_WPF
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
         }
-
 
 
         // Método para atualizar o cache de dados
