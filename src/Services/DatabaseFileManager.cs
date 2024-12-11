@@ -195,4 +195,103 @@ public class DatabaseFileManager
         }
     }
 
+    // Função para sincronizar dados com o banco, enviando os dados locais para o Firestore
+    public async Task SincronizarDadosComBancoAsync()
+    {
+        try
+        {
+            // Sincroniza os dados locais com o banco de dados
+            if (_firestoreDb != null)
+            {
+                // Sincroniza os dados locais com o banco de dados
+                if (File.Exists(CaminhoArquivoUsuarios))
+                {
+                    List<UsuarioData> usuarios = await LerDoArquivoAsync<UsuarioData>(CaminhoArquivoUsuarios);
+                    await SincronizarColecaoFirebaseDB(usuarios, "Usuarios");
+                }
+
+                if (File.Exists(CaminhoArquivoProdutos))
+                {
+                    List<ProdutoData> produtos = await LerDoArquivoAsync<ProdutoData>(CaminhoArquivoProdutos);
+                    await SincronizarColecaoFirebaseDB(produtos, "Produtos");
+                }
+
+                if (File.Exists(CaminhoArquivoLogs))
+                {
+                    List<LogData> logs = await LerDoArquivoAsync<LogData>(CaminhoArquivoLogs);
+                    await SincronizarColecaoFirebaseDB(logs, "Historico");
+                }
+
+                if (File.Exists(CaminhoArquivoMovimentacoes))
+                {
+                    List<MovimentacaoData> movimentacoes = await LerDoArquivoAsync<MovimentacaoData>(CaminhoArquivoMovimentacoes);
+                    await SincronizarColecaoFirebaseDB(movimentacoes, "Movimentacoes");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao sincronizar dados com o banco: {ex.Message}");
+        }
+    }
+
+    // Função para ler os dados de um arquivo JSON
+    private async static Task<List<T>> LerDoArquivoAsync<T>(string caminhoArquivo)
+    {
+        List<T> dados = new List<T>();
+
+        try
+        {
+            // Este método lê os dados de um arquivo JSON no caminho especificado
+            // Primeiro lê o JSON do arquivo
+            string json = await File.ReadAllTextAsync(caminhoArquivo);
+
+            // Depois, caso o arquivo tenha sido lido corretamente, desserializa o JSON
+            if (!string.IsNullOrEmpty(json))
+            {
+                dados = JsonSerializer.Deserialize<List<T>>(json);
+            }
+            else
+            {
+                // Se o JSON estiver vazio, lança uma exceção
+                throw new Exception("Erro ao ler os dados do arquivo JSON.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log de erro
+            Console.WriteLine($"Erro ao ler do arquivo {caminhoArquivo}: {ex.Message}");
+        }
+
+        return dados;
+    }
+
+    // Função para sincronizar uma coleção de documentos com o banco de dados Firestore
+    public async Task SincronizarColecaoFirebaseDB<T>(List<T> dados, string nomeColecao)
+    {
+        if (_firestoreDb != null)
+        {
+            try
+            {
+                // Deleta todos os documentos da coleção
+                QuerySnapshot querySnapshot = await _firestoreDb.Collection(nomeColecao).GetSnapshotAsync();
+                foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+                {
+                    await documentSnapshot.Reference.DeleteAsync();
+                }
+
+                // Adiciona os novos documentos à coleção
+                foreach (T dado in dados)
+                {
+                    await _firestoreDb.Collection(nomeColecao).AddAsync(dado);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log de erro
+                Console.WriteLine($"Erro ao sincronizar coleção com o banco de dados: {ex.Message}");
+            }
+        }
+    }
 }

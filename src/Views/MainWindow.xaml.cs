@@ -15,6 +15,7 @@ namespace WMS_RadiadoresLemos_WPF
         private bool isLogoutInitiated = false;
         private int _notificationCount = 0;
         private DispatcherTimer _saveCacheTimer;
+        private DispatcherTimer _connectDatabaseTimer;
 
         // Variável para armazenar o usuário logado
         public static UsuarioData? UsuarioLogado { get; set; }
@@ -34,7 +35,11 @@ namespace WMS_RadiadoresLemos_WPF
             _saveCacheTimer = new DispatcherTimer();
             _saveCacheTimer.Interval = TimeSpan.FromMinutes(5); // Salva o cache a cada 5 minutos
             _saveCacheTimer.Tick += SaveCacheTimer_Tick;
-            _saveCacheTimer.Start();
+
+            // Configura cache para conectar com banco periodicamente
+            _connectDatabaseTimer = new DispatcherTimer();
+            _connectDatabaseTimer.Interval = TimeSpan.FromMinutes(1); // Tenta conectar a cada 1 minuto
+            _connectDatabaseTimer.Tick += ConnectDatabaseTimer_Tick;
         }
         private async void SaveCacheTimer_Tick(object? sender, EventArgs e)
         {
@@ -61,6 +66,39 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Erro de rede;\n" +
                                             "- Problema de compatibilidade;",
                                             "- Recomendasse ficar na aplicação até que tudo fique sincronizado");
+            }
+        }
+        private async void ConnectDatabaseTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Tenta conectar ao banco de dados
+                DatabaseConnect.SetEnvironmentVarible();
+                DatabaseConnect.TestConnection();
+
+                // Sincroniza arquivos cache enviando para o banco de dados
+                DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
+                await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
+                await gerenciadorDeArquivos.SincronizarDadosComBancoAsync();
+
+                // Atualiza a barra de status
+                UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
+                UpdateConnectionStatus("Conectado");
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Aviso",
+                                            "Conexão com banco de dados estabelecida" + DateOnly.FromDateTime(DateTime.Now).ToString(),
+                                            "Os dados foram carregados do banco de dados com sucesso.",
+                                            "É possível sair da aplicação com segurança");
+
+                // Para os timers
+                _saveCacheTimer.Stop();
+                _connectDatabaseTimer.Stop();
+            }
+            catch (Exception ex)
+            {
+                // Log de erro
+                Console.WriteLine($"Erro ao conectar ao banco de dados: {ex.Message}");
             }
         }
 
@@ -107,8 +145,9 @@ namespace WMS_RadiadoresLemos_WPF
                 // Remove usuário logado
                 UsuarioLogado = null;
 
-                // Para o timer de salvamento de cache
+                // Para timers
                 _saveCacheTimer.Stop();
+                _connectDatabaseTimer.Stop();
 
                 // Salva o cache nos arquivos JSON
                 DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
@@ -209,6 +248,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
+                _connectDatabaseTimer.Start();
                 UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
                 MessageBox.Show($"Erro ao carregar dados, com banco de dados e com arquivos locais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
@@ -342,8 +382,9 @@ namespace WMS_RadiadoresLemos_WPF
                         // Remove usuário logado
                         UsuarioLogado = null;
 
-                        // Para o timer de salvamento de cache
+                        // Para timers
                         _saveCacheTimer.Stop();
+                        _connectDatabaseTimer.Stop();
 
                         // Salva o cache nos arquivos JSON
                         DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
@@ -454,7 +495,7 @@ namespace WMS_RadiadoresLemos_WPF
                             }
                         }
 
-                        UpdateStatusBar("Dados carregados no cache - Banco de dados", Colors.DarkGreen);
+                        UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
                         UpdateConnectionStatus("Conectado");
                     }
                     else
@@ -487,8 +528,12 @@ namespace WMS_RadiadoresLemos_WPF
                             }
                         }
 
-                        UpdateStatusBar("Dados carregados do arquivo - Usando arquivos locais", Colors.Purple);
+                        UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
                         UpdateConnectionStatus("Desconectado");
+
+                        // Inicia timers
+                        _saveCacheTimer.Start();
+                        _connectDatabaseTimer.Start();
                     }
 
                     // Adiciona a lista de objetos ao cache
@@ -498,7 +543,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                UpdateStatusBar("Erro ao carregar dados no cache", Colors.DarkRed);
+                UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
