@@ -20,7 +20,6 @@ namespace WMS_RadiadoresLemos_WPF
         private List<object> dadosFiltrados = new List<object>();
         private bool dadosCarregados = false;
         private List<string> tabelasSelecionadas = new List<string>();
-        private string ConnectionStatus;
 
         public BancoDadosUserControl()
         {
@@ -83,8 +82,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-        
         // Método para atualizar a tabela de dados com os dados do cache
         private void AtualizarTabelaDadosCache(string tabela)
         {
@@ -516,6 +513,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+
         // Função para ou substituir todos os dados ou adicionar novos dados
         private async Task SubstituirTodosOsDadosAsync(string filePath)
         {
@@ -541,66 +539,80 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     // Incluir novas tabelas a partir do arquivo Excel
-                    foreach (var worksheet in workbook.Worksheets)
+                    foreach (var tabela in tabelasSelecionadas)
                     {
-                        var data = new List<Dictionary<string, object>>();
-                        var firstRow = worksheet.FirstRowUsed();
-                        if (firstRow != null)
+                        if (workbook.Worksheets.Contains(tabela))
                         {
-                            var headers = firstRow.Cells().Select(cell => cell.GetValue<string>()).ToList();
-
-                            foreach (var row in worksheet.RowsUsed().Skip(1))
+                            var worksheet = workbook.Worksheet(tabela);
+                            var data = new List<Dictionary<string, object>>();
+                            var firstRow = worksheet.FirstRowUsed();
+                            if (firstRow != null)
                             {
-                                var rowData = new Dictionary<string, object>();
-                                for (int i = 0; i < headers.Count; i++)
+                                var headers = firstRow.Cells().Select(cell => cell.GetValue<string>()).ToList();
+
+                                foreach (var row in worksheet.RowsUsed().Skip(1))
                                 {
-                                    var cellValue = row.Cell(i + 1).GetValue<string>();
-                                    if (double.TryParse(cellValue, out double numericValue))
+                                    var rowData = new Dictionary<string, object>();
+                                    for (int i = 0; i < headers.Count; i++)
                                     {
-                                        rowData[headers[i]] = numericValue;
+                                        var cellValue = row.Cell(i + 1).GetValue<string>();
+                                        if (double.TryParse(cellValue, out double numericValue))
+                                        {
+                                            rowData[headers[i]] = numericValue;
+                                        }
+                                        else
+                                        {
+                                            rowData[headers[i]] = cellValue;
+                                        }
+                                    }
+                                    data.Add(rowData);
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show($"A planilha '{worksheet.Name}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                AlertaCache.AdicionarAlerta("Erro",
+                                                            $"Planilha '{worksheet.Name}' vazia ou sem cabeçalho.",
+                                                            $"Erro ao substituir dados. Possíveis motivos:\n" +
+                                                            "- Planilha vazia;\n" +
+                                                            "- Planilha sem cabeçalho;\n" +
+                                                            "- Erro ao acessar os dados.",
+                                                            "- Verifique se a planilha contém dados;\n" +
+                                                            "- Verifique se a planilha contém um cabeçalho.");
+
+                                continue;
+                            }
+
+                            ProgressBarMessage.Text = $"Adicionando novos dados na tabela '{worksheet.Name}'...";
+                            int totalItems = data.Count;
+                            int processedItems = 0;
+
+                            foreach (var item in data)
+                            {
+                                if (item.ContainsKey("Id") && item["Id"] != null)
+                                {
+                                    string? codigo = item["Id"]?.ToString();
+                                    if (!string.IsNullOrEmpty(codigo))
+                                    {
+                                        var docRef = db.Collection(worksheet.Name).Document(codigo);
+                                        await docRef.SetAsync(item);
                                     }
                                     else
                                     {
-                                        rowData[headers[i]] = cellValue;
+                                        // Se o Id estiver vazio, adicionar com Id gerado automaticamente
+                                        await db.Collection(worksheet.Name).AddAsync(item);
                                     }
                                 }
-                                data.Add(rowData);
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show($"A planilha '{worksheet.Name}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                            AlertaCache.AdicionarAlerta("Erro",
-                                                        $"Planilha '{worksheet.Name}' vazia ou sem cabeçalho.",
-                                                        $"Erro ao substituir dados. Possíveis motivos:\n" +
-                                                        "- Planilha vazia;\n" +
-                                                        "- Planilha sem cabeçalho;\n" +
-                                                        "- Erro ao acessar os dados.",
-                                                        "- Verifique se a planilha contém dados;\n" +
-                                                        "- Verifique se a planilha contém um cabeçalho.");
-
-                            continue;
-                        }
-
-                        ProgressBarMessage.Text = $"Adicionando novos dados na tabela '{worksheet.Name}'...";
-                        int totalItems = data.Count;
-                        int processedItems = 0;
-
-                        foreach (var item in data)
-                        {
-                            if (item.ContainsKey("Codigo") && item["Codigo"] != null)
-                            {
-                                string? codigo = item["Codigo"]?.ToString();
-                                if (!string.IsNullOrEmpty(codigo))
+                                else
                                 {
-                                    var docRef = db.Collection(worksheet.Name).Document(codigo);
-                                    await docRef.SetAsync(item);
+                                    // Se não houver Id, adicionar com Id gerado automaticamente
+                                    await db.Collection(worksheet.Name).AddAsync(item);
                                 }
-                            }
 
-                            processedItems++;
-                            ProgressBar.Value = (double)processedItems / totalItems * 100;
-                            ProgressBarMessage.Text = $"Processando item {processedItems} de {totalItems} na tabela '{worksheet.Name}'...";
+                                processedItems++;
+                                ProgressBar.Value = (double)processedItems / totalItems * 100;
+                                ProgressBarMessage.Text = $"Processando item {processedItems} de {totalItems} na tabela '{worksheet.Name}'...";
+                            }
                         }
                     }
                 }
@@ -625,7 +637,6 @@ namespace WMS_RadiadoresLemos_WPF
                 ProgressBarMessage.Text = "Processo concluído.";
             }
         }
-        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
         private async Task AdicionarNovosDadosAsync(string filePath)
         {
             var db = DatabaseConnect.Database;
@@ -700,9 +711,9 @@ namespace WMS_RadiadoresLemos_WPF
                         ProgressBarMessage.Text = $"Adicionando novos dados na tabela '{tabela}'...";
                         foreach (var item in data)
                         {
-                            if (item.ContainsKey("Codigo") && item["Codigo"] != null)
+                            if (item.ContainsKey("Id") && item["Id"] != null)
                             {
-                                string? codigo = item["Codigo"]?.ToString();
+                                string? codigo = item["Id"]?.ToString();
                                 if (!string.IsNullOrEmpty(codigo))
                                 {
                                     var docRef = db.Collection(tabela).Document(codigo);
@@ -742,6 +753,7 @@ namespace WMS_RadiadoresLemos_WPF
                 ProgressBarMessage.Text = "Processo concluído.";
             }
         }
+
 
         // Evento disparado quando o botão de reconectar é clicado
         private async void Reconectar_Click(object sender, RoutedEventArgs e)
@@ -871,6 +883,7 @@ namespace WMS_RadiadoresLemos_WPF
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
         }
+
 
 
         // Método para atualizar o cache de dados
