@@ -17,9 +17,7 @@ public class MovimentacaoData
 
     [FirestoreProperty]
     public required int Quantidade { get; set; }
-    // Quantidade movimentada
 
     [FirestoreProperty]
     public required DateTime DataHora { get; set; }
-    // Data e hora da movimentação
 }

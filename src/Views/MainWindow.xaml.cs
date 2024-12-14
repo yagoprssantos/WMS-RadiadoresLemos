@@ -127,6 +127,9 @@ namespace WMS_RadiadoresLemos_WPF
             // Adiciona o usuário logado
             SetupUsuarioLogado();
 
+            // Configura a visibilidade dos botões de acordo com o tipo de usuário
+            ConfigurarVisibilidadeBotoes();
+
             // Configura a barra de status
             SetupStatusBar();
         }
@@ -340,10 +343,10 @@ namespace WMS_RadiadoresLemos_WPF
             ContentArea.Content = new DashboardUserControl();
         }
 
-        private void BancoDados_Click(object sender, RoutedEventArgs e)
+        private void Notificacoes_Click(object sender, RoutedEventArgs e)
         {
             ContentArea.Content = null;
-            ContentArea.Content = new BancoDadosUserControl();
+            ContentArea.Content = new NotificacoesUserControl();
         }
 
         private void Usuarios_Click(object sender, RoutedEventArgs e)
@@ -352,11 +355,12 @@ namespace WMS_RadiadoresLemos_WPF
             ContentArea.Content = new UsuariosUserControl();
         }
 
-        private void Notificacoes_Click(object sender, RoutedEventArgs e)
+        private void BancoDados_Click(object sender, RoutedEventArgs e)
         {
             ContentArea.Content = null;
-            ContentArea.Content = new NotificacoesUserControl();
+            ContentArea.Content = new BancoDadosUserControl();
         }
+
 
 
         // Botão de logout para retornar à janela de login
@@ -565,6 +569,61 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique sua conexão com a internet;\n" +
                                             "- Verifique as configurações do banco de dados;\n" +
                                             "- Tente reconectar ou contate o suporte.");
+            }
+        }
+
+
+        // Função que altera visibilidade dos botões de acordo com o tipo de usuário
+        private void ConfigurarVisibilidadeBotoes()
+        {
+            if (UsuarioLogado == null)
+            {
+                return;
+            }
+
+            // Exemplo de cargos e visibilidade dos botões
+            switch (UsuarioLogado.Cargo)
+            {
+                case "Administrador":
+                    BtnRegistro.Visibility = Visibility.Visible;
+                    BtnEstoque.Visibility = Visibility.Visible;
+                    BtnDashboard.Visibility = Visibility.Visible;
+                    BtnNotificacoes.Visibility = Visibility.Visible;
+                    BtnUsuarios.Visibility = Visibility.Visible;
+                    BtnBancoDados.Visibility = Visibility.Visible;
+                    break;
+                case "Gerente":
+                    BtnRegistro.Visibility = Visibility.Visible;
+                    BtnEstoque.Visibility = Visibility.Visible;
+                    BtnDashboard.Visibility = Visibility.Visible;
+                    BtnNotificacoes.Visibility = Visibility.Visible;
+                    BtnUsuarios.Visibility = Visibility.Visible;
+                    BtnBancoDados.Visibility = Visibility.Visible;
+                    break;
+                case "Operador":
+                    BtnRegistro.Visibility = Visibility.Visible;
+                    BtnEstoque.Visibility = Visibility.Visible;
+                    BtnDashboard.Visibility = Visibility.Visible;
+                    BtnNotificacoes.Visibility = Visibility.Visible;
+                    BtnUsuarios.Visibility = Visibility.Collapsed;
+                    BtnBancoDados.Visibility = Visibility.Collapsed;
+                    break;
+                case "Estagiário":
+                    BtnRegistro.Visibility = Visibility.Visible;
+                    BtnEstoque.Visibility = Visibility.Visible;
+                    BtnDashboard.Visibility = Visibility.Collapsed;
+                    BtnNotificacoes.Visibility = Visibility.Visible;
+                    BtnUsuarios.Visibility = Visibility.Collapsed;
+                    BtnBancoDados.Visibility = Visibility.Collapsed;
+                    break;
+                default:
+                    BtnRegistro.Visibility = Visibility.Collapsed;
+                    BtnEstoque.Visibility = Visibility.Visible;
+                    BtnDashboard.Visibility = Visibility.Collapsed;
+                    BtnNotificacoes.Visibility = Visibility.Collapsed;
+                    BtnUsuarios.Visibility = Visibility.Collapsed;
+                    BtnBancoDados.Visibility = Visibility.Collapsed;
+                    break;
             }
         }
 

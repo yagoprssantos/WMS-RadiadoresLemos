@@ -68,8 +68,11 @@ namespace WMS_RadiadoresLemos_WPF
         {
             string prefixo = cargo switch
             {
-                "Administrador" => "ADM",
-                "Usuário" => "USR",
+                "Administrador" => "ADM", // Administrador do Sistema
+                "Gerente" => "GER", // Gerente da Unidade
+                "Operador" => "OPE", // Operador de Produção
+                "Estagiário" => "EST", // Estagiário
+                "Usuário" => "USR", // Usuário Comum
                 _ => "UNK"
             };
 
@@ -78,6 +81,13 @@ namespace WMS_RadiadoresLemos_WPF
             string posicao = random.Next(0, 100).ToString("D2");
 
             return $"{prefixo}{ano}{posicao}";
+        }
+
+        // Método de criação do Popup de "Sobre o cargo"
+        private void MaisSobreCargo_Click(object sender, RoutedEventArgs e)
+        {
+            CargoPopup.IsOpen = true;
+
         }
 
         // Preenche os campos da interface com os dados do usuário

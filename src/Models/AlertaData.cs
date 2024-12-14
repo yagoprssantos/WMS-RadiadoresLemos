@@ -3,13 +3,12 @@
     public class AlertaData
     {
         public required string Data { get; set; }
-        // Data e hora da notificação
 
         public required string Tipo { get; set; }
-        // Tipo de notificação
+        // Tipo de notificação (ERRO, AVISO, INFORMATIVO)
 
         public required string Sistema { get; set; }
-        // Sistema que gerou a notificação
+        // Mensagem automática de erro do sistema
 
         public required string Detalhes { get; set; }
         // Detalhes da notificação - possíveis causas, o que aconteceu

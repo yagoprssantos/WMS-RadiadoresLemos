@@ -6,8 +6,8 @@ public class LogData
     [FirestoreProperty]
     public required DateTime Data { get; set; }
     // Data e hora da alteração
-    [FirestoreProperty]
 
+    [FirestoreProperty]
     public required string Tipo { get; set; }
     // OPERACIONAL, RESTRITIVA, CRÍTICA
 

@@ -18,7 +18,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Variáveis necessárias para os gráficos
         public SeriesCollection EstoqueMarcasSeries { get; set; } = new SeriesCollection();
         public SeriesCollection MovimentacaoProdutosSeries { get; set; } = new SeriesCollection();
-        public SeriesCollection TendenciaMovimentacaoSeries { get; set; } = new SeriesCollection();
+        public SeriesCollection HistoricoMovimentacaoSeries { get; set; } = new SeriesCollection();
         public SeriesCollection ProdutosMaiorMovimentacaoSeries { get; set; } = new SeriesCollection();
         public SeriesCollection LucroMensalSeries { get; set; } = new SeriesCollection();
         public SeriesCollection ProdutosVendidosSeries { get; set; } = new SeriesCollection();
@@ -116,7 +116,7 @@ namespace WMS_RadiadoresLemos_WPF
         private void ExibirGraficos()
         {
             GraficoMovimentacaoProdutos();
-            GraficoTendenciaMovimentacao();
+            GraficoHistoricoMovimentacao();
             GraficoProdutosMaiorMovimentacao();
             GraficoLucroMensal("Sem filtros");
             GraficoEstoqueMarcas();
@@ -366,29 +366,29 @@ namespace WMS_RadiadoresLemos_WPF
             DataContext = this;
         }
 
-        // Exibe o gráfico de tendência de movimentação
-        private void GraficoTendenciaMovimentacao()
+        // Exibe o gráfico de histórico de movimentação
+        private void GraficoHistoricoMovimentacao()
         {
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
-                var tendencia = movimentacoes
+                var historico = movimentacoes
                     .GroupBy(m => ((MovimentacaoData)m).DataHora.Date)
                     .Select(g => new { Data = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
                     .OrderBy(t => t.Data)
                     .ToList();
 
-                TendenciaMovimentacaoSeries.Clear();
+                HistoricoMovimentacaoSeries.Clear();
 
-                TendenciaMovimentacaoSeries.Add(new LineSeries
+                HistoricoMovimentacaoSeries.Add(new LineSeries
                 {
-                    Title = "Tendência de Movimentação",
-                    Values = new ChartValues<int>(tendencia.Select(t => t.Quantidade)),
+                    Title = "Histórico de Movimentação",
+                    Values = new ChartValues<int>(historico.Select(t => t.Quantidade)),
                     PointGeometry = DefaultGeometries.Circle,
                     PointGeometrySize = 10,
                     Fill = new SolidColorBrush(Color.FromRgb(33, 150, 243)) // Blue
                 });
 
-                PeriodoLabels = tendencia.Select(t => t.Data.ToString("dd/MM/yyyy")).ToArray();
+                PeriodoLabels = historico.Select(t => t.Data.ToString("dd/MM/yyyy")).ToArray();
             }
             else
             {
