@@ -204,7 +204,7 @@ public class DatabaseFileManager
             // Sincroniza os dados locais com o banco de dados
             if (_firestoreDb != null)
             {
-                // Sincroniza os dados locais com o banco de dados
+                // Se o arquivo existe, lê os dados do arquivo e sincroniza com o banco
                 if (File.Exists(CaminhoArquivoUsuarios))
                 {
                     List<UsuarioData> usuarios = await LerDoArquivoAsync<UsuarioData>(CaminhoArquivoUsuarios);
@@ -275,7 +275,7 @@ public class DatabaseFileManager
         {
             try
             {
-                // Deleta todos os documentos da coleção
+                // Deleta tabela do banco de dados
                 QuerySnapshot querySnapshot = await _firestoreDb.Collection(tabela).GetSnapshotAsync();
                 foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
                 {
@@ -295,11 +295,6 @@ public class DatabaseFileManager
                             // Adiciona o documento com o ID especificado
                             DocumentReference docRef = _firestoreDb.Collection(tabela).Document(id);
                             await docRef.SetAsync(dado);
-                        }
-                        else
-                        {
-                            // Adiciona o documento com um ID gerado automaticamente
-                            await _firestoreDb.Collection(tabela).AddAsync(dado);
                         }
                     }
                     else

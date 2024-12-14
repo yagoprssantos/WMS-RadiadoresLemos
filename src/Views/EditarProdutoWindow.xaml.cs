@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -68,11 +69,21 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (ValidarCampos())
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (confirmarSenhaWindow.IsConfirmed)
                 {
-                    AtualizarProduto();
-                    DialogResult = true;
-                    Close();
+                    if (ValidarCampos())
+                    {
+                        AtualizarProduto();
+                        DialogResult = true;
+                        Close();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)

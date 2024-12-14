@@ -106,7 +106,7 @@
         </Grid>
 
         <!-- Popup para Configurações de Exportação -->
-        <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="False" IsOpen="{Binding IsExportConfigPopupOpen}">
+        <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="True">
             <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="15">
                 <StackPanel>
                     <!-- Textos ajustáveis de acordo com função -->
@@ -117,12 +117,13 @@
                     <ListBox x:Name="ExportTabelasListBox" SelectionMode="Multiple" Height="100"/>
 
                     <Button Content="Confirmar exportação" Margin="5" Click="ConfirmarExportacao_Click"/>
+                    <Button Content="Cancelar" Margin="5" Click="FecharExportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
                 </StackPanel>
             </Border>
         </Popup>
 
         <!-- Popup para Configurações de Importação -->
-        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" IsOpen="{Binding IsImportConfigPopupOpen}">
+        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True">
             <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="15">
                 <StackPanel>
                     <!-- Textos ajustáveis de acordo com função -->
@@ -142,6 +143,7 @@
                     <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" FontWeight="Bold" FontSize="12" Foreground="Red" Margin="0,0,0,10"/>
                     <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" FontWeight="Bold" FontSize="16" Foreground="Red" Margin="0,0,0,10"/>
                     <Button Content="Confirmar importação" Margin="5" Click="ConfirmarImportacao_Click"/>
+                    <Button Content="Cancelar" Margin="5" Click="FecharImportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
                 </StackPanel>
             </Border>
         </Popup>

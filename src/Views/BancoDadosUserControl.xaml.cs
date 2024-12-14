@@ -12,6 +12,8 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using DocumentFormat.OpenXml.Packaging;
+using WMS_RadiadoresLemos_WPF.src.Views;
+using System.Windows.Media;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -271,6 +273,20 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
+                ExportConfigPopup.IsOpen = false;
+
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (!confirmarSenhaWindow.IsConfirmed)
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    ExportConfigPopup.IsOpen = true;
+
+                    return;
+                }
+
                 ShowProgressBar.Visibility = Visibility.Visible;
                 ProgressBar.Value = 0;
 
@@ -418,6 +434,17 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
+        // Evento disparado ao cancelar a exportação no popup
+        private void FecharExportPopup_Click(object sender, RoutedEventArgs e)
+        {
+            // Fecha o popup de configuração de exportação
+            ExportConfigPopup.IsOpen = false;
+
+            // Limpa todos os dados
+            tabelasSelecionadas.Clear();
+        }
+
+
         // Evento disparado quando o botão de importar é clicado
         private void ImportarDados_Click(object sender, RoutedEventArgs e)
         {
@@ -468,6 +495,20 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
+                ImportConfigPopup.IsOpen = false;
+
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (!confirmarSenhaWindow.IsConfirmed)
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    ImportConfigPopup.IsOpen = true;
+
+                    return;
+                }
+
                 string? filePath = ImportConfigPopup.Tag as string; // Recupera o caminho do arquivo do Tag do popup
                 var selectedOption = ImportComboBox.SelectedItem as ComboBoxItem;
 
@@ -482,7 +523,6 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     tabelasSelecionadas.Add(item.ToString());
                 }
-
 
                 if (selectedOption != null)
                 {
@@ -754,32 +794,75 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Evento disparado ao cancelar a importação no popup
+        private void FecharImportPopup_Click(object sender, RoutedEventArgs e)
+        {
+            // Fecha o popup de configuração de importação
+            ImportConfigPopup.IsOpen = false;
 
-        // Evento disparado quando o botão de reconectar é clicado
+            // Limpa todos os dados
+            tabelasSelecionadas.Clear();
+        }
+
+        // Evento disparado ao clicar no botão de reconectar
         private async void Reconectar_Click(object sender, RoutedEventArgs e)
+        {
+            // Chama a função SetupDatabaseConnection da MainWindow
+            new MainWindow();
+        }
+
+        private async void AtualizarCache()
         {
             try
             {
-                await Task.Run(() =>
+                // Configura o ambiente para conectar ao Firestore
+                DatabaseConnect.SetEnvironmentVarible();
+
+                // Testa a conexão com o banco de dados
+                DatabaseConnect.TestConnection();
+
+                // Obtém a instância do Firestore
+                var db = DatabaseConnect.Database;
+
+                if (db == null)
                 {
-                    AtualizarCache();
-                });
-                MessageBox.Show("Reconexão realizada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Não foi possível conectar ao Firestore.");
+                    return;
+                }
+
+                // Limpa o cache atual
+                DadosCache.Tabelas.Clear();
+
+                // Obtém todas as coleções do Firestore
+                var colecoes = await db.ListRootCollectionsAsync().ToListAsync();
+
+                foreach (var colecao in colecoes)
+                {
+                    var documentos = await colecao.ListDocumentsAsync().ToListAsync();
+                    var dados = new List<object>();
+
+                    foreach (var documento in documentos)
+                    {
+                        var snapshot = await documento.GetSnapshotAsync();
+                        if (snapshot.Exists)
+                        {
+                            dados.Add(snapshot.ToDictionary());
+                        }
+                    }
+
+                    // Adiciona os dados da coleção ao cache
+                    DadosCache.Tabelas[colecao.Id] = dados;
+                }
+
+                MessageBox.Show("Cache atualizado com sucesso.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao reconectar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao reconectar. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Serviço do banco de dados indisponível.",
-                                            "- Verifique sua conexão com a internet;\n" +
-                                            "- Verifique as configurações do banco de dados.");
-
-                ShowProgressBar.Visibility = Visibility.Collapsed;
+                MessageBox.Show($"Erro ao atualizar o cache: {ex.Message}");
+                throw; // Lança a exceção para ser tratada no método chamador
             }
         }
+
 
         // Evento disparado quando o botão de gerar tabela é clicado
         private async void GerarTabela_Click(object sender, RoutedEventArgs e)
@@ -881,58 +964,6 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique se a função de geração está disponível;\n" +
                                             "- Verifique se há dados disponíveis.");
                 ShowProgressBar.Visibility = Visibility.Collapsed;
-            }
-        }
-
-
-
-        // Método para atualizar o cache de dados
-        private async void AtualizarCache()
-        {
-            try
-            {
-                // Configura o ambiente para conectar ao Firestore
-                DatabaseConnect.SetEnvironmentVarible();
-
-                // Obtém a instância do Firestore
-                var db = DatabaseConnect.Database;
-
-                if (db == null)
-                {
-                    MessageBox.Show("Não foi possível conectar ao Firestore.");
-                    return;
-                }
-
-                // Limpa o cache atual
-                DadosCache.Tabelas.Clear();
-
-                // Obtém todas as coleções do Firestore
-                var colecoes = await db.ListRootCollectionsAsync().ToListAsync();
-
-                foreach (var colecao in colecoes)
-                {
-                    var documentos = await colecao.ListDocumentsAsync().ToListAsync();
-                    var dados = new List<object>();
-
-                    foreach (var documento in documentos)
-                    {
-                        var snapshot = await documento.GetSnapshotAsync();
-                        if (snapshot.Exists)
-                        {
-                            dados.Add(snapshot.ToDictionary());
-                        }
-                    }
-
-                    // Adiciona os dados da coleção ao cache
-                    DadosCache.Tabelas[colecao.Id] = dados;
-                }
-
-                dadosCarregados = true;
-                MessageBox.Show("Cache atualizado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao atualizar o cache: {ex.Message}");
             }
         }
     }

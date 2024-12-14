@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Google.Cloud.Firestore;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -306,21 +307,31 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (CamposPreenchidos())
             {
-                if (!precisaAtualizarEstoque)
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (confirmarSenhaWindow.IsConfirmed)
                 {
-                    // Se a tabela de estoque não precisa ser atualizada, cadastra o produto
-                    CadastrarProdutoNoBanco();
-                    MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LimparCamposCadastro();
+                    if (!precisaAtualizarEstoque)
+                    {
+                        // Se a tabela de estoque não precisa ser atualizada, cadastra o produto
+                        CadastrarProdutoNoBanco();
+                        MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        LimparCamposCadastro();
+                    }
+                    else
+                    {
+                        // Se a tabela de estoque precisa ser atualizada, atualiza a tabela e cadastra o produto
+                        await AtualizarTabelaEstoqueBanco();
+
+                        CadastrarProdutoNoBanco();
+                        MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        LimparCamposCadastro();
+                    }
                 }
                 else
                 {
-                    // Se a tabela de estoque precisa ser atualizada, atualiza a tabela e cadastra o produto
-                    await AtualizarTabelaEstoqueBanco();
-
-                    CadastrarProdutoNoBanco();
-                    MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LimparCamposCadastro();
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             else
@@ -535,33 +546,43 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
             {
-                // Exibe confirmação
-                var result = MessageBox.Show("Tem certeza que deseja deletar este produto?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (confirmarSenhaWindow.IsConfirmed)
                 {
-                    // Atualiza a lista e Cache local
-                    produtos.Remove(produtoSelecionado);
-                    DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
-
-                    // Deleta o produto do banco de dados
-                    await DeletarProdutoNoBanco(produtoSelecionado);
-
-                    // Adiciona log
-                    var log = new LogData
+                    // Exibe confirmação
+                    var result = MessageBox.Show("Tem certeza que deseja deletar este produto?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
                     {
-                        Data = DateTime.UtcNow,
-                        Tipo = "CRÍTICO",
-                        Nivel = "Usuário",
-                        Detalhes = $"Produto deletado: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}",
-                        Usuario = MainWindow.UsuarioLogado.Nome
-                    };
-                    await LogHistorico.RegistrarLogAsync(log);
+                        // Atualiza a lista e Cache local
+                        produtos.Remove(produtoSelecionado);
+                        DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
 
-                    // Atualiza a fonte de dados do DataGrid
-                    EstoqueDataGrid.ItemsSource = null;
-                    EstoqueDataGrid.ItemsSource = produtos;
+                        // Deleta o produto do banco de dados
+                        await DeletarProdutoNoBanco(produtoSelecionado);
 
-                    MessageBox.Show("Produto deletado com sucesso", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        // Adiciona log
+                        var log = new LogData
+                        {
+                            Data = DateTime.UtcNow,
+                            Tipo = "CRÍTICO",
+                            Nivel = "Usuário",
+                            Detalhes = $"Produto deletado: {produtoSelecionado.Nome}, Código: {produtoSelecionado.Codigo}",
+                            Usuario = MainWindow.UsuarioLogado.Nome
+                        };
+                        await LogHistorico.RegistrarLogAsync(log);
+
+                        // Atualiza a fonte de dados do DataGrid
+                        EstoqueDataGrid.ItemsSource = null;
+                        EstoqueDataGrid.ItemsSource = produtos;
+
+                        MessageBox.Show("Produto deletado com sucesso", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             else

@@ -64,12 +64,14 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Name="NomeUsuarioTextBlock" Text="Nome do Usuário" FontSize="16" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Margin="15"/>
-                <TextBlock Name="MatriculaTextBlock" Text="Matrícula" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,5,0,10" Grid.Row="1" />
+                <TextBlock Name="NomeUsuarioTextBlock" Text="Nome do Usuário" FontSize="16" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Margin="15,10,15,3"/>
+                <TextBlock Name="CargoTextBlock" Text="Cargo do Usuário" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,5,15,0" Grid.Row="1" />
+                <TextBlock Name="MatriculaTextBlock" Text="Matrícula" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,5,15,5" Grid.Row="2" />
                 <Button Name="BtnLogout" Content="Logout" Click="LogoutButton_Click" FontSize="16" 
-                        Width="100" Grid.Row="2" Grid.Column="2"
+                        Width="100" Grid.Row="3" Grid.Column="2"
                         Style="{StaticResource CancelButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Sair do sistema"/>

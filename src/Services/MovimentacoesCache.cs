@@ -46,12 +46,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 
                 await RemoverMovimentacoesAntigasAsync(movimentacoesRef);
             }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine($"Erro ao registrar movimentação (ArgumentException): {ex.Message}");
-                AtivarModoOffline();
-                await SalvarMovimentacaoNoArquivoAsync(movimentacao);
-            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao registrar movimentação: {ex.Message}");
@@ -107,11 +101,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     // Remove as movimentações antigas do arquivo JSON
                     await RemoverMovimentacoesAntigasDoArquivoAsync();
                 }
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine($"Erro ao remover movimentações antigas (ArgumentException): {ex.Message}");
-                AtivarModoOffline();
             }
             catch (Exception ex)
             {

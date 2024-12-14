@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -126,27 +127,37 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (ValidarCampos())
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (confirmarSenhaWindow.IsConfirmed)
                 {
-                    AtualizarUsuario();
-                    DialogResult = true;
-                    Close();
+                    if (ValidarCampos())
+                    {
+                        AtualizarUsuario();
+                        DialogResult = true;
+                        Close();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao salvar usuário: {ex.Message}");
+                MessageBox.Show($"Erro ao salvar produto: {ex.Message}");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
-                                            "Erro ao salvar usuário. Possíveis motivos:\n" +
-                                            "- O usuário não foi encontrado;\n" +
-                                            "- O usuário não foi passado corretamente para a janela de edição;\n" +
-                                            "- Ocorreu um erro ao salvar os campos da janela de edição.",
-                                            "- Verifique se o usuário foi encontrado no banco de dados;\n" +
-                                            "- Verifique se suas informações estão corretamente preenchidas;\n" +
-                                            "- Verifique conexão com o banco de dados.");
+                                            "Erro ao salvar produto. Possíveis motivos:\n" +
+                                            "- Dados do produto não são válidos;\n" +
+                                            "- Produto inexistente no banco de dados;\n" +
+                                            "- Banco de dados inacessível.",
+                                            "- Verifique se os dados do produto estão corretos;\n" +
+                                            "- Verifique se o produto existe no banco de dados;\n" +
+                                            "- Verifique se o banco de dados está acessível.");
             }
         }
 
@@ -246,6 +257,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 usuario.Cargo = selectedItem.Content.ToString() ?? string.Empty;
 
+                // Se for um novo usuário, gera uma nova matrícula com base no cargo
                 if (isNewUser)
                 {
                     string novaMatricula;
@@ -254,6 +266,14 @@ namespace WMS_RadiadoresLemos_WPF
                         novaMatricula = GerarMatricula(usuario.Cargo);
                     } while (MatriculaExiste(novaMatricula));
 
+                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                }
+
+                // Se for um usuário existente, altera apenas a matrícula se for um cargo diferente
+                if (!isNewUser)
+                {
+                    string novaMatricula = GerarMatricula(usuario.Cargo);
                     usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
                     MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
                 }
