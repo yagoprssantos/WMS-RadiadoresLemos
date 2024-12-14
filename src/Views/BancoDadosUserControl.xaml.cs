@@ -27,7 +27,39 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             DataContext = this;
+            SetupDatabaseInfo();
             CarregarTabelas();
+        }
+
+        // Método para configurar informações do banco de dados
+        private void SetupDatabaseInfo()
+        {
+            try
+            {
+                if (DatabaseConnect.IsConnected)
+                {
+                    Status.Text = "Conectado ao Banco de Dados";
+                    Status.Foreground = Brushes.Green;
+                }
+                else
+                {
+                    Status.Text = "Modo Offline";
+                    Status.Foreground = Brushes.Red;
+                }
+            }
+            catch (Exception ex)
+            {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            $"Erro ao configurar informações do banco de dados. Possíveis motivos:\n" +
+                                            "- Serviço do banco de dados indisponível;\n" +
+                                            "- Problemas de conexão com a internet;\n" +
+                                            "- Configurações incorretas do banco de dados.",
+                                            "- Verifique sua conexão com a internet;\n" +
+                                            "- Verifique as configurações do banco de dados.");
+
+                new MainWindow().ativarModoOffline();
+            }
         }
 
         // Método para carregar as tabelas no ComboBox
@@ -569,14 +601,29 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     // Apagar todas as tabelas do banco de dados
                     var collections = await db.ListRootCollectionsAsync().ToListAsync();
+                    int totalCollections = collections.Count;
+                    int processedCollections = 0;
+
                     foreach (var collection in collections)
                     {
                         var snapshot = await collection.GetSnapshotAsync();
+                        int totalDocuments = snapshot.Documents.Count;
+                        int processedDocuments = 0;
+
                         foreach (var doc in snapshot.Documents)
                         {
                             await doc.Reference.DeleteAsync();
+                            processedDocuments++;
+                            ProgressBar.Value = (double)processedDocuments / totalDocuments * 100;
+                            ProgressBarMessage.Text = $"Apagando item {processedDocuments} de {totalDocuments} na tabela '{collection.Id}'...";
                         }
+
+                        processedCollections++;
+                        ProgressBar.Value = (double)processedCollections / totalCollections * 100;
                     }
+
+                    // Zera valores da barra de progresso
+                    ProgressBar.Value = 0;
 
                     // Incluir novas tabelas a partir do arquivo Excel
                     foreach (var tabela in tabelasSelecionadas)

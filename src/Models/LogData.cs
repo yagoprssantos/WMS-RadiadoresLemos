@@ -22,4 +22,12 @@ public class LogData
     [FirestoreProperty]
     public required string Usuario { get; set; }
     // Nome do usuário que fez a alteração
+
+    public string DataFormatada
+    {
+        get
+        {
+            return Data.ToString("dd/MM/yyyy HH:mm:ss");
+        }
+    }
 }

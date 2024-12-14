@@ -19,5 +19,15 @@ public class MovimentacaoData
     public required int Quantidade { get; set; }
 
     [FirestoreProperty]
-    public required DateTime DataHora { get; set; }
+    public required DateTime Data { get; set; }
+
+
+
+    public string DataFormatada
+    {
+        get
+        {
+            return Data.ToString("dd/MM/yyyy HH:mm:ss");
+        }
+    }
 }

@@ -334,7 +334,7 @@ namespace WMS_RadiadoresLemos_WPF
                         ProdutoId = produtoSelecionado.Id,
                         Quantidade = quantidadeMovimentacao,
                         Preço = precoMovimentacao,
-                        DataHora = DateTime.UtcNow,
+                        Data = DateTime.UtcNow,
                         Tipo = isEntrada ? "Entrada" : "Saída"
                     };
 

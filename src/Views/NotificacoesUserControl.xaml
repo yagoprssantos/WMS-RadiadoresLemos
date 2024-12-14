@@ -65,7 +65,7 @@
                               VerticalAlignment="Stretch"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
+                            <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
                             <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
                             <DataGridTemplateColumn Header="Detalhes" Width="*">
@@ -95,11 +95,11 @@
                   VerticalAlignment="Stretch"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <DataGrid.Columns>
+                            <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataFormatada}" Width="Auto" />
                             <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
                             <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
                             <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
                             <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
-                            <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataHora}" Width="Auto" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

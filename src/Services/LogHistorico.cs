@@ -48,8 +48,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 await SalvarLogNoArquivoAsync(log);
             }
         }
-
-        // Função para obter todos os logs do cache ou do arquivo JSON
         public static List<LogData> ObterLogs()
         {
             if (!DadosCache.Tabelas.ContainsKey("Historico"))
@@ -60,6 +58,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 
             try
             {
+                // Ordena os logs por data decrescente
                 var logs = DadosCache.Tabelas["Historico"].Cast<LogData>().OrderByDescending(log => log.Data).ToList();
                 return logs;
             }

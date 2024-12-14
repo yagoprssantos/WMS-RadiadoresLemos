@@ -81,7 +81,7 @@ namespace WMS_RadiadoresLemos_WPF
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
                 var meses = movimentacoes
-                    .Select(m => ((MovimentacaoData)m).DataHora.ToString("MMM/yyyy"))
+                    .Select(m => ((MovimentacaoData)m).Data.ToString("MMM/yyyy"))
                     .Distinct()
                     .OrderBy(m => DateTime.ParseExact(m, "MMM/yyyy", null))
                     .ToList();
@@ -282,7 +282,7 @@ namespace WMS_RadiadoresLemos_WPF
                 };
 
                 var produtosVendidos = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).DataHora >= dataInicio)
+                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).Data >= dataInicio)
                     .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
                     .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
                     .OrderByDescending(p => p.Quantidade)
@@ -372,7 +372,7 @@ namespace WMS_RadiadoresLemos_WPF
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
                 var historico = movimentacoes
-                    .GroupBy(m => ((MovimentacaoData)m).DataHora.Date)
+                    .GroupBy(m => ((MovimentacaoData)m).Data.Date)
                     .Select(g => new { Data = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
                     .OrderBy(t => t.Data)
                     .ToList();
@@ -439,7 +439,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 var lucroMensal = movimentacoes
                     .Where(m => ((MovimentacaoData)m).Tipo == "Saída")
-                    .GroupBy(m => ((MovimentacaoData)m).DataHora.ToString("MMM/yyyy"))
+                    .GroupBy(m => ((MovimentacaoData)m).Data.ToString("MMM/yyyy"))
                     .Select(g => new { Mes = g.Key, Lucro = g.Sum(m => ((MovimentacaoData)m).Quantidade * ((MovimentacaoData)m).Preço) })
                     .OrderBy(l => DateTime.ParseExact(l.Mes, "MMM/yyyy", null))
                     .ToList();

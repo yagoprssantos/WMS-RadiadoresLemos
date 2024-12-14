@@ -31,7 +31,7 @@
                             <TextBlock Text=""/>
                             <TextBlock>
                                 <Run Text="Status da Conexão: " FontWeight="Bold"/>
-                                <Run Text="{Binding ConnectionStatus}"/>
+                                <Run Name="Status" Text=""/>
                             </TextBlock>
                             <TextBlock Text=""/>
                         </StackPanel>

@@ -22,7 +22,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             {
                 var novoAlerta = new AlertaData
                 {
-                    Data = DateTime.Now.ToString("dd/MM/yyyy"),
+                    Data = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
                     Tipo = tipo,
                     Sistema = sysmsg,
                     Detalhes = mensagem,

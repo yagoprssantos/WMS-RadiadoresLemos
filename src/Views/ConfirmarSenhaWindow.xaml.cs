@@ -8,6 +8,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         public bool IsConfirmed { get; private set; }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            SenhaPasswordBox.Focus();
+        }
+
         public ConfirmarSenhaWindow()
         {
             InitializeComponent();
@@ -45,6 +50,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             IsConfirmed = false;
             this.Close();
+        }
+
+        private void SenhaPasswordBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                Confirmar_Click(sender, e);
+            }
         }
     }
 }

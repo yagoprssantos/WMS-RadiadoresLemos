@@ -88,7 +88,6 @@ namespace WMS_RadiadoresLemos_WPF
         private void MaisSobreCargo_Click(object sender, RoutedEventArgs e)
         {
             CargoPopup.IsOpen = true;
-
         }
 
         // Preenche os campos da interface com os dados do usuário
@@ -101,7 +100,7 @@ namespace WMS_RadiadoresLemos_WPF
                     NomeTextBox.Text = usuario.Nome;
                     EmailTextBox.Text = usuario.Email;
                     MatriculaTextBox.Text = usuario.Matrícula;
-                    SenhaPasswordBox.Password = usuario.Senha;
+                    SenhaPasswordBox.Password = usuario.Senha.ToString();
                     PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
                 }
             }
@@ -167,7 +166,7 @@ namespace WMS_RadiadoresLemos_WPF
             usuario.Nome = NomeTextBox.Text;
             usuario.Email = EmailTextBox.Text;
             usuario.Matrícula = MatriculaTextBox.Text;
-            usuario.Senha = SenhaPasswordBox.Password;
+            usuario.Senha = SenhaPasswordBox.Password.ToString();
             usuario.Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty;
         }
 
@@ -273,9 +272,17 @@ namespace WMS_RadiadoresLemos_WPF
                 // Se for um usuário existente, altera apenas a matrícula se for um cargo diferente
                 if (!isNewUser)
                 {
-                    string novaMatricula = GerarMatricula(usuario.Cargo);
-                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
-                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                    if (usuario.Cargo != selectedItem.Content.ToString())
+                    {
+                        string novaMatricula;
+                        do
+                        {
+                            novaMatricula = GerarMatricula(usuario.Cargo);
+                        } while (MatriculaExiste(novaMatricula));
+
+                        usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                        MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                    }
                 }
 
                 isModified = true;

@@ -13,14 +13,16 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class MainWindow : Window
     {
         private bool isLogoutInitiated = false;
-        private bool isSincronized;
-        private bool isAppOffline;
         private int _notificationCount = 0;
         private DispatcherTimer _saveCacheTimer;
         private DispatcherTimer _connectDatabaseTimer;
 
         // Variável para armazenar o usuário logado
         public static UsuarioData? UsuarioLogado { get; set; }
+
+        // Variáveis para controle de conexão com o banco de dados
+        public static bool isSincronized;
+        public static bool isAppOffline;
 
         public MainWindow()
         {
@@ -546,10 +548,10 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Salva a lista de objetos no cache
                         DadosCache.Tabelas[tabela] = listaObjetos;
-
-                        // Garantir que o app esteja online
-                        desativarModoOffline();
                     }
+
+                    // Garantir que o app esteja online
+                    desativarModoOffline();
                 }
                 // Se não está conectado
                 else
@@ -594,16 +596,17 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Com os objetos carregados, salva a lista de objetos no cache
                         DadosCache.Tabelas[tabela] = listaObjetos;
-
-                        // Inicia "Modo Offline"
-                        ativarModoOffline();
                     }
+
+                    // Inicia "Modo Offline"
+                    ativarModoOffline();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
+                UpdateConnectionStatus("ERRO");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",

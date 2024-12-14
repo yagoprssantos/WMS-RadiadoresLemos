@@ -65,7 +65,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 
             try
             {
-                var movimentacoes = DadosCache.Tabelas["Movimentacoes"].Cast<MovimentacaoData>().OrderByDescending(mov => mov.DataHora).ToList();
+                var movimentacoes = DadosCache.Tabelas["Movimentacoes"].Cast<MovimentacaoData>().OrderByDescending(mov => mov.Data).ToList();
                 return movimentacoes;
             }
             catch (ArgumentException ex)
@@ -169,7 +169,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         // Função para remover movimentações antigas do cache
         private static void RemoverMovimentacoesAntigasDoCache()
         {
-            var movimentacoesCache = DadosCache.Tabelas["Movimentacoes"].Cast<MovimentacaoData>().OrderBy(mov => mov.DataHora).ToList();
+            var movimentacoesCache = DadosCache.Tabelas["Movimentacoes"].Cast<MovimentacaoData>().OrderBy(mov => mov.Data).ToList();
             var movimentacoesParaRemoverCache = movimentacoesCache.Take(movimentacoesCache.Count - MaxMovimentacoes).ToList();
             foreach (var movimentacao in movimentacoesParaRemoverCache)
             {
