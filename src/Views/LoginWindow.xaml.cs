@@ -152,7 +152,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
 
                 // Atualiza TODOS os arquivos locais com os dados mais recentes do banco de dados
-                await _databaseFileManager.AtualizarArquivosAsync();
+                await _databaseFileManager.AtualizarArquivosComBancoAsync();
             }
             catch (Exception ex)
             {

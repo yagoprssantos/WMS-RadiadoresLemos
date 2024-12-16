@@ -14,6 +14,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         private const int MaxMovimentacoes = 1000;
         private static readonly string CaminhoArquivoMovimentacoes = new DatabaseFileManager().ObterCaminhoArquivo("Movimentacoes");
 
+
         // Função para registrar uma movimentação no cache, no Firestore e no arquivo JSON
         public static async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao)
         {
@@ -29,11 +30,20 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 var db = DatabaseConnect.Database;
                 if (db == null || !DatabaseConnect.IsConnected)
                 {
-                    AtivarModoOffline();
-                    await SalvarMovimentacaoNoArquivoAsync(movimentacao);
+                    Console.WriteLine("Não foi possível conectar ao Firestore. Registrando movimentação em modo offline.");
+
+                    // Adiciona a movimentação ao cache
+                    AdicionarMovimentacaoAoCache(movimentacao);
+
+                    // Adiciona a movimentação nos arquivos JSON
+                    await AdicionarMovimentacaoNoArquivoAsync(movimentacao);
+
+                    // Deixa offline
+                    new MainWindow().ativarModoOffline();
                     return;
                 }
 
+                // Adiciona no banco de dados
                 var movimentacoesRef = db.Collection("Movimentacoes");
                 await movimentacoesRef.AddAsync(movimentacao);
                 Console.WriteLine("Movimentação registrada com sucesso no Firestore.");
@@ -41,18 +51,19 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 // Adiciona a movimentação ao cache
                 AdicionarMovimentacaoAoCache(movimentacao);
 
-                // Salva a movimentação no arquivo JSON
-                await SalvarMovimentacaoNoArquivoAsync(movimentacao);
+                // Adiciona a movimentação nos arquivos JSON
+                await AdicionarMovimentacaoNoArquivoAsync(movimentacao);
 
+                // Remove movimentações antigas se houver mais de MaxMovimentacoes
                 await RemoverMovimentacoesAntigasAsync(movimentacoesRef);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao registrar movimentação: {ex.Message}");
-                AtivarModoOffline();
-                await SalvarMovimentacaoNoArquivoAsync(movimentacao);
+                return;
             }
         }
+
 
         // Função para obter todas as movimentações do cache ou do arquivo JSON
         public static List<MovimentacaoData> ObterMovimentacoes()
@@ -80,6 +91,67 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
+
+        // Função para adicionar uma movimentação ao cache
+        private static void AdicionarMovimentacaoAoCache(MovimentacaoData movimentacao)
+        {
+            if (!DadosCache.Tabelas.ContainsKey("Movimentacoes"))
+            {
+                DadosCache.Tabelas["Movimentacoes"] = new List<object>();
+            }
+            DadosCache.Tabelas["Movimentacoes"].Add(movimentacao);
+            Console.WriteLine("Movimentação registrada com sucesso no cache.");
+        }
+
+        // Função para salvar uma movimentação no arquivo JSON
+        private static async Task AdicionarMovimentacaoNoArquivoAsync(MovimentacaoData movimentacao)
+        {
+            try
+            {
+                var movimentacoes = LerMovimentacoesDoArquivo();
+                movimentacoes.Add(movimentacao);
+                await SalvarMovimentacoesNoArquivoAsync(movimentacoes);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao salvar movimentação no arquivo JSON: {ex.Message}");
+            }
+        }
+
+        // Função para salvar uma lista de movimentações no arquivo JSON
+        private static async Task SalvarMovimentacoesNoArquivoAsync(List<MovimentacaoData> movimentacoes)
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(movimentacoes);
+                await File.WriteAllTextAsync(CaminhoArquivoMovimentacoes, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao salvar movimentações no arquivo JSON: {ex.Message}");
+            }
+        }
+
+
+        // Função para ler as movimentações do arquivo JSON
+        private static List<MovimentacaoData> LerMovimentacoesDoArquivo()
+        {
+            try
+            {
+                if (File.Exists(CaminhoArquivoMovimentacoes))
+                {
+                    string json = File.ReadAllText(CaminhoArquivoMovimentacoes);
+                    return JsonSerializer.Deserialize<List<MovimentacaoData>>(json) ?? new List<MovimentacaoData>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao ler movimentações do arquivo JSON: {ex.Message}");
+            }
+            return new List<MovimentacaoData>();
+        }
+
+
         // Função para remover movimentações antigas se houver mais de MaxMovimentacoes
         private static async Task RemoverMovimentacoesAntigasAsync(CollectionReference movimentacoesRef)
         {
@@ -105,65 +177,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao remover movimentações antigas: {ex.Message}");
-                AtivarModoOffline();
             }
-        }
-
-        // Função para salvar uma movimentação no arquivo JSON
-        private static async Task SalvarMovimentacaoNoArquivoAsync(MovimentacaoData movimentacao)
-        {
-            var movimentacoes = LerMovimentacoesDoArquivo();
-            movimentacoes.Add(movimentacao);
-            await SalvarMovimentacoesNoArquivoAsync(movimentacoes);
-        }
-
-        // Função para salvar uma lista de movimentações no arquivo JSON
-        private static async Task SalvarMovimentacoesNoArquivoAsync(List<MovimentacaoData> movimentacoes)
-        {
-            try
-            {
-                string json = JsonSerializer.Serialize(movimentacoes);
-                await File.WriteAllTextAsync(CaminhoArquivoMovimentacoes, json);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao salvar movimentações no arquivo JSON: {ex.Message}");
-            }
-        }
-
-        // Função para ler as movimentações do arquivo JSON
-        private static List<MovimentacaoData> LerMovimentacoesDoArquivo()
-        {
-            try
-            {
-                if (File.Exists(CaminhoArquivoMovimentacoes))
-                {
-                    string json = File.ReadAllText(CaminhoArquivoMovimentacoes);
-                    return JsonSerializer.Deserialize<List<MovimentacaoData>>(json) ?? new List<MovimentacaoData>();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao ler movimentações do arquivo JSON: {ex.Message}");
-            }
-            return new List<MovimentacaoData>();
-        }
-
-        // Função para ativar o modo offline
-        private static void AtivarModoOffline()
-        {
-            new MainWindow().ativarModoOffline();
-        }
-
-        // Função para adicionar uma movimentação ao cache
-        private static void AdicionarMovimentacaoAoCache(MovimentacaoData movimentacao)
-        {
-            if (!DadosCache.Tabelas.ContainsKey("Movimentacoes"))
-            {
-                DadosCache.Tabelas["Movimentacoes"] = new List<object>();
-            }
-            DadosCache.Tabelas["Movimentacoes"].Add(movimentacao);
-            Console.WriteLine("Movimentação registrada com sucesso no cache.");
         }
 
         // Função para remover movimentações antigas do cache

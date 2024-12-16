@@ -38,15 +38,21 @@ namespace WMS_RadiadoresLemos_WPF
             ToggleVisibility(false);
         }
 
-        // Método assíncrono para carregar produtos do cache
+        // Método para carregar produtos do cache
         private void CarregarProdutos()
         {
             try
             {
+                // Carregar produtos do cache
                 if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtosCache))
                 {
+                    // Converte a lista de objetos para uma lista de produtos
                     produtos = produtosCache.Cast<ProdutoData>().ToList();
                     produtoNomeParaId = produtos.ToDictionary(p => p.Nome, p => p.Id);
+                    foreach (var produto in produtos)
+                    {
+                        produtosFiltrados.Add(produto.Nome);
+                    }
                 }
             }
             catch (Exception ex)
@@ -110,7 +116,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             if (!string.IsNullOrEmpty(inputText) && !produtoNomeParaId.ContainsKey(inputText))
             {
-                MessageBox.Show("Produto inválido.");
                 ProdutoComboBox.Text = string.Empty;
                 ProdutoComboBox.SelectedItem = null;
                 ProdutoComboBox.Focus();
@@ -190,12 +195,23 @@ namespace WMS_RadiadoresLemos_WPF
 
                 QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
 
-                // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
-                double preco = produto.Preço;
-                double precoNovo = double.Parse(PrecoTextBox.Text);
-                int quantidade = int.Parse(QuantidadeDepoisDadoTextBlock.Text);
-                double precoDepois = (preco * produto.Quantidade + precoNovo * quantidade) / (produto.Quantidade + quantidade);
-                PrecoDepoisDadoTextBlock.Text = precoDepois.ToString("C");
+                if (usePositiveNumber)
+                {
+                    // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
+                    double precoAtual = produto.Preço;
+                    double precoNovo = double.Parse(PrecoTextBox.Text);
+                    int quantidadeAtual = produto.Quantidade;
+                    int quantidadeNova = int.Parse(QuantidadeTextBox.Text);
+                    int quantidadeTotal = quantidadeAtual + quantidadeNova;
+
+                    double precoPonderado = ((precoAtual * quantidadeAtual) + (precoNovo * quantidadeNova)) / quantidadeTotal;
+                    PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
+                }
+                else
+                {
+                    // Mantém o preço atual para saída
+                    PrecoDepoisDadoTextBlock.Text = produto.Preço.ToString("C");
+                }
             }
             else
             {
