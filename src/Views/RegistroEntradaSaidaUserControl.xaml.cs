@@ -354,12 +354,10 @@ namespace WMS_RadiadoresLemos_WPF
                         Tipo = isEntrada ? "Entrada" : "Saída"
                     };
 
-
-                    // Adiciona a movimentação ao cache e ao Firestore
+                    // Adiciona a movimentação ao cache, no Firestore e no arquivo JSON
                     await MovimentacoesCache.RegistrarMovimentacaoAsync(movimentacao);
 
-                    // Atualiza o produto no banco de dados
-                    await AtualizarProdutoNoBanco(produtoSelecionado);
+                    // Mostra mensagem de sucesso
                     MessageBox.Show($"{(isEntrada ? "Entrada" : "Saída")} registrada com sucesso");
 
                     // Adiciona log
@@ -398,33 +396,6 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Não foi possível atualizar o produto no banco de dados.",
                                             "- Verifique se o produto foi selecionado corretamente.\n" +
                                             "- Verifique se a quantidade um valor é válido.\n" +
-                                            "- Verifique a conexão com a internet.\n" +
-                                            "- Reinicie o aplicativo.");
-            }
-        }
-
-        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
-        // Método assíncrono para atualizar o produto no banco de dados
-        private async Task AtualizarProdutoNoBanco(ProdutoData produto)
-        {
-            try
-            {
-                var db = DatabaseConnect.Database ?? throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
-                DocumentReference docRef = db.Collection("Produtos").Document(produto.Id);
-                await docRef.SetAsync(produto, SetOptions.Overwrite);
-
-                DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}");
-
-                // Adicionar alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao atualizar produto no banco de dados. Possíveis motivos:\n" +
-                                            "- Falha na conexão com o banco de dados.\n" +
-                                            "- Não foi possível atualizar o produto no banco de dados.",
                                             "- Verifique a conexão com a internet.\n" +
                                             "- Reinicie o aplicativo.");
             }

@@ -28,6 +28,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             {
                 // Adiciona a movimentação ao Firestore
                 var db = DatabaseConnect.Database;
+
+                // Se não estiver conectado ao banco
                 if (db == null || !DatabaseConnect.IsConnected)
                 {
                     Console.WriteLine("Não foi possível conectar ao Firestore. Registrando movimentação em modo offline.");

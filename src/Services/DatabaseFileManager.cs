@@ -175,7 +175,7 @@ public class DatabaseFileManager
 
 
     // Função para salvar os dados em um arquivo JSON
-    private async static Task SalvarNoArquivoAsync<T>(string caminhoArquivo, List<T> dados)
+    public async static Task SalvarNoArquivoAsync<T>(string caminhoArquivo, List<T> dados)
     {
         try
         {
@@ -281,7 +281,7 @@ public class DatabaseFileManager
     }
 
     // Função para ler os dados de um arquivo JSON
-    private async static Task<List<T>> LerDoArquivoAsync<T>(string caminhoArquivo)
+    public async static Task<List<T>> LerDoArquivoAsync<T>(string caminhoArquivo)
     {
         List<T> dados = new List<T>();
 

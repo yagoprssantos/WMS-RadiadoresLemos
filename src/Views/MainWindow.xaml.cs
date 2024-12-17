@@ -762,8 +762,16 @@ namespace WMS_RadiadoresLemos_WPF
         public void ativarModoOffline()
         {
             // Inicia o processo de "Modo Offline"
-            _saveCacheTimer.Start();
-            _connectDatabaseTimer.Start();
+
+            // Inicia timers caso não estejam ativos
+            if (!_saveCacheTimer.IsEnabled)
+            {
+                _saveCacheTimer.Start();
+            }
+            if (!_connectDatabaseTimer.IsEnabled)
+            {
+                _connectDatabaseTimer.Start();
+            }
 
             UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
             UpdateConnectionStatus("Desconectado");

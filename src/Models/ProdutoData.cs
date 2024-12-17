@@ -26,5 +26,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
 
         [FirestoreDocumentId]
         public string Id { get; set; } // Identificador único do documento
+
+        // Define Id como o código do produto SEMPRE que o objeto for criado
+        public ProdutoData()
+        {
+            Id = Codigo;
+        }
     }
 }

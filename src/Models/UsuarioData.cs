@@ -28,5 +28,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [FirestoreDocumentId]
         public string Id { get; set; } // Identificador único do documento
 
+        // Define Id como a matrícula do usuário SEMPRE que o objeto for criado
+        public UsuarioData()
+        {
+            Id = Matrícula;
+        }
+
     }
 }
