@@ -426,7 +426,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
-        // Método para atualizar um produto no banco de dados
+        // Método para atualizar um produto
         private static async Task AtualizarProduto(ProdutoData produto)
         {
             var db = DatabaseConnect.Database;
@@ -496,7 +496,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Método para deletar um produto no banco de dados
+        // Método para deletar um produto
         private async Task DeletarProduto(ProdutoData produto)
         {
             var db = DatabaseConnect.Database;
@@ -542,7 +542,7 @@ namespace WMS_RadiadoresLemos_WPF
                     Data = DateTime.UtcNow,
                     Tipo = "OPERACIONAL",
                     Nivel = "Usuário",
-                    Detalhes = $"Produto deletado: {produto.Nome}, Código: {produto.Codigo}",
+                    Detalhes = $"Produto deletado: {produto.Nome}, Código: {produto.Codigo}, Quantidade: {produto.Quantidade}, Preço: {produto.Preço}, Tipo: {produto.Tipo}, Marca: {produto.Marca}",
                     Usuario = MainWindow.UsuarioLogado.Nome
                 };
                 await LogHistorico.RegistrarLogAsync(log);

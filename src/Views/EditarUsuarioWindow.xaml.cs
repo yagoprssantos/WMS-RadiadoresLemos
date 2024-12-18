@@ -14,9 +14,9 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class EditarUsuarioWindow : Window
     {
         private UsuarioData usuario;
-        private bool isConfirmingExit = false;
         private bool isModified = false;
         private bool isNewUser = false;
+        private List<UsuarioData> usuarios;
 
         // Propriedade pública para acessar o usuário editado
         public UsuarioData Usuario => usuario;
@@ -43,7 +43,7 @@ namespace WMS_RadiadoresLemos_WPF
                     Matrícula = novaMatricula, // Gera a matrícula com base no cargo e ano atual
                     Senha = string.Empty,
                     Cargo = "Usuário",
-                    Id = Guid.NewGuid().ToString()
+                    Id = novaMatricula
                 };
             }
             else
@@ -51,8 +51,137 @@ namespace WMS_RadiadoresLemos_WPF
                 this.usuario = usuario;
             }
 
+            usuarios = new List<UsuarioData>();
             PreencherCampos();
+
+            isModified = false;
         }
+
+        // Preenche os campos da interface com os dados do usuário
+        private void PreencherCampos()
+        {
+            try
+            {
+                if (usuario != null)
+                {
+                    NomeTextBox.Text = usuario.Nome;
+                    EmailTextBox.Text = usuario.Email;
+                    MatriculaTextBox.Text = usuario.Matrícula;
+                    SenhaPasswordBox.Password = usuario.Senha.ToString();
+                    PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            "Erro ao preencher campos de usuário. Possíveis motivos:\n" +
+                                            "- O usuário não foi encontrado;\n" +
+                                            "- O usuário não foi passado corretamente para a janela de edição;\n" +
+                                            "- Ocorreu um erro ao preencher os campos da janela de edição.",
+                                            "- Verifique se o usuário foi encontrado no banco de dados;\n" +
+                                            "- Verifique se suas informações estão corretamente preenchidas;\n" +
+                                            "- Verifique conexão com o banco de dados.");
+            }
+        }
+        private ComboBoxItem GetComboBoxItemByContent(string content)
+        {
+            foreach (ComboBoxItem item in PermissaoComboBox.Items)
+            {
+                if (item.Content.ToString() == content)
+                    return item;
+            }
+            return new ComboBoxItem { Content = string.Empty };
+        }
+
+
+        // Evento disparado ao clicar no botão de salvar usuário
+        private void Salvar_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (confirmarSenhaWindow.IsConfirmed)
+                {
+                    if (ValidarCampos())
+                    {
+                        AtualizarUsuario();
+                        DialogResult = true;
+                        Close();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao salvar usuário: {ex.Message}");
+
+                // Adiciona alerta
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            "Erro ao salvar usuário. Possíveis motivos:\n" +
+                                            "- Dados do usuário não são válidos;\n" +
+                                            "- Usuário inexistente no banco de dados;\n" +
+                                            "- Banco de dados inacessível.",
+                                            "- Verifique se os dados do usuário estão corretos;\n" +
+                                            "- Verifique se o usuário existe no banco de dados;\n" +
+                                            "- Verifique se o banco de dados está acessível.");
+            }
+        }
+
+        // Atualiza os dados do usuário com os valores dos campos
+        private void AtualizarUsuario()
+        {
+            usuario.Nome = NomeTextBox.Text;
+            usuario.Email = EmailTextBox.Text;
+            usuario.Matrícula = MatriculaTextBox.Text;
+            usuario.Senha = SenhaPasswordBox.Password.ToString();
+            usuario.Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty;
+
+            isModified = false;
+        }
+
+        // Evento disparado ao clicar no botão de cancelar
+        private void Cancelar_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (isModified)
+                {
+                    if (ConfirmarSaidaSemSalvar())
+                    {
+                        return;
+                    }
+                }
+                DialogResult = false;
+                Close();
+            }
+            catch (Exception)
+            {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Edição de usuário.",
+                                            "Erro ao cancelar edição de usuário. Possíveis motivos:\n" +
+                                            "- Erro ao fechar janela de edição de usuário;\n" +
+                                            "- Impossibilidade de fechar janela de edição de usuário.",
+                                            "- Verifique se a janela de edição de usuário está aberta."); Close();
+            }
+        }
+
+        // Confirma se o usuário deseja sair sem salvar as alterações
+        private bool ConfirmarSaidaSemSalvar()
+        {
+            var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
+            return result == MessageBoxResult.No;
+        }
+
 
         // Método para verificar se a matrícula já existe
         private bool MatriculaExiste(string matricula)
@@ -90,163 +219,45 @@ namespace WMS_RadiadoresLemos_WPF
             CargoPopup.IsOpen = true;
         }
 
-        // Preenche os campos da interface com os dados do usuário
-        private void PreencherCampos()
+
+        // Restrições de entrada de texto nos TextBoxes
+
+        private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            try
+            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
+        }
+
+        private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^a-zA-Z ]+");
+        }
+
+        private void SenhaPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            isModified = true;
+        }
+
+        // Verifica se o texto é permitido com base no padrão fornecido
+        private static bool IsTextAllowed(string text, string pattern)
+        {
+            return !Regex.IsMatch(text, pattern);
+        }
+
+        // Lida com a colagem de texto, verificando se o texto colado é permitido
+        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                if (usuario != null)
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsTextAllowed(text, pattern))
                 {
-                    NomeTextBox.Text = usuario.Nome;
-                    EmailTextBox.Text = usuario.Email;
-                    MatriculaTextBox.Text = usuario.Matrícula;
-                    SenhaPasswordBox.Password = usuario.Senha.ToString();
-                    PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
+                    e.CancelCommand();
                 }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao preencher campos de usuário. Possíveis motivos:\n" +
-                                            "- O usuário não foi encontrado;\n" +
-                                            "- O usuário não foi passado corretamente para a janela de edição;\n" +
-                                            "- Ocorreu um erro ao preencher os campos da janela de edição.",
-                                            "- Verifique se o usuário foi encontrado no banco de dados;\n" +
-                                            "- Verifique se suas informações estão corretamente preenchidas;\n" +
-                                            "- Verifique conexão com o banco de dados.");
+                e.CancelCommand();
             }
-        }
-
-        // Evento disparado ao clicar no botão de salvar usuário
-        private void Salvar_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
-                confirmarSenhaWindow.ShowDialog();
-
-                if (confirmarSenhaWindow.IsConfirmed)
-                {
-                    if (ValidarCampos())
-                    {
-                        AtualizarUsuario();
-                        DialogResult = true;
-                        Close();
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao salvar produto: {ex.Message}");
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao salvar produto. Possíveis motivos:\n" +
-                                            "- Dados do produto não são válidos;\n" +
-                                            "- Produto inexistente no banco de dados;\n" +
-                                            "- Banco de dados inacessível.",
-                                            "- Verifique se os dados do produto estão corretos;\n" +
-                                            "- Verifique se o produto existe no banco de dados;\n" +
-                                            "- Verifique se o banco de dados está acessível.");
-            }
-        }
-
-        // Atualiza os dados do usuário com os valores dos campos
-        private void AtualizarUsuario()
-        {
-            usuario.Nome = NomeTextBox.Text;
-            usuario.Email = EmailTextBox.Text;
-            usuario.Matrícula = MatriculaTextBox.Text;
-            usuario.Senha = SenhaPasswordBox.Password.ToString();
-            usuario.Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty;
-        }
-
-        // Evento disparado ao clicar no botão de cancelar
-        private void Cancelar_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (isModified && VerificarModificacoes() && ConfirmarSaidaSemSalvar())
-                {
-                    return;
-                }
-                DialogResult = false;
-                Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao cancelar: {ex.Message}");
-                Close();
-            }
-        }
-
-        // Confirma se o usuário deseja sair sem salvar as alterações
-        private bool ConfirmarSaidaSemSalvar()
-        {
-            if (isConfirmingExit)
-            {
-                return false;
-            }
-
-            isConfirmingExit = true;
-            var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
-            isConfirmingExit = false;
-
-            return result == MessageBoxResult.No;
-        }
-
-        // Evento disparado ao tentar fechar a janela
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            if (isModified && VerificarModificacoes() && ConfirmarSaidaSemSalvar())
-            {
-                e.Cancel = true;
-            }
-            base.OnClosing(e);
-        }
-
-        // Método para verificar se houve modificações nos campos
-        private bool VerificarModificacoes()
-        {
-            return usuario.Nome != NomeTextBox.Text ||
-                   usuario.Email != EmailTextBox.Text ||
-                   usuario.Senha != SenhaPasswordBox.Password ||
-                   usuario.Cargo != ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString();
-        }
-
-        // Valida os campos antes de salvar
-        private bool ValidarCampos()
-        {
-            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
-            {
-                MessageBox.Show("O campo Nome deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
-            {
-                MessageBox.Show("O campo Email deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
-            {
-                MessageBox.Show("O campo Senha deve ser preenchido.");
-                return false;
-            }
-            if (PermissaoComboBox.SelectedItem == null)
-            {
-                MessageBox.Show("O campo Cargo deve ser selecionado.");
-                return false;
-            }
-            return true;
         }
 
         // Evento disparado ao mudar a seleção do cargo do usuário
@@ -289,59 +300,36 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
         // Evento disparado ao modificar qualquer campo de texto
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             isModified = true;
         }
 
-        private void SenhaPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        // Valida os campos antes de salvar
+        private bool ValidarCampos()
         {
-            isModified = true;
-        }
-
-        private ComboBoxItem GetComboBoxItemByContent(string content)
-        {
-            foreach (ComboBoxItem item in PermissaoComboBox.Items)
+            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
             {
-                if (item.Content.ToString() == content)
-                    return item;
+                MessageBox.Show("O campo Nome deve ser preenchido.");
+                return false;
             }
-            return new ComboBoxItem { Content = string.Empty };
-        }
-
-        private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
-        }
-
-        private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z ]+");
-        }
-
-        // Verifica se o texto é permitido com base no padrão fornecido
-        private static bool IsTextAllowed(string text, string pattern)
-        {
-            return !Regex.IsMatch(text, pattern);
-        }
-
-        // Lida com a colagem de texto, verificando se o texto colado é permitido
-        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
-        {
-            if (e.DataObject.GetDataPresent(typeof(string)))
+            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
             {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                if (!IsTextAllowed(text, pattern))
-                {
-                    e.CancelCommand();
-                }
+                MessageBox.Show("O campo Email deve ser preenchido.");
+                return false;
             }
-            else
+            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
             {
-                e.CancelCommand();
+                MessageBox.Show("O campo Senha deve ser preenchido.");
+                return false;
             }
+            if (PermissaoComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("O campo Cargo deve ser selecionado.");
+                return false;
+            }
+            return true;
         }
     }
 }

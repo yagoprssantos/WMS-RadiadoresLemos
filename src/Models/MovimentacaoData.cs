@@ -22,12 +22,14 @@ public class MovimentacaoData
     public required DateTime Data { get; set; }
 
 
-
+    // DataFormatada é uma propriedade que retorna a data e hora formatada, removendo a formatação gringa
     public string DataFormatada
     {
         get
         {
-            return Data.ToString("dd/MM/yyyy HH:mm:ss");
+            TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(Data, timeZone);
+            return localTime.ToString("dd/MM/yyyy HH:mm:ss");
         }
     }
 }

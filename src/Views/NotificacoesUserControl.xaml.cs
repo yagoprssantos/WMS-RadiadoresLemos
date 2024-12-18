@@ -18,17 +18,9 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para carregar todas as notificações
         private void CarregarNotificacoes()
         {
-            CarregarHistorico();
             CarregarAlertas();
+            CarregarHistorico();
             CarregarMovimentacoes();
-        }
-
-        // Método para carregar dados no DataGrid de Histórico
-        private void CarregarHistorico()
-        {
-            var historico = LogHistorico.ObterLogs();
-
-            HistoricoDataGrid.ItemsSource = historico;
         }
 
         // Método para carregar dados no DataGrid de Alertas
@@ -43,6 +35,14 @@ namespace WMS_RadiadoresLemos_WPF
             }
 
             AlertaDataGrid.ItemsSource = alertas;
+        }
+
+        // Método para carregar dados no DataGrid de Histórico
+        private void CarregarHistorico()
+        {
+            var historico = LogHistorico.ObterLogs();
+
+            HistoricoDataGrid.ItemsSource = historico;
         }
 
         // Método para carregar dados no DataGrid de Movimentações

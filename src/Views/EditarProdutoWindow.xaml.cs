@@ -14,7 +14,6 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private ProdutoData produto;
         private bool isModified = false;
-        private bool isConfirmingExit = false;
         private List<ProdutoData> produtos;
 
         // Propriedade pública para acessar o produto editado
@@ -33,6 +32,8 @@ namespace WMS_RadiadoresLemos_WPF
             };
             produtos = new List<ProdutoData>();
             PreencherCampos();
+
+            isModified = false;
         }
 
         // Preenche os campos da interface com os dados do produto
@@ -121,11 +122,13 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (isModified && ConfirmarSaidaSemSalvar())
+                if (isModified)
                 {
-                    return;
+                    if (ConfirmarSaidaSemSalvar())
+                    {
+                        return;
+                    }
                 }
-                isConfirmingExit = false;
                 DialogResult = false;
                 Close();
             }
@@ -147,6 +150,7 @@ namespace WMS_RadiadoresLemos_WPF
             var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
             return result == MessageBoxResult.No;
         }
+
 
         // Restrições de entrada de texto nos TextBoxes
         private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -256,32 +260,6 @@ namespace WMS_RadiadoresLemos_WPF
                 return false;
             }
             return true;
-        }
-
-        // Método para verificar se houve modificações nos campos
-        private bool VerificarModificacoes()
-        {
-            return produto.Nome != NomeProduto.Text ||
-                   produto.Tipo != TipoProduto.Text ||
-                   produto.Marca != MarcaProduto.Text ||
-                   produto.Codigo != CodigoProduto.Text ||
-                   produto.Preço.ToString("F2") != PrecoProduto.Text ||
-                   produto.Quantidade.ToString("N0") != QuantidadeInicial.Text;
-        }
-
-        // Evento disparado ao tentar fechar a janela
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            if (!isConfirmingExit && VerificarModificacoes())
-            {
-                isConfirmingExit = true;
-                if (ConfirmarSaidaSemSalvar())
-                {
-                    e.Cancel = true;
-                }
-                isConfirmingExit = false;
-            }
-            base.OnClosing(e);
         }
     }
 }
