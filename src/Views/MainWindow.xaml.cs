@@ -12,6 +12,7 @@ namespace WMS_RadiadoresLemos_WPF
 {
     public partial class MainWindow : Window
     {
+        public static MainWindow? _instance;
         private bool isLogoutInitiated = false;
         private int _notificationCount = 0;
         private DispatcherTimer _saveCacheTimer;
@@ -28,6 +29,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             // Inicia processo de login
             InitializeComponent();
+            _instance = this;
             StartApplication();
 
             // Adiciona o evento de alerta adicionado
@@ -84,14 +86,22 @@ namespace WMS_RadiadoresLemos_WPF
                 DatabaseConnect.SetEnvironmentVarible();
                 DatabaseConnect.TestConnection();
 
-                // Sincroniza dados com banco de dados
-                SincronizarBancoDados();
-                isAppOffline = false;
-                isSincronized = true;
+                // Verifica se a conexão foi estabelecida
+                if (DatabaseConnect.IsConnected)
+                {
+                    // Sincroniza dados com banco de dados
+                    SincronizarBancoDados();
+                    isAppOffline = false;
+                    isSincronized = true;
 
-                // Atualiza a barra de status
-                UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
-                UpdateConnectionStatus("Conectado");
+                    // Atualiza a barra de status
+                    UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
+                    UpdateConnectionStatus("Conectado");
+                }
+                else
+                {
+                    throw new Exception("Não foi possível estabelecer conexão com o banco de dados.");
+                }
             }
             catch (Exception ex)
             {
@@ -142,9 +152,6 @@ namespace WMS_RadiadoresLemos_WPF
                 // Verifica se o usuário logado é nulo
                 if (UsuarioLogado == null) return;
 
-                // Desconecta do banco de dados
-                DatabaseConnect.Disconnect();
-
                 // Adiciona log
                 var log = new LogData
                 {
@@ -166,6 +173,9 @@ namespace WMS_RadiadoresLemos_WPF
                 // Salva o cache nos arquivos JSON
                 DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
                 await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
+
+                // Desconecta do banco de dados
+                DatabaseConnect.Disconnect();
             }
             catch (Exception ex)
             {
@@ -323,11 +333,11 @@ namespace WMS_RadiadoresLemos_WPF
         }
         public async void SincronizarBancoDados()
         {
-            // Deixa carregamento visível
-            LoadingScreen.Visibility = Visibility.Visible;
-
             // Fecha qualquer aba que esteja aberta
             ContentArea.Content = null;
+
+            // Deixa carregamento visível
+            LoadingScreen.Visibility = Visibility.Visible;
 
             // Altera a barra de status
             UpdateStatusBar("Sincronizando dados com o banco de dados...", Colors.Blue);
@@ -399,9 +409,6 @@ namespace WMS_RadiadoresLemos_WPF
                     // Define a variável de controle como true
                     isLogoutInitiated = true;
 
-                    // Desconecta do banco de dados
-                    DatabaseConnect.Disconnect();
-
                     // Oculta a janela principal
                     this.Hide();
 
@@ -429,6 +436,9 @@ namespace WMS_RadiadoresLemos_WPF
                         // Salva o cache nos arquivos JSON
                         DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
                         await gerenciadorDeArquivos.SalvarCacheNosArquivosAsync();
+
+                        // Desconecta do banco de dados
+                        DatabaseConnect.Disconnect();
                     }
 
                     // Reabre a janela de login

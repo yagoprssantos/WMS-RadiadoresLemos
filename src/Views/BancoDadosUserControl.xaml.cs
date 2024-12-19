@@ -58,7 +58,11 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique sua conexão com a internet;\n" +
                                             "- Verifique as configurações do banco de dados.");
 
-                new MainWindow().ativarModoOffline();
+                // Ativa modo offline caso não esteja ativo
+                if (MainWindow.isAppOffline == false)
+                {
+                    MainWindow._instance?.ativarModoOffline();
+                }
             }
         }
 
@@ -235,7 +239,6 @@ namespace WMS_RadiadoresLemos_WPF
                 Console.WriteLine($"Erro ao atualizar DataGrid: {ex.Message}");
             }
         }
-
         private async Task<List<object>> ObterDadosDoFirebaseAsync()
         {
             var db = DatabaseConnect.Database; // Supondo que DatabaseConnect.Database esteja configurado com a instância do Firestore
@@ -269,9 +272,45 @@ namespace WMS_RadiadoresLemos_WPF
             return produtos;
         }
 
+        private async Task<List<object>> ObterDadosDoArquivoAsync()
+        {
+            var dados = new List<object>();
+            var fileManager = new DatabaseFileManager();
+
+            try
+            {
+                // Lê os dados de todas as tabelas
+                var usuarios = await DatabaseFileManager.LerDoArquivoAsync<UsuarioData>(fileManager.CaminhoArquivoUsuarios);
+                dados.AddRange(usuarios);
+
+                var produtos = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(fileManager.CaminhoArquivoProdutos);
+                dados.AddRange(produtos);
+
+                var logs = await DatabaseFileManager.LerDoArquivoAsync<LogData>(fileManager.CaminhoArquivoLogs);
+                dados.AddRange(logs);
+
+                var movimentacoes = await DatabaseFileManager.LerDoArquivoAsync<MovimentacaoData>(fileManager.CaminhoArquivoMovimentacoes);
+                dados.AddRange(movimentacoes);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao obter dados do arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            $"Erro ao obter dados do arquivo. Possíveis motivos:\n" +
+                                            "- Arquivo corrompido;\n" +
+                                            "- Formato de arquivo inválido;\n" +
+                                            "- Problemas ao acessar o arquivo.",
+                                            "- Verifique se o arquivo está correto;\n" +
+                                            "- Verifique se o formato do arquivo é suportado.");
+            }
+
+            return dados;
+        }
+
 
         // Evento disparado quando o botão de exportar é clicado
-        private async void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
@@ -284,6 +323,12 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Abre o popup de configuração de exportação
                 ExportConfigPopup.IsOpen = true;
+
+                // Se o popup fechar
+                ExportConfigPopup.Closed += (s, ev) =>
+                {
+                    tabelasSelecionadas.Clear();
+                };
             }
             catch (Exception ex)
             {
@@ -322,7 +367,19 @@ namespace WMS_RadiadoresLemos_WPF
                 ShowProgressBar.Visibility = Visibility.Visible;
                 ProgressBar.Value = 0;
 
-                var dadosProdutos = await ObterDadosDoFirebaseAsync();
+                var dadosProdutos = new List<object>();
+
+                // Se banco conectado
+                if (DatabaseConnect.IsConnected)
+                {
+                    // Obter dados do Firebase
+                    dadosProdutos = await ObterDadosDoFirebaseAsync();
+                }
+                else
+                {
+                    // Obter dados do arquivo
+                    dadosProdutos = await ObterDadosDoArquivoAsync();
+                }
 
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
@@ -506,6 +563,12 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Abre o popup de configuração de importação
                 ImportConfigPopup.IsOpen = true;
+
+                // Se o popup fechar
+                ImportConfigPopup.Closed += (s, ev) =>
+                {
+                    tabelasSelecionadas.Clear();
+                };
             }
             catch (Exception ex)
             {
@@ -852,64 +915,36 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Evento disparado ao clicar no botão de reconectar
-        private async void Reconectar_Click(object sender, RoutedEventArgs e)
+        private void Reconectar_Click(object sender, RoutedEventArgs e)
         {
-            // Chama a função SetupDatabaseConnection da MainWindow
-            new MainWindow();
-        }
+            // Mostra a barra de progresso
+            ShowProgressBar.Visibility = Visibility.Visible;
+            ProgressBar.Value = 100;
+            ProgressBarMessage.Text = "Reconectando ao Banco de Dados...";
 
-        private async void AtualizarCache()
-        {
-            try
+            // Tenta reconectar ao banco de dados
+            MainWindow._instance.SetupDatabaseConnection();
+
+            // Se a conexão for bem sucedida
+            if (DatabaseConnect.IsConnected)
             {
-                // Configura o ambiente para conectar ao Firestore
-                DatabaseConnect.SetEnvironmentVarible();
+                // Atualiza o status
+                Status.Text = "Conectado ao Banco de Dados";
+                Status.Foreground = Brushes.Green;
 
-                // Testa a conexão com o banco de dados
-                DatabaseConnect.TestConnection();
-
-                // Obtém a instância do Firestore
-                var db = DatabaseConnect.Database;
-
-                if (db == null)
-                {
-                    MessageBox.Show("Não foi possível conectar ao Firestore.");
-                    return;
-                }
-
-                // Limpa o cache atual
-                DadosCache.Tabelas.Clear();
-
-                // Obtém todas as coleções do Firestore
-                var colecoes = await db.ListRootCollectionsAsync().ToListAsync();
-
-                foreach (var colecao in colecoes)
-                {
-                    var documentos = await colecao.ListDocumentsAsync().ToListAsync();
-                    var dados = new List<object>();
-
-                    foreach (var documento in documentos)
-                    {
-                        var snapshot = await documento.GetSnapshotAsync();
-                        if (snapshot.Exists)
-                        {
-                            dados.Add(snapshot.ToDictionary());
-                        }
-                    }
-
-                    // Adiciona os dados da coleção ao cache
-                    DadosCache.Tabelas[colecao.Id] = dados;
-                }
-
-                MessageBox.Show("Cache atualizado com sucesso.");
+                // Fecha a barra de progresso
+                ShowProgressBar.Visibility = Visibility.Collapsed;
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Erro ao atualizar o cache: {ex.Message}");
-                throw; // Lança a exceção para ser tratada no método chamador
-            }
-        }
+                Status.Text = "Modo Offline";
+                Status.Foreground = Brushes.Red;
 
+                // Fecha a barra de progresso
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
+
+        }
 
         // Evento disparado quando o botão de gerar tabela é clicado
         private async void GerarTabela_Click(object sender, RoutedEventArgs e)

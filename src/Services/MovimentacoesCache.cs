@@ -40,8 +40,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     // Adiciona a movimentação nos arquivos JSON
                     await AdicionarMovimentacaoNoArquivoAsync(movimentacao);
 
-                    // Deixa offline
-                    new MainWindow().ativarModoOffline();
+                    // Ativa modo offline caso não esteja ativo
+                    if (MainWindow.isAppOffline == false)
+                    {
+                        MainWindow._instance?.ativarModoOffline();
+                    }
                     return;
                 }
 

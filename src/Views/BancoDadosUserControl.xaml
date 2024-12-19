@@ -123,25 +123,25 @@
         </Popup>
 
         <!-- Popup para Configurações de Importação -->
-        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True">
+        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" Width="400">
             <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="15">
                 <StackPanel>
                     <!-- Textos ajustáveis de acordo com função -->
-                    <TextBlock Text="Configurações para Importar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+                    <TextBlock Text="Configurações para Importar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10" TextWrapping="Wrap"/>
 
                     <!-- Tabelas adicionadas de acordo com arquivo/função -->
-                    <TextBlock Text="Selecione as Tabelas que deseja importar:" FontWeight="Bold" FontSize="16"/>
+                    <TextBlock Text="Selecione as Tabelas que deseja importar:" FontWeight="Bold" FontSize="16" TextWrapping="Wrap"/>
                     <ListBox x:Name="ImportTabelasListBox" SelectionMode="Multiple" Height="100"/>
 
                     <!-- ComboBox com opções para importação-->
-                    <TextBlock Text="Escolha um método de importação:" FontWeight="Bold" FontSize="16" Margin="0,10,0,0"/>
+                    <TextBlock Text="Escolha um método de importação:" FontWeight="Bold" FontSize="16" Margin="0,10,0,0" TextWrapping="Wrap"/>
                     <ComboBox x:Name="ImportComboBox" Margin="0,0,0,10">
                         <ComboBoxItem Content="Substituir Dados"/>
                         <ComboBoxItem Content="Adicionar Dados"/>
                     </ComboBox>
 
-                    <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" FontWeight="Bold" FontSize="12" Foreground="Red" Margin="0,0,0,10"/>
-                    <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" FontWeight="Bold" FontSize="16" Foreground="Red" Margin="0,0,0,10"/>
+                    <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" FontWeight="Bold" FontSize="12" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                    <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" FontWeight="Bold" FontSize="16" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
                     <Button Content="Confirmar importação" Margin="5" Click="ConfirmarImportacao_Click"/>
                     <Button Content="Cancelar" Margin="5" Click="FecharImportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
                 </StackPanel>

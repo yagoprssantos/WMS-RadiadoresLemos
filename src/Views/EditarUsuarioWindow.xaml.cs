@@ -265,7 +265,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (PermissaoComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
             {
-                usuario.Cargo = selectedItem.Content.ToString() ?? string.Empty;
+                string novoCargo = selectedItem.Content.ToString() ?? string.Empty;
 
                 // Se for um novo usuário, gera uma nova matrícula com base no cargo
                 if (isNewUser)
@@ -273,29 +273,26 @@ namespace WMS_RadiadoresLemos_WPF
                     string novaMatricula;
                     do
                     {
-                        novaMatricula = GerarMatricula(usuario.Cargo);
+                        novaMatricula = GerarMatricula(novoCargo);
+                    } while (MatriculaExiste(novaMatricula));
+
+                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                }
+                // Se for um usuário existente, altera apenas a matrícula se for um cargo diferente
+                else if (usuario.Cargo != novoCargo)
+                {
+                    string novaMatricula;
+                    do
+                    {
+                        novaMatricula = GerarMatricula(novoCargo);
                     } while (MatriculaExiste(novaMatricula));
 
                     usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
                     MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
                 }
 
-                // Se for um usuário existente, altera apenas a matrícula se for um cargo diferente
-                if (!isNewUser)
-                {
-                    if (usuario.Cargo != selectedItem.Content.ToString())
-                    {
-                        string novaMatricula;
-                        do
-                        {
-                            novaMatricula = GerarMatricula(usuario.Cargo);
-                        } while (MatriculaExiste(novaMatricula));
-
-                        usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
-                        MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
-                    }
-                }
-
+                usuario.Cargo = novoCargo;
                 isModified = true;
             }
         }

@@ -124,22 +124,29 @@ namespace WMS_RadiadoresLemos_WPF
         // Método chamado ao clicar no botão de adicionar usuário
         private async void AdicionarUsuario_Click(object sender, RoutedEventArgs e)
         {
-            if (UsuariosDataGrid.SelectedItem is UsuarioData usuarioSelecionado)
+            // Cria um novo usuário vazio
+            UsuarioData usuarioSelecionado = new UsuarioData
             {
-                EditarUsuarioWindow editarUsuarioWindow = null;
-                if (editarUsuarioWindow.ShowDialog() == true)
-                {
+                Nome = string.Empty,
+                Email = string.Empty,
+                Matrícula = string.Empty,
+                Senha = string.Empty,
+                Cargo = "Usuário",
+                Id = string.Empty
+            };
 
-                    // Atualiza o usuário no banco de dados
-                    await AtualizarUsuario(usuarioSelecionado);
+            EditarUsuarioWindow editarUsuarioWindow = new(usuarioSelecionado);
+            if (editarUsuarioWindow.ShowDialog() == true)
+            {
+                // Atualiza o usuário no banco de dados
+                await AtualizarUsuario(usuarioSelecionado);
 
-                    // Atualiza a fonte de dados do DataGrid
-                    UsuariosDataGrid.ItemsSource = null;
-                    UsuariosDataGrid.ItemsSource = usuarios;
+                // Atualiza a fonte de dados do DataGrid
+                UsuariosDataGrid.ItemsSource = null;
+                UsuariosDataGrid.ItemsSource = usuarios;
 
-                    // Avisa o usuário que a quantidade foi alterada
-                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                // Avisa o usuário que a quantidade foi alterada
+                MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -212,8 +219,11 @@ namespace WMS_RadiadoresLemos_WPF
                 // Se não estiver conectado ao banco
                 if (db == null || !DatabaseConnect.IsConnected)
                 {
-                    // Ativa modo offline
-                    new MainWindow().ativarModoOffline();
+                    // Ativa modo offline caso não esteja ativo
+                    if (MainWindow.isAppOffline == false)
+                    {
+                        MainWindow._instance?.ativarModoOffline();
+                    }
                 }
                 else
                 {
@@ -257,6 +267,7 @@ namespace WMS_RadiadoresLemos_WPF
                 };
                 await LogHistorico.RegistrarLogAsync(log);
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao atualizar usuário no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -282,8 +293,11 @@ namespace WMS_RadiadoresLemos_WPF
                 // Se não estiver conectado ao banco
                 if (db == null || !DatabaseConnect.IsConnected)
                 {
-                    // Ativa modo offline
-                    new MainWindow().ativarModoOffline();
+                    // Ativa modo offline caso não esteja ativo
+                    if (MainWindow.isAppOffline == false)
+                    {
+                        MainWindow._instance?.ativarModoOffline();
+                    }
                 }
                 else
                 {

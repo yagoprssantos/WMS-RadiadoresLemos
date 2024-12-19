@@ -31,7 +31,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     Console.WriteLine("Não foi possível conectar ao Firestore. Registrando log em modo offline.");
                     AdicionarLogAoCache(log);
                     await SalvarLogNoArquivoAsync(log);
-                    new MainWindow().ativarModoOffline();
                     return;
                 }
 
@@ -46,7 +45,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao registrar log: {ex.Message}");
-                new MainWindow().ativarModoOffline();
                 await SalvarLogNoArquivoAsync(log);
             }
         }
@@ -152,7 +150,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao remover logs antigos: {ex.Message}");
-                new MainWindow().ativarModoOffline();
+                // Ativa modo offline caso não esteja ativo
+                if (MainWindow.isAppOffline == false)
+                {
+                    MainWindow._instance?.ativarModoOffline();
+                }
             }
         }
 
