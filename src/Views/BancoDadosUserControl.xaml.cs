@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 using DocumentFormat.OpenXml.Packaging;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using System.Windows.Media;
+using System.Diagnostics;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -28,6 +29,7 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
             DataContext = this;
             SetupDatabaseInfo();
+            SetupLinks();
             CarregarTabelas();
         }
 
@@ -64,6 +66,64 @@ namespace WMS_RadiadoresLemos_WPF
                     MainWindow._instance?.ativarModoOffline();
                 }
             }
+        }
+
+        // Método para configurar botões de links (arquivos locais e banco de dados)
+        private void SetupLinks()
+        {
+            // Configura o evento do botão para abrir arquivos locais
+            var abrirArquivosLocaisButton = FindName("AbrirArquivosLocaisButton") as Button;
+            if (abrirArquivosLocaisButton != null)
+            {
+                abrirArquivosLocaisButton.Click += AbrirArquivosLocais_Click;
+            }
+
+            // Configura o evento do botão para abrir Firestore
+            var abrirFirestoreButton = FindName("AbrirFirestoreButton") as Button;
+            if (abrirFirestoreButton != null)
+            {
+                abrirFirestoreButton.Click += AbrirFirestore_Click;
+            }
+
+            // Configura o evento do botão para abrir Google Cloud
+            var abrirGoogleCloudButton = FindName("AbrirGoogleCloudButton") as Button;
+            if (abrirGoogleCloudButton != null)
+            {
+                abrirGoogleCloudButton.Click += AbrirGoogleCloud_Click;
+            }
+        }
+
+        private void AbrirArquivosLocais_Click(object sender, RoutedEventArgs e)
+        {
+            // Abre o diretório de arquivos locais
+            Process.Start(new ProcessStartInfo
+            {
+                // Diretório "DadosBancoDeDadosOffline" dentro do diretório atual do projeto
+                FileName = Path.Combine(Directory.GetCurrentDirectory(), "DadosBancoDeDadosOffline"),
+
+                // Abre o diretório no explorador de arquivos
+                UseShellExecute = true
+            });
+        }
+
+        private void AbrirFirestore_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                // Abre o console do Firestore no navegador
+                FileName = "https://console.firebase.google.com/project/radiadoreslemos-ea8c6/firestore/",
+                UseShellExecute = true
+            });
+        }
+
+        private void AbrirGoogleCloud_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                // Abre o console do Google Cloud no navegador
+                FileName = "https://console.cloud.google.com/welcome?hl=pt-BR&project=radiadoreslemos-ea8c6",
+                UseShellExecute = true
+            });
         }
 
         // Método para carregar as tabelas no ComboBox

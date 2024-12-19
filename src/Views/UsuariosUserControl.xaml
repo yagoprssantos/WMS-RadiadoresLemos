@@ -33,14 +33,14 @@
                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                         Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
                         AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                        CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
+                        CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
                         ColumnWidth="*"
                         MouseDoubleClick="UsuariosDataGrid_MouseDoubleClick">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*" MaxWidth="500"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="Auto" MaxWidth="500"/>
-                    <DataGridTextColumn Header="Matrícula" Binding="{Binding Matrícula}" IsReadOnly="True" Width="*" MaxWidth="100"/>
-                    <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" IsReadOnly="True" Width="*" MaxWidth="200"/>
+                    <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="500"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="*" MinWidth="166" MaxWidth="500"/>
+                    <DataGridTextColumn Header="Matrícula" Binding="{Binding Matrícula}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="100"/>
+                    <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="200"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>

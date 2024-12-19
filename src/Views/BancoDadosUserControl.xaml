@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="800">
 
     <Grid Margin="10">
         <TabControl>
@@ -31,9 +31,15 @@
                             <TextBlock Text=""/>
                             <TextBlock>
                                 <Run Text="Status da Conexão: " FontWeight="Bold"/>
-                                <Run Name="Status" Text=""/>
+                                <Run Name="Status" FontWeight="Bold" Text=""/>
                             </TextBlock>
-                            <TextBlock Text=""/>
+                            <TextBlock Text="" Height="20"/>
+                            <TextBlock Text="Caso queira acessar os arquivos locais no explorador de arquivos:" Margin="5"/>
+                            <Button x:Name="AbrirArquivosLocaisButton" Content="Abrir Arquivos Locais" Margin="5"/>
+                            <TextBlock Text="Caso queira acessar o banco de dados online no Firebase:" Margin="5"/>
+                            <Button x:Name="AbrirFirestoreButton" Content="Abrir Banco de Dados" Margin="5"/>
+                            <TextBlock Text="Para acessar mais informações e configurações:" Margin="5"/>
+                            <Button x:Name="AbrirGoogleCloudButton" Content="Abrir Google Cloud" Margin="5"/>                       
                         </StackPanel>
                     </GroupBox>
                     <UniformGrid Rows="1" Columns="4" Margin="0,5,0,10" Grid.Row="1">
@@ -44,6 +50,7 @@
                     </UniformGrid>
                 </Grid>
             </TabItem>
+
 
             <!-- Segunda Aba: Visualização de Dados -->
             <TabItem Header="Visualizar Dados" FontSize="18">
