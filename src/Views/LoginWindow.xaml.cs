@@ -14,6 +14,11 @@ namespace WMS_RadiadoresLemos_WPF
     {
         public string Username { get; private set; } = string.Empty;
         private DatabaseFileManager _databaseFileManager;
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            UsernameField.Focus();
+        }
+
 
         public LoginWindow()
         {
@@ -147,7 +152,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
 
                 // Atualiza TODOS os arquivos locais com os dados mais recentes do banco de dados
-                await _databaseFileManager.AtualizarArquivosAsync();
+                await _databaseFileManager.AtualizarArquivosComBancoAsync();
             }
             catch (Exception ex)
             {
@@ -173,6 +178,8 @@ namespace WMS_RadiadoresLemos_WPF
         {
             // Login bem-sucedido
             MainWindow.UsuarioLogado = usuario;
+            MainWindow.isSincronized = true;
+            MainWindow.isAppOffline = false;
             this.Hide();
 
             // Inicia a janela principal

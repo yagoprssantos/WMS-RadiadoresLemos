@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="800">
 
     <Grid Margin="10">
         <TabControl>
@@ -31,9 +31,15 @@
                             <TextBlock Text=""/>
                             <TextBlock>
                                 <Run Text="Status da Conexão: " FontWeight="Bold"/>
-                                <Run Text="{Binding ConnectionStatus}"/>
+                                <Run Name="Status" FontWeight="Bold" Text=""/>
                             </TextBlock>
-                            <TextBlock Text=""/>
+                            <TextBlock Text="" Height="20"/>
+                            <TextBlock Text="Caso queira acessar os arquivos locais no explorador de arquivos:" Margin="5"/>
+                            <Button x:Name="AbrirArquivosLocaisButton" Content="Abrir Arquivos Locais" Margin="5"/>
+                            <TextBlock Text="Caso queira acessar o banco de dados online no Firebase:" Margin="5"/>
+                            <Button x:Name="AbrirFirestoreButton" Content="Abrir Banco de Dados" Margin="5"/>
+                            <TextBlock Text="Para acessar mais informações e configurações:" Margin="5"/>
+                            <Button x:Name="AbrirGoogleCloudButton" Content="Abrir Google Cloud" Margin="5"/>                       
                         </StackPanel>
                     </GroupBox>
                     <UniformGrid Rows="1" Columns="4" Margin="0,5,0,10" Grid.Row="1">
@@ -44,6 +50,7 @@
                     </UniformGrid>
                 </Grid>
             </TabItem>
+
 
             <!-- Segunda Aba: Visualização de Dados -->
             <TabItem Header="Visualizar Dados" FontSize="18">
@@ -106,7 +113,7 @@
         </Grid>
 
         <!-- Popup para Configurações de Exportação -->
-        <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="False" IsOpen="{Binding IsExportConfigPopupOpen}">
+        <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="True">
             <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="15">
                 <StackPanel>
                     <!-- Textos ajustáveis de acordo com função -->
@@ -117,31 +124,33 @@
                     <ListBox x:Name="ExportTabelasListBox" SelectionMode="Multiple" Height="100"/>
 
                     <Button Content="Confirmar exportação" Margin="5" Click="ConfirmarExportacao_Click"/>
+                    <Button Content="Cancelar" Margin="5" Click="FecharExportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
                 </StackPanel>
             </Border>
         </Popup>
 
         <!-- Popup para Configurações de Importação -->
-        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" IsOpen="{Binding IsImportConfigPopupOpen}">
+        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" Width="400">
             <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="15">
                 <StackPanel>
                     <!-- Textos ajustáveis de acordo com função -->
-                    <TextBlock Text="Configurações para Importar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10"/>
+                    <TextBlock Text="Configurações para Importar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10" TextWrapping="Wrap"/>
 
                     <!-- Tabelas adicionadas de acordo com arquivo/função -->
-                    <TextBlock Text="Selecione as Tabelas que deseja importar:" FontWeight="Bold" FontSize="16"/>
+                    <TextBlock Text="Selecione as Tabelas que deseja importar:" FontWeight="Bold" FontSize="16" TextWrapping="Wrap"/>
                     <ListBox x:Name="ImportTabelasListBox" SelectionMode="Multiple" Height="100"/>
 
                     <!-- ComboBox com opções para importação-->
-                    <TextBlock Text="Escolha um método de importação:" FontWeight="Bold" FontSize="16" Margin="0,10,0,0"/>
+                    <TextBlock Text="Escolha um método de importação:" FontWeight="Bold" FontSize="16" Margin="0,10,0,0" TextWrapping="Wrap"/>
                     <ComboBox x:Name="ImportComboBox" Margin="0,0,0,10">
                         <ComboBoxItem Content="Substituir Dados"/>
                         <ComboBoxItem Content="Adicionar Dados"/>
                     </ComboBox>
 
-                    <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" FontWeight="Bold" FontSize="12" Foreground="Red" Margin="0,0,0,10"/>
-                    <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" FontWeight="Bold" FontSize="16" Foreground="Red" Margin="0,0,0,10"/>
+                    <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" FontWeight="Bold" FontSize="12" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                    <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" FontWeight="Bold" FontSize="16" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
                     <Button Content="Confirmar importação" Margin="5" Click="ConfirmarImportacao_Click"/>
+                    <Button Content="Cancelar" Margin="5" Click="FecharImportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
                 </StackPanel>
             </Border>
         </Popup>

@@ -28,7 +28,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 var db = DatabaseConnect.Database;
                 if (db == null || !DatabaseConnect.IsConnected)
                 {
-                    AtivarModoOffline();
+                    Console.WriteLine("Não foi possível conectar ao Firestore. Registrando log em modo offline.");
+                    AdicionarLogAoCache(log);
                     await SalvarLogNoArquivoAsync(log);
                     return;
                 }
@@ -44,7 +45,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao registrar log: {ex.Message}");
-                AtivarModoOffline();
                 await SalvarLogNoArquivoAsync(log);
             }
         }
@@ -70,38 +70,30 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        // Função para remover logs antigos se houver mais de MaxLogs
-        private static async Task RemoverLogsAntigosAsync(CollectionReference logsRef)
+        // Função para adicionar um log ao cache
+        private static void AdicionarLogAoCache(LogData log)
         {
-            try
+            if (!DadosCache.Tabelas.ContainsKey("Historico"))
             {
-                var snapshot = await logsRef.OrderBy("Data").GetSnapshotAsync();
-                if (snapshot.Count > MaxLogs)
-                {
-                    var logsParaRemover = snapshot.Documents.Take(snapshot.Count - MaxLogs);
-                    foreach (var log in logsParaRemover)
-                    {
-                        await logsRef.Document(log.Id).DeleteAsync();
-                    }
-                    Console.WriteLine("Logs antigos removidos com sucesso do Firestore.");
-
-                    RemoverLogsAntigosDoCache();
-                    await RemoverLogsAntigosDoArquivoAsync();
-                }
+                DadosCache.Tabelas["Historico"] = new List<object>();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao remover logs antigos: {ex.Message}");
-                AtivarModoOffline();
-            }
+            DadosCache.Tabelas["Historico"].Add(log);
+            Console.WriteLine("Log registrado com sucesso no cache.");
         }
 
         // Função para salvar um log no arquivo JSON
         private static async Task SalvarLogNoArquivoAsync(LogData log)
         {
-            var logs = LerLogsDoArquivo();
-            logs.Add(log);
-            await SalvarLogsNoArquivoAsync(logs);
+            try
+            {
+                var logs = LerLogsDoArquivo();
+                logs.Add(log);
+                await SalvarLogsNoArquivoAsync(logs);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao salvar log no arquivo JSON: {ex.Message}");
+            }
         }
 
         // Função para salvar uma lista de logs no arquivo JSON
@@ -136,20 +128,34 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             return new List<LogData>();
         }
 
-        // Função para ativar o modo offline
-        private static void AtivarModoOffline()
+        // Função para remover logs antigos se houver mais de MaxLogs
+        private static async Task RemoverLogsAntigosAsync(CollectionReference logsRef)
         {
-            Console.WriteLine("Modo offline ativado.");
-        }
-
-        // Função para adicionar um log ao cache
-        private static void AdicionarLogAoCache(LogData log)
-        {
-            if (!DadosCache.Tabelas.ContainsKey("Historico"))
+            try
             {
-                DadosCache.Tabelas["Historico"] = new List<object>();
+                var snapshot = await logsRef.OrderBy("Data").GetSnapshotAsync();
+                if (snapshot.Count > MaxLogs)
+                {
+                    var logsParaRemover = snapshot.Documents.Take(snapshot.Count - MaxLogs);
+                    foreach (var log in logsParaRemover)
+                    {
+                        await logsRef.Document(log.Id).DeleteAsync();
+                    }
+                    Console.WriteLine("Logs antigos removidos com sucesso do Firestore.");
+
+                    RemoverLogsAntigosDoCache();
+                    await RemoverLogsAntigosDoArquivoAsync();
+                }
             }
-            DadosCache.Tabelas["Historico"].Add(log);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao remover logs antigos: {ex.Message}");
+                // Ativa modo offline caso não esteja ativo
+                if (MainWindow.isAppOffline == false)
+                {
+                    MainWindow._instance?.ativarModoOffline();
+                }
+            }
         }
 
         // Função para remover logs antigos do cache
@@ -160,10 +166,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 var logs = DadosCache.Tabelas["Historico"].Cast<LogData>().OrderByDescending(log => log.Data).ToList();
                 if (logs.Count > MaxLogs)
                 {
-                    // Captura os logs mais antigos
                     var logsParaRemover = logs.Skip(MaxLogs).ToList();
-
-                    // Remove os logs mais antigos
                     foreach (var log in logsParaRemover)
                     {
                         DadosCache.Tabelas["Historico"].Remove(log);

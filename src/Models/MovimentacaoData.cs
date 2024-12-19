@@ -17,9 +17,19 @@ public class MovimentacaoData
 
     [FirestoreProperty]
     public required int Quantidade { get; set; }
-    // Quantidade movimentada
 
     [FirestoreProperty]
-    public required DateTime DataHora { get; set; }
-    // Data e hora da movimentação
+    public required DateTime Data { get; set; }
+
+
+    // DataFormatada é uma propriedade que retorna a data e hora formatada, removendo a formatação gringa
+    public string DataFormatada
+    {
+        get
+        {
+            TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(Data, timeZone);
+            return localTime.ToString("dd/MM/yyyy HH:mm:ss");
+        }
+    }
 }

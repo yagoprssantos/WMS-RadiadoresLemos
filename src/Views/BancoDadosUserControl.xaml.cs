@@ -12,6 +12,9 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using DocumentFormat.OpenXml.Packaging;
+using WMS_RadiadoresLemos_WPF.src.Views;
+using System.Windows.Media;
+using System.Diagnostics;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -25,7 +28,102 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             DataContext = this;
+            SetupDatabaseInfo();
+            SetupLinks();
             CarregarTabelas();
+        }
+
+        // Método para configurar informações do banco de dados
+        private void SetupDatabaseInfo()
+        {
+            try
+            {
+                if (DatabaseConnect.IsConnected)
+                {
+                    Status.Text = "Conectado ao Banco de Dados";
+                    Status.Foreground = Brushes.Green;
+                }
+                else
+                {
+                    Status.Text = "Modo Offline";
+                    Status.Foreground = Brushes.Red;
+                }
+            }
+            catch (Exception ex)
+            {
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            $"Erro ao configurar informações do banco de dados. Possíveis motivos:\n" +
+                                            "- Serviço do banco de dados indisponível;\n" +
+                                            "- Problemas de conexão com a internet;\n" +
+                                            "- Configurações incorretas do banco de dados.",
+                                            "- Verifique sua conexão com a internet;\n" +
+                                            "- Verifique as configurações do banco de dados.");
+
+                // Ativa modo offline caso não esteja ativo
+                if (MainWindow.isAppOffline == false)
+                {
+                    MainWindow._instance?.ativarModoOffline();
+                }
+            }
+        }
+
+        // Método para configurar botões de links (arquivos locais e banco de dados)
+        private void SetupLinks()
+        {
+            // Configura o evento do botão para abrir arquivos locais
+            var abrirArquivosLocaisButton = FindName("AbrirArquivosLocaisButton") as Button;
+            if (abrirArquivosLocaisButton != null)
+            {
+                abrirArquivosLocaisButton.Click += AbrirArquivosLocais_Click;
+            }
+
+            // Configura o evento do botão para abrir Firestore
+            var abrirFirestoreButton = FindName("AbrirFirestoreButton") as Button;
+            if (abrirFirestoreButton != null)
+            {
+                abrirFirestoreButton.Click += AbrirFirestore_Click;
+            }
+
+            // Configura o evento do botão para abrir Google Cloud
+            var abrirGoogleCloudButton = FindName("AbrirGoogleCloudButton") as Button;
+            if (abrirGoogleCloudButton != null)
+            {
+                abrirGoogleCloudButton.Click += AbrirGoogleCloud_Click;
+            }
+        }
+
+        private void AbrirArquivosLocais_Click(object sender, RoutedEventArgs e)
+        {
+            // Abre o diretório de arquivos locais
+            Process.Start(new ProcessStartInfo
+            {
+                // Diretório "DadosBancoDeDadosOffline" dentro do diretório atual do projeto
+                FileName = Path.Combine(Directory.GetCurrentDirectory(), "DadosBancoDeDadosOffline"),
+
+                // Abre o diretório no explorador de arquivos
+                UseShellExecute = true
+            });
+        }
+
+        private void AbrirFirestore_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                // Abre o console do Firestore no navegador
+                FileName = "https://console.firebase.google.com/project/radiadoreslemos-ea8c6/firestore/",
+                UseShellExecute = true
+            });
+        }
+
+        private void AbrirGoogleCloud_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                // Abre o console do Google Cloud no navegador
+                FileName = "https://console.cloud.google.com/welcome?hl=pt-BR&project=radiadoreslemos-ea8c6",
+                UseShellExecute = true
+            });
         }
 
         // Método para carregar as tabelas no ComboBox
@@ -201,7 +299,6 @@ namespace WMS_RadiadoresLemos_WPF
                 Console.WriteLine($"Erro ao atualizar DataGrid: {ex.Message}");
             }
         }
-
         private async Task<List<object>> ObterDadosDoFirebaseAsync()
         {
             var db = DatabaseConnect.Database; // Supondo que DatabaseConnect.Database esteja configurado com a instância do Firestore
@@ -235,9 +332,45 @@ namespace WMS_RadiadoresLemos_WPF
             return produtos;
         }
 
+        private async Task<List<object>> ObterDadosDoArquivoAsync()
+        {
+            var dados = new List<object>();
+            var fileManager = new DatabaseFileManager();
+
+            try
+            {
+                // Lê os dados de todas as tabelas
+                var usuarios = await DatabaseFileManager.LerDoArquivoAsync<UsuarioData>(fileManager.CaminhoArquivoUsuarios);
+                dados.AddRange(usuarios);
+
+                var produtos = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(fileManager.CaminhoArquivoProdutos);
+                dados.AddRange(produtos);
+
+                var logs = await DatabaseFileManager.LerDoArquivoAsync<LogData>(fileManager.CaminhoArquivoLogs);
+                dados.AddRange(logs);
+
+                var movimentacoes = await DatabaseFileManager.LerDoArquivoAsync<MovimentacaoData>(fileManager.CaminhoArquivoMovimentacoes);
+                dados.AddRange(movimentacoes);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao obter dados do arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AlertaCache.AdicionarAlerta("Erro",
+                                            ex.Message.ToString(),
+                                            $"Erro ao obter dados do arquivo. Possíveis motivos:\n" +
+                                            "- Arquivo corrompido;\n" +
+                                            "- Formato de arquivo inválido;\n" +
+                                            "- Problemas ao acessar o arquivo.",
+                                            "- Verifique se o arquivo está correto;\n" +
+                                            "- Verifique se o formato do arquivo é suportado.");
+            }
+
+            return dados;
+        }
+
 
         // Evento disparado quando o botão de exportar é clicado
-        private async void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void ExportarDados_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
@@ -250,6 +383,12 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Abre o popup de configuração de exportação
                 ExportConfigPopup.IsOpen = true;
+
+                // Se o popup fechar
+                ExportConfigPopup.Closed += (s, ev) =>
+                {
+                    tabelasSelecionadas.Clear();
+                };
             }
             catch (Exception ex)
             {
@@ -271,10 +410,36 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
+                ExportConfigPopup.IsOpen = false;
+
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (!confirmarSenhaWindow.IsConfirmed)
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    ExportConfigPopup.IsOpen = true;
+
+                    return;
+                }
+
                 ShowProgressBar.Visibility = Visibility.Visible;
                 ProgressBar.Value = 0;
 
-                var dadosProdutos = await ObterDadosDoFirebaseAsync();
+                var dadosProdutos = new List<object>();
+
+                // Se banco conectado
+                if (DatabaseConnect.IsConnected)
+                {
+                    // Obter dados do Firebase
+                    dadosProdutos = await ObterDadosDoFirebaseAsync();
+                }
+                else
+                {
+                    // Obter dados do arquivo
+                    dadosProdutos = await ObterDadosDoArquivoAsync();
+                }
 
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
@@ -418,6 +583,17 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
+        // Evento disparado ao cancelar a exportação no popup
+        private void FecharExportPopup_Click(object sender, RoutedEventArgs e)
+        {
+            // Fecha o popup de configuração de exportação
+            ExportConfigPopup.IsOpen = false;
+
+            // Limpa todos os dados
+            tabelasSelecionadas.Clear();
+        }
+
+
         // Evento disparado quando o botão de importar é clicado
         private void ImportarDados_Click(object sender, RoutedEventArgs e)
         {
@@ -447,6 +623,12 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Abre o popup de configuração de importação
                 ImportConfigPopup.IsOpen = true;
+
+                // Se o popup fechar
+                ImportConfigPopup.Closed += (s, ev) =>
+                {
+                    tabelasSelecionadas.Clear();
+                };
             }
             catch (Exception ex)
             {
@@ -468,6 +650,20 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
+                ImportConfigPopup.IsOpen = false;
+
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (!confirmarSenhaWindow.IsConfirmed)
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    ImportConfigPopup.IsOpen = true;
+
+                    return;
+                }
+
                 string? filePath = ImportConfigPopup.Tag as string; // Recupera o caminho do arquivo do Tag do popup
                 var selectedOption = ImportComboBox.SelectedItem as ComboBoxItem;
 
@@ -482,7 +678,6 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     tabelasSelecionadas.Add(item.ToString());
                 }
-
 
                 if (selectedOption != null)
                 {
@@ -529,14 +724,29 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     // Apagar todas as tabelas do banco de dados
                     var collections = await db.ListRootCollectionsAsync().ToListAsync();
+                    int totalCollections = collections.Count;
+                    int processedCollections = 0;
+
                     foreach (var collection in collections)
                     {
                         var snapshot = await collection.GetSnapshotAsync();
+                        int totalDocuments = snapshot.Documents.Count;
+                        int processedDocuments = 0;
+
                         foreach (var doc in snapshot.Documents)
                         {
                             await doc.Reference.DeleteAsync();
+                            processedDocuments++;
+                            ProgressBar.Value = (double)processedDocuments / totalDocuments * 100;
+                            ProgressBarMessage.Text = $"Apagando item {processedDocuments} de {totalDocuments} na tabela '{collection.Id}'...";
                         }
+
+                        processedCollections++;
+                        ProgressBar.Value = (double)processedCollections / totalCollections * 100;
                     }
+
+                    // Zera valores da barra de progresso
+                    ProgressBar.Value = 0;
 
                     // Incluir novas tabelas a partir do arquivo Excel
                     foreach (var tabela in tabelasSelecionadas)
@@ -754,31 +964,46 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-        // Evento disparado quando o botão de reconectar é clicado
-        private async void Reconectar_Click(object sender, RoutedEventArgs e)
+        // Evento disparado ao cancelar a importação no popup
+        private void FecharImportPopup_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                await Task.Run(() =>
-                {
-                    AtualizarCache();
-                });
-                MessageBox.Show("Reconexão realizada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao reconectar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao reconectar. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Serviço do banco de dados indisponível.",
-                                            "- Verifique sua conexão com a internet;\n" +
-                                            "- Verifique as configurações do banco de dados.");
+            // Fecha o popup de configuração de importação
+            ImportConfigPopup.IsOpen = false;
 
+            // Limpa todos os dados
+            tabelasSelecionadas.Clear();
+        }
+
+        // Evento disparado ao clicar no botão de reconectar
+        private void Reconectar_Click(object sender, RoutedEventArgs e)
+        {
+            // Mostra a barra de progresso
+            ShowProgressBar.Visibility = Visibility.Visible;
+            ProgressBar.Value = 100;
+            ProgressBarMessage.Text = "Reconectando ao Banco de Dados...";
+
+            // Tenta reconectar ao banco de dados
+            MainWindow._instance.SetupDatabaseConnection();
+
+            // Se a conexão for bem sucedida
+            if (DatabaseConnect.IsConnected)
+            {
+                // Atualiza o status
+                Status.Text = "Conectado ao Banco de Dados";
+                Status.Foreground = Brushes.Green;
+
+                // Fecha a barra de progresso
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
+            else
+            {
+                Status.Text = "Modo Offline";
+                Status.Foreground = Brushes.Red;
+
+                // Fecha a barra de progresso
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
+
         }
 
         // Evento disparado quando o botão de gerar tabela é clicado
@@ -881,58 +1106,6 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique se a função de geração está disponível;\n" +
                                             "- Verifique se há dados disponíveis.");
                 ShowProgressBar.Visibility = Visibility.Collapsed;
-            }
-        }
-
-
-
-        // Método para atualizar o cache de dados
-        private async void AtualizarCache()
-        {
-            try
-            {
-                // Configura o ambiente para conectar ao Firestore
-                DatabaseConnect.SetEnvironmentVarible();
-
-                // Obtém a instância do Firestore
-                var db = DatabaseConnect.Database;
-
-                if (db == null)
-                {
-                    MessageBox.Show("Não foi possível conectar ao Firestore.");
-                    return;
-                }
-
-                // Limpa o cache atual
-                DadosCache.Tabelas.Clear();
-
-                // Obtém todas as coleções do Firestore
-                var colecoes = await db.ListRootCollectionsAsync().ToListAsync();
-
-                foreach (var colecao in colecoes)
-                {
-                    var documentos = await colecao.ListDocumentsAsync().ToListAsync();
-                    var dados = new List<object>();
-
-                    foreach (var documento in documentos)
-                    {
-                        var snapshot = await documento.GetSnapshotAsync();
-                        if (snapshot.Exists)
-                        {
-                            dados.Add(snapshot.ToDictionary());
-                        }
-                    }
-
-                    // Adiciona os dados da coleção ao cache
-                    DadosCache.Tabelas[colecao.Id] = dados;
-                }
-
-                dadosCarregados = true;
-                MessageBox.Show("Cache atualizado com sucesso.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao atualizar o cache: {ex.Message}");
             }
         }
     }

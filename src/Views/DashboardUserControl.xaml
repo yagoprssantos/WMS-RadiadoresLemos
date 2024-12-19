@@ -91,9 +91,9 @@
                         </lvc:CartesianChart>
                     </TabItem>
 
-                    <!-- Aba 2: Gráfico de Linhas - Tendência de Movimentação -->
-                    <TabItem Header="Tendência de Movimentação">
-                        <lvc:CartesianChart Series="{Binding TendenciaMovimentacaoSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
+                    <!-- Aba 2: Gráfico de Linhas - Histórico de Movimentação -->
+                    <TabItem Header="Histórico de Movimentação">
+                        <lvc:CartesianChart Series="{Binding HistoricoMovimentacaoSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
                             <lvc:CartesianChart.DataTooltip>
                                 <lvc:DefaultTooltip Background="{StaticResource AccentBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="14"/>
                             </lvc:CartesianChart.DataTooltip>

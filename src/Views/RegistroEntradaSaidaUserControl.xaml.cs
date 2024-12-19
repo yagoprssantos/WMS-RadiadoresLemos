@@ -38,15 +38,21 @@ namespace WMS_RadiadoresLemos_WPF
             ToggleVisibility(false);
         }
 
-        // Método assíncrono para carregar produtos do cache
+        // Método para carregar produtos do cache
         private void CarregarProdutos()
         {
             try
             {
+                // Carregar produtos do cache
                 if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtosCache))
                 {
+                    // Converte a lista de objetos para uma lista de produtos
                     produtos = produtosCache.Cast<ProdutoData>().ToList();
                     produtoNomeParaId = produtos.ToDictionary(p => p.Nome, p => p.Id);
+                    foreach (var produto in produtos)
+                    {
+                        produtosFiltrados.Add(produto.Nome);
+                    }
                 }
             }
             catch (Exception ex)
@@ -110,7 +116,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             if (!string.IsNullOrEmpty(inputText) && !produtoNomeParaId.ContainsKey(inputText))
             {
-                MessageBox.Show("Produto inválido.");
                 ProdutoComboBox.Text = string.Empty;
                 ProdutoComboBox.SelectedItem = null;
                 ProdutoComboBox.Focus();
@@ -190,12 +195,23 @@ namespace WMS_RadiadoresLemos_WPF
 
                 QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
 
-                // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
-                double preco = produto.Preço;
-                double precoNovo = double.Parse(PrecoTextBox.Text);
-                int quantidade = int.Parse(QuantidadeDepoisDadoTextBlock.Text);
-                double precoDepois = (preco * produto.Quantidade + precoNovo * quantidade) / (produto.Quantidade + quantidade);
-                PrecoDepoisDadoTextBlock.Text = precoDepois.ToString("C");
+                if (usePositiveNumber)
+                {
+                    // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
+                    double precoAtual = produto.Preço;
+                    double precoNovo = double.Parse(PrecoTextBox.Text);
+                    int quantidadeAtual = produto.Quantidade;
+                    int quantidadeNova = int.Parse(QuantidadeTextBox.Text);
+                    int quantidadeTotal = quantidadeAtual + quantidadeNova;
+
+                    double precoPonderado = ((precoAtual * quantidadeAtual) + (precoNovo * quantidadeNova)) / quantidadeTotal;
+                    PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
+                }
+                else
+                {
+                    // Mantém o preço atual para saída
+                    PrecoDepoisDadoTextBlock.Text = produto.Preço.ToString("C");
+                }
             }
             else
             {
@@ -334,16 +350,14 @@ namespace WMS_RadiadoresLemos_WPF
                         ProdutoId = produtoSelecionado.Id,
                         Quantidade = quantidadeMovimentacao,
                         Preço = precoMovimentacao,
-                        DataHora = DateTime.UtcNow,
+                        Data = DateTime.UtcNow,
                         Tipo = isEntrada ? "Entrada" : "Saída"
                     };
 
-
-                    // Adiciona a movimentação ao cache e ao Firestore
+                    // Adiciona a movimentação ao cache, no Firestore e no arquivo JSON
                     await MovimentacoesCache.RegistrarMovimentacaoAsync(movimentacao);
 
-                    // Atualiza o produto no banco de dados
-                    await AtualizarProdutoNoBanco(produtoSelecionado);
+                    // Mostra mensagem de sucesso
                     MessageBox.Show($"{(isEntrada ? "Entrada" : "Saída")} registrada com sucesso");
 
                     // Adiciona log
@@ -382,33 +396,6 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Não foi possível atualizar o produto no banco de dados.",
                                             "- Verifique se o produto foi selecionado corretamente.\n" +
                                             "- Verifique se a quantidade um valor é válido.\n" +
-                                            "- Verifique a conexão com a internet.\n" +
-                                            "- Reinicie o aplicativo.");
-            }
-        }
-
-        // TODO: UTILIZAR JSON QUANDO BANCO DE DADOS NÃO ESTIVER DISPONÍVEL
-        // Método assíncrono para atualizar o produto no banco de dados
-        private async Task AtualizarProdutoNoBanco(ProdutoData produto)
-        {
-            try
-            {
-                var db = DatabaseConnect.Database ?? throw new InvalidOperationException("Conexão com o banco de dados não estabelecida.");
-                DocumentReference docRef = db.Collection("Produtos").Document(produto.Id);
-                await docRef.SetAsync(produto, SetOptions.Overwrite);
-
-                DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}");
-
-                // Adicionar alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao atualizar produto no banco de dados. Possíveis motivos:\n" +
-                                            "- Falha na conexão com o banco de dados.\n" +
-                                            "- Não foi possível atualizar o produto no banco de dados.",
                                             "- Verifique a conexão com a internet.\n" +
                                             "- Reinicie o aplicativo.");
             }

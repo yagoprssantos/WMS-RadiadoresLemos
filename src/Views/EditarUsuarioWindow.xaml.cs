@@ -7,15 +7,16 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
     public partial class EditarUsuarioWindow : Window
     {
         private UsuarioData usuario;
-        private bool isConfirmingExit = false;
         private bool isModified = false;
         private bool isNewUser = false;
+        private List<UsuarioData> usuarios;
 
         // Propriedade pública para acessar o usuário editado
         public UsuarioData Usuario => usuario;
@@ -42,7 +43,7 @@ namespace WMS_RadiadoresLemos_WPF
                     Matrícula = novaMatricula, // Gera a matrícula com base no cargo e ano atual
                     Senha = string.Empty,
                     Cargo = "Usuário",
-                    Id = Guid.NewGuid().ToString()
+                    Id = novaMatricula
                 };
             }
             else
@@ -50,34 +51,10 @@ namespace WMS_RadiadoresLemos_WPF
                 this.usuario = usuario;
             }
 
+            usuarios = new List<UsuarioData>();
             PreencherCampos();
-        }
 
-        // Método para verificar se a matrícula já existe
-        private bool MatriculaExiste(string matricula)
-        {
-            if (DadosCache.Tabelas.TryGetValue("Usuarios", out var usuarios))
-            {
-                return usuarios.OfType<UsuarioData>().Any(u => u.Matrícula == matricula);
-            }
-            return false;
-        }
-
-        // Método para gerar a matrícula do usuário com base no cargo e ano atual
-        private string GerarMatricula(string cargo)
-        {
-            string prefixo = cargo switch
-            {
-                "Administrador" => "ADM",
-                "Usuário" => "USR",
-                _ => "UNK"
-            };
-
-            string ano = DateTime.Now.Year.ToString().Substring(2, 2);
-            Random random = new Random();
-            string posicao = random.Next(0, 100).ToString("D2");
-
-            return $"{prefixo}{ano}{posicao}";
+            isModified = false;
         }
 
         // Preenche os campos da interface com os dados do usuário
@@ -90,7 +67,7 @@ namespace WMS_RadiadoresLemos_WPF
                     NomeTextBox.Text = usuario.Nome;
                     EmailTextBox.Text = usuario.Email;
                     MatriculaTextBox.Text = usuario.Matrícula;
-                    SenhaPasswordBox.Password = usuario.Senha;
+                    SenhaPasswordBox.Password = usuario.Senha.ToString();
                     PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
                 }
             }
@@ -110,17 +87,37 @@ namespace WMS_RadiadoresLemos_WPF
                                             "- Verifique conexão com o banco de dados.");
             }
         }
+        private ComboBoxItem GetComboBoxItemByContent(string content)
+        {
+            foreach (ComboBoxItem item in PermissaoComboBox.Items)
+            {
+                if (item.Content.ToString() == content)
+                    return item;
+            }
+            return new ComboBoxItem { Content = string.Empty };
+        }
+
 
         // Evento disparado ao clicar no botão de salvar usuário
         private void Salvar_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (ValidarCampos())
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (confirmarSenhaWindow.IsConfirmed)
                 {
-                    AtualizarUsuario();
-                    DialogResult = true;
-                    Close();
+                    if (ValidarCampos())
+                    {
+                        AtualizarUsuario();
+                        DialogResult = true;
+                        Close();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -131,12 +128,12 @@ namespace WMS_RadiadoresLemos_WPF
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             "Erro ao salvar usuário. Possíveis motivos:\n" +
-                                            "- O usuário não foi encontrado;\n" +
-                                            "- O usuário não foi passado corretamente para a janela de edição;\n" +
-                                            "- Ocorreu um erro ao salvar os campos da janela de edição.",
-                                            "- Verifique se o usuário foi encontrado no banco de dados;\n" +
-                                            "- Verifique se suas informações estão corretamente preenchidas;\n" +
-                                            "- Verifique conexão com o banco de dados.");
+                                            "- Dados do usuário não são válidos;\n" +
+                                            "- Usuário inexistente no banco de dados;\n" +
+                                            "- Banco de dados inacessível.",
+                                            "- Verifique se os dados do usuário estão corretos;\n" +
+                                            "- Verifique se o usuário existe no banco de dados;\n" +
+                                            "- Verifique se o banco de dados está acessível.");
             }
         }
 
@@ -146,8 +143,10 @@ namespace WMS_RadiadoresLemos_WPF
             usuario.Nome = NomeTextBox.Text;
             usuario.Email = EmailTextBox.Text;
             usuario.Matrícula = MatriculaTextBox.Text;
-            usuario.Senha = SenhaPasswordBox.Password;
+            usuario.Senha = SenhaPasswordBox.Password.ToString();
             usuario.Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty;
+
+            isModified = false;
         }
 
         // Evento disparado ao clicar no botão de cancelar
@@ -155,52 +154,153 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (isModified && VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+                if (isModified)
                 {
-                    return;
+                    if (ConfirmarSaidaSemSalvar())
+                    {
+                        return;
+                    }
                 }
                 DialogResult = false;
                 Close();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Erro ao cancelar: {ex.Message}");
-                Close();
+                AlertaCache.AdicionarAlerta("Erro",
+                                            "Edição de usuário.",
+                                            "Erro ao cancelar edição de usuário. Possíveis motivos:\n" +
+                                            "- Erro ao fechar janela de edição de usuário;\n" +
+                                            "- Impossibilidade de fechar janela de edição de usuário.",
+                                            "- Verifique se a janela de edição de usuário está aberta."); Close();
             }
         }
 
         // Confirma se o usuário deseja sair sem salvar as alterações
         private bool ConfirmarSaidaSemSalvar()
         {
-            if (isConfirmingExit)
-            {
-                return false;
-            }
-
-            isConfirmingExit = true;
             var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
-            isConfirmingExit = false;
-
             return result == MessageBoxResult.No;
         }
 
-        // Evento disparado ao tentar fechar a janela
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+
+        // Método para verificar se a matrícula já existe
+        private bool MatriculaExiste(string matricula)
         {
-            if (isModified && VerificarModificacoes() && ConfirmarSaidaSemSalvar())
+            if (DadosCache.Tabelas.TryGetValue("Usuarios", out var usuarios))
             {
-                e.Cancel = true;
+                return usuarios.OfType<UsuarioData>().Any(u => u.Matrícula == matricula);
             }
-            base.OnClosing(e);
+            return false;
         }
 
-        // Método para verificar se houve modificações nos campos
-        private bool VerificarModificacoes()
+        // Método para gerar a matrícula do usuário com base no cargo e ano atual
+        private string GerarMatricula(string cargo)
         {
-            return usuario.Nome != NomeTextBox.Text ||
-                   usuario.Email != EmailTextBox.Text ||
-                   usuario.Senha != SenhaPasswordBox.Password ||
-                   usuario.Cargo != ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString();
+            string prefixo = cargo switch
+            {
+                "Administrador" => "ADM", // Administrador do Sistema
+                "Gerente" => "GER", // Gerente da Unidade
+                "Operador" => "OPE", // Operador de Produção
+                "Estagiário" => "EST", // Estagiário
+                "Usuário" => "USR", // Usuário Comum
+                _ => "UNK"
+            };
+
+            string ano = DateTime.Now.Year.ToString().Substring(2, 2);
+            Random random = new Random();
+            string posicao = random.Next(0, 100).ToString("D2");
+
+            return $"{prefixo}{ano}{posicao}";
+        }
+
+        // Método de criação do Popup de "Sobre o cargo"
+        private void MaisSobreCargo_Click(object sender, RoutedEventArgs e)
+        {
+            CargoPopup.IsOpen = true;
+        }
+
+
+        // Restrições de entrada de texto nos TextBoxes
+
+        private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
+        }
+
+        private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^a-zA-Z ]+");
+        }
+
+        private void SenhaPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            isModified = true;
+        }
+
+        // Verifica se o texto é permitido com base no padrão fornecido
+        private static bool IsTextAllowed(string text, string pattern)
+        {
+            return !Regex.IsMatch(text, pattern);
+        }
+
+        // Lida com a colagem de texto, verificando se o texto colado é permitido
+        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsTextAllowed(text, pattern))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+        // Evento disparado ao mudar a seleção do cargo do usuário
+        private void PermissaoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (PermissaoComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
+            {
+                string novoCargo = selectedItem.Content.ToString() ?? string.Empty;
+
+                // Se for um novo usuário, gera uma nova matrícula com base no cargo
+                if (isNewUser)
+                {
+                    string novaMatricula;
+                    do
+                    {
+                        novaMatricula = GerarMatricula(novoCargo);
+                    } while (MatriculaExiste(novaMatricula));
+
+                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                }
+                // Se for um usuário existente, altera apenas a matrícula se for um cargo diferente
+                else if (usuario.Cargo != novoCargo)
+                {
+                    string novaMatricula;
+                    do
+                    {
+                        novaMatricula = GerarMatricula(novoCargo);
+                    } while (MatriculaExiste(novaMatricula));
+
+                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                }
+
+                usuario.Cargo = novoCargo;
+                isModified = true;
+            }
+        }
+
+        // Evento disparado ao modificar qualquer campo de texto
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            isModified = true;
         }
 
         // Valida os campos antes de salvar
@@ -227,84 +327,6 @@ namespace WMS_RadiadoresLemos_WPF
                 return false;
             }
             return true;
-        }
-
-        // Evento disparado ao mudar a seleção do cargo do usuário
-        private void PermissaoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (PermissaoComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
-            {
-                usuario.Cargo = selectedItem.Content.ToString() ?? string.Empty;
-
-                if (isNewUser)
-                {
-                    string novaMatricula;
-                    do
-                    {
-                        novaMatricula = GerarMatricula(usuario.Cargo);
-                    } while (MatriculaExiste(novaMatricula));
-
-                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
-                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
-                }
-
-                isModified = true;
-            }
-        }
-
-
-        // Evento disparado ao modificar qualquer campo de texto
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            isModified = true;
-        }
-
-        private void SenhaPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            isModified = true;
-        }
-
-        private ComboBoxItem GetComboBoxItemByContent(string content)
-        {
-            foreach (ComboBoxItem item in PermissaoComboBox.Items)
-            {
-                if (item.Content.ToString() == content)
-                    return item;
-            }
-            return new ComboBoxItem { Content = string.Empty };
-        }
-
-        private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
-        }
-
-        private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z ]+");
-        }
-
-        // Verifica se o texto é permitido com base no padrão fornecido
-        private static bool IsTextAllowed(string text, string pattern)
-        {
-            return !Regex.IsMatch(text, pattern);
-        }
-
-        // Lida com a colagem de texto, verificando se o texto colado é permitido
-        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
-        {
-            if (e.DataObject.GetDataPresent(typeof(string)))
-            {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                if (!IsTextAllowed(text, pattern))
-                {
-                    e.CancelCommand();
-                }
-            }
-            else
-            {
-                e.CancelCommand();
-            }
         }
     }
 }

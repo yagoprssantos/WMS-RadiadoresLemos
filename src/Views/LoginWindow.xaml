@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="LoginWindow" Height="350" Width="400"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}">
+        Background="{StaticResource BackgroundBrush}"
+        Loaded="Window_Loaded">
 
     <Grid>
         <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">

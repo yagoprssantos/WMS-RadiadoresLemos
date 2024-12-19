@@ -7,45 +7,47 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class AlterarQuantidadeWindow : Window
     {
         public int Quantidade { get; private set; }
-        private bool isConfirmingExit = false;
+        private bool isModified = false;
 
         public AlterarQuantidadeWindow(ProdutoData produto)
         {
+            InitializeComponent();
             try
             {
-                InitializeComponent();
                 Quantidade = produto.Quantidade;
                 QuantidadeTextBox.Text = Quantidade.ToString();
+                QuantidadeTextBox.TextChanged += QuantidadeTextBox_TextChanged;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao carregar os dados do produto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Não foi possível carregar os dados do produto. Possíveis motivos:\n" +
-                                            "- Produto não encontrado;\n" +
-                                            "- Dados do produto corrompidos;\n" +
-                                            "- Problemas de conexão com a internet.\n",
-                                            "- Verifique se o produto existe;\n" +
-                                            "- Verifique se os dados do produto estão corretos;\n" +
-                                            "- Faça a reconexão com banco de dados.");
+                HandleException("Erro ao carregar os dados do produto", ex, "Não foi possível carregar os dados do produto. Possíveis motivos:\n" +
+                    "- Produto não encontrado;\n" +
+                    "- Dados do produto corrompidos;\n" +
+                    "- Problemas de conexão com a internet.\n",
+                    "Verifique se o produto existe;\n" +
+                    "Verifique se os dados do produto estão corretos;\n" +
+                    "Faça a reconexão com banco de dados.");
                 Close();
             }
+        }
+
+        private void QuantidadeTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            isModified = true;
         }
 
         private void Salvar_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Valida e salva a nova quantidade
                 if (int.TryParse(QuantidadeTextBox.Text, out int novaQuantidade) && novaQuantidade >= 0)
                 {
                     Quantidade = novaQuantidade;
-                    DialogResult = true; // Define o resultado como "OK" para confirmar o salvamento
-                    isConfirmingExit = true;
-                    Close();
+                    DialogResult = true;
+
+                    isModified = false;
+
+                    Dispatcher.InvokeAsync(Close);
                 }
                 else
                 {
@@ -54,68 +56,39 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao salvar a nova quantidade: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Não foi possível salvar a nova quantidade. Possíveis motivos:\n" +
-                                            "- Valor inserido não é numérico;\n" +
-                                            "- Valor inserido é negativo;\n" +
-                                            "- Quantidade do produto corrompida.\n",
-                                            "- Verifique se o valor inserido é numérico;\n" +
-                                            "- Verifique se a quantidade do produto está correta e atualizada;\n" +
-                                            "- Insira um valor que seja válido.");
+                HandleException("Erro ao salvar a nova quantidade", ex, "Não foi possível salvar a nova quantidade. Possíveis motivos:\n" +
+                    "- Valor inserido não é numérico;\n" +
+                    "- Valor inserido é negativo;\n" +
+                    "- Quantidade do produto corrompida.\n",
+                    "Verifique se o valor inserido é numérico;\n" +
+                    "Verifique se a quantidade do produto está correta e atualizada;\n" +
+                    "Insira um valor que seja válido.");
             }
         }
 
         private void Cancelar_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                DialogResult = false; // Cancela a alteração
-                isConfirmingExit = true;
-                Close();
-            }
-            catch (Exception)
-            {
-                // Força o fechamento da janela em caso de erro
-                Close();
-            }
-        }
-
-        private void QuantidadeTextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
-        {
-            try
-            {
-                e.Handled = !int.TryParse(e.Text, out _); // Apenas números são permitidos
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao processar a entrada de texto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao processar a entrada de texto. Possíveis motivos:\n" +
-                                            "- Valor inserido não é numérico;\n" +
-                                            "- Existem espaços ou caracteres inválidos.\n",
-                                            "- Verifique se o valor inserido é numérico;\n" +
-                                            "- Verifique se existem espaços ou caracteres inválidos.");
-            }
-        }
-
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            if (!isConfirmingExit)
+            if (isModified)
             {
                 var result = MessageBox.Show("Você tem certeza que deseja sair sem salvar?", "Confirmação de Saída", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
                 {
-                    e.Cancel = true;
+                    return;
                 }
             }
-            base.OnClosing(e);
+            DialogResult = false;
+            Close();
+        }
+
+        private void QuantidadeTextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !int.TryParse(e.Text, out _);
+        }
+
+        private void HandleException(string title, Exception ex, string message, string suggestions)
+        {
+            MessageBox.Show($"{title}: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            AlertaCache.AdicionarAlerta("Erro", ex.Message, message, suggestions);
         }
     }
 }

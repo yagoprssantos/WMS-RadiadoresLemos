@@ -17,39 +17,39 @@
         <DockPanel Grid.Column="0" Background="{StaticResource PanelBackgroundBrush}">
             <StackPanel Name="BarraLateral" Margin="10" DockPanel.Dock="Top">
                 <!-- Botão para abrir a aba de Registro -->
-                <Button Content="Registro de Entrada/Saída" Click="RegistroEntradaSaida_Click" FontSize="16">
+                <Button Name="BtnRegistro" Content="Registro de Entrada/Saída" Click="RegistroEntradaSaida_Click" FontSize="16" Visibility="Visible">
                     <Button.ToolTip>
                         <ToolTip Content="Registrar entrada e saída de produtos"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir a aba de Estoque -->
-                <Button Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16">
+                <Button Name="BtnEstoque" Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16" Visibility="Visible">
                     <Button.ToolTip>
                         <ToolTip Content="Visualizar e gerenciar o estoque"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir o Dashboard -->
-                <Button Content="Dashboard" Click="Dashboard_Click" FontSize="16">
+                <Button Name="BtnDashboard" Content="Dashboard" Click="Dashboard_Click" FontSize="16" Visibility="Visible">
                     <Button.ToolTip>
                         <ToolTip Content="Exibir o dashboard"/>
                     </Button.ToolTip>
                 </Button>
-                <!-- Botão para abrir a aba de Banco de Dados -->
-                <Button Content="Banco de Dados" Click="BancoDados_Click" FontSize="16">
+                <!-- Botão para abrir a aba de Notificações -->
+                <Button Name="BtnNotificacoes" Content="Notificações" Click="Notificacoes_Click" FontSize="16" Visibility="Visible">
                     <Button.ToolTip>
-                        <ToolTip Content="Gerenciar o banco de dados"/>
+                        <ToolTip Content="Configurar notificações do sistema"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir a aba de Usuários -->
-                <Button Content="Gerenciar Usuários" Click="Usuarios_Click" FontSize="16">
+                <Button Name="BtnUsuarios" Content="Gerenciar Usuários" Click="Usuarios_Click" FontSize="16" Visibility="Visible">
                     <Button.ToolTip>
                         <ToolTip Content="Gerenciar usuários do sistema"/>
                     </Button.ToolTip>
                 </Button>
-                <!-- Botão para abrir a aba de Notificações -->
-                <Button Content="Notificações" Click="Notificacoes_Click" FontSize="16">
+                <!-- Botão para abrir a aba de Banco de Dados -->
+                <Button Name="BtnBancoDados" Content="Banco de Dados" Click="BancoDados_Click" FontSize="16" Visibility="Visible">
                     <Button.ToolTip>
-                        <ToolTip Content="Configurar notificações do sistema"/>
+                        <ToolTip Content="Gerenciar o banco de dados"/>
                     </Button.ToolTip>
                 </Button>
             </StackPanel>
@@ -64,12 +64,14 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Name="NomeUsuarioTextBlock" Text="Nome do Usuário" FontSize="16" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Margin="15"/>
-                <TextBlock Name="MatriculaTextBlock" Text="Matrícula" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,5,0,10" Grid.Row="1" />
-                <Button Content="Logout" Click="LogoutButton_Click" FontSize="16" 
-                        Width="100" Grid.Row="2" Grid.Column="2"
+                <TextBlock Name="NomeUsuarioTextBlock" Text="Nome do Usuário" FontSize="16" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Margin="15,10,15,3"/>
+                <TextBlock Name="CargoTextBlock" Text="Cargo do Usuário" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,5,15,0" Grid.Row="1" />
+                <TextBlock Name="MatriculaTextBlock" Text="Matrícula" FontSize="12" Foreground="{StaticResource ButtonForegroundBrush}" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,5,15,5" Grid.Row="2" />
+                <Button Name="BtnLogout" Content="Logout" Click="LogoutButton_Click" FontSize="16" 
+                        Width="100" Grid.Row="3" Grid.Column="2"
                         Style="{StaticResource CancelButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Sair do sistema"/>
