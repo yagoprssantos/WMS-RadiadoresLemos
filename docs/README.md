@@ -1,73 +1,35 @@
-# Sistema de Controle de Estoque
+# Sistema Integrado de Gest√£o de Estoque e Financeiro
 
-## Vis„o Geral
+## Vis√£o Geral
 
-Este projeto visa desenvolver um sistema de controle de estoque eficiente e intuitivo, permitindo o registro e gerenciamento de entrada e saÌda de produtos. O sistema utiliza um banco de dados local e/ou na nuvem para garantir a precis„o e a organizaÁ„o das informaÁıes de estoque.
+Este sistema foi projetado para oferecer uma solu√ß√£o abrangente e eficiente para a gest√£o empresarial, integrando o controle de estoque com um m√≥dulo financeiro inovador. Ele possibilita o registro detalhado e o gerenciamento de entrada e sa√≠da de produtos, al√©m de acompanhar o fluxo de caixa por meio do rastreamento de pagamentos de boletos. O sistema utiliza um banco de dados local para garantir precis√£o, organiza√ß√£o e acessibilidade √†s informa√ß√µes, e um com backup salvo local e na nuvem, assegurando a consist√™ncia dos dados em casos extremos.
+
+---
 
 ## Funcionalidades
 
-- **Controle de Estoque**: Registro preciso de entrada e saÌda de produtos.
-- **Consulta de Estoque**: VisualizaÁ„o e consulta de informaÁıes de estoque.
-- **Interface Amig·vel**: Interface de usu·rio intuitiva e f·cil de usar.
-- **SincronizaÁ„o de Dados**: AtualizaÁ„o periÛdica dos dados para manter a precis„o.
-- **Backup**: Capacidade de salvar todos os dados em um arquivo para recriaÁ„o do banco de dados.
+### Controle de Estoque
+- Permite o registro detalhado e preciso das entradas e sa√≠das de produtos, garantindo a organiza√ß√£o e atualiza√ß√£o constante do invent√°rio.
+  - **Registro Automatizado:** Atualiza√ß√µes r√°pidas e confi√°veis que refletem a movimenta√ß√£o real de produtos.
+  - **Consulta Din√¢mica:** Ferramentas de visualiza√ß√£o que facilitam o monitoramento do estoque em tempo real.
 
-## Requisitos
+### Gerenciamento Financeiro e Rastreamento de Boletos
+- Um m√≥dulo financeiro robusto que acompanha e gerencia os pagamentos de boletos, integrando informa√ß√µes financeiras √† gest√£o de estoque.
+  - **Monitoramento de Pagamentos:** Rastreie o status de cada boleto‚Äîse est√° pendente, pago ou vencido‚Äîgarantindo controle rigoroso das obriga√ß√µes financeiras.
+  - **Alertas e Relat√≥rios:** Notifica√ß√µes para vencimentos pr√≥ximos e gera√ß√£o de relat√≥rios detalhados que facilitam a an√°lise de fluxo de caixa e o planejamento financeiro.
+  - **Hist√≥rico de Transa√ß√µes:** Registro completo de todas as opera√ß√µes financeiras para consulta e auditoria.
+ 
+### Interface Amig√°vel e Sincroniza√ß√£o
+- Uma interface intuitiva que torna a opera√ß√£o simples para usu√°rios de todos os n√≠veis, com sincroniza√ß√£o cont√≠nua dos dados para assegurar a consist√™ncia entre diferentes pontos de acesso.
+  - **Backup Autom√°tico:** Seguran√ßa dos dados com a possibilidade de realizar backups de forma pr√°tica e imediata.
 
-### Funcionais
-
-- Controle preciso do estoque utilizando um banco de dados local.
-- Registro de entrada e saÌda de produtos.
-- Desempenho b·sico adequado para uso cotidiano.
-
-### N„o Funcionais
-
-- Interface de usu·rio intuitiva e f·cil de usar.
-- SincronizaÁ„o em tempo real das informaÁıes entre o sistema de controle de estoque e o registro de vendas.
-- Acessibilidade para diversos tipos de dispositivos.
-- Backup dos dados ao clicar em um bot„o.
+---
 
 ## Tecnologias Utilizadas
 
-- **Tipo do Sistema**: Aplicativo Execut·vel
+- **Tipo do Sistema**: Aplicativo Windows Execut√°vel 
 - **IDE**: Visual Studio
-- **Banco de Dados**: Firebase
+- **Banco de Dados**: LiteDB com backup salvo na nuvem
 - **Frontend e Backend**: C#
 - **Frameworks**: WPF
 - **Target Framework**: .NET 8
-
-## Cronograma de Entregas
-
-### Fase 1: Design da Arquitetura
-
-- **Semana 1**: ProtÛtipo inicial da arquitetura.
-- **Semana 2**: Revis„o e ajustes no protÛtipo com feedback do cliente.
-- **Semana 3**: Entrega do design final da arquitetura.
-
-### Fase 2: Banco de Dados Inicial, Interface Inicial, Cadastro de Produtos
-
-- **Semana 4**: Estrutura inicial do banco de dados.
-- **Semana 5**: ProtÛtipo da interface inicial.
-- **Semana 6**: Funcionalidade b·sica de cadastro de produtos.
-- **Semana 7**: IntegraÁ„o e testes iniciais das funcionalidades.
-
-### Fase 3: Banco de Dados Preenchido, Entrada e SaÌda de Produtos, Dashboards
-
-- **Semana 7**: Preenchimento inicial do banco de dados com dados reais.
-- **Semana 8**: Funcionalidade de entrada e saÌda de produtos.
-- **Semana 9**: ProtÛtipo inicial dos dashboards.
-- **Semana 10**: Testes e ajustes finais das funcionalidades.
-
-### Fase 4: Treinamento, ImplementaÁ„o do Sistema
-
-- **Semana 11**: Sess„o de treinamento inicial para os usu·rios.
-- **Semana 12**: ImplementaÁ„o do sistema no ambiente do cliente.
-- **Semana 13**: Suporte pÛs-implementaÁ„o e ajustes finais.
-
-## Colaboradores
-
-Este repositÛrio È acessÌvel apenas para os colaboradores do projeto. Se vocÍ È um colaborador, sinta-se ‡ vontade para contribuir e melhorar o sistema.
-
-## Contato
-
-Para mais informaÁıes, entre em contato com o administrador do projeto.
