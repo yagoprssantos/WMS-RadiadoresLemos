@@ -4,108 +4,114 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="800">
+             d:DesignHeight="550" d:DesignWidth="800"
+             Background="{StaticResource BackgroundBrush}">
 
-    <Grid>
-        <TabControl>
+    <Grid Margin="20">
+        <TabControl Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1">
             <!-- Aba de Alerta -->
             <TabItem Header="Alertas" FontSize="18">
-                <Grid Margin="10">
-                    <DataGrid Name="AlertaDataGrid"
-                              AutoGenerateColumns="False"
-                              AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
-                              IsReadOnly="True" ColumnWidth="*"
-                              SelectionMode="Single"
-                              SelectionUnit="FullRow"
-                              HorizontalAlignment="Stretch"
-                              VerticalAlignment="Stretch"
-                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
-                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" MinWidth="70"/>
-                            <DataGridTemplateColumn Header="Sistema" Width="*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Sistema}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Detalhes" Width="*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Ações" Width="*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Acoes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
+                <Border Background="{StaticResource BackgroundBrush}" CornerRadius="10" Padding="20" Margin="10">
+                    <Grid Margin="10">
+                        <DataGrid Name="AlertaDataGrid"
+                                  AutoGenerateColumns="False"
+                                  AlternatingRowBackground="{StaticResource AlternativeLineBrush}" AlternationCount="2"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
+                                  IsReadOnly="True" ColumnWidth="*"
+                                  SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
+                                <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" MinWidth="70"/>
+                                <DataGridTemplateColumn Header="Sistema" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Sistema}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Detalhes" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Ações" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Acoes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
             </TabItem>
 
             <!-- Aba de Histórico -->
             <TabItem Header="Histórico" FontSize="18">
-                <Grid Margin="10">
-                    <DataGrid Name="HistoricoDataGrid"
-                              AutoGenerateColumns="False"
-                              AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
-                              IsReadOnly="True" ColumnWidth="*"
-                              SelectionMode="Single"
-                              SelectionUnit="FullRow"
-                              HorizontalAlignment="Stretch"
-                              VerticalAlignment="Stretch"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
-                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
-                            <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
-                            <DataGridTemplateColumn Header="Detalhes" Width="*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="Auto" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
+                <Border Background="{StaticResource BackgroundBrush}" CornerRadius="10" Padding="20" Margin="10">
+                    <Grid Margin="10">
+                        <DataGrid Name="HistoricoDataGrid"
+                                  AutoGenerateColumns="False"
+                                  AlternatingRowBackground="{StaticResource AlternativeLineBrush}" AlternationCount="2"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
+                                  IsReadOnly="True" ColumnWidth="*"
+                                  SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
+                                <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
+                                <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
+                                <DataGridTemplateColumn Header="Detalhes" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="Auto" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
             </TabItem>
-            
+
             <!-- Aba de Movimentações -->
             <TabItem Header="Movimentações" FontSize="18">
-                <Grid Margin="10">
-                    <DataGrid Name="MovimentacoesDataGrid"
-                  AutoGenerateColumns="False"
-                  AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
-                  IsReadOnly="True" ColumnWidth="*"
-                  SelectionMode="Single"
-                  SelectionUnit="FullRow"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataFormatada}" Width="Auto" />
-                            <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
-                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
-                            <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
-                            <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
+                <Border Background="{StaticResource BackgroundBrush}" CornerRadius="10" Padding="20" Margin="10">
+                    <Grid Margin="10">
+                        <DataGrid Name="MovimentacoesDataGrid"
+                                  AutoGenerateColumns="False"
+                                  AlternatingRowBackground="{StaticResource AlternativeLineBrush}" AlternationCount="2"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
+                                  IsReadOnly="True" ColumnWidth="*"
+                                  SelectionMode="Single"
+                                  SelectionUnit="FullRow"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataFormatada}" Width="Auto" />
+                                <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
+                                <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
+                                <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
+                                <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
             </TabItem>
 
         </TabControl>
     </Grid>
 </UserControl>
-    

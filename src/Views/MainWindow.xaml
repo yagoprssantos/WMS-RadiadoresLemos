@@ -17,39 +17,51 @@
         <DockPanel Grid.Column="0" Background="{StaticResource PanelBackgroundBrush}">
             <StackPanel Name="BarraLateral" Margin="10" DockPanel.Dock="Top">
                 <!-- Botão para abrir a aba de Registro -->
-                <Button Name="BtnRegistro" Content="Registro de Entrada/Saída" Click="RegistroEntradaSaida_Click" FontSize="16" Visibility="Visible">
+                <Button Name="BtnRegistro" Content="Registro de Entrada/Saída" Click="RegistroEntradaSaida_Click" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Registrar entrada e saída de produtos"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir a aba de Estoque -->
-                <Button Name="BtnEstoque" Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16" Visibility="Visible">
+                <Button Name="BtnEstoque" Content="Controle de Estoque" Click="ControleEstoque_Click" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Visualizar e gerenciar o estoque"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir o Dashboard -->
-                <Button Name="BtnDashboard" Content="Dashboard" Click="Dashboard_Click" FontSize="16" Visibility="Visible">
+                <Button Name="BtnDashboard" Content="Dashboard" Click="Dashboard_Click" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Exibir o dashboard"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir a aba de Notificações -->
-                <Button Name="BtnNotificacoes" Content="Notificações" Click="Notificacoes_Click" FontSize="16" Visibility="Visible">
+                <Button Name="BtnNotificacoes" Content="Notificações" Click="Notificacoes_Click" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Configurar notificações do sistema"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir a aba de Usuários -->
-                <Button Name="BtnUsuarios" Content="Gerenciar Usuários" Click="Usuarios_Click" FontSize="16" Visibility="Visible">
+                <Button Name="BtnUsuarios" Content="Gerenciar Usuários" Click="Usuarios_Click" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Gerenciar usuários do sistema"/>
                     </Button.ToolTip>
                 </Button>
                 <!-- Botão para abrir a aba de Banco de Dados -->
-                <Button Name="BtnBancoDados" Content="Banco de Dados" Click="BancoDados_Click" FontSize="16" Visibility="Visible">
+                <Button Name="BtnBancoDados" Content="Banco de Dados" Click="BancoDados_Click" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
                     <Button.ToolTip>
                         <ToolTip Content="Gerenciar o banco de dados"/>
+                    </Button.ToolTip>
+                </Button>
+                 <!--Botão para Light Theme-->
+                <Button Name="BtnLightTheme" Content="Light Theme" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
+                    <Button.ToolTip>
+                        <ToolTip Content="Aplicar tema claro"/>
+                    </Button.ToolTip>
+                </Button>
+                <!--Botão para Midnight Theme-->
+                <Button Name="BtnMidnightTheme" Content="Midnight Theme" FontSize="16" Visibility="Visible" Style="{StaticResource HoverButtonStyle}">
+                    <Button.ToolTip>
+                        <ToolTip Content="Aplicar tema noturno"/>
                     </Button.ToolTip>
                 </Button>
             </StackPanel>

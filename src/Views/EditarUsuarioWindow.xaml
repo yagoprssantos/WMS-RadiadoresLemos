@@ -1,55 +1,81 @@
 ﻿<Window x:Class="WMS_RadiadoresLemos_WPF.EditarUsuarioWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Editar Usuário" Height="460" Width="400"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
+        mc:Ignorable="d"
+        Title="Editar Usuário" Height="600" Width="600" FontSize="18"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  Background="{StaticResource BackgroundBrush}">
+        <Grid>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
+                <!-- Dados do Usuário -->
+                <!-- Nome -->
+                <TextBlock Text="Nome:" Margin="0,0,0,5"
+                           Foreground="{StaticResource TextBrush}"/>
+                <TextBox FontSize="16" Height="35" x:Name="NomeTextBox" TextChanged="TextBox_TextChanged" PreviewTextInput="NomeTextBox_PreviewTextInput"
+                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
-    <Grid>
-        <StackPanel Margin="20">
-            <TextBlock Text="Nome:" Foreground="White" FontSize="16"/>
-            <TextBox FontSize="16" Height="35" x:Name="NomeTextBox" TextChanged="TextBox_TextChanged" PreviewTextInput="NomeTextBox_PreviewTextInput" />
+                <!-- Email -->
+                <TextBlock Text="Email:" Margin="0,0,0,5"
+                           Foreground="{StaticResource TextBrush}"/>
+                <TextBox FontSize="16" Height="35" x:Name="EmailTextBox" TextChanged="TextBox_TextChanged"
+                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
-            <TextBlock Text="Email:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
-            <TextBox FontSize="16" Height="35" x:Name="EmailTextBox" TextChanged="TextBox_TextChanged" />
+                <!-- Matrícula -->
+                <TextBlock Text="Matrícula:" Margin="0,0,0,5"
+                           Foreground="{StaticResource TextBrush}"/>
+                <TextBox FontSize="16" Height="35" x:Name="MatriculaTextBox" IsReadOnly="True"
+                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
-            <TextBlock Text="Matrícula:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
-            <TextBox FontSize="16" Height="35" x:Name="MatriculaTextBox" IsReadOnly="True" />
+                <!-- Senha -->
+                <TextBlock Text="Senha:" Margin="0,0,0,5"
+                           Foreground="{StaticResource TextBrush}"/>
+                <PasswordBox FontSize="16" Height="35" x:Name="SenhaPasswordBox" PasswordChanged="SenhaPasswordBox_PasswordChanged"
+                             Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
-            <TextBlock Text="Senha:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
-            <PasswordBox FontSize="16" Height="35" x:Name="SenhaPasswordBox" PasswordChanged="SenhaPasswordBox_PasswordChanged" />
+                <!-- Cargo -->
+                <TextBlock Text="Cargo:" Margin="0,0,0,5"
+                           Foreground="{StaticResource TextBrush}"/>
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox FontSize="16" Height="35" x:Name="PermissaoComboBox" Grid.Column="0" SelectionChanged="PermissaoComboBox_SelectionChanged"
+                              Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}">
+                        <ComboBoxItem Content="Administrador" />
+                        <ComboBoxItem Content="Gerente" />
+                        <ComboBoxItem Content="Operador" />
+                        <ComboBoxItem Content="Estagiário" />
+                        <ComboBoxItem Content="Usuário" />
+                    </ComboBox>
+                    <Button Content="?" Width="30" Height="30" Margin="10,0,0,0" FontSize="16" Grid.Column="1" Click="MaisSobreCargo_Click"/>
+                    <Popup x:Name="CargoPopup" Placement="Mouse" StaysOpen="False">
+                        <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="Administrador - Acesso total ao sistema, ideal para desenvolvedores" TextWrapping="Wrap" Width="250" Foreground="{StaticResource TextBrush}" FontSize="16" Margin="0,5,0,5"/>
+                                <TextBlock Text="Gerente - Acesso total ao sistema, para funções operacionais e administrativas" TextWrapping="Wrap" Width="250" Foreground="{StaticResource TextBrush}" FontSize="16" Margin="0,5,0,5"/>
+                                <TextBlock Text="Operador - Acesso limitado, para funções operacionais básicas" TextWrapping="Wrap" Width="250" Foreground="{StaticResource TextBrush}" FontSize="16" Margin="0,5,0,5"/>
+                                <TextBlock Text="Estagiário - Acesso restrito, voltado para aprendizado e treinamento" TextWrapping="Wrap" Width="250" Foreground="{StaticResource TextBrush}" FontSize="16" Margin="0,5,0,5"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
 
-            <TextBlock Text="Cargo:" Margin="0,10,0,0" Foreground="White" FontSize="16"/>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <ComboBox FontSize="16" Height="35" x:Name="PermissaoComboBox" Grid.Column="0" SelectionChanged="PermissaoComboBox_SelectionChanged">
-                    <ComboBoxItem Content="Administrador" />
-                    <ComboBoxItem Content="Gerente" />
-                    <ComboBoxItem Content="Operador" />
-                    <ComboBoxItem Content="Estagiário" />
-                    <ComboBoxItem Content="Usuário" />
-                </ComboBox>
-                <Button Content="?" Width="30" Height="30" Margin="10,0,0,0" FontSize="16" Grid.Column="1" Click="MaisSobreCargo_Click"/>
-                <Popup x:Name="CargoPopup" Placement="Mouse" StaysOpen="False">
-                    <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="10">
-                        <StackPanel>
-                            <TextBlock Text="Administrador - Acesso total ao sistema, ideal para desenvolvedores" TextWrapping="Wrap" Width="200"/>
-                            <TextBlock Text="Gerente - Acesso total ao sistema, para funções operacionais e administrativas" TextWrapping="Wrap" Width="200" Margin="0,5,0,0"/>
-                            <TextBlock Text="Operador - Acesso limitado, para funções operacionais básicas" TextWrapping="Wrap" Width="200" Margin="0,5,0,0"/>
-                            <TextBlock Text="Estagiário - Acesso restrito, voltado para aprendizado e treinamento" TextWrapping="Wrap" Width="200" Margin="0,5,0,0"/>
-                        </StackPanel>
-                    </Border>
-                </Popup>
-            </Grid>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                <Button Content="Salvar" Width="100" Margin="10,0" Click="Salvar_Click" FontSize="16"/>
-                <Button Content="Cancelar" Width="100" Margin="10,0" Click="Cancelar_Click" FontSize="16"
-                        Style="{StaticResource CancelButtonStyle}"/>
+                <!-- Botões -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,10,0,0">
+                    <!-- Botão Salvar -->
+                    <Button Content="Salvar" Width="250" Margin="10" Click="Salvar_Click" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <!-- Botão Cancelar -->
+                    <Button Content="Cancelar" Width="150" Margin="10" Click="Cancelar_Click"
+                            Style="{StaticResource CancelButtonStyle}"/>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </Window>

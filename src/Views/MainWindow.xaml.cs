@@ -137,6 +137,9 @@ namespace WMS_RadiadoresLemos_WPF
             // Configura a visibilidade dos botões de acordo com o tipo de usuário
             ConfigurarVisibilidadeBotoes();
 
+            // Configura temas
+            ConfigurarTema();
+
             // Configura a barra de status
             SetupStatusBar();
         }
@@ -693,6 +696,46 @@ namespace WMS_RadiadoresLemos_WPF
                     break;
             }
         }
+
+        // Função que altera o tema da aplicação
+        private void ConfigurarTema()
+        {
+            // Configura os eventos de clique dos botões
+            BtnLightTheme.Click += (sender, e) => SwitchToTheme("LightTheme");
+            BtnMidnightTheme.Click += (sender, e) => SwitchToTheme("MidnightTheme");
+        }
+
+        private void SwitchToTheme(string themeName)
+        {
+            // Função para alterar Styles de acordo com o tema
+            ResourceDictionary newTheme = new ResourceDictionary
+            {
+                // Define o caminho do arquivo de estilos
+                Source = new Uri($"/src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
+            };
+
+            // Substitui o Style.xaml para novo tema
+            Application.Current.Resources.MergedDictionaries[0] = newTheme;
+            // Recarrega a janela principal
+            ReloadWindow();
+        }
+
+        private void ReloadWindow()
+        {
+            // Cria uma nova instância da MainWindow
+            MainWindow newWindow = new MainWindow();
+
+            // Fecha a janela atual
+            this.Close();
+
+            // Define a nova instância como a janela principal
+            Application.Current.MainWindow = newWindow;
+
+            // Exibe a nova janela
+            newWindow.Show();
+        }
+
+
 
 
         // Função que representa a animação de notificação de alerta

@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="630" d:DesignWidth="800"
-             TextBlock.Foreground="White">
+             Background="{StaticResource BackgroundBrush}">
 
     <Grid Margin="0,0,0,10">
         <TabControl>
@@ -14,28 +14,28 @@
                 <ScrollViewer VerticalScrollBarVisibility="Hidden">
                     <Grid Margin="20">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
-                            <TextBlock Text="Nome do Produto:" Margin="0,0,0,5" Foreground="White"/>
-                            <TextBox Name="NomeProduto" Margin="0,0,0,15"/>
+                            <TextBlock Text="Nome do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                            <TextBox Name="NomeProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
 
-                            <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5" Foreground="White"/>
-                            <ComboBox Name="TipoProduto" Margin="0,0,0,15">
+                            <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                            <ComboBox Name="TipoProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}">
                                 <ComboBoxItem Content="Caixa"/>
                                 <ComboBoxItem Content="Radiador"/>
                             </ComboBox>
 
-                            <TextBlock Text="Marca do Produto:" Margin="0,0,0,5" Foreground="White"/>
-                            <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
+                            <TextBlock Text="Marca do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                            <TextBox Name="MarcaProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
 
-                            <TextBlock Text="Código do Produto:" Margin="0,0,0,5" Foreground="White"/>
-                            <TextBox Name="CodigoProduto" Margin="0,0,0,15"/>
+                            <TextBlock Text="Código do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                            <TextBox Name="CodigoProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
 
-                            <TextBlock Text="Preço do Produto:" Margin="0,0,0,5" Foreground="White"/>
-                            <TextBox Name="PrecoProduto" Margin="0,0,0,15" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
+                            <TextBlock Text="Preço do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                            <TextBox Name="PrecoProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
 
-                            <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5" Foreground="White"/>
-                            <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
+                            <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                            <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
 
-                            <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20"/>
+                            <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20" Style="{StaticResource EmphasisButtonStyle}"/>
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>
@@ -45,8 +45,8 @@
             <TabItem Header="Controle de Estoque" Name="AbaEstoque" FontSize="18">
                 <DockPanel Margin="10">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
-                        <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10"/>
-                        <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="200" Margin="10"/>
+                        <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
+                        <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="200" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
                         <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
                     </StackPanel>
 
@@ -57,10 +57,10 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" FontSize="18" Margin="0,0,10,0" Foreground="White"/>
-                        <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged"/>
-                        <Button Content="Filtrar" ToolTip="Filtrar" Click="AbrirFiltroPopup_Click"  HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource ButtonBackgroundBrush}" Foreground="White" Margin="20, 0, 10, 0" FontSize="18" Grid.Column="2"/>
-                        <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" Foreground="White" Margin="7, 0, 0, 0" FontSize="33" Grid.Column="3"/>
+                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" FontSize="18" Margin="0,0,10,0" Foreground="{StaticResource TextBrush}"/>
+                        <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                        <Button Content="Filtrar" ToolTip="Filtrar" Click="AbrirFiltroPopup_Click" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource EmphasisButtonStyle}" Margin="20, 0, 10, 0" FontSize="18" Grid.Column="2"/>
+                        <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" Foreground="{StaticResource TextBrush}" Margin="7, 0, 0, 0" FontSize="33" Grid.Column="3"/>
                     </Grid>
 
                     <DataGrid Name="EstoqueDataGrid"
@@ -68,7 +68,7 @@
                               SelectionMode="Single" SelectionUnit="FullRow"
                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                               Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
-                              AlternatingRowBackground="Gainsboro" AlternationCount="2"
+                              AlternatingRowBackground="{StaticResource AlternativeLineBrush}" AlternationCount="2"
                               CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
                               ColumnWidth="*"
                               MouseDoubleClick="EstoqueDataGrid_MouseDoubleClick">
@@ -92,23 +92,21 @@
                 <StackPanel Width="250" Margin="10">
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,10">
-                        <CheckBox x:Name="EmEstoqueCheckBox" Foreground="White"
+                        <CheckBox x:Name="EmEstoqueCheckBox" Foreground="{StaticResource TextBrush}"
                                   VerticalAlignment="Center" HorizontalAlignment="Center"
                                   Checked="Filtro_Changed" Unchecked="Filtro_Changed" 
                                   FontSize="16" Padding="5"/>
                         <TextBlock Text="Ver apenas itens em estoque" MouseLeftButtonDown="Filtro_Changed"
-                                   VerticalAlignment="Center" Foreground="White" FontSize="16" />
+                                   VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" />
                     </StackPanel>
 
-
-
-                    <TextBlock Text="Marca do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="White"/>
+                    <TextBlock Text="Marca do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
                     <ComboBox x:Name="MarcaProdutoComboBox" SelectionChanged="Filtro_Changed" 
-                                FontSize="16" Margin="0,0,0,10" Padding="5"/>
+                                FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
 
-                    <TextBlock Text="Tipo do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="White"/>
+                    <TextBlock Text="Tipo do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
                     <ComboBox x:Name="TipoProdutoComboBox" SelectionChanged="Filtro_Changed"
-                                FontSize="16" Margin="0,0,0,10" Padding="5"/>
+                                FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
                 </StackPanel>
             </Border>
         </Popup>
