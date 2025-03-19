@@ -33,7 +33,7 @@ namespace WMS_RadiadoresLemos_WPF
             StartApplication();
 
             // Adiciona o evento de alerta adicionado
-            AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
+            // AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
 
             this.Closing += Window_Closing;
 
@@ -78,9 +78,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                // Atualiza a barra de status
-                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
-                UpdateConnectionStatus("Conectando...");
 
                 // Tenta conectar ao banco de dados
                 DatabaseConnect.SetEnvironmentVarible();
@@ -93,10 +90,6 @@ namespace WMS_RadiadoresLemos_WPF
                     SincronizarBancoDados();
                     isAppOffline = false;
                     isSincronized = true;
-
-                    // Atualiza a barra de status
-                    UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
-                    UpdateConnectionStatus("Conectado");
                 }
                 else
                 {
@@ -111,15 +104,10 @@ namespace WMS_RadiadoresLemos_WPF
                 isSincronized = false;
                 isAppOffline = true;
 
-                // Atualiza a barra de status
-                UpdateStatusBar("Erro ao conectar ao banco de dados", Colors.Purple);
-                UpdateConnectionStatus("Desconectado");
-
                 // Espera 3 segundos
                 await Task.Delay(3000);
 
                 // Altera a barra de status
-                UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
             }
         }
 
@@ -139,9 +127,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Configura temas
             ConfigurarTema();
-
-            // Configura a barra de status
-            SetupStatusBar();
         }
 
         // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
@@ -264,7 +249,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
 
                 // Estabelece a conexão com o banco de dados Firestore
                 DatabaseConnect.SetEnvironmentVarible();
@@ -278,7 +262,6 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 _connectDatabaseTimer.Start();
-                UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
                 MessageBox.Show($"Erro ao carregar dados, com banco de dados e com arquivos locais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
@@ -294,46 +277,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void SetupStatusBar()
-        {
-            try
-            {
-                UpdateDateTime();
-                StartDateTimeUpdater();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao configurar a barra de status: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Não foi possível configurar a barra de status. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Configurações incorretas do sistema;\n" +
-                                            "- Serviço do sistema indisponível.",
-                                            "- Verifique sua conexão com a internet;\n" +
-                                            "- Verifique as configurações do sistema;\n" +
-                                            "- Tente reconectar ou contate o suporte.");
-            }
-        }
-
-        // Atualiza a barra de status com a data e hora atual
-        private void UpdateDateTime()
-        {
-            StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}  ";
-        }
-
-        // Inicia o temporizador que atualiza a data e hora a cada segundo
-        private void StartDateTimeUpdater()
-        {
-            DispatcherTimer timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += (sender, args) => UpdateDateTime();
-            timer.Start();
-        }
         public async void SincronizarBancoDados()
         {
             // Fecha qualquer aba que esteja aberta
@@ -341,10 +284,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Deixa carregamento visível
             LoadingScreen.Visibility = Visibility.Visible;
-
-            // Altera a barra de status
-            UpdateStatusBar("Sincronizando dados com o banco de dados...", Colors.Blue);
-            UpdateConnectionStatus("Conectado");
 
             // Sincroniza arquivos cache enviando para o banco de dados
             DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
@@ -468,28 +407,12 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-        // Atualiza a barra de status com uma mensagem e uma cor
-        public void UpdateStatusBar(string message, Color color)
-        {
-            StatusBarItem.Content = message;
-            StatusBar.Background = new SolidColorBrush(color);
-        }
-
-        // Atualiza o status da conexão com o banco de dados
-        public void UpdateConnectionStatus(string status)
-        {
-            ConnectionStatus.Text = status;
-        }
-
-
         // Função para carregar todas as tabelas no cache
         private async Task CarregarTodasTabelasNoCache(bool isConnected)
         {
             try
             {
                 var db = DatabaseConnect.Database;
-                UpdateStatusBar("Carregando dados no cache...", Colors.DarkOrange);
 
                 // Lista de tabelas a serem carregadas no cache
                 var tabelas = new List<string>
@@ -618,8 +541,6 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
-                UpdateConnectionStatus("ERRO");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -700,9 +621,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Função que altera o tema da aplicação
         private void ConfigurarTema()
         {
-            // Configura os eventos de clique dos botões
-            BtnLightTheme.Click += (sender, e) => SwitchToTheme("LightTheme");
-            BtnMidnightTheme.Click += (sender, e) => SwitchToTheme("MidnightTheme");
+
         }
 
         private void SwitchToTheme(string themeName)
@@ -739,76 +658,35 @@ namespace WMS_RadiadoresLemos_WPF
 
 
         // Função que representa a animação de notificação de alerta
-        private void OnAlertaAdicionado(AlertaData alerta)
-        {
-            // Incrementa a contagem de notificações
-            _notificationCount++;
+        //private void OnAlertaAdicionado(AlertaData alerta)
+        //{
+        //    // Incrementa a contagem de notificações
+        //    _notificationCount++;
 
-            // Tornar o ícone de notificação visível
-            NotificationButton.Visibility = Visibility.Visible;
+        //    // Tornar o ícone de notificação visível
+        //    NotificationButton.Visibility = Visibility.Visible;
 
-            // Altera a cor do ícone de notificação para vermelho por 2 segundos e depois fica vermelho
-            ColorAnimation colorAnimation = new ColorAnimation
-            {
-                From = Colors.Transparent,
-                To = (Color)ColorConverter.ConvertFromString("#990000"),
-                Duration = new Duration(TimeSpan.FromSeconds(0.5)),
-                AutoReverse = true,
-                RepeatBehavior = new RepeatBehavior(4) // Pisca 4 vezes (2 segundos)
-            };
+        //    // Altera a cor do ícone de notificação para vermelho por 2 segundos e depois fica vermelho
+        //    ColorAnimation colorAnimation = new ColorAnimation
+        //    {
+        //        From = Colors.Transparent,
+        //        To = (Color)ColorConverter.ConvertFromString("#990000"),
+        //        Duration = new Duration(TimeSpan.FromSeconds(0.5)),
+        //        AutoReverse = true,
+        //        RepeatBehavior = new RepeatBehavior(4) // Pisca 4 vezes (2 segundos)
+        //    };
 
-            // Aplica a animação ao fundo do botão de notificação
-            NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
-            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+        //    // Aplica a animação ao fundo do botão de notificação
+        //    NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
+        //    NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
 
-            // Define a cor final como vermelho após a animação
-            colorAnimation.AutoReverse = false;
-            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+        //    // Define a cor final como vermelho após a animação
+        //    colorAnimation.AutoReverse = false;
+        //    NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
 
-            // Atualizar o ToolTip com a quantidade de notificações
-            NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
-        }
-
-        // Função para abrir a aba de notificações
-        private void NotificationButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Limpar a contagem de notificações
-            _notificationCount = 0;
-
-            // Tornar o fundo do botão de notificação transparente
-            NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
-
-            // Abrir a aba de notificações
-            ContentArea.Content = null;
-            ContentArea.Content = new NotificacoesUserControl();
-        }
-
-        private void NotificationButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            // Atualizar o ToolTip com a quantidade de notificações
-            NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
-        }
-
-
-        // Função para abrir conexão com banco de dados
-        private void ConnectionButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Abre a aba de banco de dados
-            ContentArea.Content = null;
-            ContentArea.Content = new BancoDadosUserControl();
-        }
-        private void ConnectionButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            // Atualizar o ToolTip com base na conexão com o banco de dados
-            if (DatabaseConnect.IsConnected)
-            {
-                ConnectionToolTip.Content = "Conectado ao Banco de Dados";
-            }
-            else
-            {
-                ConnectionToolTip.Content = "Desconectado do Banco de Dados";
-            }
-        }
+        //    // Atualizar o ToolTip com a quantidade de notificações
+        //    NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
+        //}
 
 
         // Função para iniciar processo de "Modo Offline"
@@ -826,9 +704,6 @@ namespace WMS_RadiadoresLemos_WPF
                 _connectDatabaseTimer.Start();
             }
 
-            UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
-            UpdateConnectionStatus("Desconectado");
-
             // Adiciona alerta
             AlertaCache.AdicionarAlerta("Aviso",
                                         "Falha na conexão com o banco de dados",
@@ -845,10 +720,6 @@ namespace WMS_RadiadoresLemos_WPF
             // Finaliza o processo de "Modo Offline"
             _saveCacheTimer.Stop();
             _connectDatabaseTimer.Stop();
-
-            // Atualiza a barra de status
-            UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
-            UpdateConnectionStatus("Conectado");
 
             // Adiciona alerta
             AlertaCache.AdicionarAlerta("Aviso",

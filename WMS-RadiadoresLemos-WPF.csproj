@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="src\Resources\Images\user.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Remove="src\App.xaml" />
   </ItemGroup>
 
@@ -33,6 +37,10 @@
 
   <ItemGroup>
     <Folder Include="assets\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="src\Resources\Images\user.png" />
   </ItemGroup>
 
 </Project>
