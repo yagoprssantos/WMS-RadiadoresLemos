@@ -5,7 +5,7 @@
         Height="700" Width="1000"
         MinHeight="700" MinWidth="1000"
         WindowState="Maximized"
-        Background="{StaticResource SecondaryBrush}">
+        Background="{StaticResource BackgroundBrush}">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -111,7 +111,7 @@
             </Grid.RowDefinitions>
 
             <!-- Botões de Navegação -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,15,0,0">
                 <Button Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
@@ -133,9 +133,9 @@
             </StackPanel>
 
             <!-- Título e Ícone -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,15,0,0">
                 <Image x:Name="IconImage" Width="30" Height="30" Source="{Binding SelectedTabIcon}" Margin="0,0,10,0"/>
-                <TextBlock x:Name="TitleTextBlock" Text="{Binding SelectedTabTitle}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                <TextBlock x:Name="TitleTextBlock" Text="{Binding SelectedTabTitle}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
             </StackPanel>
 
             <!-- Área de Conteúdo -->

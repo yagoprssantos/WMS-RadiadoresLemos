@@ -75,42 +75,42 @@ namespace WMS_RadiadoresLemos_WPF
 
 
         // Método chamado ao clicar no botão de cadastrar produto
-        private async void CadastrarProduto_Click(object sender, RoutedEventArgs e)
-        {
-            if (CamposPreenchidos())
-            {
-                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
-                confirmarSenhaWindow.ShowDialog();
+        //private async void CadastrarProduto_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (CamposPreenchidos())
+        //    {
+        //        var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+        //        confirmarSenhaWindow.ShowDialog();
 
-                if (confirmarSenhaWindow.IsConfirmed)
-                {
-                    if (!precisaAtualizarEstoque)
-                    {
-                        // Se a tabela de estoque não precisa ser atualizada, cadastra o produto
-                        CadastrarProduto();
-                        MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                        LimparCamposCadastro();
-                    }
-                    else
-                    {
-                        // Se a tabela de estoque precisa ser atualizada, atualiza a tabela e cadastra o produto
-                        await AtualizarTabelaEstoque();
+        //        if (confirmarSenhaWindow.IsConfirmed)
+        //        {
+        //            if (!precisaAtualizarEstoque)
+        //            {
+        //                // Se a tabela de estoque não precisa ser atualizada, cadastra o produto
+        //                CadastrarProduto();
+        //                MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        //                LimparCamposCadastro();
+        //            }
+        //            else
+        //            {
+        //                // Se a tabela de estoque precisa ser atualizada, atualiza a tabela e cadastra o produto
+        //                await AtualizarTabelaEstoque();
 
-                        CadastrarProduto();
-                        MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                        LimparCamposCadastro();
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Preencha todos os campos para cadastrar o produto.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
+        //                CadastrarProduto();
+        //                MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        //                LimparCamposCadastro();
+        //            }
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Preencha todos os campos para cadastrar o produto.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+        //    }
+        //}
 
         // Método para atualizar a tabela de estoque com os produtos
         private async Task AtualizarTabelaEstoque()
@@ -164,97 +164,97 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Verifica se todos os campos necessários estão preenchidos
-        private bool CamposPreenchidos() =>
-            !string.IsNullOrEmpty(NomeProduto.Text) &&
-            !string.IsNullOrEmpty(TipoProduto.Text) &&
-            !string.IsNullOrEmpty(MarcaProduto.Text) &&
-            !string.IsNullOrEmpty(CodigoProduto.Text) &&
-            !string.IsNullOrEmpty(PrecoProduto.Text) &&
-            !string.IsNullOrEmpty(QuantidadeInicial.Text);
+        //// Verifica se todos os campos necessários estão preenchidos
+        //private bool CamposPreenchidos() =>
+        //    !string.IsNullOrEmpty(NomeProduto.Text) &&
+        //    !string.IsNullOrEmpty(TipoProduto.Text) &&
+        //    !string.IsNullOrEmpty(MarcaProduto.Text) &&
+        //    !string.IsNullOrEmpty(CodigoProduto.Text) &&
+        //    !string.IsNullOrEmpty(PrecoProduto.Text) &&
+        //    !string.IsNullOrEmpty(QuantidadeInicial.Text);
 
         // Método para cadastrar um novo produto no banco de dados
-        private async void CadastrarProduto()
-        {
-            var db = DatabaseConnect.Database;
-            ProdutoData data = DadosDoProduto();
+        //private async void CadastrarProduto()
+        //{
+        //    var db = DatabaseConnect.Database;
+        //    ProdutoData data = DadosDoProduto();
 
 
-            // Se não estiver conectado ao banco
-            if (db == null || !DatabaseConnect.IsConnected)
-            {
-                // Ativa modo offline caso não esteja ativo
-                if (MainWindow.isAppOffline == false)
-                {
-                    MainWindow._instance?.ativarModoOffline();
-                }
-            }
-            else
-            {
-                // Salva o produto no banco de dados Firestore
-                var docRef = db.Collection("Produtos").Document(data.Codigo);
-                await docRef.SetAsync(data);
-            }
+        //    // Se não estiver conectado ao banco
+        //    if (db == null || !DatabaseConnect.IsConnected)
+        //    {
+        //        // Ativa modo offline caso não esteja ativo
+        //        if (MainWindow.isAppOffline == false)
+        //        {
+        //            MainWindow._instance?.ativarModoOffline();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // Salva o produto no banco de dados Firestore
+        //        var docRef = db.Collection("Produtos").Document(data.Codigo);
+        //        await docRef.SetAsync(data);
+        //    }
 
-            // Atualiza o cache local
-            if (!DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
-            {
-                value = [];
-                DadosCache.Tabelas["Produtos"] = value;
-            }
+        //    // Atualiza o cache local
+        //    if (!DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+        //    {
+        //        value = [];
+        //        DadosCache.Tabelas["Produtos"] = value;
+        //    }
 
-            // Adiciona o produto ao cache local e à fonte de dados do DataGrid
-            value.Add(data);
-            produtos.Add(data);
-            EstoqueDataGrid.ItemsSource = null;
-            EstoqueDataGrid.ItemsSource = produtos;
+        //    // Adiciona o produto ao cache local e à fonte de dados do DataGrid
+        //    value.Add(data);
+        //    produtos.Add(data);
+        //    EstoqueDataGrid.ItemsSource = null;
+        //    EstoqueDataGrid.ItemsSource = produtos;
 
-            // Adiciona o novo produto no arquivo JSON
-            var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
-            var produtosCache = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
-            produtosCache.Add(data);
-            await DatabaseFileManager.SalvarNoArquivoAsync(caminhoArquivoProdutos, produtosCache);
+        //    // Adiciona o novo produto no arquivo JSON
+        //    var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
+        //    var produtosCache = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
+        //    produtosCache.Add(data);
+        //    await DatabaseFileManager.SalvarNoArquivoAsync(caminhoArquivoProdutos, produtosCache);
 
-            // Adiciona log
-            var log = new LogData
-            {
-                Data = DateTime.UtcNow,
-                Tipo = "OPERACIONAL",
-                Nivel = "Usuário",
-                Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
-                Usuario = MainWindow.UsuarioLogado.Nome
-            };
-            await LogHistorico.RegistrarLogAsync(log);
-        }
+        //    // Adiciona log
+        //    var log = new LogData
+        //    {
+        //        Data = DateTime.UtcNow,
+        //        Tipo = "OPERACIONAL",
+        //        Nivel = "Usuário",
+        //        Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
+        //        Usuario = MainWindow.UsuarioLogado.Nome
+        //    };
+        //    await LogHistorico.RegistrarLogAsync(log);
+        //}
 
         // Método para obter os dados do produto a partir dos TextBoxes
-        private ProdutoData DadosDoProduto() => new()
-        {
-            Nome = NomeProduto.Text.Trim(),
-            Tipo = TipoProduto.Text.Trim(),
-            Marca = MarcaProduto.Text.Trim(),
-            Codigo = CodigoProduto.Text.Trim(),
+        //private ProdutoData DadosDoProduto() => new()
+        //{
+        //    Nome = NomeProduto.Text.Trim(),
+        //    Tipo = TipoProduto.Text.Trim(),
+        //    Marca = MarcaProduto.Text.Trim(),
+        //    Codigo = CodigoProduto.Text.Trim(),
 
-            // Remove a formatação do preço (1.000,00 -> 1000 OU 1.999,99 -> 1999.99)
-            Preço = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", "."), System.Globalization.CultureInfo.InvariantCulture),
+        //    // Remove a formatação do preço (1.000,00 -> 1000 OU 1.999,99 -> 1999.99)
+        //    Preço = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", "."), System.Globalization.CultureInfo.InvariantCulture),
 
 
-            // Remove a formatação da quantidade (1.000 -> 1000)
-            Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", "")),
+        //    // Remove a formatação da quantidade (1.000 -> 1000)
+        //    Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", "")),
 
-            Id = CodigoProduto.Text.Trim()
-        };
+        //    Id = CodigoProduto.Text.Trim()
+        //};
 
         // Método para limpar os campos de cadastro
-        private void LimparCamposCadastro()
-        {
-            NomeProduto.Text = string.Empty;
-            TipoProduto.Text = string.Empty;
-            MarcaProduto.Text = string.Empty;
-            CodigoProduto.Text = string.Empty;
-            PrecoProduto.Text = string.Empty;
-            QuantidadeInicial.Text = string.Empty;
-        }
+        //private void LimparCamposCadastro()
+        //{
+        //    NomeProduto.Text = string.Empty;
+        //    TipoProduto.Text = string.Empty;
+        //    MarcaProduto.Text = string.Empty;
+        //    CodigoProduto.Text = string.Empty;
+        //    PrecoProduto.Text = string.Empty;
+        //    QuantidadeInicial.Text = string.Empty;
+        //}
 
 
         // Método chamado ao alterar o texto da caixa de busca

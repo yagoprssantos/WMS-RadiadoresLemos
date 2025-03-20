@@ -1,115 +1,92 @@
 ﻿<UserControl x:Class="WMS_RadiadoresLemos_WPF.ControleEstoqueUserControl"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="630" d:DesignWidth="800"
-             Background="{StaticResource BackgroundBrush}">
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            mc:Ignorable="d" 
+            d:DesignHeight="630" d:DesignWidth="800"
+            Background="{StaticResource BackgroundBrush}">
 
-    <Grid Margin="0,0,0,10">
-        <TabControl>
-            <!-- Aba de Cadastrar Produtos -->
-            <TabItem Header="Cadastrar Produtos" Name="AbaCadastro" FontSize="18">
-                <ScrollViewer VerticalScrollBarVisibility="Hidden">
-                    <Grid Margin="20">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="500">
-                            <TextBlock Text="Nome do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
-                            <TextBox Name="NomeProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+    <Grid Margin="15, 15, 15, 0">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid Margin="0,0,0,20" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="18" Height="36" Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Lupa em emoji -->
+                            <TextBlock Text="🔍" FontSize="15" Foreground="{StaticResource TextBrush}" Width="20" Height="21" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0,5,0"/>
 
-                            <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
-                            <ComboBox Name="TipoProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}">
-                                <ComboBoxItem Content="Caixa"/>
-                                <ComboBoxItem Content="Radiador"/>
-                            </ComboBox>
+                            <!-- Fill="{StaticResource TextBrush}" Width="20" Height="21" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Fill" Margin="10,0,10,0"/> -->
 
-                            <TextBlock Text="Marca do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
-                            <TextBox Name="MarcaProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting"/>
 
-                            <TextBlock Text="Código do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
-                            <TextBox Name="CodigoProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                            <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" Background="Transparent" Foreground="{StaticResource TextBrush}" BorderThickness="0" Padding="5,0"/>
+                        </Grid>
+                    </Border>
+                    <Button Content="Filtrar por" Grid.Column="2"  ToolTip="Filtrar" Click="AbrirFiltroPopup_Click" Style="{StaticResource FilterButtonStyle}"/>
+                </Grid>
 
-                            <TextBlock Text="Preço do Produto:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
-                            <TextBox Name="PrecoProduto" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
-
-                            <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
-                            <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
-
-                            <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" HorizontalAlignment="Center" Width="200" Margin="20" Style="{StaticResource EmphasisButtonStyle}"/>
-                        </StackPanel>
-                    </Grid>
-                </ScrollViewer>
-            </TabItem>
-
-            <!-- Aba de Controle de Estoque -->
-            <TabItem Header="Controle de Estoque" Name="AbaEstoque" FontSize="18">
-                <DockPanel Margin="10">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
-                        <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
-                        <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="200" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
-                        <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
-                    </StackPanel>
-
-                    <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Pesquisar:" VerticalAlignment="Center" FontSize="18" Margin="0,0,10,0" Foreground="{StaticResource TextBrush}"/>
-                        <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
-                        <Button Content="Filtrar" ToolTip="Filtrar" Click="AbrirFiltroPopup_Click" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource EmphasisButtonStyle}" Margin="20, 0, 10, 0" FontSize="18" Grid.Column="2"/>
-                        <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" Foreground="{StaticResource TextBrush}" Margin="7, 0, 0, 0" FontSize="33" Grid.Column="3"/>
-                    </Grid>
-
-                    <DataGrid Name="EstoqueDataGrid"
-                              AutoGenerateColumns="False" IsReadOnly="True" 
-                              SelectionMode="Single" SelectionUnit="FullRow"
-                              VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                              Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
-                              AlternatingRowBackground="{StaticResource AlternativeLineBrush}" AlternationCount="2"
-                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
-                              ColumnWidth="*"
-                              MouseDoubleClick="EstoqueDataGrid_MouseDoubleClick">
+                <Border Grid.Row="1" CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
+                    <DataGrid Name="EstoqueDataGrid" Style="{StaticResource CustomDataGridStyle}"
+                             MouseDoubleClick="EstoqueDataGrid_MouseDoubleClick"
+                             Background="Transparent">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True" Width="*"/>
+                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*" />
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="*" />
+                            <DataGridTextColumn Header="Marca" Binding="{Binding Marca}" IsReadOnly="True" Width="*" />
+                            <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True" Width="*" />
                             <DataGridTextColumn Header="Preço" Binding="{Binding Preço, StringFormat={}{0:C2}}" IsReadOnly="True" Width="*" />
                             <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade, StringFormat={}{0:N0}}" IsReadOnly="False" Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>
+                </Border>
 
-                </DockPanel>
-            </TabItem>
-        </TabControl>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Row="2">
+                    <Button Content="Cadastrar Produto" Width="150" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <Button Content="Editar Produto" Click="EditarProduto_Click" Width="150" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="150" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <Popup x:Name="PainelFiltrosPopup" Placement="Mouse" StaysOpen="False" Grid.ColumnSpan="2">
             <Border Background="{StaticResource ButtonBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}"
-                    BorderThickness="2" Padding="10">
+                   BorderThickness="2" Padding="10">
                 <StackPanel Width="250" Margin="10">
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,10">
                         <CheckBox x:Name="EmEstoqueCheckBox" Foreground="{StaticResource TextBrush}"
-                                  VerticalAlignment="Center" HorizontalAlignment="Center"
-                                  Checked="Filtro_Changed" Unchecked="Filtro_Changed" 
-                                  FontSize="16" Padding="5"/>
+                                 VerticalAlignment="Center" HorizontalAlignment="Center"
+                                 Checked="Filtro_Changed" Unchecked="Filtro_Changed" 
+                                 FontSize="16" Padding="5"/>
                         <TextBlock Text="Ver apenas itens em estoque" MouseLeftButtonDown="Filtro_Changed"
-                                   VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" />
+                                  VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" />
                     </StackPanel>
 
                     <TextBlock Text="Marca do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
                     <ComboBox x:Name="MarcaProdutoComboBox" SelectionChanged="Filtro_Changed" 
-                                FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                               FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
 
                     <TextBlock Text="Tipo do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
                     <ComboBox x:Name="TipoProdutoComboBox" SelectionChanged="Filtro_Changed"
-                                FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                               FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
                 </StackPanel>
             </Border>
         </Popup>
-
     </Grid>
 </UserControl>
