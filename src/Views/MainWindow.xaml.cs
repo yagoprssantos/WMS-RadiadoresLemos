@@ -332,26 +332,32 @@ namespace WMS_RadiadoresLemos_WPF
                 if (clickedButton == BtnRegistro)
                 {
                     ContentArea.Content = new RegistroEntradaSaidaUserControl();
+                    TitleTextBlock.Text = "Registro de Entrada/Saída";
                 }
                 else if (clickedButton == BtnEstoque)
                 {
                     ContentArea.Content = new ControleEstoqueUserControl();
+                    TitleTextBlock.Text = "Controle de Estoque";
                 }
                 else if (clickedButton == BtnDashboard)
                 {
                     ContentArea.Content = new DashboardUserControl();
+                    TitleTextBlock.Text = "Dashboard";
                 }
                 else if (clickedButton == BtnNotificacoes)
                 {
                     ContentArea.Content = new NotificacoesUserControl();
+                    TitleTextBlock.Text = "Notificações";
                 }
                 else if (clickedButton == BtnUsuarios)
                 {
                     ContentArea.Content = new UsuariosUserControl();
+                    TitleTextBlock.Text = "Gerenciar Usuários";
                 }
                 else if (clickedButton == BtnBancoDados)
                 {
                     ContentArea.Content = new BancoDadosUserControl();
+                    TitleTextBlock.Text = "Banco de Dados";
                 }
 
                 // Altera a cor do texto e do ícone do botão clicado
