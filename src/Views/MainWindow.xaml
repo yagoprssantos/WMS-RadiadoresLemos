@@ -10,7 +10,8 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300" MinWidth="200" MaxWidth="400"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="24*"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
         <!-- Menu Lateral -->
@@ -44,40 +45,40 @@
 
                 <!-- Itens do Menu -->
                 <StackPanel Grid.Row="1" x:Name="MenuItemsPanel">
-                    <Button x:Name="BtnRegistro" Style="{StaticResource MenuButtonStyle}" Click="RegistroEntradaSaida_Click">
+                    <Button x:Name="BtnRegistro" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Style="{StaticResource MenuIconStyle}"/>
-                            <TextBlock Text="Registro de Entrada/Saída" Style="{StaticResource MenuItemTextStyle}"/>
+                            <Path x:Name="IconRegistro" Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextRegistro" Text="Registro de Entrada/Saída" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnEstoque" Style="{StaticResource MenuButtonStyle}" Click="ControleEstoque_Click">
+                    <Button x:Name="BtnEstoque" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M12,3C12.55,3 13,3.45 13,4C13,4.55 12.55,5 12,5C11.45,5 11,4.55 11,4C11,3.45 11.45,3 12,3M7,7H17V5H19V19H5V5H7V7M7.5,13.5L9,12L11,14L15.5,9.5L17,11L11,17L7.5,13.5Z" Style="{StaticResource MenuIconStyle}"/>
-                            <TextBlock Text="Controle de Estoque" Style="{StaticResource MenuItemTextStyle}"/>
+                            <Path x:Name="IconEstoque" Data="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M12,3C12.55,3 13,3.45 13,4C13,4.55 12.55,5 12,5C11.45,5 11,4.55 11,4C11,3.45 11.45,3 12,3M7,7H17V5H19V19H5V5H7V7M7.5,13.5L9,12L11,14L15.5,9.5L17,11L11,17L7.5,13.5Z" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextEstoque" Text="Controle de Estoque" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnDashboard" Style="{StaticResource MenuButtonStyle}" Click="Dashboard_Click">
+                    <Button x:Name="BtnDashboard" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" Style="{StaticResource MenuIconStyle}"/>
-                            <TextBlock Text="Dashboard" Style="{StaticResource MenuItemTextStyle}"/>
+                            <Path x:Name="IconDashboard" Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextDashboard" Text="Dashboard" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnNotificacoes" Style="{StaticResource MenuButtonStyle}" Click="Notificacoes_Click">
+                    <Button x:Name="BtnNotificacoes" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" Style="{StaticResource MenuIconStyle}"/>
-                            <TextBlock Text="Notificações" Style="{StaticResource MenuItemTextStyle}"/>
+                            <Path x:Name="IconNotificacoes" Data="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextNotificacoes" Text="Notificações" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnUsuarios" Style="{StaticResource MenuButtonStyle}" Click="Usuarios_Click">
+                    <Button x:Name="BtnUsuarios" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M12,3C12.55,3 13,3.45 13,4C13,4.55 12.55,5 12,5C11.45,5 11,4.55 11,4C11,3.45 11.45,3 12,3M7,7H17V5H19V19H5V5H7V7Z" Style="{StaticResource MenuIconStyle}"/>
-                            <TextBlock Text="Gerenciar Usuários" Style="{StaticResource MenuItemTextStyle}"/>
+                            <Path x:Name="IconUsuarios" Data="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M12,3C12.55,3 13,3.45 13,4C13,4.55 12.55,5 12,5C11.45,5 11,4.55 11,4C11,3.45 11.45,3 12,3M7,7H17V5H19V19H5V5H7V7Z" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextUsuarios" Text="Gerenciar Usuários" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnBancoDados" Style="{StaticResource MenuButtonStyle}" Click="BancoDados_Click">
+                    <Button x:Name="BtnBancoDados" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" Style="{StaticResource MenuIconStyle}"/>
-                            <TextBlock Text="Banco de Dados" Style="{StaticResource MenuItemTextStyle}"/>
+                            <Path x:Name="IconBancoDados" Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextBancoDados" Text="Banco de Dados" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -103,34 +104,34 @@
         </Border>
 
         <!-- Tela de Loading -->
-        <Grid Grid.Row="0" Grid.ColumnSpan="2" Name="LoadingScreen" Background="#80000000" Visibility="Collapsed">
+        <Grid Grid.Row="0" Grid.ColumnSpan="3" Name="LoadingScreen" Background="#80000000" Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="Sincronizando com Banco de Dados..." Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <TextBlock Text="Esta ação pode demorar alguns minutos" Foreground="White" FontSize="16" HorizontalAlignment="Center" Margin="0,10,0,0"/>
                 <ProgressBar Width="500" Height="20" IsIndeterminate="True" Margin="0,20,0,0"/>
             </StackPanel>
         </Grid>
-        
+
         <!-- Conteúdo Principal -->
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Grid.ColumnSpan="2">
             <!-- Botões de Navegação -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15">
-                <Button Style="{StaticResource NavigationButtonStyle}">
+                <Button Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
-                        <Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Style="{StaticResource MenuIconStyle}" HorizontalAlignment="Left" Margin="16,0,0,0" />
+                        <Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Style="{StaticResource NavegationIconStyle}" HorizontalAlignment="Left" Margin="16,0,0,0" />
+                    </Grid>
+                </Button>
+                <Button Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0">
+                    <Grid Width="50" Height="50">
+                        <Ellipse Fill="Transparent"/>
+                        <Path Data="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" Style="{StaticResource NavegationIconStyle}" HorizontalAlignment="Left" Margin="16,0,0,0"/>
                     </Grid>
                 </Button>
                 <Button Style="{StaticResource NavigationButtonStyle}">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
-                        <Path Data="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" Style="{StaticResource MenuIconStyle}" HorizontalAlignment="Left" Margin="16,0,0,0"/>
-                    </Grid>
-                </Button>
-                <Button Style="{StaticResource NavigationButtonStyle}">
-                    <Grid Width="50" Height="50">
-                        <Ellipse Fill="Transparent"/>
-                        <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Style="{StaticResource MenuIconStyle}" HorizontalAlignment="Left" Margin="16,0,0,0"/>
+                        <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" Style="{StaticResource NavegationIconStyle}" HorizontalAlignment="Left" Margin="16,0,0,0"/>
                     </Grid>
                 </Button>
             </StackPanel>

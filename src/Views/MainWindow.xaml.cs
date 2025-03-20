@@ -299,43 +299,75 @@ namespace WMS_RadiadoresLemos_WPF
 
 
         // Abas
-        private void RegistroEntradaSaida_Click(object sender, RoutedEventArgs e)
+        private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new RegistroEntradaSaidaUserControl();
+            // Altera a cor do botão clicado
+            foreach (var child in MenuItemsPanel.Children)
+            {
+                if (child is Button button)
+                {
+                    button.Style = (Style)FindResource("MenuButtonStyle");
+                    // Altera a cor do texto e do ícone do botão
+                    foreach (var innerChild in ((StackPanel)button.Content).Children)
+                    {
+                        if (innerChild is TextBlock textBlock)
+                        {
+                            textBlock.Foreground = (Brush)FindResource("TextBrush");
+                        }
+                        else if (innerChild is System.Windows.Shapes.Path path)
+                        {
+                            path.Fill = (Brush)FindResource("TextBrush");
+                        }
+                    }
+                }
+            }
+
+            // Se o botão clicado for um botão
+            if (sender is Button clickedButton)
+            {
+                // Altera o estilo do botão clicado
+                clickedButton.Style = (Style)FindResource("MenuItemSelectedStyle");
+
+                // e define a aba correspondente
+                if (clickedButton == BtnRegistro)
+                {
+                    ContentArea.Content = new RegistroEntradaSaidaUserControl();
+                }
+                else if (clickedButton == BtnEstoque)
+                {
+                    ContentArea.Content = new ControleEstoqueUserControl();
+                }
+                else if (clickedButton == BtnDashboard)
+                {
+                    ContentArea.Content = new DashboardUserControl();
+                }
+                else if (clickedButton == BtnNotificacoes)
+                {
+                    ContentArea.Content = new NotificacoesUserControl();
+                }
+                else if (clickedButton == BtnUsuarios)
+                {
+                    ContentArea.Content = new UsuariosUserControl();
+                }
+                else if (clickedButton == BtnBancoDados)
+                {
+                    ContentArea.Content = new BancoDadosUserControl();
+                }
+
+                // Altera a cor do texto e do ícone do botão clicado
+                foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
+                {
+                    if (innerChild is TextBlock textBlock)
+                    {
+                        textBlock.Foreground = (Brush)FindResource("AccentBrush");
+                    }
+                    else if (innerChild is System.Windows.Shapes.Path path)
+                    {
+                        path.Fill = (Brush)FindResource("AccentBrush");
+                    }
+                }
+            }
         }
-
-        private void ControleEstoque_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new ControleEstoqueUserControl();
-        }
-
-        private void Dashboard_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new DashboardUserControl();
-        }
-
-        private void Notificacoes_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new NotificacoesUserControl();
-        }
-
-        private void Usuarios_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new UsuariosUserControl();
-        }
-
-        private void BancoDados_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new BancoDadosUserControl();
-        }
-
-
 
         // Botão de logout para retornar à janela de login
         private async void LogoutButton_Click(object sender, RoutedEventArgs e)
