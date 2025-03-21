@@ -12,8 +12,8 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
-    // Definição parcial da classe RegistroEntradaSaidaUserControl que herda de UserControl
-    public partial class RegistroEntradaSaidaUserControl : UserControl
+    // Definição parcial da classe AddEntradaSaidaUserControl que herda de UserControl
+    public partial class AddEntradaSaidaUserControl : UserControl
     {
         // Declaração de variáveis privadas para armazenar dados dos produtos
         private List<ProdutoData> produtos = new List<ProdutoData>();
@@ -25,7 +25,7 @@ namespace WMS_RadiadoresLemos_WPF
 
 
         // Construtor da classe que inicializa os componentes e carrega os produtos
-        public RegistroEntradaSaidaUserControl()
+        public AddEntradaSaidaUserControl()
         {
             InitializeComponent();
             ProdutoComboBox.ItemsSource = produtosFiltrados;

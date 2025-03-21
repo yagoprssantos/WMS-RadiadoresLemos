@@ -329,49 +329,56 @@ namespace WMS_RadiadoresLemos_WPF
                 clickedButton.Style = (Style)FindResource("MenuItemSelectedStyle");
 
                 // e define a aba correspondente
-                if (clickedButton == BtnRegistro)
+                if (clickedButton == BtnAdicionar)
                 {
-                    ContentArea.Content = new RegistroEntradaSaidaUserControl();
-                    TitleTextBlock.Text = "Registro de Entrada/Saída";
+                    ContentArea.Content = new AddEntradaSaidaUserControl();
+                    TitleTextBlock.Text = "Adicionar Entrada/Saída";
+                }
+                else if (clickedButton == BtnVendas)
+                {
+                    //ContentArea.Content = new VendasUserControl();
+                    //TitleTextBlock.Text = "Vendas";
+                }
+                else if (clickedButton == BtnRegistro)
+                {
+                    //ContentArea.Content = new RegistroUserControl();
+                    //TitleTextBlock.Text = "Registro";
                 }
                 else if (clickedButton == BtnEstoque)
                 {
                     ContentArea.Content = new ControleEstoqueUserControl();
-                    TitleTextBlock.Text = "Controle de Estoque";
+                    TitleTextBlock.Text = "Estoque";
                 }
                 else if (clickedButton == BtnDashboard)
                 {
                     ContentArea.Content = new DashboardUserControl();
-                    TitleTextBlock.Text = "Dashboard";
+                    TitleTextBlock.Text = "Relatório";
                 }
                 else if (clickedButton == BtnNotificacoes)
                 {
                     ContentArea.Content = new NotificacoesUserControl();
                     TitleTextBlock.Text = "Notificações";
                 }
-                else if (clickedButton == BtnUsuarios)
+
+
+                else if (clickedButton == BtnConfiguracoes)
                 {
-                    ContentArea.Content = new UsuariosUserControl();
-                    TitleTextBlock.Text = "Gerenciar Usuários";
-                }
-                else if (clickedButton == BtnBancoDados)
-                {
-                    ContentArea.Content = new BancoDadosUserControl();
-                    TitleTextBlock.Text = "Banco de Dados";
+                    //ContentArea.Content = new ConfiguracoesUserControl();
+                    //TitleTextBlock.Text = "Configurações";
                 }
 
-                // Altera a cor do texto e do ícone do botão clicado
-                foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
-                {
-                    if (innerChild is TextBlock textBlock)
+                    // Altera a cor do texto e do ícone do botão clicado
+                    foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
                     {
-                        textBlock.Foreground = (Brush)FindResource("AccentBrush");
+                        if (innerChild is TextBlock textBlock)
+                        {
+                            textBlock.Foreground = (Brush)FindResource("AccentBrush");
+                        }
+                        else if (innerChild is System.Windows.Shapes.Path path)
+                        {
+                            path.Fill = (Brush)FindResource("AccentBrush");
+                        }
                     }
-                    else if (innerChild is System.Windows.Shapes.Path path)
-                    {
-                        path.Fill = (Brush)FindResource("AccentBrush");
-                    }
-                }
             }
         }
 
@@ -605,54 +612,6 @@ namespace WMS_RadiadoresLemos_WPF
             // Exemplo de cargos e visibilidade dos botões
             switch (UsuarioLogado.Cargo)
             {
-                case "Administrador":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Visible;
-                    BtnBancoDados.Visibility = Visibility.Visible;
-                    break;
-                case "Gerente":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Visible;
-                    BtnBancoDados.Visibility = Visibility.Visible;
-                    break;
-                case "Operador":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
-                case "Estagiário":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Collapsed;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
-                case "Usuário":
-                    BtnRegistro.Visibility = Visibility.Collapsed;
-                    BtnEstoque.Visibility = Visibility.Collapsed;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
-                default:
-                    BtnRegistro.Visibility = Visibility.Collapsed;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Collapsed;
-                    BtnNotificacoes.Visibility = Visibility.Collapsed;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
             }
         }
 
@@ -673,25 +632,9 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Substitui o Style.xaml para novo tema
             Application.Current.Resources.MergedDictionaries[0] = newTheme;
-            // Recarrega a janela principal
-            ReloadWindow();
+
+            // Aplicar Tema (?)
         }
-
-        private void ReloadWindow()
-        {
-            // Cria uma nova instância da MainWindow
-            MainWindow newWindow = new MainWindow();
-
-            // Fecha a janela atual
-            this.Close();
-
-            // Define a nova instância como a janela principal
-            Application.Current.MainWindow = newWindow;
-
-            // Exibe a nova janela
-            newWindow.Show();
-        }
-
 
 
 
