@@ -2,35 +2,30 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Definição de Cores -->
-    <!-- Cores Primárias -->
-    <Color x:Key="PrimaryColor">White</Color>
+    <!-- Paleta de Cores -->
+    <Color x:Key="BackgroundColor">#FFFFFF</Color>
+    <Color x:Key="PanelBackgroundColor">#E0E0E0</Color>
+    <Color x:Key="PrimaryColor">#F8F9FA</Color>
     <Color x:Key="SecondaryColor">#F4F4F4</Color>
     <Color x:Key="AccentColor">#6680E8</Color>
-    <Color x:Key="TextColor">#929292</Color>
-    <Color x:Key="BackgroundColor">White</Color>
-    <Color x:Key="PanelBackgroundColor">#E8E8E8</Color>
-
-    <!-- Cores de Botões -->
-    <Color x:Key="ButtonForegroundColor">#929292</Color>
-    <Color x:Key="ButtonBackgroundColor">#F4F4F4</Color>
-    <Color x:Key="ButtonHoverColor">#D9D9D9</Color>
-    <Color x:Key="CancelButtonColor">#FF0000</Color>
-    <Color x:Key="CancelButtonHoverColor">#800000</Color>
-    <Color x:Key="HoverBackgroundColor">#D9D9D9</Color>
-    <Color x:Key="HoverForegroundColor">#6680E8</Color>
+    <Color x:Key="TextColor">#828282</Color>
+    <Color x:Key="HoverBackgroundColor">#D0D0D0</Color>
+    <Color x:Key="HoverForegroundColor">#707070</Color>
+    <Color x:Key="CancelColor">#FF0000</Color>
+    <Color x:Key="CancelHoverColor">#A00000</Color>
 
     <!-- Brushes -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{StaticResource PanelBackgroundColor}" />
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
     <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
-    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{StaticResource PanelBackgroundColor}" />
-    <SolidColorBrush x:Key="ButtonForegroundBrush" Color="{StaticResource ButtonForegroundColor}" />
-    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{StaticResource ButtonBackgroundColor}" />
-    <SolidColorBrush x:Key="ButtonHoverBrush" Color="{StaticResource ButtonHoverColor}" />
-    <SolidColorBrush x:Key="CancelButtonBrush" Color="{StaticResource CancelButtonColor}" />
-    <SolidColorBrush x:Key="CancelButtonHoverBrush" Color="{StaticResource CancelButtonHoverColor}" />
+    <SolidColorBrush x:Key="ButtonForegroundBrush" Color="{StaticResource SecondaryColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{StaticResource PrimaryColor}" />
+    <SolidColorBrush x:Key="ButtonHoverBrush" Color="{StaticResource HoverBackgroundColor}" />
+    <SolidColorBrush x:Key="CancelButtonBrush" Color="{StaticResource CancelColor}" />
+    <SolidColorBrush x:Key="CancelButtonHoverBrush" Color="{StaticResource CancelHoverColor}" />
     <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}" />
     <SolidColorBrush x:Key="HoverForegroundBrush" Color="{StaticResource HoverForegroundColor}" />
 
@@ -76,7 +71,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
-                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>                        
+                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
@@ -149,7 +144,6 @@
         </Setter>
     </Style>
 
-
     <!-- Estilo dos Botões de Navegação -->
     <Style x:Key="NavigationButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
@@ -163,10 +157,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#D9D9D9"/>
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="#D9D9D9"/>
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -230,7 +224,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- Botão de Filtro -->
     <Style x:Key="FilterButtonStyle" TargetType="Button">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -263,7 +257,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
 
     <!-- Estilo para TextBoxes -->
     <Style TargetType="TextBox">
@@ -349,7 +342,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
 
     <!-- Estilo para DockPanel -->
     <Style TargetType="DockPanel">

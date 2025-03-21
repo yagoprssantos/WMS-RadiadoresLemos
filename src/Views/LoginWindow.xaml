@@ -24,7 +24,7 @@
 
             <StackPanel Orientation="Horizontal" Width="300" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- Botão para Confirmar -->
-                <Button Content="Entrar" FontSize="16" Width="140" Height="40" Click="ConfirmarLogin_Click" Margin="2.5,0,10,0" Style="{StaticResource HoverButtonStyle}"/>
+                <Button Content="Entrar" FontSize="16" Width="140" Height="40" Click="ConfirmarLogin_Click" Margin="2.5,0,10,0" Style="{StaticResource EmphasisButtonStyle}"/>
 
                 <!-- Botão para Sair da aplicação -->
                 <Button Content="Sair" FontSize="16" Width="140" Height="40" Click="Sair_Click" Style="{StaticResource CancelButtonStyle}"/>
