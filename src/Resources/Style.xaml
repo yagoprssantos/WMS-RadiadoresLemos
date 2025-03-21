@@ -261,8 +261,9 @@
     <!-- Estilo para TextBoxes -->
     <Style TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="FontSize" Value="18" />
-        <Setter Property="Padding" Value="5" />
+        <Setter Property="Padding" Value="10, 5, 10, 5" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -275,6 +276,143 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
+    <!-- Estilo para PasswordBoxes -->
+    <Style TargetType="PasswordBox">
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Padding" Value="10, 5, 10, 5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            CornerRadius="15">
+                        <ScrollViewer x:Name="PART_ContentHost" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo para ComboBoxes -->
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Padding" Value="10, 5, 10, 5" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="10, 5, 10, 5"
+                            CornerRadius="15">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton"
+                                          Grid.Column="2"
+                                          Focusable="false"
+                                          IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press"
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="0"
+                                          Content="▼"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Center"
+                                          Width="20" />
+                            <ContentPresenter Name="ContentSite"
+                                              IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              Margin="3,3,23,3"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left" />
+                            <TextBox x:Name="PART_EditableTextBox"
+                                     Style="{x:Null}"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Center"
+                                     Margin="3,3,23,3"
+                                     Focusable="True"
+                                     Background="Transparent"
+                                     Visibility="Hidden"
+                                     IsReadOnly="{TemplateBinding IsReadOnly}" />
+                            <Popup Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid Name="DropDown"
+                                      SnapsToDevicePixels="True"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="{StaticResource SecondaryBrush}"
+                                            BorderBrush="{StaticResource AccentBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="15" />
+                                    <ScrollViewer Margin="4,6,4,6"
+                                                  SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True"
+                                                    KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasItems" Value="False">
+                            <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{StaticResource HoverForegroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsGrouping" Value="True">
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo para GroupBoxes -->
+    <Style TargetType="GroupBox">
+        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GroupBox">
+                    <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="10, 5, 10, 5"
+                        CornerRadius="15">
+                        <DockPanel>
+                            <ContentPresenter DockPanel.Dock="Bottom" Margin="0,10,0,0" />
+                            <TextBlock Text="{TemplateBinding Header}" 
+                                   Background="{TemplateBinding Background}" 
+                                   Foreground="{TemplateBinding Foreground}" 
+                                   FontSize="{TemplateBinding FontSize}" 
+                                   FontWeight="{TemplateBinding FontWeight}" 
+                                   Padding="5,0" />
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 
     <!-- Estilo para a Janela -->
     <Style TargetType="Window">
@@ -322,15 +460,22 @@
         <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="GridLinesVisibility" Value="None" />
+        <Setter Property="CellStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Padding" Value="5" />
+                </Style>
+            </Setter.Value>
+        </Setter>
         <Setter Property="RowStyle">
             <Setter.Value>
                 <Style TargetType="DataGridRow">
                     <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-                    <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
-                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter Property="BorderBrush" Value="{StaticResource SecondaryBrush}" />
                     <Setter Property="HorizontalAlignment" Value="Stretch" />
                     <Setter Property="VerticalAlignment" Value="Stretch" />
-                    <Setter Property="Height" Value="Auto" />
+                    <Setter Property="Height" Value="30" />
                     <Setter Property="FontSize" Value="16" />
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
