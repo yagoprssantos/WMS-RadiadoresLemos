@@ -240,9 +240,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
-                            Width="120"
+                            Width="Auto"
                             CornerRadius="15"
-                            Padding="7">
+                            Padding="10, 7">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" />
@@ -475,7 +475,7 @@
                     <Setter Property="BorderBrush" Value="{StaticResource SecondaryBrush}" />
                     <Setter Property="HorizontalAlignment" Value="Stretch" />
                     <Setter Property="VerticalAlignment" Value="Stretch" />
-                    <Setter Property="Height" Value="30" />
+                    <Setter Property="MinHeight" Value="30" />
                     <Setter Property="FontSize" Value="16" />
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">

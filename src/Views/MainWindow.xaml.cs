@@ -7,6 +7,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -341,8 +342,8 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 else if (clickedButton == BtnRegistro)
                 {
-                    //ContentArea.Content = new RegistroUserControl();
-                    //TitleTextBlock.Text = "Registro";
+                    ContentArea.Content = new RegistroUserControl();
+                    TitleTextBlock.Text = "Registro";
                 }
                 else if (clickedButton == BtnEstoque)
                 {
