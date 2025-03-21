@@ -69,14 +69,18 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
-                        CornerRadius="15"
-                        Padding="5">
+                            CornerRadius="15"
+                            Padding="10">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
-                            <Setter Property="Foreground" Value="{StaticResource HoverForegroundBrush}" />
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>                        
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -99,10 +103,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#F5F5F5"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="#EBEBEB"/>
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -131,8 +132,8 @@
 
     <!-- Estilo para Itens de Menu Selecionados -->
     <Style x:Key="MenuItemSelectedStyle" TargetType="Button">
-        <Setter Property="Background" Value="#D9D9D9"/>
-        <Setter Property="Foreground" Value="#6680E8"/>
+        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="15"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
