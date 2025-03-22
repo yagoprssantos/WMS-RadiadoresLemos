@@ -19,6 +19,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="18" Height="36" Margin="0,0,10,0">
                         <Grid>
@@ -32,13 +33,14 @@
                         </Grid>
                     </Border>
                     <Button Content="Filtrar por" Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}"/>
+                    <Button Content="Categorias" Grid.Column="3" ToolTip="Categorias" Style="{StaticResource FilterButtonStyle}" Margin="5,0,0,0"/>
                 </Grid>
 
-                <TabControl Grid.Row="1" Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1">
-                    <!-- Aba de Alerta -->
-                    <TabItem Header="Alertas" FontSize="18">
-                        <Grid Margin="10">
-                            <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}">
+                <Grid Grid.Row="1">
+                    <!-- Seção de Alertas -->
+                    <Grid x:Name="AlertasGrid" Visibility="Visible">
+                        <Border CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
+                            <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
                                     <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" MinWidth="70"/>
@@ -65,13 +67,13 @@
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
-                        </Grid>
-                    </TabItem>
+                        </Border>
+                    </Grid>
 
-                    <!-- Aba de Histórico -->
-                    <TabItem Header="Histórico" FontSize="18">
-                        <Grid Margin="10">
-                            <DataGrid Name="HistoricoDataGrid" Style="{StaticResource CustomDataGridStyle}">
+                    <!-- Seção de Histórico -->
+                    <Grid x:Name="HistoricoGrid" Visibility="Collapsed">
+                        <Border CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
+                            <DataGrid Name="HistoricoDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
                                     <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
@@ -86,13 +88,13 @@
                                     <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="Auto" />
                                 </DataGrid.Columns>
                             </DataGrid>
-                        </Grid>
-                    </TabItem>
+                        </Border>
+                    </Grid>
 
-                    <!-- Aba de Movimentações -->
-                    <TabItem Header="Movimentações" FontSize="18">
-                        <Grid Margin="10">
-                            <DataGrid Name="MovimentacoesDataGrid" Style="{StaticResource CustomDataGridStyle}">
+                    <!-- Seção de Movimentações -->
+                    <Grid x:Name="MovimentacoesGrid" Visibility="Collapsed">
+                        <Border CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
+                            <DataGrid Name="MovimentacoesDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataFormatada}" Width="Auto" />
                                     <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
@@ -101,9 +103,9 @@
                                     <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
                                 </DataGrid.Columns>
                             </DataGrid>
-                        </Grid>
-                    </TabItem>
-                </TabControl>
+                        </Border>
+                    </Grid>
+                </Grid>
             </Grid>
         </Border>
     </Grid>

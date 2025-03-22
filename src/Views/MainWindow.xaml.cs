@@ -302,8 +302,29 @@ namespace WMS_RadiadoresLemos_WPF
         // Abas
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
-            // Altera a cor do botão clicado
+            // Altera a cor do botão clicado nos itens do menu
             foreach (var child in MenuItemsPanel.Children)
+            {
+                if (child is Button button)
+                {
+                    button.Style = (Style)FindResource("MenuButtonStyle");
+                    // Altera a cor do texto e do ícone do botão
+                    foreach (var innerChild in ((StackPanel)button.Content).Children)
+                    {
+                        if (innerChild is TextBlock textBlock)
+                        {
+                            textBlock.Foreground = (Brush)FindResource("TextBrush");
+                        }
+                        else if (innerChild is System.Windows.Shapes.Path path)
+                        {
+                            path.Fill = (Brush)FindResource("TextBrush");
+                        }
+                    }
+                }
+            }
+
+            // Altera a cor do botão clicado no rodapé do menu
+            foreach (var child in MenuItemsFooterPanel.Children)
             {
                 if (child is Button button)
                 {
@@ -360,26 +381,24 @@ namespace WMS_RadiadoresLemos_WPF
                     ContentArea.Content = new NotificacoesUserControl();
                     TitleTextBlock.Text = "Notificações";
                 }
-
-
                 else if (clickedButton == BtnConfiguracoes)
                 {
-                    //ContentArea.Content = new ConfiguracoesUserControl();
-                    //TitleTextBlock.Text = "Configurações";
+                    ContentArea.Content = new ConfiguracaoUserControl();
+                    TitleTextBlock.Text = "Configurações";
                 }
 
-                    // Altera a cor do texto e do ícone do botão clicado
-                    foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
+                // Altera a cor do texto e do ícone do botão clicado
+                foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
+                {
+                    if (innerChild is TextBlock textBlock)
                     {
-                        if (innerChild is TextBlock textBlock)
-                        {
-                            textBlock.Foreground = (Brush)FindResource("AccentBrush");
-                        }
-                        else if (innerChild is System.Windows.Shapes.Path path)
-                        {
-                            path.Fill = (Brush)FindResource("AccentBrush");
-                        }
+                        textBlock.Foreground = (Brush)FindResource("AccentBrush");
                     }
+                    else if (innerChild is System.Windows.Shapes.Path path)
+                    {
+                        path.Fill = (Brush)FindResource("AccentBrush");
+                    }
+                }
             }
         }
 

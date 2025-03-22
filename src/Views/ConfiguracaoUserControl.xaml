@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="WMS_RadiadoresLemos_WPF.src.Views.ConfiguracaoUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF.src.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="630" d:DesignWidth="800"
+             Background="{StaticResource BackgroundBrush}">
+
+        <Grid Margin="15, 15, 15, 0">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+            <Border Grid.Column="0" Grid.Row="1" CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,10,0">
+                <StackPanel Margin="20">
+                    <Button x:Name="BtnUsuarios" Style="{StaticResource MenuButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path x:Name="IconUsuarios" Data="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M12,3C12.55,3 13,3.45 13,4C13,4.55 12.55,5 12,5C11.45,5 11,4.55 11,4C11,3.45 11.45,3 12,3M7,7H17V5H19V19H5V5H7V7Z" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextUsuarios" Text="Gerenciar Usuários" Style="{StaticResource MenuItemTextStyle}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnBancoDados" Style="{StaticResource MenuButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path x:Name="IconBancoDados" Data="M20,12H4V10H20V12M20,18H4V16H20V18M20,6H4V4H20V6Z" Style="{StaticResource MenuIconStyle}" StrokeThickness="3"/>
+                            <TextBlock x:Name="TextBancoDados" Text="Banco de Dados" Style="{StaticResource MenuItemTextStyle}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnTema" Style="{StaticResource MenuButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path x:Name="IconTema" Data="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M12,20C7.58,20 4,16.42 4,12C4,7.58 7.58,4 12,4C16.42,4 20,7.58 20,12C20,16.42 16.42,20 12,20M12,7C10.9,7 10,7.9 10,9C10,10.1 10.9,11 12,11C13.1,11 14,10.1 14,9C14,7.9 13.1,7 12,7M12,15C10.9,15 10,15.9 10,17C10,18.1 10.9,19 12,19C13.1,19 14,18.1 14,17C14,15.9 13.1,15 12,15Z" Style="{StaticResource MenuIconStyle}"/>
+                            <TextBlock x:Name="TextTema" Text="Alterar Tema" Style="{StaticResource MenuItemTextStyle}"/>
+                        </StackPanel>
+
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>
