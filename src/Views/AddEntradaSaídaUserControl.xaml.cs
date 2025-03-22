@@ -49,6 +49,7 @@ namespace WMS_RadiadoresLemos_WPF
                     // Converte a lista de objetos para uma lista de produtos
                     produtos = produtosCache.Cast<ProdutoData>().ToList();
                     produtoNomeParaId = produtos.ToDictionary(p => p.Nome, p => p.Id);
+                    produtosFiltrados.Clear();
                     foreach (var produto in produtos)
                     {
                         produtosFiltrados.Add(produto.Nome);
@@ -75,12 +76,15 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
 
-            // Títulos
+            // Títulos e detalhes antes e depois
             AntesTextBlock.Visibility = visibility;
             DepoisTextBlock.Visibility = visibility;
-
-            // Detalhes depois
+            AntesGrid.Visibility = visibility;
             DepoisGrid.Visibility = visibility;
+
+            // Produto Selecionado
+            ProdutoSelecionado.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
+            ProdutoAntesDepois.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
         }
 
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
@@ -130,7 +134,7 @@ namespace WMS_RadiadoresLemos_WPF
                 produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == selectedProductName);
                 if (produtoSelecionado != null)
                 {
-                    AtualizarDetalhesProduto(produtoSelecionado);
+                    AtualizarProdutoSelecionado(produtoSelecionado);
                 }
                 else
                 {
@@ -140,15 +144,25 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para atualizar os detalhes do produto selecionado
+        private void AtualizarProdutoSelecionado(ProdutoData produto)
+        {
+            NomeSelecionadoDadoTextBlock.Text = produto.Nome;
+            TipoSelecionadoDadoTextBlock.Text = produto.Tipo;
+            MarcaSelecionadoDadoTextBlock.Text = produto.Marca;
+            CodigoSelecionadoDadoTextBlock.Text = produto.Codigo;
+            QuantidadeSelecionadoDadoTextBlock.Text = produto.Quantidade.ToString();
+            PrecoSelecionadoDadoTextBlock.Text = produto.Preço.ToString("C");
+        }
+
+        // Método para atualizar os detalhes do produto selecionado
         private bool AtualizarDetalhesProduto(ProdutoData produto)
         {
             // Mostrar os detalhes atuais do produto (TextBlock1)
-            NomeAtualDadoTextBlock.Text = produto.Nome;
-            TipoAtualDadoTextBlock.Text = produto.Tipo;
-            MarcaAtualDadoTextBlock.Text = produto.Marca;
-            CodigoAtualDadoTextBlock.Text = produto.Codigo;
-            QuantidadeAtualDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoAtualDadoTextBlock.Text = produto.Preço.ToString("C");
+            TipoAntesDadoTextBlock.Text = produto.Tipo;
+            MarcaAntesDadoTextBlock.Text = produto.Marca;
+            CodigoAntesDadoTextBlock.Text = produto.Codigo;
+            QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString();
+            PrecoAntesDadoTextBlock.Text = produto.Preço.ToString("C");
 
             // Se quantidade e preço forem vazios, não atualiza valores depois
             if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
@@ -157,7 +171,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
 
             // Mostrar os detalhes depois do produto (TextBlock2)
-            NomeDepoisDadoTextBlock.Text = produto.Nome;
             TipoDepoisDadoTextBlock.Text = produto.Tipo;
             MarcaDepoisDadoTextBlock.Text = produto.Marca;
             CodigoDepoisDadoTextBlock.Text = produto.Codigo;
@@ -222,9 +235,6 @@ namespace WMS_RadiadoresLemos_WPF
             return true;
         }
 
-
-
-        // Método assíncrono para registrar a entrada de produtos
         private void RegistrarEntrada_Click(object sender, RoutedEventArgs e)
         {
             usePositiveNumber = true;
@@ -246,10 +256,12 @@ namespace WMS_RadiadoresLemos_WPF
             CancelarRegistroButton.Visibility = Visibility.Visible;
             RegistrarEntradaButton.Visibility = Visibility.Collapsed;
             RegistrarSaidaButton.Visibility = Visibility.Collapsed;
+
+            // Desabilitar o ComboBox
+            ProdutoComboBox.IsHitTestVisible = false;
+            ProdutoComboBox.IsEnabled = true;
         }
 
-
-        // Método assíncrono para registrar a saída de produtos
         private void RegistrarSaida_Click(object sender, RoutedEventArgs e)
         {
             usePositiveNumber = false;
@@ -271,6 +283,10 @@ namespace WMS_RadiadoresLemos_WPF
             CancelarRegistroButton.Visibility = Visibility.Visible;
             RegistrarEntradaButton.Visibility = Visibility.Collapsed;
             RegistrarSaidaButton.Visibility = Visibility.Collapsed;
+
+            // Desabilitar o ComboBox
+            ProdutoComboBox.IsHitTestVisible = false;
+            ProdutoComboBox.IsEnabled = true;
         }
 
 
@@ -316,6 +332,10 @@ namespace WMS_RadiadoresLemos_WPF
             RegistrarSaidaButton.Visibility = Visibility.Visible;
 
             usePositiveNumber = true;
+
+            // Habilitar o ComboBox
+            ProdutoComboBox.IsHitTestVisible = true;
+            ProdutoComboBox.IsEnabled = true;
         }
 
         // Método assíncrono para registrar a movimentação de produtos
