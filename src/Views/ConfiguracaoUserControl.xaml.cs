@@ -13,12 +13,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void BtnUsuarios_Click(object sender, RoutedEventArgs e)
         {
-            //ContentArea.Content = new UsuariosUserControl();
+            ContentArea.Content = new UsuariosUserControl();
         }
 
         private void BtnBancoDados_Click(object sender, RoutedEventArgs e)
         {
-            //ContentArea.Content = new BancoDadosUserControl();
+            ContentArea.Content = new BancoDadosUserControl();
         }
 
         private void BtnTema_Click(object sender, RoutedEventArgs e)

@@ -14,7 +14,7 @@
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" CornerRadius="10,10,10,10" Padding="20" Margin="50, 0, 50, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" MaxWidth="800" Background="{StaticResource PanelBackgroundBrush}">
-                <Border CornerRadius="10,10,10,10" Padding="30, 0, 30, 10" Background="{StaticResource BackgroundBrush}">
+                <Border CornerRadius="10,10,10,10" Padding="30, 0, 30, 10" Background="{StaticResource PanelBackgroundBrush}">
                     <!-- Registro de Entrada/Saída -->
                     <StackPanel Width="Auto" VerticalAlignment="Top" Margin="0, 15, 0, 0">
                         <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>

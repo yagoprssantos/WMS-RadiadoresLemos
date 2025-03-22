@@ -225,37 +225,24 @@
         </Setter>
     </Style>
 
-    <!-- Botão de Filtro -->
-    <Style x:Key="FilterButtonStyle" TargetType="Button">
+
+    <!-- Vendas -->
+    <Style x:Key="VendasTitleTextBox" TargetType="TextBlock">
+        <Setter Property="Text" Value="NF" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Padding" Value="10" />
         <Setter Property="Margin" Value="5" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
-                            Width="Auto"
-                            CornerRadius="15"
-                            Padding="10, 7">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style x:Key="VendasTextBox" TargetType="TextBlock">
+        <Setter Property="Text" Value="Número: 123456" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <!-- Estilo para TextBoxes -->
@@ -276,7 +263,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- Estilo para PasswordBoxes -->
     <Style TargetType="PasswordBox">
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
@@ -297,7 +284,6 @@
     </Style>
 
     <!-- Estilo para ComboBoxes -->
-    <!-- Estilo para ComboBoxes -->
     <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
@@ -307,7 +293,6 @@
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Padding" Value="10" />
         <Setter Property="Margin" Value="5" />
-        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Width" Value="Auto"/>
         <Setter Property="IsTextSearchEnabled" Value="True"/>
         <Setter Property="StaysOpenOnEdit" Value="True"/>
@@ -332,15 +317,33 @@
                         </Border>
                         <ToggleButton Name="ToggleButton"  
                                      Grid.Column="1"  
-                                     Focusable="false"  
+                                     Focusable="True"  
                                      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"  
                                      ClickMode="Press"  
                                      Background="Transparent"  
                                      BorderThickness="0"  
                                      HorizontalAlignment="Right"
                                      Width="Auto"
-                                     MinWidth="40">
-                            <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" />  
+                                     MinWidth="40"
+                                     Cursor="Hand">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Style>
                         </ToggleButton>
                         <Popup Name="Popup"
                            Placement="Bottom"

@@ -358,8 +358,8 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 else if (clickedButton == BtnVendas)
                 {
-                    //ContentArea.Content = new VendasUserControl();
-                    //TitleTextBlock.Text = "Vendas";
+                    ContentArea.Content = new VendasUserControl();
+                    TitleTextBlock.Text = "Vendas";
                 }
                 else if (clickedButton == BtnRegistro)
                 {
