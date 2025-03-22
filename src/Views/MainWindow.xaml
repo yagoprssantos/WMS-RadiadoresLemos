@@ -66,13 +66,13 @@
                     </Button>
                     <Button x:Name="BtnEstoque" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path x:Name="IconEstoque" Data="M3,3 L21,3 M21,3 L21,21 M21,21 L3,21 M3,21 L3,3 M5,5 L19,19 M19,5 L5,19" Style="{StaticResource MenuIconStyle}" Stroke="{StaticResource TextBrush}" StrokeThickness="2"/>
+                            <Path x:Name="IconEstoque" Data="M3,3 L21,3 L21,21 L3,21 Z M3,3 L21,21 M3,21 L21,3" Style="{StaticResource MenuIconStyle}" StrokeThickness="1"/>
                             <TextBlock x:Name="TextEstoque" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Estoque"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnDashboard" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Path x:Name="IconDashboard" Data="M4,17V21H8V17H4M10,13V21H14V13H10M16,9V21H20V9H16" Style="{StaticResource MenuIconStyle}" StrokeThickness="1" Height="20" Stretch="Fill"/>
+                            <Path x:Name="IconDashboard" Data="M4,17V21H8V17H4M10,13V21H14V13H10M16,9V21H20V9H16" Style="{StaticResource MenuIconStyle}" Stretch="Fill"/>
                             <TextBlock x:Name="TextDashboard" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Relatório"/></TextBlock>
                         </StackPanel>
                     </Button>

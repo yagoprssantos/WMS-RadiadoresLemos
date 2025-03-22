@@ -32,7 +32,12 @@
                             <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" Background="Transparent" Foreground="{StaticResource TextBrush}" Padding="5,0" Margin="0,0,10,0"/>
                         </Grid>
                     </Border>
-                    <Button Content="Filtrar por" Grid.Column="2"  ToolTip="Filtrar" Click="AbrirFiltroPopup_Click" Style="{StaticResource FilterButtonStyle}"/>
+                    <ComboBox Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource ComboBoxStyle}" SelectedIndex="0">
+                        <ComboBoxItem Content="Filtrar por" IsSelected="True"/>
+                        <ComboBoxItem Content="Opção 1"/>
+                        <ComboBoxItem Content="Opção 2"/>
+                        <ComboBoxItem Content="Opção 3"/>
+                    </ComboBox>
                 </Grid>
 
                 <Border Grid.Row="1" CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">

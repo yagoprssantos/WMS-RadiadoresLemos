@@ -33,8 +33,12 @@
                             <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource TextBrush}" Padding="5,0" Margin="0,0,10,0"/>
                         </Grid>
                     </Border>
-                    <Button Content="Filtrar por" Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}"/>
-                    <Button Content="Categorias" Grid.Column="3" ToolTip="Categorias" Style="{StaticResource FilterButtonStyle}" Margin="5,0,0,0"/>
+                    <ComboBox Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource ComboBoxStyle}">
+                        <ComboBoxItem Content="Filtrar por" IsSelected="True"/>
+                    </ComboBox>
+                    <ComboBox Grid.Column="3" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0">
+                        <ComboBoxItem Content="Categorias" IsSelected="True"/>
+                    </ComboBox>
                 </Grid>
 
                 <Grid Grid.Row="1">

@@ -354,7 +354,7 @@ namespace WMS_RadiadoresLemos_WPF
                 if (clickedButton == BtnAdicionar)
                 {
                     ContentArea.Content = new AddEntradaSaidaUserControl();
-                    TitleTextBlock.Text = "Adicionar Entrada/Saída";
+                    TitleTextBlock.Text = "Entrada/Saída";
                 }
                 else if (clickedButton == BtnVendas)
                 {
