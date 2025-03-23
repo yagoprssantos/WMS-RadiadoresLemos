@@ -1,9 +1,41 @@
 ﻿using System;
+using System.IO; // Adicione esta linha
 using System.Windows;
 
 namespace WMS_RadiadoresLemos_WPF
 {
     public partial class App : Application
     {
+        private const string ThemeFilePath = "theme.txt";
+        private const string DefaultTheme = "LightTheme";
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            LoadTheme();
+        }
+
+        private void LoadTheme()
+        {
+            string themeName = DefaultTheme;
+
+            if (File.Exists(ThemeFilePath))
+            {
+                themeName = File.ReadAllText(ThemeFilePath);
+            }
+
+            ApplyTheme(themeName);
+        }
+
+        public static void ApplyTheme(string themeName)
+        {
+            var dict = new ResourceDictionary
+            {
+                Source = new Uri($"src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
+            };
+
+            Application.Current.Resources.MergedDictionaries.Clear();
+            Application.Current.Resources.MergedDictionaries.Add(dict);
+        }
     }
 }

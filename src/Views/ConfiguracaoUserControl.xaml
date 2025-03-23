@@ -18,9 +18,10 @@
                         <DockPanel LastChildFill="False" Background="{StaticResource PanelBackgroundBrush}">
                             <!-- Ícone de Sol -->
                             <TextBlock Text="Alterar Tema" Style="{StaticResource TextBoxCustom2ButtonStyle}" />
-                            <ComboBox Style="{StaticResource ComboBoxStyle}" DockPanel.Dock="Right" Width="225">
-                                <ComboBoxItem Content="Tema Claro" IsSelected="True"/>
-                                <ComboBoxItem Content="Tema Escuro"/>
+                            <ComboBox x:Name="ThemeSelector" Style="{StaticResource ComboBoxStyle}" DockPanel.Dock="Right" Width="225" SelectionChanged="ThemeSelector_SelectionChanged">
+                                <ComboBoxItem x:Name="LightTheme" Content="Tema Claro"/>
+                                <ComboBoxItem x:Name="DarkTheme" Content="Tema Escuro"/>
+                                <ComboBoxItem x:Name="MidnightTheme" Content="Tema Azul"/>
                             </ComboBox>
                         </DockPanel>
                     </Border>

@@ -26,6 +26,10 @@ namespace WMS_RadiadoresLemos_WPF
         public static bool isSincronized;
         public static bool isAppOffline;
 
+        // Variáveis de controle
+        private List<UserControl> _userControls;
+        private int _currentIndex;
+
         public MainWindow()
         {
             // Inicia processo de login
@@ -47,6 +51,25 @@ namespace WMS_RadiadoresLemos_WPF
             _connectDatabaseTimer = new DispatcherTimer();
             _connectDatabaseTimer.Interval = TimeSpan.FromMinutes(1); // Tenta conectar a cada 1 minuto
             _connectDatabaseTimer.Tick += ConnectDatabaseTimer_Tick;
+
+            // Inicializa a lista de UserControls
+            _userControls = new List<UserControl>
+        {
+            new AddEntradaSaidaUserControl(),
+            new VendasUserControl(),
+            new RegistroUserControl(),
+            new ControleEstoqueUserControl(),
+            new DashboardUserControl(),
+            new NotificacoesUserControl(),
+            new ConfiguracaoUserControl()
+        };
+
+            // Define o índice inicial
+            _currentIndex = 0;
+
+            // Exibe o primeiro controle
+            ContentArea.Content = _userControls[_currentIndex];
+            UpdateTitle();
         }
         private async void SaveCacheTimer_Tick(object? sender, EventArgs e)
         {
@@ -125,9 +148,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Configura a visibilidade dos botões de acordo com o tipo de usuário
             ConfigurarVisibilidadeBotoes();
-
-            // Configura temas
-            ConfigurarTema();
         }
 
         // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
@@ -635,28 +655,69 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Função que altera o tema da aplicação
-        private void ConfigurarTema()
+        private void PreviousButton_Click(object sender, RoutedEventArgs e)
         {
-
-        }
-
-        private void SwitchToTheme(string themeName)
-        {
-            // Função para alterar Styles de acordo com o tema
-            ResourceDictionary newTheme = new ResourceDictionary
+            // Navega para a aba anterior
+            if (_currentIndex > 0)
             {
-                // Define o caminho do arquivo de estilos
-                Source = new Uri($"/src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
-            };
-
-            // Substitui o Style.xaml para novo tema
-            Application.Current.Resources.MergedDictionaries[0] = newTheme;
-
-            // Aplicar Tema (?)
+                _currentIndex--;
+                ContentArea.Content = _userControls[_currentIndex];
+                UpdateTitle();
+            }
         }
 
+        private void NextButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Navega para a próxima aba
+            if (_currentIndex < _userControls.Count - 1)
+            {
+                _currentIndex++;
+                ContentArea.Content = _userControls[_currentIndex];
+                UpdateTitle();
+            }
+        }
 
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Atualiza a aba atual
+            if (ContentArea.Content is UserControl currentControl)
+            {
+                ContentArea.Content = Activator.CreateInstance(currentControl.GetType());
+            }
+        }
+
+        private void UpdateTitle()
+        {
+            // Atualiza o título com base no controle atual
+            if (ContentArea.Content is AddEntradaSaidaUserControl)
+            {
+                TitleTextBlock.Text = "Entrada/Saída";
+            }
+            else if (ContentArea.Content is VendasUserControl)
+            {
+                TitleTextBlock.Text = "Vendas";
+            }
+            else if (ContentArea.Content is RegistroUserControl)
+            {
+                TitleTextBlock.Text = "Registro";
+            }
+            else if (ContentArea.Content is ControleEstoqueUserControl)
+            {
+                TitleTextBlock.Text = "Estoque";
+            }
+            else if (ContentArea.Content is DashboardUserControl)
+            {
+                TitleTextBlock.Text = "Relatório";
+            }
+            else if (ContentArea.Content is NotificacoesUserControl)
+            {
+                TitleTextBlock.Text = "Notificações";
+            }
+            else if (ContentArea.Content is ConfiguracaoUserControl)
+            {
+                TitleTextBlock.Text = "Configurações";
+            }
+        }
 
         // Função que representa a animação de notificação de alerta
         //private void OnAlertaAdicionado(AlertaData alerta)

@@ -38,8 +38,8 @@
                 <!-- Tabela de Notificações -->
                 <Grid Grid.Row="1">
                     <Grid x:Name="AlertasGrid" Visibility="Visible">
-                        <Border CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
-                            <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent">
+                        <Border CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,10">
+                            <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}" >
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
                                     <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" MinWidth="70"/>

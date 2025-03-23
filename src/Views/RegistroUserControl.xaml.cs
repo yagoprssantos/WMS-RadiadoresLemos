@@ -119,43 +119,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         // Método para aplicar o filtro selecionado
         private void AplicarFiltro(string filtro)
         {
-            try
-            {
-                if (filtro == "Produto")
-                {
-                    EntradaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Entrada").OrderBy(m => m.ProdutoId).ToList();
-                    SaidaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Saída").OrderBy(m => m.ProdutoId).ToList();
-                }
-                else if (filtro == "Data")
-                {
-                    EntradaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Entrada").OrderBy(m => m.Data).ToList();
-                    SaidaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Saída").OrderBy(m => m.Data).ToList();
-                }
-                //else if (filtro == "Usuário")
-                //{
-                //    EntradaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Entrada").OrderBy(m => m.Usuario).ToList();
-                //    SaidaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Saída").OrderBy(m => m.Usuario).ToList();
-                //}
-                else if (filtro == "Preço")
-                {
-                    EntradaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Entrada").OrderBy(m => m.Preço).ToList();
-                    SaidaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Saída").OrderBy(m => m.Preço).ToList();
-                }
-                else if (filtro == "Mais Recentes")
-                {
-                    EntradaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Entrada").OrderByDescending(m => m.Data).ToList();
-                    SaidaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Saída").OrderByDescending(m => m.Data).ToList();
-                }
-                else if (filtro == "Mais Antigos")
-                {
-                    EntradaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Entrada").OrderBy(m => m.Data).ToList();
-                    SaidaDataGrid.ItemsSource = MovimentacoesCache.ObterMovimentacoes().Where(m => m.Tipo == "Saída").OrderBy(m => m.Data).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            
         }
     }
 }
