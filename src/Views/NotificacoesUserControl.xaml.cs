@@ -9,6 +9,8 @@ namespace WMS_RadiadoresLemos_WPF
 {
     public partial class NotificacoesUserControl : UserControl
     {
+        private List<AlertaData> alertas;
+
         public NotificacoesUserControl()
         {
             InitializeComponent();
@@ -18,15 +20,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para carregar todas as notificações
         private void CarregarNotificacoes()
         {
-            CarregarAlertas();
-            CarregarHistorico();
-            CarregarMovimentacoes();
-        }
-
-        // Método para carregar dados no DataGrid de Alertas
-        private void CarregarAlertas()
-        {
-            var alertas = new List<AlertaData>();
+            alertas = new List<AlertaData>();
 
             // Para cada tipo de alerta, carregar os dados
             foreach (var tipo in AlertaCache.Alertas.Keys)
@@ -34,22 +28,10 @@ namespace WMS_RadiadoresLemos_WPF
                 alertas.AddRange(AlertaCache.ObterAlertas(tipo));
             }
 
-            AlertaDataGrid.ItemsSource = alertas;
-        }
-
-        // Método para carregar dados no DataGrid de Histórico
-        private void CarregarHistorico()
-        {
-            var historico = LogHistorico.ObterLogs();
-
-            HistoricoDataGrid.ItemsSource = historico;
-        }
-
-        // Método para carregar dados no DataGrid de Movimentações
-        private async void CarregarMovimentacoes()
-        {
-            var movimentacoes = await Task.Run(() => MovimentacoesCache.ObterMovimentacoes());
-            MovimentacoesDataGrid.ItemsSource = movimentacoes;
+            if (AlertaDataGrid != null)
+            {
+                AlertaDataGrid.ItemsSource = alertas;
+            }
         }
     }
 }

@@ -33,7 +33,7 @@
                             <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource TextBrush}" Padding="5,0" Margin="0,0,10,0"/>
                         </Grid>
                     </Border>
-                    <ComboBox Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource ComboBoxStyle}">
+                    <ComboBox Grid.Column="2" x:Name="FiltrosComboBox" ToolTip="Filtrar" Style="{StaticResource ComboBoxStyle}" SelectionChanged="FiltroComboBox_SelectionChanged">
                         <ComboBoxItem Content="Filtrar por" IsSelected="True"/>
                         <ComboBoxItem Content="Produto"/>
                         <ComboBoxItem Content="Data"/>
@@ -41,17 +41,15 @@
                         <ComboBoxItem Content="Preço"/>
                         <ComboBoxItem Content="Mais Recentes"/>
                         <ComboBoxItem Content="Mais Antigos"/>
-
                     </ComboBox>
-                    <ComboBox Grid.Column="3" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0">
-                        <ComboBoxItem Content="Categorias" IsSelected="True"/>
+                    <ComboBox Grid.Column="3" x:Name="CategoriasComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectionChanged="CategoriasComboBox_SelectionChanged">
                         <ComboBoxItem Content="Entrada/Saída"/>
-                        <ComboBoxItem Content="Movimentação"/>
+                        <ComboBoxItem Content="Histórico"/>
                     </ComboBox>
                 </Grid>
 
                 <Grid Grid.Row="1">
-                    <!-- Seção de Entradas e Saídas -->
+                    <!-- Seção de Entradas e Saídas (Movimentações) -->
                     <Grid x:Name="EntradasSaidasGrid" Visibility="Visible">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -73,8 +71,8 @@
                                 <Separator Grid.Row="1" Margin="20, 0, 20, 20"/>
                                 <DataGrid Name="EntradaDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent" Grid.Row="2" Margin="20, 0, 20, 20">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Produto" Binding="{Binding Produto}" Width="Auto" />
-                                        <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
+                                        <DataGridTextColumn Header="Produto" Binding="{Binding ProdutoId}" Width="Auto" />
+                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
                                         <DataGridTextColumn Header="Usuário" Binding="{Binding Usuario}" Width="Auto" />
                                     </DataGrid.Columns>
                                 </DataGrid>
@@ -92,17 +90,17 @@
                                 <Separator Grid.Row="1" Margin="20, 0, 20, 20"/>
                                 <DataGrid Name="SaidaDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent" Grid.Row="2" Margin="20, 0, 20, 20">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Produto" Binding="{Binding Produto}" Width="Auto" />
-                                        <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
+                                        <DataGridTextColumn Header="Produto" Binding="{Binding ProdutoId}" Width="Auto" />
+                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
                                         <DataGridTextColumn Header="Usuário" Binding="{Binding Usuario}" Width="Auto" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>
                         </Border>
                     </Grid>
-                    
-                    <!-- Seção de Movimentação -->
-                    <Grid x:Name="MovimentacaoGrid" Visibility="Collapsed">
+
+                    <!-- Seção de Histórico -->
+                    <Grid x:Name="HistoricoGrid" Visibility="Collapsed">
                         <Border Grid.Column="0" Grid.Row="1" CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,10,0">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -110,15 +108,21 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <TextBlock Text="MOVIMENTAÇÃO" FontSize="20" FontWeight="Bold" Margin="0,10,0,10" HorizontalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
+                                <TextBlock Text="HISTÓRICO" FontSize="20" FontWeight="Bold" Margin="0,10,0,10" HorizontalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
                                 <Separator Grid.Row="1" Margin="20, 0, 20, 20"/>
-                                <DataGrid Name="MovimentacaoDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent" Grid.Row="2" Margin="20, 0, 20, 20">
+                                <DataGrid Name="HistoricoDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent" Grid.Row="2" Margin="20, 0, 20, 20">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataFormatada}" Width="Auto" />
-                                        <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
+                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
                                         <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
-                                        <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
-                                        <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
+                                        <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
+                                        <DataGridTemplateColumn Header="Detalhes" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="Auto" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>

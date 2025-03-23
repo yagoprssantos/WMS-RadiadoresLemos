@@ -14,13 +14,14 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid Margin="0,0,0,20" Grid.Row="0">
+
+                <Grid Grid.Row="0" Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    
+                    <!-- Barra de Pesquisa-->
                     <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="18" Height="36" Margin="0,0,10,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -32,16 +33,10 @@
                             <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource TextBrush}" Padding="5,0" Margin="0,0,10,0"/>
                         </Grid>
                     </Border>
-                    <ComboBox Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource ComboBoxStyle}" SelectedIndex="0">
-                        <ComboBoxItem Content="Filtrar por" IsSelected="True"/>
-                    </ComboBox>
-                    <ComboBox Grid.Column="3" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectedIndex="0">
-                        <ComboBoxItem Content="Categorias" IsSelected="True"/>
-                    </ComboBox>
                 </Grid>
 
+                <!-- Tabela de Notificações -->
                 <Grid Grid.Row="1">
-                    <!-- Seção de Alertas -->
                     <Grid x:Name="AlertasGrid" Visibility="Visible">
                         <Border CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
                             <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent">
@@ -69,42 +64,6 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Border>
-                    </Grid>
-
-                    <!-- Seção de Histórico -->
-                    <Grid x:Name="HistoricoGrid" Visibility="Collapsed">
-                        <Border CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
-                            <DataGrid Name="HistoricoDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada}" Width="Auto" />
-                                    <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
-                                    <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
-                                    <DataGridTemplateColumn Header="Detalhes" Width="*">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="Auto" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Border>
-                    </Grid>
-
-                    <!-- Seção de Movimentações -->
-                    <Grid x:Name="MovimentacoesGrid" Visibility="Collapsed">
-                        <Border CornerRadius="10" Background="#F0F0F0" Padding="5" Margin="0,0,0,10">
-                            <DataGrid Name="MovimentacoesDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataFormatada}" Width="Auto" />
-                                    <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
-                                    <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
-                                    <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
-                                    <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Border>
