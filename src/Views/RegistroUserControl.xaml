@@ -35,9 +35,18 @@
                     </Border>
                     <ComboBox Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource ComboBoxStyle}">
                         <ComboBoxItem Content="Filtrar por" IsSelected="True"/>
+                        <ComboBoxItem Content="Produto"/>
+                        <ComboBoxItem Content="Data"/>
+                        <ComboBoxItem Content="Usuário"/>
+                        <ComboBoxItem Content="Preço"/>
+                        <ComboBoxItem Content="Mais Recentes"/>
+                        <ComboBoxItem Content="Mais Antigos"/>
+
                     </ComboBox>
                     <ComboBox Grid.Column="3" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0">
                         <ComboBoxItem Content="Categorias" IsSelected="True"/>
+                        <ComboBoxItem Content="Entrada/Saída"/>
+                        <ComboBoxItem Content="Movimentação"/>
                     </ComboBox>
                 </Grid>
 
@@ -52,6 +61,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
+                        <!-- Entradas -->
                         <Border Grid.Column="0" Grid.Row="1" CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,10,0">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -70,6 +80,7 @@
                                 </DataGrid>
                             </Grid>
                         </Border>
+                        <!-- Saídas -->
                         <Border Grid.Column="1" Grid.Row="1" CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,0">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -84,6 +95,30 @@
                                         <DataGridTextColumn Header="Produto" Binding="{Binding Produto}" Width="Auto" />
                                         <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" />
                                         <DataGridTextColumn Header="Usuário" Binding="{Binding Usuario}" Width="Auto" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- Seção de Movimentação -->
+                    <Grid x:Name="MovimentacaoGrid" Visibility="Collapsed">
+                        <Border Grid.Column="0" Grid.Row="1" CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,10,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="MOVIMENTAÇÃO" FontSize="20" FontWeight="Bold" Margin="0,10,0,10" HorizontalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
+                                <Separator Grid.Row="1" Margin="20, 0, 20, 20"/>
+                                <DataGrid Name="MovimentacaoDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent" Grid.Row="2" Margin="20, 0, 20, 20">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Data e Hora" Binding="{Binding DataFormatada}" Width="Auto" />
+                                        <DataGridTextColumn Header="Produto ID" Binding="{Binding ProdutoId}" Width="Auto" />
+                                        <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
+                                        <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
+                                        <DataGridTextColumn Header="Preço" Binding="{Binding Preço}" Width="Auto" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>

@@ -3,159 +3,165 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-            xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
             mc:Ignorable="d"
-            d:DesignHeight="700" d:DesignWidth="800">
-    
-   <Grid Margin="10">
-       <TabControl Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1">
-           <!-- Primeira Aba: Ferramentas de Banco de Dados -->
-           <TabItem Header="Ferramentas" FontSize="18">
-               <Grid Margin="10">
-                   <Grid.RowDefinitions>
-                       <RowDefinition Height="*"/>
-                       <RowDefinition Height="Auto"/>
-                   </Grid.RowDefinitions>
-                   <GroupBox Header="Informações de Conexão" Grid.Row="0" Margin="10"
-                             Background="{StaticResource BackgroundBrush}"
-                             Foreground="{StaticResource TextBrush}">
-                       <StackPanel Margin="10">
-                           <TextBlock>
-                               <Run Text="Servidor: " FontWeight="Bold"/>
-                               <Run Text="FireBase - FirestoreDatabase"/>
-                           </TextBlock>
-                           <TextBlock Text=""/>
-                           <TextBlock>
-                               <Run Text="Banco de Dados: " FontWeight="Bold"/>
-                               <Run Text="RadiadoresLemos"/>
-                           </TextBlock>
-                           <TextBlock Text=""/>
-                           <TextBlock>
-                               <Run Text="Status da Conexão: " FontWeight="Bold"/>
-                               <Run Name="Status" FontWeight="Bold" Text=""/>
-                           </TextBlock>
-                           <TextBlock Text="" Height="20"/>
-                           <TextBlock Text="Caso queira acessar os arquivos locais no explorador de arquivos:" Margin="5"/>
-                           <Button x:Name="AbrirArquivosLocaisButton" Content="Abrir Arquivos Locais" Margin="5" Style="{StaticResource EmphasisButtonStyle}"/>
-                           <TextBlock Text="Caso queira acessar o banco de dados online no Firebase:" Margin="5"/>
-                           <Button x:Name="AbrirFirestoreButton" Content="Abrir Banco de Dados" Margin="5" Style="{StaticResource EmphasisButtonStyle}"/>
-                           <TextBlock Text="Para acessar mais informações e configurações:" Margin="5"/>
-                           <Button x:Name="AbrirGoogleCloudButton" Content="Abrir Google Cloud" Margin="5" Style="{StaticResource EmphasisButtonStyle}"/>
-                       </StackPanel>
-                   </GroupBox>
-                   <UniformGrid Rows="1" Columns="4" Margin="0,5,0,10" Grid.Row="1">
-                       <Button Content="Exportar" Margin="5" Click="ExportarDados_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                       <Button Content="Importar" Margin="5" Click="ImportarDados_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                       <Button Content="Reconectar" Margin="5" Click="Reconectar_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                       <Button Content="Gerar Tabela" Margin="5" Click="GerarTabela_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                   </UniformGrid>
-               </Grid>
-           </TabItem>
+            d:DesignHeight="600" d:DesignWidth="800">
 
-           <!-- Segunda Aba: Visualização de Dados -->
-           <TabItem Header="Visualizar Dados" FontSize="18">
-               <DockPanel Margin="10">
-                   <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                       <Grid.ColumnDefinitions>
-                           <ColumnDefinition Width="Auto"/>
-                           <ColumnDefinition Width="*"/>
-                       </Grid.ColumnDefinitions>
-                       <TextBlock Text="Selecione a Tabela:" FontWeight="Bold" Margin="5" VerticalAlignment="Center" Grid.Column="0"
-                                  Foreground="{StaticResource TextBrush}"/>
-                       <ComboBox x:Name="TabelaComboBox" Width="Auto" Margin="5" Grid.Column="1" SelectionChanged="TabelaComboBox_SelectionChanged"
-                                 Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}">
-                           <ComboBox.ItemContainerStyle>
-                               <Style TargetType="ComboBoxItem">
-                                   <Setter Property="HorizontalContentAlignment" Value="{Binding Path=HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
-                                   <Setter Property="VerticalContentAlignment" Value="{Binding Path=VerticalContentAlignment, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
-                               </Style>
-                           </ComboBox.ItemContainerStyle>
-                       </ComboBox>
-                   </Grid>
-                   <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                       <Grid.ColumnDefinitions>
-                           <ColumnDefinition Width="Auto"/>
-                           <ColumnDefinition Width="*"/>
-                           <ColumnDefinition Width="Auto"/>
-                       </Grid.ColumnDefinitions>
-                       <TextBlock Text="Pesquisar:" VerticalAlignment="Center" Margin="0,0,10,0"
-                                  Foreground="{StaticResource TextBrush}"/>
-                       <TextBox Name="SearchBox" Grid.Column="1" 
-                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                                TextChanged="SearchBox_TextChanged"
-                                Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
-                       <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" 
-                               HorizontalAlignment="Center" VerticalAlignment="Top" 
-                               Background="Transparent" Foreground="{StaticResource TextBrush}" 
-                               Padding="0" Margin="7, 0, 0, 0"
-                               FontSize="33" Grid.Column="2"/>
-                   </Grid>
-                   <DataGrid x:Name="DadosDataGrid"
-                             AutoGenerateColumns="True" IsReadOnly="True" 
-                             SelectionMode="Single" SelectionUnit="FullRow"
-                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                             Margin="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
-                             AlternatingRowBackground="{StaticResource SecondaryBrush}" AlternationCount="2"
-                             CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" 
-                             ColumnWidth="Auto">
-                   </DataGrid>
-               </DockPanel>
-           </TabItem>
-       </TabControl>
+    <Grid Margin="15, 15, 15, 0">
+        <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="10" Padding="25" Background="{StaticResource SecondaryBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-       <!-- Barra de Progresso -->
-       <Grid Name="ShowProgressBar" Background="#80000000" Visibility="Collapsed">
-           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="{StaticResource BackgroundBrush}" Height="Auto" Width="600">
-               <TextBlock Text="Processando Informações. Por favor, Aguarde" FontWeight="Bold" FontSize="20" Margin="0, 20, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
-               <TextBlock Name="ProgressBarMessage" Text="Aguardando próxima ação..." FontWeight="Bold" FontSize="16" Margin="0, 0, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
-               <ProgressBar Name="ProgressBar" Height="20" Width="500" Margin="0, 0, 0, 30"
-                    VerticalAlignment="Center" HorizontalAlignment="Center" 
-                    Minimum="0" Maximum="100" Value="0"/>
-           </StackPanel>
-       </Grid>
+                <!-- Título -->
+                <Grid Grid.Row="0" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="1" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="18" Padding="10" Margin="5,0,5,10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="Banco de Dados" Foreground="{StaticResource TextBrush}" FontSize="18" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
 
-       <!-- Popup para Configurações de Exportação -->
-       <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="True">
-           <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" Padding="15">
-               <StackPanel>
-                   <!-- Textos ajustáveis de acordo com função -->
-                   <TextBlock Text="Configurações para Exportar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10" Foreground="{StaticResource TextBrush}"/>
+                <!-- Área principal -->
+                <StackPanel Grid.Row="1">
+                    <!-- Acessar arquivos -->
+                    <TextBlock Text="Acessar arquivos do banco de dados:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14"/>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" x:Name="AbrirArquivosLocaisButton" Content="ABRIR ARQUIVOS LOCAIS" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                        <Button Grid.Column="1" x:Name="AbrirOneDriveButton" Content="ABRIR ONEDRIVE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                    </Grid>
 
-                   <!-- Tabelas adicionadas de acordo com arquivo/função -->
-                   <TextBlock Text="Selecione as Tabelas que deseja exportar:" FontWeight="Bold" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                   <ListBox x:Name="ExportTabelasListBox" SelectionMode="Multiple" Height="100"/>
+                    <!-- Backup -->
+                    <TextBlock Text="Realizar backup:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14"/>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Column="1" x:Name="ExportarBackupButton" Content="EXPORTAR BACKUP" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
+                    </Grid>
 
-                   <Button Content="Confirmar exportação" Margin="5" Click="ConfirmarExportacao_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                   <Button Content="Cancelar" Margin="5" Click="FecharExportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
-               </StackPanel>
-           </Border>
-       </Popup>
+                    <!-- Tabelas Excel -->
+                    <TextBlock Text="Tabelas do Excel:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14"/>
+                    <Grid HorizontalAlignment="Stretch" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="ImportarButton" Content="IMPORTAR" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                        <Button x:Name="ExportarButton" Content="EXPORTAR" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Grid.Column="1"/>
+                        <Button x:Name="GerarButton" Content="GERAR" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Grid.Column="2"/>
+                    </Grid>
 
-       <!-- Popup para Configurações de Importação -->
-       <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" Width="400">
-           <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" Padding="15">
-               <StackPanel>
-                   <!-- Textos ajustáveis de acordo com função -->
-                   <TextBlock Text="Configurações para Importar" FontWeight="Bold" FontSize="18" Margin="0,0,0,10" TextWrapping="Wrap" Foreground="{StaticResource TextBrush}"/>
+                    <!-- Menu de Tabelas -->
+                    <TextBlock Text="Visualizar Menu de Tabelas:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14" />
+                    <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                </StackPanel>
 
-                   <!-- Tabelas adicionadas de acordo com arquivo/função -->
-                   <TextBlock Text="Selecione as Tabelas que deseja importar:" FontWeight="Bold" FontSize="16" TextWrapping="Wrap" Foreground="{StaticResource TextBrush}"/>
-                   <ListBox x:Name="ImportTabelasListBox" SelectionMode="Multiple" Height="100"/>
+                <!-- Mais Informações -->
+                <StackPanel Grid.Row="2">
+                    <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="10" Padding="40, 5" HorizontalAlignment="Center" Margin="0,0,0,15">
+                        <TextBlock Text="Mais informações:" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                    </Border>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock>
+                                <Run Text="Banco de Dados: " FontWeight="Bold"/>
+                                <Run Text="Local" FontStyle="Italic"/>
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="Conexão com o OneDrive: " FontWeight="Bold"/>
+                                <Run Text="Conectado" FontStyle="Italic"/>
+                            </TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock>
+                                <Run Text="Ultimo backup importado: " FontWeight="Bold"/>
+                                <Run x:Name="UltimoBackupImport" Text="01/01/2025" FontStyle="Italic"/>
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="Ultimo backup exportado: " FontWeight="Bold"/>
+                                <Run x:Name="UltimoBackupExport" Text="19/03/2025" FontStyle="Italic"/>
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="Backup Atual: " FontWeight="Bold"/>
+                                <Run x:Name="BackupStatus" Text="Salvo" FontStyle="Italic"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-                   <!-- ComboBox com opções para importação-->
-                   <TextBlock Text="Escolha um método de importação:" FontWeight="Bold" FontSize="16" Margin="0,10,0,0" TextWrapping="Wrap" Foreground="{StaticResource TextBrush}"/>
-                   <ComboBox x:Name="ImportComboBox" Margin="0,0,0,10" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}">
-                       <ComboBoxItem Content="Substituir Dados"/>
-                       <ComboBoxItem Content="Adicionar Dados"/>
-                   </ComboBox>
+        <!-- Barra de Progresso -->
+        <Grid Name="ShowProgressBar" Background="#80000000" Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="White" Height="Auto" Width="600">
+                <TextBlock Text="Processando Informações. Por favor, Aguarde" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="20" Margin="0, 20, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Name="ProgressBarMessage" Text="Aguardando próxima ação..." Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" Margin="0, 0, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ProgressBar Name="ProgressBar" Height="20" Width="500" Margin="0, 0, 0, 30"
+                             VerticalAlignment="Center" HorizontalAlignment="Center" 
+                             Minimum="0" Maximum="100" Value="0"/>
+            </StackPanel>
+        </Grid>
 
-                   <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" FontWeight="Bold" FontSize="12" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
-                   <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" FontWeight="Bold" FontSize="16" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
-                   <Button Content="Confirmar importação" Margin="5" Click="ConfirmarImportacao_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                   <Button Content="Cancelar" Margin="5" Click="FecharImportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
-               </StackPanel>
-           </Border>
-       </Popup>
-   </Grid>
+        <!-- Popup para Configurações de Exportação -->
+        <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="True">
+            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="10">
+                <StackPanel>
+                    <!-- Textos ajustáveis de acordo com função -->
+                    <TextBlock Text="Configurações para Exportar" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="18" Margin="0,0,0,10"/>
+
+                    <!-- Tabelas adicionadas de acordo com arquivo/função -->
+                    <TextBlock Text="Selecione as Tabelas que deseja exportar:" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16"/>
+                    <ListBox x:Name="ExportTabelasListBox" SelectionMode="Multiple" Height="100"/>
+
+                    <Button Content="Confirmar exportação" Margin="5" Click="ConfirmarExportacao_Click" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <Button Content="Cancelar" Margin="5" Click="FecharExportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Popup para Configurações de Importação -->
+        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" Width="400">
+            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="10">
+                <StackPanel>
+                    <!-- Textos ajustáveis de acordo com função -->
+                    <TextBlock Text="Configurações para Importar" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="18" Margin="0,0,0,10" TextWrapping="Wrap"/>
+
+                    <!-- Tabelas adicionadas de acordo com arquivo/função -->
+                    <TextBlock Text="Selecione as Tabelas que deseja importar:" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" TextWrapping="Wrap"/>
+                    <ListBox x:Name="ImportTabelasListBox" SelectionMode="Multiple" Height="100"/>
+
+                    <!-- ComboBox com opções para importação-->
+                    <TextBlock Text="Escolha um método de importação:" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                    <ComboBox x:Name="ImportComboBox" Margin="0,0,0,10" Style="{StaticResource ComboBoxStyle}">
+                        <ComboBoxItem Content="Substituir Dados"/>
+                        <ComboBoxItem Content="Adicionar Dados"/>
+                    </ComboBox>
+
+                    <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="12" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                    <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                    <Button Content="Confirmar importação" Margin="5" Click="ConfirmarImportacao_Click" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <Button Content="Cancelar" Margin="5" Click="FecharImportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
 </UserControl>
-

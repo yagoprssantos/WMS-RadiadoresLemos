@@ -34,7 +34,7 @@
         <!-- Grid para escurecer o fundo e mostrar a barra de progresso -->
         <Grid x:Name="LoadingGrid" Visibility="Collapsed" Background="#80000000">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Carregando..." x:Name="TextoCarregamento" Foreground="{StaticResource TextBrush}" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                <TextBlock Text="Carregando..." x:Name="TextoCarregamento" Foreground="{StaticResource AccentBrush}" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
                 <ProgressBar x:Name="LoadingProgressBar" 
                              IsIndeterminate="True" 
                              Width="300" 

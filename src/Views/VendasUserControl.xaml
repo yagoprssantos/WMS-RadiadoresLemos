@@ -8,15 +8,37 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <ScrollViewer>
         <WrapPanel Margin="10">
-            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="10" Padding="10" Margin="10" Width="300" Height="Auto">
+            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="5" Width="240" Height="Auto">
                 <StackPanel>
-                    <TextBlock Text="Nota Fiscal" Style="{StaticResource VendasTitleTextBox}" />
-                    <Separator Margin="15, 0, 15, 10" />
-                    <TextBlock Text="Cliente: ID/Nome" Style="{StaticResource VendasTextBox}" />
-                    <TextBlock Text="Pedido: X" Style="{StaticResource VendasTextBox}" />
-                    <TextBlock Text="Data da Compra: XX/XX/XX" Style="{StaticResource VendasTextBox}" />
-                    <TextBlock Text="Valor Total: R$ X.XXX,XX" Style="{StaticResource VendasTextBox}" />
-                    <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" Width="175" Margin="10" Click="DetalhesButton_Click"/>
+                    <TextBlock Text="Nota Fiscal" Style="{StaticResource VendasTitleTextBox}" FontSize="16"/>
+                    <Separator Margin="10, 2, 10, 5" />
+                    <TextBlock Text="Cliente: ID/Nome" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Pedido: X" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Data da Compra: XX/XX/XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Valor Total: R$ X.XXX,XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="16" Width="120" Margin="4" Click="DetalhesButton_Click"/>
+                </StackPanel>
+            </Border>
+            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="5" Width="240" Height="Auto">
+                <StackPanel>
+                    <TextBlock Text="Nota Fiscal" Style="{StaticResource VendasTitleTextBox}" FontSize="16"/>
+                    <Separator Margin="10, 2, 10, 5" />
+                    <TextBlock Text="Cliente: ID/Nome" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Pedido: X" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Data da Compra: XX/XX/XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Valor Total: R$ X.XXX,XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="16" Width="120" Margin="4" Click="DetalhesButton_Click"/>
+                </StackPanel>
+            </Border>
+            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="5" Width="240" Height="Auto">
+                <StackPanel>
+                    <TextBlock Text="Nota Fiscal" Style="{StaticResource VendasTitleTextBox}" FontSize="16"/>
+                    <Separator Margin="10, 2, 10, 5" />
+                    <TextBlock Text="Cliente: ID/Nome" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Pedido: X" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Data da Compra: XX/XX/XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <TextBlock Text="Valor Total: R$ X.XXX,XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                    <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="16" Width="120" Margin="4" Click="DetalhesButton_Click"/>
                 </StackPanel>
             </Border>
         </WrapPanel>

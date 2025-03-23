@@ -7,10 +7,10 @@
         mc:Ignorable="d"
         Title="EditarProdutoWindow" Height="600" Width="600" FontSize="18"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}">
+        Background="{StaticResource PanelBackgroundBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  Background="{StaticResource BackgroundBrush}">
+                  Background="{StaticResource PanelBackgroundBrush}">
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
                 <!-- Dados do Produto -->
@@ -18,13 +18,13 @@
                 <TextBlock Text="Nome do Produto:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox Name="NomeProduto" Margin="0,0,0,15" TextChanged="TextBox_TextChanged"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
 
                 <!-- Tipo -->
                 <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
-                <ComboBox Name="TipoProduto" Margin="0,0,0,15" SelectionChanged="TipoProduto_SelectionChanged"
-                          Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}">
+                <ComboBox Name="TipoProduto" Margin="0,0,0,15" Width="500" SelectionChanged="TipoProduto_SelectionChanged"
+                          Style="{StaticResource ComboBoxStyle}">
                     <!-- Tipos de Produtos -->
                     <ComboBoxItem Content="Caixa"/>
                     <ComboBoxItem Content="Radiador"/>
@@ -34,25 +34,25 @@
                 <TextBlock Text="Marca do Produto:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox Name="MarcaProduto" Margin="0,0,0,15" PreviewTextInput="MarcaProduto_PreviewTextInput" DataObject.Pasting="MarcaProduto_Pasting" TextChanged="TextBox_TextChanged"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
 
                 <!-- Código -->
                 <TextBlock Text="Código do Produto:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox Name="CodigoProduto" Margin="0,0,0,15" TextChanged="TextBox_TextChanged"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
 
                 <!-- Preço -->
                 <TextBlock Text="Preço do Produto:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox Name="PrecoProduto" Margin="0,0,0,15" PreviewTextInput="PrecoProduto_PreviewTextInput" DataObject.Pasting="PrecoProduto_Pasting" TextChanged="TextBox_TextChanged"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
 
                 <!-- Quantidade -->
                 <TextBlock Text="Quantidade Inicial:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox Name="QuantidadeInicial" Margin="0,0,0,15" PreviewTextInput="QuantidadeInicial_PreviewTextInput" DataObject.Pasting="QuantidadeInicial_Pasting" TextChanged="TextBox_TextChanged"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
 
                 <!-- Botões -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,10,0,0">

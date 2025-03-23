@@ -7,10 +7,10 @@
         mc:Ignorable="d"
         Title="Editar Usuário" Height="600" Width="600" FontSize="18"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}">
+        Background="{StaticResource PanelBackgroundBrush}">
     
     <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  Background="{StaticResource BackgroundBrush}">
+                  Background="{StaticResource PanelBackgroundBrush}">
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
                 <!-- Dados do Usuário -->
@@ -18,25 +18,25 @@
                 <TextBlock Text="Nome:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox FontSize="16" Height="35" x:Name="NomeTextBox" TextChanged="TextBox_TextChanged" PreviewTextInput="NomeTextBox_PreviewTextInput"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
                 <!-- Email -->
                 <TextBlock Text="Email:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox FontSize="16" Height="35" x:Name="EmailTextBox" TextChanged="TextBox_TextChanged"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
                 <!-- Matrícula -->
                 <TextBlock Text="Matrícula:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox FontSize="16" Height="35" x:Name="MatriculaTextBox" IsReadOnly="True"
-                         Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
+                         Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
                 <!-- Senha -->
                 <TextBlock Text="Senha:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <PasswordBox FontSize="16" Height="35" x:Name="SenhaPasswordBox" PasswordChanged="SenhaPasswordBox_PasswordChanged"
-                             Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
+                             Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
                 <!-- Cargo -->
                 <TextBlock Text="Cargo:" Margin="0,0,0,5"
@@ -47,14 +47,14 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <ComboBox FontSize="16" Height="35" x:Name="PermissaoComboBox" Grid.Column="0" SelectionChanged="PermissaoComboBox_SelectionChanged"
-                              Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}">
+                              Style="{StaticResource ComboBoxStyle}" Width="450">
                         <ComboBoxItem Content="Administrador" />
                         <ComboBoxItem Content="Gerente" />
                         <ComboBoxItem Content="Operador" />
                         <ComboBoxItem Content="Estagiário" />
                         <ComboBoxItem Content="Usuário" />
                     </ComboBox>
-                    <Button Content="?" Width="30" Height="30" Margin="10,0,0,0" FontSize="16" Grid.Column="1" Click="MaisSobreCargo_Click"/>
+                    <Button Content="?" Width="30" Height="30" Margin="10,0,0,0" Foreground="{StaticResource TextBrush}" FontSize="16" Grid.Column="1" Click="MaisSobreCargo_Click"/>
                     <Popup x:Name="CargoPopup" Placement="Mouse" StaysOpen="False">
                         <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" Padding="10">
                             <StackPanel>

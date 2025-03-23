@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Alterar Quantidade" Height="250" Width="300"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}">
+        Background="{StaticResource PanelBackgroundBrush}">
     
     <Grid>
         <Grid.RowDefinitions>
@@ -40,7 +40,7 @@
                  HorizontalAlignment="Left"
                  PreviewTextInput="QuantidadeTextBox_PreviewTextInput" 
                  Margin="0,0,10,0" 
-                 Background="{StaticResource BackgroundBrush}" />
+                 Background="{StaticResource SecondaryBrush}" />
 
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" 
                     Orientation="Horizontal" 
