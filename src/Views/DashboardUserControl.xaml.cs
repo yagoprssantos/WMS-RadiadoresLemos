@@ -392,12 +392,12 @@ namespace WMS_RadiadoresLemos_WPF
         // Função para atualizar o estilo dos botões de filtro por período
         private void AtualizarEstiloBotoes(Button botaoSelecionado)
         {
-            DiarioButton.Style = (Style)FindResource("FilterButtonStyle");
-            SemanalButton.Style = (Style)FindResource("FilterButtonStyle");
-            MensalButton.Style = (Style)FindResource("FilterButtonStyle");
-            AnualButton.Style = (Style)FindResource("FilterButtonStyle");
+            DiarioButton.Style = (Style)FindResource("DashboardButtonStyle");
+            SemanalButton.Style = (Style)FindResource("DashboardButtonStyle");
+            MensalButton.Style = (Style)FindResource("DashboardButtonStyle");
+            AnualButton.Style = (Style)FindResource("DashboardButtonStyle");
 
-            botaoSelecionado.Style = (Style)FindResource("SelectedFilterButtonStyle");
+            botaoSelecionado.Style = (Style)FindResource("SelectedDashboardButtonStyle");
         }
 
         // Função para atualizar o gráfico exibido

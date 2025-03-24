@@ -4,7 +4,7 @@
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
             mc:Ignorable="d" 
-            d:DesignHeight="630" d:DesignWidth="800"
+            d:DesignHeight="630" d:DesignWidth="820"
             Background="{StaticResource BackgroundBrush}">
 
     <Grid Margin="15, 15, 15, 0">
@@ -32,12 +32,7 @@
                             <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" Background="Transparent" Foreground="{StaticResource TextBrush}" Padding="5,0" Margin="0,0,10,0"/>
                         </Grid>
                     </Border>
-                    <ComboBox Grid.Column="2" ToolTip="Filtrar" Style="{StaticResource ComboBoxStyle}" SelectedIndex="0">
-                        <ComboBoxItem Content="Filtrar por" IsSelected="True"/>
-                        <ComboBoxItem Content="Opção 1"/>
-                        <ComboBoxItem Content="Opção 2"/>
-                        <ComboBoxItem Content="Opção 3"/>
-                    </ComboBox>
+                    <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
                 </Grid>
 
                 <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,10">
@@ -56,7 +51,7 @@
 
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Row="2">
                     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                        <Button Content="Cadastrar Produto" Width="160" Height="40" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
+                        <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" Width="160" Height="40" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
                         <Button Content="Editar Produto" Click="EditarProduto_Click" Width="160" Height="40" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
                         <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="170" Height="40" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
                         <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="160" Height="40" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
@@ -65,29 +60,34 @@
             </Grid>
         </Border>
 
-        <Popup x:Name="PainelFiltrosPopup" Placement="Mouse" StaysOpen="False" Grid.ColumnSpan="2">
-            <Border Background="{StaticResource ButtonBackgroundBrush}" BorderBrush="{StaticResource AccentBrush}"
-                   BorderThickness="2" Padding="10">
-                <StackPanel Width="250" Margin="10">
+        <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
+            <StackPanel Background="{StaticResource PanelBackgroundBrush}">
+                <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="10">
+                    <StackPanel Background="{StaticResource SecondaryBrush}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10, 10, 10, 0">
+                            <CheckBox x:Name="EmEstoqueCheckBox" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"  Margin="0,0,10,0"/>
+                            <TextBlock Text="Ver apenas itens em estoque" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" />
+                        </StackPanel>
+                        <TextBlock Text="Filtrar por Produto" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        </ComboBox>
+                        <TextBlock Text="Filtrar por Tipo" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        </ComboBox>
+                        <TextBlock Text="Filtrar por Marca" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="MarcaComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        </ComboBox>
+                        <TextBlock Text="Filtrar por Código" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="CodigoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        </ComboBox>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,10">
-                        <CheckBox x:Name="EmEstoqueCheckBox" Foreground="{StaticResource TextBrush}"
-                                 VerticalAlignment="Center" HorizontalAlignment="Center"
-                                 Checked="Filtro_Changed" Unchecked="Filtro_Changed" 
-                                 FontSize="16" Padding="5"/>
-                        <TextBlock Text="Ver apenas itens em estoque" MouseLeftButtonDown="Filtro_Changed"
-                                  VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 5, 0, 10">
+                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
+                            <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
+                        </StackPanel>
                     </StackPanel>
-
-                    <TextBlock Text="Marca do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                    <ComboBox x:Name="MarcaProdutoComboBox" SelectionChanged="Filtro_Changed" 
-                               FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
-
-                    <TextBlock Text="Tipo do Produto" Margin="0,0,0,5" Padding="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                    <ComboBox x:Name="TipoProdutoComboBox" SelectionChanged="Filtro_Changed"
-                               FontSize="16" Margin="0,0,0,10" Padding="5" Background="{StaticResource BackgroundBrush}" Foreground="{StaticResource TextBrush}"/>
-                </StackPanel>
-            </Border>
+                </Border>
+            </StackPanel>
         </Popup>
     </Grid>
 </UserControl>

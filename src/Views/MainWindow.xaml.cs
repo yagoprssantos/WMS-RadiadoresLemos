@@ -759,11 +759,11 @@ namespace WMS_RadiadoresLemos_WPF
             // Inicia timers caso não estejam ativos
             if (!_saveCacheTimer.IsEnabled)
             {
-                _saveCacheTimer.Start();
+                // _saveCacheTimer.Start();
             }
             if (!_connectDatabaseTimer.IsEnabled)
             {
-                _connectDatabaseTimer.Start();
+                // _connectDatabaseTimer.Start();
             }
 
             // Adiciona alerta

@@ -32,10 +32,10 @@
                 <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="10, 5" Background="{StaticResource SecondaryBrush}">
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button x:Name="DiarioButton" Content="Diário" Click="FiltrarPorPeriodo_Click" Tag="Hoje" Style="{StaticResource FilterButtonStyle}" Margin="10"/>
-                            <Button x:Name="SemanalButton" Content="Semanal" Click="FiltrarPorPeriodo_Click" Tag="Última Semana" Style="{StaticResource FilterButtonStyle}" Margin="10"/>
-                            <Button x:Name="MensalButton" Content="Mensal" Click="FiltrarPorPeriodo_Click" Tag="Último Mês" Style="{StaticResource FilterButtonStyle}" Margin="10"/>
-                            <Button x:Name="AnualButton" Content="Anual" Click="FiltrarPorPeriodo_Click" Tag="Último Ano" Style="{StaticResource FilterButtonStyle}" Margin="10"/>
+                            <Button x:Name="DiarioButton" Content="Diário" Click="FiltrarPorPeriodo_Click" Tag="Hoje" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
+                            <Button x:Name="SemanalButton" Content="Semanal" Click="FiltrarPorPeriodo_Click" Tag="Última Semana" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
+                            <Button x:Name="MensalButton" Content="Mensal" Click="FiltrarPorPeriodo_Click" Tag="Último Mês" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
+                            <Button x:Name="AnualButton" Content="Anual" Click="FiltrarPorPeriodo_Click" Tag="Último Ano" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
                         </StackPanel>
                         
                         <!-- Área de Conteúdo para Gráficos -->

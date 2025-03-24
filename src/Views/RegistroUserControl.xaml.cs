@@ -26,6 +26,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CarregarEntradas();
             CarregarSaidas();
             CarregarHistorico();
+            CarregarProdutos();
 
             // Seleciona primeira opção de categoria
             CategoriasComboBox.SelectedIndex = 0;
@@ -75,6 +76,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        // Método para carregar produtos no ComboBox
+        private void CarregarProdutos()
+        {
+            try
+            {
+                var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
+                var produtos = movimentacoes.Select(m => m.ProdutoId).Distinct().ToList();
+                ProdutoComboBox.ItemsSource = produtos;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         // Evento para alterar a visibilidade das grids com base na categoria selecionada
         private void CategoriasComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -90,36 +106,103 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     {
                         EntradasSaidasGrid.Visibility = Visibility.Visible;
                         HistoricoGrid.Visibility = Visibility.Collapsed;
+                        // Ocultar filtros adicionais
+                        FiltroTipoTextBlock.Visibility = Visibility.Collapsed;
+                        TipoComboBox.Visibility = Visibility.Collapsed;
+                        FiltroNivelTextBlock.Visibility = Visibility.Collapsed;
+                        NivelComboBox.Visibility = Visibility.Collapsed;
                     }
                     else if (category == "Histórico")
                     {
                         EntradasSaidasGrid.Visibility = Visibility.Collapsed;
                         HistoricoGrid.Visibility = Visibility.Visible;
+                        // Mostrar filtros adicionais
+                        FiltroTipoTextBlock.Visibility = Visibility.Visible;
+                        TipoComboBox.Visibility = Visibility.Visible;
+                        FiltroNivelTextBlock.Visibility = Visibility.Visible;
+                        NivelComboBox.Visibility = Visibility.Visible;
                     }
                 }
             }
         }
 
+        // Evento para abrir o popup de filtro
+        private void FiltrarButton_Click(object sender, RoutedEventArgs e)
+        {
+            FiltroPopup.IsOpen = true;
+        }
 
         // Evento para aplicar o filtro selecionado
-        private void FiltroComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            var comboBox = sender as ComboBox;
-            if (comboBox != null)
-            {
-                var selectedFilter = comboBox.SelectedItem as ComboBoxItem;
-                if (selectedFilter != null)
-                {
-                    string filter = selectedFilter.Content.ToString();
-                    AplicarFiltro(filter);
-                }
-            }
+            string produto = ProdutoComboBox.SelectedItem?.ToString();
+            DateTime? dataInicio = DataInicioPicker.SelectedDate;
+            DateTime? dataFim = DataFimPicker.SelectedDate;
+
+            AplicarFiltro(produto, dataInicio, dataFim);
+            FiltroPopup.IsOpen = false;
+        }
+
+        // Evento para limpar os filtros
+        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
+        {
+            ProdutoComboBox.SelectedItem = null;
+            DataInicioPicker.SelectedDate = null;
+            DataFimPicker.SelectedDate = null;
+
+            // Historico
+            TipoComboBox.SelectedItem = null;
+            NivelComboBox.SelectedItem = null;
+
+            // Recarregar todas as movimentações
+            CarregarEntradas();
+            CarregarSaidas();
+            FiltroPopup.IsOpen = false;
         }
 
         // Método para aplicar o filtro selecionado
-        private void AplicarFiltro(string filtro)
+        private void AplicarFiltro(string produto, DateTime? dataInicio, DateTime? dataFim)
         {
-            
+            try
+            {
+                var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
+
+                // Filtrar entradas
+                var entradasFiltradas = movimentacoes.Where(m =>
+                    m.Tipo == "Entrada" &&
+                    (string.IsNullOrEmpty(produto) || m.ProdutoId == produto) &&
+                    (!dataInicio.HasValue || m.Data >= dataInicio.Value) &&
+                    (!dataFim.HasValue || m.Data <= dataFim.Value)).ToList();
+
+                // Filtrar saídas
+                var saidasFiltradas = movimentacoes.Where(m =>
+                    m.Tipo == "Saída" &&
+                    (string.IsNullOrEmpty(produto) || m.ProdutoId == produto) &&
+                    (!dataInicio.HasValue || m.Data >= dataInicio.Value) &&
+                    (!dataFim.HasValue || m.Data <= dataFim.Value)).ToList();
+
+                // Atualizar DataGrids
+                EntradaDataGrid.ItemsSource = entradasFiltradas;
+                SaidaDataGrid.ItemsSource = saidasFiltradas;
+
+                // Filtrar histórico
+                var historico = LogHistorico.ObterLogs();
+                var tipo = TipoComboBox.SelectedItem?.ToString();
+                var nivel = NivelComboBox.SelectedItem?.ToString();
+
+                var historicoFiltrado = historico.Where(h =>
+                    (string.IsNullOrEmpty(tipo) || h.Tipo == tipo) &&
+                    (string.IsNullOrEmpty(nivel) || h.Nivel == nivel) &&
+                    (!dataInicio.HasValue || h.Data >= dataInicio.Value) &&
+                    (!dataFim.HasValue || h.Data <= dataFim.Value)).ToList();
+
+                // Atualizar HistoricoDataGrid
+                HistoricoDataGrid.ItemsSource = historicoFiltrado;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

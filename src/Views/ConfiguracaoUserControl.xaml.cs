@@ -33,7 +33,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 string themeName = selectedItem.Name;
                 SwitchToTheme(themeName);
                 SaveTheme(themeName);
-                ReloadWindow();
             }
         }
 
@@ -67,16 +66,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
                 }
             }
-        }
-
-        // Recarrega a MainWindow para aplicar o novo tema
-        private void ReloadWindow()
-        {
-            Window mainWindow = Window.GetWindow(this);
-            mainWindow.Content = new MainWindow();
-            mainWindow.Show();
-
-            Window.GetWindow(this).Close();
         }
     }
 }
