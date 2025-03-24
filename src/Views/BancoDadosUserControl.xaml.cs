@@ -92,7 +92,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
@@ -131,7 +131,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
-                    MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     AlertaCache.AdicionarAlerta("Erro",
                                                 "Nenhum dado disponível para exportação.",
                                                 $"Erro ao exportar dados. Possíveis motivos:\n" +
@@ -238,7 +238,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         AlertaCache.AdicionarAlerta("Erro",
                                                     ex.Message.ToString(),
                                                     $"Erro ao exportar dados. Possíveis motivos:\n" +
@@ -257,7 +257,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
@@ -320,7 +320,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar importação de dados. Possíveis motivos:\n" +
@@ -357,7 +357,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 if (filePath == null)
                 {
-                    MessageBox.Show("Caminho do arquivo não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //MessageBox.Show("Caminho do arquivo não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -385,7 +385,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar importação de dados. Possíveis motivos:\n" +
@@ -468,7 +468,7 @@ namespace WMS_RadiadoresLemos_WPF
                             }
                             else
                             {
-                                MessageBox.Show($"A planilha '{worksheet.Name}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                //MessageBox.Show($"A planilha '{worksheet.Name}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                                 AlertaCache.AdicionarAlerta("Erro",
                                                             $"Planilha '{worksheet.Name}' vazia ou sem cabeçalho.",
                                                             $"Erro ao substituir dados. Possíveis motivos:\n" +
@@ -519,7 +519,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao substituir dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao substituir dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao substituir dados. Possíveis motivos:\n" +
@@ -552,7 +552,7 @@ namespace WMS_RadiadoresLemos_WPF
                         var worksheet = workbook.Worksheet(tabela);
                         if (worksheet == null)
                         {
-                            MessageBox.Show($"A planilha '{tabela}' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            //MessageBox.Show($"A planilha '{tabela}' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                             AlertaCache.AdicionarAlerta("Erro",
                                                         $"Planilha '{tabela}' não encontrada.",
                                                         $"Erro ao adicionar dados. Possíveis motivos:\n" +
@@ -589,7 +589,7 @@ namespace WMS_RadiadoresLemos_WPF
                         }
                         else
                         {
-                            MessageBox.Show($"A planilha '{tabela}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            //MessageBox.Show($"A planilha '{tabela}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                             AlertaCache.AdicionarAlerta("Erro",
                                                         $"Planilha '{tabela}' vazia ou sem cabeçalho.",
                                                         $"Erro ao adicionar dados. Possíveis motivos:\n" +
@@ -635,7 +635,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao adicionar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao adicionar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao adicionar dados. Possíveis motivos:\n" +
@@ -752,7 +752,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Erro ao gerar estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //MessageBox.Show($"Erro ao gerar estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         AlertaCache.AdicionarAlerta("Erro",
                                                     ex.Message.ToString(),
                                                     $"Erro ao gerar estrutura das tabelas. Possíveis motivos:\n" +
@@ -767,7 +767,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar geração de estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar geração de estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar geração de estrutura das tabelas. Possíveis motivos:\n" +

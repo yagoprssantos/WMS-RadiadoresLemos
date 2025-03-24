@@ -89,7 +89,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao salvar produto: {ex.Message}");
+                //MessageBox.Show($"Erro ao salvar produto: {ex.Message}");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",

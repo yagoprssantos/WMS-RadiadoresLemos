@@ -106,7 +106,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 precisaAtualizarUsuarios = true;
-                MessageBox.Show($"Erro ao carregar usuários do banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao carregar usuários do banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -270,7 +270,7 @@ namespace WMS_RadiadoresLemos_WPF
 
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao atualizar usuário no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao atualizar usuário no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -339,7 +339,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao deletar usuário no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao deletar usuário no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",

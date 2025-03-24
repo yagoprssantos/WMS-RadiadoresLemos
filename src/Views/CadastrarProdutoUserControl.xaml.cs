@@ -58,7 +58,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao cadastrar produto: {ex.Message}");
+                //MessageBox.Show($"Erro ao cadastrar produto: {ex.Message}");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
