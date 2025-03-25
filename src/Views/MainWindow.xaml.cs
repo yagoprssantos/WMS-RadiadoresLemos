@@ -66,11 +66,9 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Define o índice inicial
             _currentIndex = 0;
-
-            // Exibe o primeiro controle
-            ContentArea.Content = _userControls[_currentIndex];
             UpdateTitle();
         }
+
         private async void SaveCacheTimer_Tick(object? sender, EventArgs e)
         {
             try
@@ -717,6 +715,15 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 TitleTextBlock.Text = "Configurações";
             }
+        }
+
+        // Função para recarregar toda a MainWindow
+        public void Reload()
+        {
+            // Recarrega a MainWindow
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
+            this.Close();
         }
 
         // Função que representa a animação de notificação de alerta

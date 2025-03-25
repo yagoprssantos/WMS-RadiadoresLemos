@@ -67,5 +67,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 }
             }
         }
+
+        // Botão Salvar e Aplicar
+        private void BtnSalvarAplicar_Click(object sender, RoutedEventArgs e)
+        {
+            if (ThemeSelector.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string themeName = selectedItem.Name;
+                SaveTheme(themeName);
+                SwitchToTheme(themeName);
+                MainWindow._instance?.Reload(); // Chama a função para recarregar a janela
+            }
+        }
     }
 }

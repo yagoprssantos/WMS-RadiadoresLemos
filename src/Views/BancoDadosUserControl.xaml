@@ -55,7 +55,7 @@
 
                     <!-- Tabelas Excel -->
                     <TextBlock Text="Tabelas do Excel:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14"/>
-                    <Grid HorizontalAlignment="Stretch" Margin="0,0,0,10">
+                    <Grid Margin="0,0,0,10" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -82,25 +82,25 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock>
+                            <TextBlock Foreground="{StaticResource TextBrush}">
                                 <Run Text="Banco de Dados: " FontWeight="Bold"/>
                                 <Run Text="Local" FontStyle="Italic"/>
                             </TextBlock>
-                            <TextBlock>
+                            <TextBlock Foreground="{StaticResource TextBrush}">
                                 <Run Text="Conexão com o OneDrive: " FontWeight="Bold"/>
                                 <Run Text="Conectado" FontStyle="Italic"/>
                             </TextBlock>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <TextBlock>
+                            <TextBlock Foreground="{StaticResource TextBrush}">
                                 <Run Text="Ultimo backup importado: " FontWeight="Bold"/>
                                 <Run x:Name="UltimoBackupImport" Text="01/01/2025" FontStyle="Italic"/>
                             </TextBlock>
-                            <TextBlock>
+                            <TextBlock Foreground="{StaticResource TextBrush}">
                                 <Run Text="Ultimo backup exportado: " FontWeight="Bold"/>
                                 <Run x:Name="UltimoBackupExport" Text="19/03/2025" FontStyle="Italic"/>
                             </TextBlock>
-                            <TextBlock>
+                            <TextBlock Foreground="{StaticResource TextBrush}">
                                 <Run Text="Backup Atual: " FontWeight="Bold"/>
                                 <Run x:Name="BackupStatus" Text="Salvo" FontStyle="Italic"/>
                             </TextBlock>
@@ -112,7 +112,7 @@
 
         <!-- Barra de Progresso -->
         <Grid Name="ShowProgressBar" Background="#80000000" Visibility="Collapsed">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="White" Height="Auto" Width="600">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="{StaticResource BackgroundBrush}" Height="Auto" Width="600">
                 <TextBlock Text="Processando Informações. Por favor, Aguarde" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="20" Margin="0, 20, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <TextBlock Name="ProgressBarMessage" Text="Aguardando próxima ação..." Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" Margin="0, 0, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <ProgressBar Name="ProgressBar" Height="20" Width="500" Margin="0, 0, 0, 30"
