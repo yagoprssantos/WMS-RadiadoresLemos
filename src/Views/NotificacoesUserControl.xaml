@@ -19,6 +19,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     
                     <!-- Barra de Pesquisa-->
@@ -33,6 +34,7 @@
                             <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource TextBrush}" Padding="5,0" Margin="0,0,10,0"/>
                         </Grid>
                     </Border>
+                    <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
                 </Grid>
 
                 <!-- Tabela de Notificações -->
@@ -71,5 +73,25 @@
                 </Grid>
             </Grid>
         </Border>
+
+        <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
+            <StackPanel Background="{StaticResource PanelBackgroundBrush}">
+                <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="10">
+                    <StackPanel Background="{StaticResource SecondaryBrush}">
+                        <TextBlock Text="Filtrar por Tipo" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        </ComboBox>
+                        <TextBlock Text="Filtrar por Data" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="DataComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        </ComboBox>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
+                            <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Popup>
     </Grid>
 </UserControl>

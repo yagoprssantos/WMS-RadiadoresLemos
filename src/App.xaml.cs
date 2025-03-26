@@ -31,7 +31,10 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var dict = new ResourceDictionary
             {
-                Source = new Uri($"src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
+                // TODO: Comentado para desenvolver melhor o Style da aplicação
+                // Source = new Uri($"src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
+
+                Source = new Uri("src/Resources/Style.xaml", UriKind.Relative)
             };
 
             Application.Current.Resources.MergedDictionaries.Clear();

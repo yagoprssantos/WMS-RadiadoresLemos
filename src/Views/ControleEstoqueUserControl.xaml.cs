@@ -22,9 +22,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             CarregarDadosIniciais();
-
-            CarregarProdutos();
-            PreencherFiltros();
+            CarregarFiltro();
         }
 
         // Método para carregar os dados iniciais
@@ -37,25 +35,30 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para carregar todo o filtro
+        private void CarregarFiltro()
+        {
+            // Carrega todos os ComboBox necessários
+            CarregarProdutos();
+
+            // Preenche os filtros
+            PreencherFiltros();
+        }
+
         // Método para carregar produtos no ComboBox
         private void CarregarProdutos()
         {
             try
             {
-                var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
-                produtos = movimentacoes.Select(m => new ProdutoData
+                if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
                 {
-                    Nome = m.ProdutoId,
-                    Tipo = "", // Inicialize com um valor padrão
-                    Marca = "", // Inicialize com um valor padrão
-                    Codigo = "", // Inicialize com um valor padrão
-                    Preço = 0.0, // Inicialize com um valor padrão
-                    Quantidade = 0 // Inicialize com um valor padrão
-                }).Distinct().ToList();
-                ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).Distinct().ToList();
-                MarcaComboBox.ItemsSource = produtos.Select(p => p.Marca).Distinct().ToList();
-                TipoComboBox.ItemsSource = produtos.Select(p => p.Tipo).Distinct().ToList();
-                CodigoComboBox.ItemsSource = produtos.Select(p => p.Codigo).Distinct().ToList();
+                    produtos = value.Cast<ProdutoData>().ToList();
+
+                    ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).Distinct().ToList();
+                    MarcaComboBox.ItemsSource = produtos.Select(p => p.Marca).Distinct().ToList();
+                    TipoComboBox.ItemsSource = produtos.Select(p => p.Tipo).Distinct().ToList();
+                    CodigoComboBox.ItemsSource = produtos.Select(p => p.Codigo).Distinct().ToList();
+                }
             }
             catch (Exception ex)
             {

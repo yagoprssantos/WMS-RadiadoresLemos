@@ -15,6 +15,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             CarregarNotificacoes();
+            CarregarFiltros();
         }
 
         // Método para carregar todas as notificações
@@ -32,6 +33,63 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 AlertaDataGrid.ItemsSource = alertas;
             }
+        }
+
+        // Método para carregar os filtros
+        private void CarregarFiltros()
+        {
+            CarregarDadosComboBoxes();
+        }
+
+        // Método para carregar dados nos ComboBoxes
+        private void CarregarDadosComboBoxes()
+        {
+            TipoComboBox.ItemsSource = alertas.Select(a => a.Tipo).Distinct().ToList();
+            DataComboBox.ItemsSource = alertas.Select(a => DateTime.Parse(a.Data).ToString("dd/MM/yyyy")).Distinct().ToList();
+        }
+
+        // Método chamado ao clicar no botão de aplicar filtro
+        private void AplicarFiltroButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            string tipo = TipoComboBox.SelectedItem?.ToString();
+            string data = DataComboBox.SelectedItem?.ToString();
+
+            AplicarFiltro(tipo, data);
+            FiltroPopup.IsOpen = false;
+        }
+
+        // Método para aplicar os filtros na tabela de notificações
+        private void AplicarFiltro(string tipo, string data)
+        {
+            try
+            {
+                var alertasFiltrados = alertas.Where(a =>
+                    (string.IsNullOrEmpty(tipo) || a.Tipo == tipo) &&
+                    (string.IsNullOrEmpty(data) || DateTime.Parse(a.Data).ToString("dd/MM/yyyy") == data)).ToList();
+
+                AlertaDataGrid.ItemsSource = alertasFiltrados;
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Evento para limpar os filtros
+        private void LimparFiltroButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            TipoComboBox.SelectedItem = null;
+            DataComboBox.SelectedItem = null;
+
+            // Recarregar todas as notificações
+            AlertaDataGrid.ItemsSource = alertas;
+            FiltroPopup.IsOpen = false;
+        }
+
+        // Método chamado ao clicar no botão de filtrar
+        private void FiltrarButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            FiltroPopup.IsOpen = true;
         }
     }
 }

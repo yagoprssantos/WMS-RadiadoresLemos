@@ -40,35 +40,58 @@
                     </ComboBox>
                 </Grid>
 
-                <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
+                <!-- Popup para Entrada/Saída -->
+                <Popup x:Name="FiltroEntradaSaidaPopup" Placement="Bottom" StaysOpen="True" PlacementTarget="{Binding ElementName=FiltrarButton}">
                     <StackPanel Background="{StaticResource PanelBackgroundBrush}">
                         <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="10">
                             <StackPanel Background="{StaticResource SecondaryBrush}">
                                 <TextBlock Text="Filtrar por Produto" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                                <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
-                                </ComboBox>
+                                <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
                                 <TextBlock Text="Filtrar por Período" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <DatePicker x:Name="DataInicioPicker" Width="125" Foreground="{StaticResource TextBrush}" Margin="10, 0, 0, 10"/>
-                                    <DatePicker x:Name="DataFimPicker" Width="125" Foreground="{StaticResource TextBrush}" Margin="5, 0, 10, 10"/>
+                                    <Border  BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="10, 0, 0, 10" BorderThickness="0" CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}">
+                                        <DatePicker x:Name="DataInicioPicker" Width="125" Style="{StaticResource DatePickerStyle}"/>
+                                    </Border>
+                                    <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="5, 0, 10, 10" BorderThickness="0" CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}">
+                                        <DatePicker x:Name="DataFimPicker" Width="125" Style="{StaticResource DatePickerStyle}"/>
+                                    </Border>
                                 </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 5, 0, 10">
+                                    <Button Content="Aplicar Filtro" Click="AplicarFiltroEntradaSaidaButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
+                                    <Button Content="Limpar" Click="LimparFiltroEntradaSaidaButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Popup>
 
-                                <!-- Filtros adicionais para o HistoricoDataGrid -->
-                                <TextBlock x:Name="FiltroTipoTextBlock" Text="Filtrar por Tipo" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}" Visibility="Collapsed"/>
-                                <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}" Visibility="Collapsed">
+                <!-- Popup para Histórico -->
+                <Popup x:Name="FiltroHistoricoPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
+                    <StackPanel Background="{StaticResource PanelBackgroundBrush}">
+                        <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="10">
+                            <StackPanel Background="{StaticResource SecondaryBrush}">
+                                <TextBlock Text="Filtrar por Tipo" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                                <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
                                     <ComboBoxItem Content="Operacional"/>
                                     <ComboBoxItem Content="Erro"/>
                                 </ComboBox>
-                                <TextBlock x:Name="FiltroNivelTextBlock" Text="Filtrar por Nível" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}" Visibility="Collapsed"/>
-                                <ComboBox x:Name="NivelComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}" Visibility="Collapsed">
+                                <TextBlock Text="Filtrar por Nível" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                                <ComboBox x:Name="NivelComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
                                     <ComboBoxItem Content="Usuário"/>
                                     <ComboBoxItem Content="Sistema"/>
                                 </ComboBox>
-                                <!-- Fim dos Filtros Adicionais -->
-
+                                <TextBlock Text="Filtrar por Período" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="10, 0, 0, 10" BorderThickness="0" CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}">
+                                        <DatePicker x:Name="DataInicioHistoricoPicker" Width="125" Foreground="{StaticResource TextBrush}" Margin="10, 0, 0, 10" Style="{StaticResource DatePickerStyle}"/>
+                                    </Border>
+                                    <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="5, 0, 10, 10" BorderThickness="0" CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}">
+                                        <DatePicker x:Name="DataFimHistoricoPicker" Width="125" Foreground="{StaticResource TextBrush}" Margin="5, 0, 10, 10" Style="{StaticResource DatePickerStyle}"/>
+                                    </Border>
+                                </StackPanel>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 5, 0, 10">
-                                    <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
-                                    <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
+                                    <Button Content="Aplicar Filtro" Click="AplicarFiltroHistoricoButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
+                                    <Button Content="Limpar" Click="LimparFiltroHistoricoButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>

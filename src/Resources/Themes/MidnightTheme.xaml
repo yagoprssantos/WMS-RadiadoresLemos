@@ -142,7 +142,7 @@
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="FontSize" Value="16"/>
-        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -150,7 +150,7 @@
                             CornerRadius="15"
                             Padding="10">
                         <Grid>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0, 0, 15, 0"/>
                             <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                         </Grid>
                     </Border>
@@ -167,6 +167,55 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Estilo para "Selecionar Data" -->
+    <Style x:Key="DatePickerStyle" TargetType="DatePicker">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DatePicker">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="5">
+                            <Grid>
+                                <TextBox x:Name="PART_TextBox"
+                                     Background="Transparent"
+                                     Foreground="{TemplateBinding Foreground}"
+                                     FontSize="{TemplateBinding FontSize}"
+                                     Padding="{TemplateBinding Padding}"
+                                     BorderThickness="0"
+                                     IsReadOnly="True"/>
+                                <Button x:Name="PART_Button"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Width="20"
+                                    Height="20"
+                                    Cursor="Hand">
+                                    <Path Data="M 0 0 L 4 4 L 8 0"
+                                      Stroke="{StaticResource TextBrush}"
+                                      StrokeThickness="2"
+                                      Width="9"
+                                      Height="6"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 
     <!-- Estilo para Botões de Menu -->
     <Style x:Key="MenuButtonStyle" TargetType="Button">

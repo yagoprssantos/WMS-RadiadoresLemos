@@ -17,7 +17,6 @@ using WMS_RadiadoresLemos_WPF.src.Models;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
-
     public partial class RegistroUserControl : UserControl
     {
         public RegistroUserControl()
@@ -106,21 +105,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     {
                         EntradasSaidasGrid.Visibility = Visibility.Visible;
                         HistoricoGrid.Visibility = Visibility.Collapsed;
-                        // Ocultar filtros adicionais
-                        FiltroTipoTextBlock.Visibility = Visibility.Collapsed;
-                        TipoComboBox.Visibility = Visibility.Collapsed;
-                        FiltroNivelTextBlock.Visibility = Visibility.Collapsed;
-                        NivelComboBox.Visibility = Visibility.Collapsed;
                     }
                     else if (category == "Histórico")
                     {
                         EntradasSaidasGrid.Visibility = Visibility.Collapsed;
                         HistoricoGrid.Visibility = Visibility.Visible;
-                        // Mostrar filtros adicionais
-                        FiltroTipoTextBlock.Visibility = Visibility.Visible;
-                        TipoComboBox.Visibility = Visibility.Visible;
-                        FiltroNivelTextBlock.Visibility = Visibility.Visible;
-                        NivelComboBox.Visibility = Visibility.Visible;
                     }
                 }
             }
@@ -129,39 +118,47 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         // Evento para abrir o popup de filtro
         private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
-            FiltroPopup.IsOpen = true;
+            var selectedCategory = CategoriasComboBox.SelectedItem as ComboBoxItem;
+            if (selectedCategory != null)
+            {
+                string category = selectedCategory.Content.ToString();
+                if (category == "Entrada/Saída")
+                {
+                    FiltroEntradaSaidaPopup.IsOpen = true;
+                }
+                else if (category == "Histórico")
+                {
+                    FiltroHistoricoPopup.IsOpen = true;
+                }
+            }
         }
 
-        // Evento para aplicar o filtro selecionado
-        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
+        // Evento para aplicar o filtro de Entrada/Saída
+        private void AplicarFiltroEntradaSaidaButton_Click(object sender, RoutedEventArgs e)
         {
             string produto = ProdutoComboBox.SelectedItem?.ToString();
             DateTime? dataInicio = DataInicioPicker.SelectedDate;
             DateTime? dataFim = DataFimPicker.SelectedDate;
 
-            AplicarFiltro(produto, dataInicio, dataFim);
-            FiltroPopup.IsOpen = false;
+            AplicarFiltroEntradaSaida(produto, dataInicio, dataFim);
+            FiltroEntradaSaidaPopup.IsOpen = false;
         }
 
-        // Evento para limpar os filtros
-        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
+        // Evento para limpar os filtros de Entrada/Saída
+        private void LimparFiltroEntradaSaidaButton_Click(object sender, RoutedEventArgs e)
         {
             ProdutoComboBox.SelectedItem = null;
             DataInicioPicker.SelectedDate = null;
             DataFimPicker.SelectedDate = null;
 
-            // Historico
-            TipoComboBox.SelectedItem = null;
-            NivelComboBox.SelectedItem = null;
-
             // Recarregar todas as movimentações
             CarregarEntradas();
             CarregarSaidas();
-            FiltroPopup.IsOpen = false;
+            FiltroEntradaSaidaPopup.IsOpen = false;
         }
 
-        // Método para aplicar o filtro selecionado
-        private void AplicarFiltro(string produto, DateTime? dataInicio, DateTime? dataFim)
+        // Método para aplicar o filtro de Entrada/Saída
+        private void AplicarFiltroEntradaSaida(string produto, DateTime? dataInicio, DateTime? dataFim)
         {
             try
             {
@@ -184,14 +181,34 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Atualizar DataGrids
                 EntradaDataGrid.ItemsSource = entradasFiltradas;
                 SaidaDataGrid.ItemsSource = saidasFiltradas;
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-                // Filtrar histórico
+        // Evento para aplicar o filtro de Histórico
+        private void AplicarFiltroHistoricoButton_Click(object sender, RoutedEventArgs e)
+        {
+            string tipo = (TipoComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            string nivel = (NivelComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            DateTime? dataInicio = DataInicioHistoricoPicker.SelectedDate;
+            DateTime? dataFim = DataFimHistoricoPicker.SelectedDate;
+
+            AplicarFiltroHistorico(tipo, nivel, dataInicio, dataFim);
+            FiltroHistoricoPopup.IsOpen = false;
+        }
+
+        // Método para aplicar o filtro de Histórico
+        private void AplicarFiltroHistorico(string tipo, string nivel, DateTime? dataInicio, DateTime? dataFim)
+        {
+            try
+            {
                 var historico = LogHistorico.ObterLogs();
-                var tipo = TipoComboBox.SelectedItem?.ToString();
-                var nivel = NivelComboBox.SelectedItem?.ToString();
 
                 var historicoFiltrado = historico.Where(h =>
-                    (string.IsNullOrEmpty(tipo) || h.Tipo == tipo) &&
+                    (string.IsNullOrEmpty(tipo) || h.Tipo.Equals(tipo, StringComparison.OrdinalIgnoreCase)) &&
                     (string.IsNullOrEmpty(nivel) || h.Nivel == nivel) &&
                     (!dataInicio.HasValue || h.Data >= dataInicio.Value) &&
                     (!dataFim.HasValue || h.Data <= dataFim.Value)).ToList();
@@ -201,8 +218,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"Erro ao aplicar filtro: {ex.Message}");
             }
+        }
+
+        // Evento para limpar os filtros de Histórico
+        private void LimparFiltroHistoricoButton_Click(object sender, RoutedEventArgs e)
+        {
+            TipoComboBox.SelectedItem = null;
+            NivelComboBox.SelectedItem = null;
+            DataInicioHistoricoPicker.SelectedDate = null;
+            DataFimHistoricoPicker.SelectedDate = null;
+
+            // Recarregar histórico
+            CarregarHistorico();
+            FiltroHistoricoPopup.IsOpen = false;
         }
     }
 }
