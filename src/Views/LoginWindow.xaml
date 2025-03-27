@@ -13,18 +13,18 @@
     <Grid>
         <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Campo de Texto para Usuário -->
-            <TextBlock Foreground="White" Text="Usuário" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
+            <TextBlock Foreground="{StaticResource TextBrush}" Text="Usuário" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
             <TextBox Name="UsernameField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"
                      VerticalAlignment="Center" KeyDown="UsernameField_KeyDown"/>
 
             <!-- Campo de Texto para Senha -->
-            <TextBlock Foreground="White" Text="Senha" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
+            <TextBlock Foreground="{StaticResource TextBrush}" Text="Senha" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
             <PasswordBox Name="PasswordField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"
                          KeyDown="PasswordField_KeyDown"/>
 
             <StackPanel Orientation="Horizontal" Width="300" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- Botão para Confirmar -->
-                <Button Content="Entrar" FontSize="16" Width="140" Height="40" Click="ConfirmarLogin_Click" Margin="2.5,0,10,0"/>
+                <Button Content="Entrar" FontSize="16" Width="140" Height="40" Click="ConfirmarLogin_Click" Margin="2.5,0,10,0" Style="{StaticResource EmphasisButtonStyle}"/>
 
                 <!-- Botão para Sair da aplicação -->
                 <Button Content="Sair" FontSize="16" Width="140" Height="40" Click="Sair_Click" Style="{StaticResource CancelButtonStyle}"/>
@@ -34,7 +34,7 @@
         <!-- Grid para escurecer o fundo e mostrar a barra de progresso -->
         <Grid x:Name="LoadingGrid" Visibility="Collapsed" Background="#80000000">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Carregando..." x:Name="TextoCarregamento" Foreground="White" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                <TextBlock Text="Carregando..." x:Name="TextoCarregamento" Foreground="{StaticResource AccentBrush}" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
                 <ProgressBar x:Name="LoadingProgressBar" 
                              IsIndeterminate="True" 
                              Width="300" 

@@ -28,44 +28,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             DataContext = this;
-            SetupDatabaseInfo();
             SetupLinks();
-            CarregarTabelas();
-        }
-
-        // Método para configurar informações do banco de dados
-        private void SetupDatabaseInfo()
-        {
-            try
-            {
-                if (DatabaseConnect.IsConnected)
-                {
-                    Status.Text = "Conectado ao Banco de Dados";
-                    Status.Foreground = Brushes.Green;
-                }
-                else
-                {
-                    Status.Text = "Modo Offline";
-                    Status.Foreground = Brushes.Red;
-                }
-            }
-            catch (Exception ex)
-            {
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao configurar informações do banco de dados. Possíveis motivos:\n" +
-                                            "- Serviço do banco de dados indisponível;\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Configurações incorretas do banco de dados.",
-                                            "- Verifique sua conexão com a internet;\n" +
-                                            "- Verifique as configurações do banco de dados.");
-
-                // Ativa modo offline caso não esteja ativo
-                if (MainWindow.isAppOffline == false)
-                {
-                    MainWindow._instance?.ativarModoOffline();
-                }
-            }
         }
 
         // Método para configurar botões de links (arquivos locais e banco de dados)
@@ -78,18 +41,11 @@ namespace WMS_RadiadoresLemos_WPF
                 abrirArquivosLocaisButton.Click += AbrirArquivosLocais_Click;
             }
 
-            // Configura o evento do botão para abrir Firestore
-            var abrirFirestoreButton = FindName("AbrirFirestoreButton") as Button;
-            if (abrirFirestoreButton != null)
+            // Configura o evento do botão para abrir o OneDrive
+            var abrirOneDriveButton = FindName("AbrirOneDriveButton") as Button;
+            if (abrirOneDriveButton != null)
             {
-                abrirFirestoreButton.Click += AbrirFirestore_Click;
-            }
-
-            // Configura o evento do botão para abrir Google Cloud
-            var abrirGoogleCloudButton = FindName("AbrirGoogleCloudButton") as Button;
-            if (abrirGoogleCloudButton != null)
-            {
-                abrirGoogleCloudButton.Click += AbrirGoogleCloud_Click;
+                abrirOneDriveButton.Click += AbrirOneDrive_Click;
             }
         }
 
@@ -106,266 +62,10 @@ namespace WMS_RadiadoresLemos_WPF
             });
         }
 
-        private void AbrirFirestore_Click(object sender, RoutedEventArgs e)
+        private void AbrirOneDrive_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start(new ProcessStartInfo
-            {
-                // Abre o console do Firestore no navegador
-                FileName = "https://console.firebase.google.com/project/radiadoreslemos-ea8c6/firestore/",
-                UseShellExecute = true
-            });
-        }
-
-        private void AbrirGoogleCloud_Click(object sender, RoutedEventArgs e)
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                // Abre o console do Google Cloud no navegador
-                FileName = "https://console.cloud.google.com/welcome?hl=pt-BR&project=radiadoreslemos-ea8c6",
-                UseShellExecute = true
-            });
-        }
-
-        // Método para carregar as tabelas no ComboBox
-        private void CarregarTabelas()
-        {
-            try
-            {
-                TabelaComboBox.Items.Clear();
-                foreach (var tabela in DadosCache.Tabelas.Keys)
-                {
-                    TabelaComboBox.Items.Add(tabela);
-                }
-            }
-            catch (Exception ex)
-            {
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao carregar tabelas. Possíveis motivos:\n" +
-                                            "- Não foi possível acessar o cache de dados;\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Serviço do banco de dados indisponível.",
-                                            "- Recarregue a tela de Banco de Dados.");
-
-                Console.WriteLine($"Erro ao carregar tabelas: {ex.Message}");
-            }
-        }
-
-        // Evento disparado quando uma tabela é selecionada no ComboBox
-        private void TabelaComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                if (TabelaComboBox.SelectedItem != null)
-                {
-                    string? tabelaSelecionada = TabelaComboBox.SelectedItem?.ToString();
-                    if (tabelaSelecionada != null)
-                    {
-                        AtualizarTabelaDadosCache(tabelaSelecionada);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao selecionar tabela. Possíveis motivos:\n" +
-                                            "- Tabela não encontrada;\n" +
-                                            "- Tabela com dados corrompidos;\n" +
-                                            "- Serviço do banco de dados indisponível.",
-                                            "- Verifique se a tabela selecionada está disponível\n" +
-                                            "- Recarregue a tela de Banco de Dados.");
-
-                Console.WriteLine($"Erro ao selecionar tabela: {ex.Message}");
-            }
-        }
-
-        // Método para atualizar a tabela de dados com os dados do cache
-        private void AtualizarTabelaDadosCache(string tabela)
-        {
-            try
-            {
-                if (DadosCache.Tabelas.TryGetValue(tabela, out List<object>? value))
-                {
-                    dadosFiltrados = value;
-                    DadosDataGrid.ItemsSource = dadosFiltrados;
-                    dadosCarregados = true;
-                    RemoverUltimaColuna();
-                }
-            }
-            catch (Exception ex)
-            {
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
-                                            "- Tabela corrompida;\n" +
-                                            "- Dados não encontrados;\n" +
-                                            "- Serviço do banco de dados indisponível.",
-                                            "- Verifique se a tabela selecionada está disponível\n" +
-                                            "- Recarregue a tela de Banco de Dados.");
-
-                Console.WriteLine($"Erro ao atualizar tabela de dados: {ex.Message}");
-            }
-        }
-
-        // Método para remover a última coluna do DataGrid
-        private void RemoverUltimaColuna()
-        {
-            try
-            {
-                if (DadosDataGrid.Columns.Count > 0)
-                {
-                    DadosDataGrid.Columns.RemoveAt(DadosDataGrid.Columns.Count - 1);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Ignora exceções ao remover a última coluna
-                AlertaCache.AdicionarAlerta("Aviso",
-                                            ex.Message.ToString(),
-                                            $"Erro ao remover última coluna. Isto é um erro mas não causa interferência no funcionamento do sistema. Possíveis motivos:\n" +
-                                            "- Aplicações com bugs;\n" +
-                                            "- Tabela de dados vazia;\n" +
-                                            "- Problema ao carregar dados;\n" +
-                                            "- Impossibilidade de remover a última coluna.",
-                                            "- Feche e abra a tela de Banco de Dados");
-
-                Console.WriteLine($"Erro ao remover última coluna: {ex.Message}");
-            }
-        }
-
-        // Evento disparado quando o texto de pesquisa é alterado
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                if (!dadosCarregados && TabelaComboBox.SelectedItem != null)
-                {
-                    string? tabelaSelecionada = TabelaComboBox.SelectedItem?.ToString();
-                    if (tabelaSelecionada != null)
-                    {
-                        AtualizarTabelaDadosCache(tabelaSelecionada);
-                    }
-                }
-
-                string searchText = SearchBox.Text.ToLower();
-                var filteredData = dadosFiltrados.Where(item =>
-                    item.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Any(prop => prop.GetValue(item)?.ToString()?.ToLower().Contains(searchText) == true)
-                ).ToList();
-                DadosDataGrid.ItemsSource = filteredData;
-                RemoverUltimaColuna();
-            }
-            catch (Exception ex)
-            {
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao filtrar dados. Possíveis motivos:\n" +
-                                            "- Sistema com bugs;\n" +
-                                            "- Caracteres inválidos na pesquisa;\n" +
-                                            "- Problema ao carregar dados.",
-                                            "- Feche e abra a tela de Banco de Dados;\n" +
-                                            "- Tente reiniciar a aplicação.");
-
-                Console.WriteLine($"Erro ao filtrar dados: {ex.Message}");
-            }
-        }
-
-        // Evento disparado quando o botão de atualizar é clicado
-        private void AtualizarDataGrid_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            try
-            {
-                if (TabelaComboBox.SelectedItem != null)
-                {
-                    string? tabelaSelecionada = TabelaComboBox.SelectedItem?.ToString();
-                    if (tabelaSelecionada != null)
-                    {
-                        AtualizarTabelaDadosCache(tabelaSelecionada);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao atualizar tabela de dados. Possíveis motivos:\n" +
-                                            "- Componentes da interface corrompidos;\n" +
-                                            "- Erro ao reconhecer a tabela selecionada;\n" +
-                                            "- Serviço do banco de dados indisponível.",
-                                            "- Feche e abra a tela de Banco de Dados;\n" +
-                                            "- Reinicie a aplicação.");
-
-                Console.WriteLine($"Erro ao atualizar DataGrid: {ex.Message}");
-            }
-        }
-        private async Task<List<object>> ObterDadosDoFirebaseAsync()
-        {
-            var db = DatabaseConnect.Database; // Supondo que DatabaseConnect.Database esteja configurado com a instância do Firestore
-            var produtos = new List<object>();
-
-            try
-            {
-                var produtosRef = db.Collection("Produtos");
-                var snapshot = await produtosRef.GetSnapshotAsync();
-
-                foreach (var doc in snapshot.Documents)
-                {
-                    // Converte o documento para o tipo ProdutoData (ajuste para o tipo específico que você usa)
-                    var produto = doc.ConvertTo<ProdutoData>();
-                    produtos.Add(produto);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao obter dados de Produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao obter dados de Produtos. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Configurações incorretas do banco de dados;\n" +
-                                            "- Serviço do banco de dados indisponível.",
-                                            "- Verifique sua conexão com a internet;\n" +
-                                            "- Verifique as configurações do banco de dados.");
-            }
-
-            return produtos;
-        }
-
-        private async Task<List<object>> ObterDadosDoArquivoAsync()
-        {
-            var dados = new List<object>();
-            var fileManager = new DatabaseFileManager();
-
-            try
-            {
-                // Lê os dados de todas as tabelas
-                var usuarios = await DatabaseFileManager.LerDoArquivoAsync<UsuarioData>(fileManager.CaminhoArquivoUsuarios);
-                dados.AddRange(usuarios);
-
-                var produtos = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(fileManager.CaminhoArquivoProdutos);
-                dados.AddRange(produtos);
-
-                var logs = await DatabaseFileManager.LerDoArquivoAsync<LogData>(fileManager.CaminhoArquivoLogs);
-                dados.AddRange(logs);
-
-                var movimentacoes = await DatabaseFileManager.LerDoArquivoAsync<MovimentacaoData>(fileManager.CaminhoArquivoMovimentacoes);
-                dados.AddRange(movimentacoes);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao obter dados do arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            $"Erro ao obter dados do arquivo. Possíveis motivos:\n" +
-                                            "- Arquivo corrompido;\n" +
-                                            "- Formato de arquivo inválido;\n" +
-                                            "- Problemas ao acessar o arquivo.",
-                                            "- Verifique se o arquivo está correto;\n" +
-                                            "- Verifique se o formato do arquivo é suportado.");
-            }
-
-            return dados;
+            // Abre o OneDrive
+            Process.Start("explorer.exe", "shell:OneDrive");
         }
 
 
@@ -392,7 +92,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
@@ -429,21 +129,9 @@ namespace WMS_RadiadoresLemos_WPF
 
                 var dadosProdutos = new List<object>();
 
-                // Se banco conectado
-                if (DatabaseConnect.IsConnected)
-                {
-                    // Obter dados do Firebase
-                    dadosProdutos = await ObterDadosDoFirebaseAsync();
-                }
-                else
-                {
-                    // Obter dados do arquivo
-                    dadosProdutos = await ObterDadosDoArquivoAsync();
-                }
-
                 if (dadosProdutos == null || !dadosProdutos.Any())
                 {
-                    MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //MessageBox.Show("Nenhum dado disponível para exportação.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     AlertaCache.AdicionarAlerta("Erro",
                                                 "Nenhum dado disponível para exportação.",
                                                 $"Erro ao exportar dados. Possíveis motivos:\n" +
@@ -550,7 +238,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //MessageBox.Show($"Erro ao exportar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         AlertaCache.AdicionarAlerta("Erro",
                                                     ex.Message.ToString(),
                                                     $"Erro ao exportar dados. Possíveis motivos:\n" +
@@ -569,7 +257,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar exportação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar exportação de dados. Possíveis motivos:\n" +
@@ -632,7 +320,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar importação de dados. Possíveis motivos:\n" +
@@ -669,7 +357,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 if (filePath == null)
                 {
-                    MessageBox.Show("Caminho do arquivo não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //MessageBox.Show("Caminho do arquivo não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -697,7 +385,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar importação de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar importação de dados. Possíveis motivos:\n" +
@@ -780,7 +468,7 @@ namespace WMS_RadiadoresLemos_WPF
                             }
                             else
                             {
-                                MessageBox.Show($"A planilha '{worksheet.Name}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                //MessageBox.Show($"A planilha '{worksheet.Name}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                                 AlertaCache.AdicionarAlerta("Erro",
                                                             $"Planilha '{worksheet.Name}' vazia ou sem cabeçalho.",
                                                             $"Erro ao substituir dados. Possíveis motivos:\n" +
@@ -831,7 +519,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao substituir dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao substituir dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao substituir dados. Possíveis motivos:\n" +
@@ -864,7 +552,7 @@ namespace WMS_RadiadoresLemos_WPF
                         var worksheet = workbook.Worksheet(tabela);
                         if (worksheet == null)
                         {
-                            MessageBox.Show($"A planilha '{tabela}' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            //MessageBox.Show($"A planilha '{tabela}' não foi encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                             AlertaCache.AdicionarAlerta("Erro",
                                                         $"Planilha '{tabela}' não encontrada.",
                                                         $"Erro ao adicionar dados. Possíveis motivos:\n" +
@@ -901,7 +589,7 @@ namespace WMS_RadiadoresLemos_WPF
                         }
                         else
                         {
-                            MessageBox.Show($"A planilha '{tabela}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            //MessageBox.Show($"A planilha '{tabela}' está vazia ou não contém uma linha de cabeçalho.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                             AlertaCache.AdicionarAlerta("Erro",
                                                         $"Planilha '{tabela}' vazia ou sem cabeçalho.",
                                                         $"Erro ao adicionar dados. Possíveis motivos:\n" +
@@ -947,7 +635,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao adicionar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao adicionar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao adicionar dados. Possíveis motivos:\n" +
@@ -985,25 +673,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Tenta reconectar ao banco de dados
             MainWindow._instance.SetupDatabaseConnection();
 
-            // Se a conexão for bem sucedida
-            if (DatabaseConnect.IsConnected)
-            {
-                // Atualiza o status
-                Status.Text = "Conectado ao Banco de Dados";
-                Status.Foreground = Brushes.Green;
-
-                // Fecha a barra de progresso
-                ShowProgressBar.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                Status.Text = "Modo Offline";
-                Status.Foreground = Brushes.Red;
-
-                // Fecha a barra de progresso
-                ShowProgressBar.Visibility = Visibility.Collapsed;
-            }
-
+            ShowProgressBar.Visibility = Visibility.Collapsed;
         }
 
         // Evento disparado quando o botão de gerar tabela é clicado
@@ -1082,7 +752,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Erro ao gerar estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //MessageBox.Show($"Erro ao gerar estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         AlertaCache.AdicionarAlerta("Erro",
                                                     ex.Message.ToString(),
                                                     $"Erro ao gerar estrutura das tabelas. Possíveis motivos:\n" +
@@ -1097,7 +767,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar geração de estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao iniciar geração de estrutura das tabelas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             $"Erro ao iniciar geração de estrutura das tabelas. Possíveis motivos:\n" +

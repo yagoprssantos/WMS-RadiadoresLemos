@@ -22,7 +22,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             CarregarDadosIniciais();
-            PreencherFiltros();
+            CarregarFiltro();
         }
 
         // Método para carregar os dados iniciais
@@ -35,6 +35,37 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para carregar todo o filtro
+        private void CarregarFiltro()
+        {
+            // Carrega todos os ComboBox necessários
+            CarregarProdutos();
+
+            // Preenche os filtros
+            PreencherFiltros();
+        }
+
+        // Método para carregar produtos no ComboBox
+        private void CarregarProdutos()
+        {
+            try
+            {
+                if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+                {
+                    produtos = value.Cast<ProdutoData>().ToList();
+
+                    ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).Distinct().ToList();
+                    MarcaComboBox.ItemsSource = produtos.Select(p => p.Marca).Distinct().ToList();
+                    TipoComboBox.ItemsSource = produtos.Select(p => p.Tipo).Distinct().ToList();
+                    CodigoComboBox.ItemsSource = produtos.Select(p => p.Codigo).Distinct().ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         // Método para preencher os filtros de marca e tipo de produto
         private void PreencherFiltros()
         {
@@ -43,23 +74,12 @@ namespace WMS_RadiadoresLemos_WPF
                 var marcas = produtos.Select(p => p.Marca).Distinct().ToList();
                 var tipos = produtos.Select(p => p.Tipo).Distinct().ToList();
 
-                // Adiciona uma opção vazia no início das listas
-                marcas.Insert(0, string.Empty);
-                tipos.Insert(0, string.Empty);
-
-                if (marcas != null && marcas.Any())
-                {
-                    MarcaProdutoComboBox.ItemsSource = marcas;
-                }
-
-                if (tipos != null && tipos.Any())
-                {
-                    TipoProdutoComboBox.ItemsSource = tipos;
-                }
+                MarcaComboBox.ItemsSource = marcas;
+                TipoComboBox.ItemsSource = tipos;
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show($"Erro ao preencher filtros: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao preencher filtros: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -73,44 +93,31 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
         // Método chamado ao clicar no botão de cadastrar produto
         private async void CadastrarProduto_Click(object sender, RoutedEventArgs e)
         {
-            if (CamposPreenchidos())
+            var cadastrarProdutoWindow = new CadastrarProdutoWindow();
+            if (cadastrarProdutoWindow.ShowDialog() == true)
             {
-                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
-                confirmarSenhaWindow.ShowDialog();
+                // Obtém o produto cadastrado
+                var produtoCadastrado = cadastrarProdutoWindow.Produto;
 
-                if (confirmarSenhaWindow.IsConfirmed)
-                {
-                    if (!precisaAtualizarEstoque)
-                    {
-                        // Se a tabela de estoque não precisa ser atualizada, cadastra o produto
-                        CadastrarProduto();
-                        MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                        LimparCamposCadastro();
-                    }
-                    else
-                    {
-                        // Se a tabela de estoque precisa ser atualizada, atualiza a tabela e cadastra o produto
-                        await AtualizarTabelaEstoque();
+                // Atualiza o banco de dados
+                await AtualizarProduto(produtoCadastrado);
 
-                        CadastrarProduto();
-                        MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                        LimparCamposCadastro();
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+                // Atualiza a fonte de dados do DataGrid
+                EstoqueDataGrid.ItemsSource = null;
+                EstoqueDataGrid.ItemsSource = produtos;
+
+                // Avisa o usuário que o produto foi cadastrado
+                MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                MessageBox.Show("Preencha todos os campos para cadastrar o produto.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Cadastro de produto cancelado.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
+
 
         // Método para atualizar a tabela de estoque com os produtos
         private async Task AtualizarTabelaEstoque()
@@ -164,98 +171,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Verifica se todos os campos necessários estão preenchidos
-        private bool CamposPreenchidos() =>
-            !string.IsNullOrEmpty(NomeProduto.Text) &&
-            !string.IsNullOrEmpty(TipoProduto.Text) &&
-            !string.IsNullOrEmpty(MarcaProduto.Text) &&
-            !string.IsNullOrEmpty(CodigoProduto.Text) &&
-            !string.IsNullOrEmpty(PrecoProduto.Text) &&
-            !string.IsNullOrEmpty(QuantidadeInicial.Text);
-
-        // Método para cadastrar um novo produto no banco de dados
-        private async void CadastrarProduto()
-        {
-            var db = DatabaseConnect.Database;
-            ProdutoData data = DadosDoProduto();
-
-
-            // Se não estiver conectado ao banco
-            if (db == null || !DatabaseConnect.IsConnected)
-            {
-                // Ativa modo offline caso não esteja ativo
-                if (MainWindow.isAppOffline == false)
-                {
-                    MainWindow._instance?.ativarModoOffline();
-                }
-            }
-            else
-            {
-                // Salva o produto no banco de dados Firestore
-                var docRef = db.Collection("Produtos").Document(data.Codigo);
-                await docRef.SetAsync(data);
-            }
-
-            // Atualiza o cache local
-            if (!DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
-            {
-                value = [];
-                DadosCache.Tabelas["Produtos"] = value;
-            }
-
-            // Adiciona o produto ao cache local e à fonte de dados do DataGrid
-            value.Add(data);
-            produtos.Add(data);
-            EstoqueDataGrid.ItemsSource = null;
-            EstoqueDataGrid.ItemsSource = produtos;
-
-            // Adiciona o novo produto no arquivo JSON
-            var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
-            var produtosCache = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
-            produtosCache.Add(data);
-            await DatabaseFileManager.SalvarNoArquivoAsync(caminhoArquivoProdutos, produtosCache);
-
-            // Adiciona log
-            var log = new LogData
-            {
-                Data = DateTime.UtcNow,
-                Tipo = "OPERACIONAL",
-                Nivel = "Usuário",
-                Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
-                Usuario = MainWindow.UsuarioLogado.Nome
-            };
-            await LogHistorico.RegistrarLogAsync(log);
-        }
-
-        // Método para obter os dados do produto a partir dos TextBoxes
-        private ProdutoData DadosDoProduto() => new()
-        {
-            Nome = NomeProduto.Text.Trim(),
-            Tipo = TipoProduto.Text.Trim(),
-            Marca = MarcaProduto.Text.Trim(),
-            Codigo = CodigoProduto.Text.Trim(),
-
-            // Remove a formatação do preço (1.000,00 -> 1000 OU 1.999,99 -> 1999.99)
-            Preço = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", "."), System.Globalization.CultureInfo.InvariantCulture),
-
-
-            // Remove a formatação da quantidade (1.000 -> 1000)
-            Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", "")),
-
-            Id = CodigoProduto.Text.Trim()
-        };
-
-        // Método para limpar os campos de cadastro
-        private void LimparCamposCadastro()
-        {
-            NomeProduto.Text = string.Empty;
-            TipoProduto.Text = string.Empty;
-            MarcaProduto.Text = string.Empty;
-            CodigoProduto.Text = string.Empty;
-            PrecoProduto.Text = string.Empty;
-            QuantidadeInicial.Text = string.Empty;
-        }
-
 
         // Método chamado ao alterar o texto da caixa de busca
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -265,9 +180,6 @@ namespace WMS_RadiadoresLemos_WPF
                 // Garante que produtos estejam sempre carregados
                 AtualizarTabelaEstoqueCache();
             }
-
-            // Aplica filtros
-            AplicarFiltros();
         }
 
         // Método para atualizar a tabela de estoque com os produtos do cache
@@ -287,61 +199,56 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método chamado ao clicar no botão de filtrar
-        private void AbrirFiltroPopup_Click(object sender, RoutedEventArgs e)
+        private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
-            // Verifica se o PainelFiltrosPopup está aberto
-            if (PainelFiltrosPopup.IsOpen)
-            {
-                // Se estiver aberto, fecha o popup
-                PainelFiltrosPopup.IsOpen = false;
-            }
-            else
-            {
-                // Se estiver fechado, abre o popup
-                PainelFiltrosPopup.IsOpen = true;
-            }
+            FiltroPopup.IsOpen = true;
         }
 
-        // Método chamado ao clicar no botão de filtros
-        private void Filtro_Changed(object sender, RoutedEventArgs e)
+        // Método chamado ao clicar no botão de aplicar filtro
+        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            AplicarFiltros();
+            string produto = ProdutoComboBox.SelectedItem?.ToString();
+            string tipo = TipoComboBox.SelectedItem?.ToString();
+            string marca = MarcaComboBox.SelectedItem?.ToString();
+            string codigo = CodigoComboBox.SelectedItem?.ToString();
+            bool emEstoque = EmEstoqueCheckBox.IsChecked == true;
+
+            AplicarFiltro(produto, tipo, marca, codigo, emEstoque);
+            FiltroPopup.IsOpen = false;
         }
 
         // Método para aplicar os filtros na tabela de estoque
-        private void AplicarFiltros()
+        private void AplicarFiltro(string produto, string tipo, string marca, string codigo, bool emEstoque)
         {
-            var view = CollectionViewSource.GetDefaultView(produtos);
-            if (view != null)
+            try
             {
-                view.Filter = item =>
-                {
-                    var produto = item as ProdutoData;
-                    if (produto == null) return false;
+                var produtosFiltrados = produtos.Where(p =>
+                    (string.IsNullOrEmpty(produto) || p.Nome.Contains(produto, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(tipo) || p.Tipo == tipo) &&
+                    (string.IsNullOrEmpty(marca) || p.Marca == marca) &&
+                    (string.IsNullOrEmpty(codigo) || p.Codigo.Contains(codigo, StringComparison.OrdinalIgnoreCase)) &&
+                    (!emEstoque || p.Quantidade > 0)).ToList();
 
-                    bool emEstoque = EmEstoqueCheckBox.IsChecked == true ? produto.Quantidade > 0 : true;
-                    bool marcaCorreta = MarcaProdutoComboBox.SelectedItem == null || MarcaProdutoComboBox.SelectedItem.ToString() == string.Empty || produto.Marca == MarcaProdutoComboBox.SelectedItem.ToString();
-                    bool tipoCorreto = TipoProdutoComboBox.SelectedItem == null || TipoProdutoComboBox.SelectedItem.ToString() == string.Empty || produto.Tipo == TipoProdutoComboBox.SelectedItem.ToString();
-
-                    // Faz a pesquisa por texto em todos os campos do produto com o filtro (se houver)
-                    string searchText = SearchBox.Text.ToLower();
-                    bool pesquisaCorreta = string.IsNullOrEmpty(searchText) ||
-                                           produto.Nome.ToLower().Contains(searchText) ||
-                                           produto.Tipo.ToLower().Contains(searchText) ||
-                                           produto.Marca.ToLower().Contains(searchText) ||
-                                           produto.Codigo.ToLower().Contains(searchText);
-
-                    return emEstoque && marcaCorreta && tipoCorreto && pesquisaCorreta;
-                };
-                view.Refresh();
+                EstoqueDataGrid.ItemsSource = produtosFiltrados;
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // Método chamado ao clicar no botão de atualizar tabela de estoque
-        private async void AtualizarDataGrid_Click(object sender, RoutedEventArgs e)
+        // Evento para limpar os filtros
+        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            await AtualizarTabelaEstoque();
-            MessageBox.Show("Tabela de estoque atualizada.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+            ProdutoComboBox.SelectedItem = null;
+            TipoComboBox.SelectedItem = null;
+            MarcaComboBox.SelectedItem = null;
+            CodigoComboBox.SelectedItem = null;
+            EmEstoqueCheckBox.IsChecked = false;
+
+            // Recarregar todos os produtos
+            CarregarProdutos();
+            FiltroPopup.IsOpen = false;
         }
 
 
@@ -489,7 +396,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -558,7 +465,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao deletar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao deletar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",

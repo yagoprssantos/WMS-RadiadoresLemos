@@ -7,6 +7,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -25,6 +26,10 @@ namespace WMS_RadiadoresLemos_WPF
         public static bool isSincronized;
         public static bool isAppOffline;
 
+        // Variáveis de controle
+        private List<UserControl> _userControls;
+        private int _currentIndex;
+
         public MainWindow()
         {
             // Inicia processo de login
@@ -33,7 +38,7 @@ namespace WMS_RadiadoresLemos_WPF
             StartApplication();
 
             // Adiciona o evento de alerta adicionado
-            AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
+            // AlertaCache.AlertaAdicionado += OnAlertaAdicionado;
 
             this.Closing += Window_Closing;
 
@@ -46,7 +51,24 @@ namespace WMS_RadiadoresLemos_WPF
             _connectDatabaseTimer = new DispatcherTimer();
             _connectDatabaseTimer.Interval = TimeSpan.FromMinutes(1); // Tenta conectar a cada 1 minuto
             _connectDatabaseTimer.Tick += ConnectDatabaseTimer_Tick;
+
+            // Inicializa a lista de UserControls
+            _userControls = new List<UserControl>
+        {
+            new AddEntradaSaidaUserControl(),
+            new VendasUserControl(),
+            new RegistroUserControl(),
+            new ControleEstoqueUserControl(),
+            new DashboardUserControl(),
+            new NotificacoesUserControl(),
+            new ConfiguracaoUserControl()
+        };
+
+            // Define o índice inicial
+            _currentIndex = 0;
+            UpdateTitle();
         }
+
         private async void SaveCacheTimer_Tick(object? sender, EventArgs e)
         {
             try
@@ -78,9 +100,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                // Atualiza a barra de status
-                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
-                UpdateConnectionStatus("Conectando...");
 
                 // Tenta conectar ao banco de dados
                 DatabaseConnect.SetEnvironmentVarible();
@@ -93,10 +112,6 @@ namespace WMS_RadiadoresLemos_WPF
                     SincronizarBancoDados();
                     isAppOffline = false;
                     isSincronized = true;
-
-                    // Atualiza a barra de status
-                    UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
-                    UpdateConnectionStatus("Conectado");
                 }
                 else
                 {
@@ -111,15 +126,10 @@ namespace WMS_RadiadoresLemos_WPF
                 isSincronized = false;
                 isAppOffline = true;
 
-                // Atualiza a barra de status
-                UpdateStatusBar("Erro ao conectar ao banco de dados", Colors.Purple);
-                UpdateConnectionStatus("Desconectado");
-
                 // Espera 3 segundos
                 await Task.Delay(3000);
 
                 // Altera a barra de status
-                UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
             }
         }
 
@@ -136,9 +146,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Configura a visibilidade dos botões de acordo com o tipo de usuário
             ConfigurarVisibilidadeBotoes();
-
-            // Configura a barra de status
-            SetupStatusBar();
         }
 
         // Registra log de saída caso a janela seja fechada ou a aplicação seja encerrada
@@ -179,7 +186,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao registrar a saída do usuário no log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao registrar a saída do usuário no log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -215,7 +222,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao registrar a entrada do usuário no log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao registrar a entrada do usuário no log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -261,7 +268,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                UpdateStatusBar("Estabelecendo conexão com o banco de dados...", Colors.DarkOrange);
 
                 // Estabelece a conexão com o banco de dados Firestore
                 DatabaseConnect.SetEnvironmentVarible();
@@ -275,8 +281,7 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 _connectDatabaseTimer.Start();
-                UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
-                MessageBox.Show($"Erro ao carregar dados, com banco de dados e com arquivos locais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao carregar dados, com banco de dados e com arquivos locais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -291,46 +296,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void SetupStatusBar()
-        {
-            try
-            {
-                UpdateDateTime();
-                StartDateTimeUpdater();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao configurar a barra de status: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Não foi possível configurar a barra de status. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Configurações incorretas do sistema;\n" +
-                                            "- Serviço do sistema indisponível.",
-                                            "- Verifique sua conexão com a internet;\n" +
-                                            "- Verifique as configurações do sistema;\n" +
-                                            "- Tente reconectar ou contate o suporte.");
-            }
-        }
-
-        // Atualiza a barra de status com a data e hora atual
-        private void UpdateDateTime()
-        {
-            StatusBarDateTime.Content = $"{DateTime.Now.ToLongDateString()}  |  {DateTime.Now.ToLongTimeString()}  ";
-        }
-
-        // Inicia o temporizador que atualiza a data e hora a cada segundo
-        private void StartDateTimeUpdater()
-        {
-            DispatcherTimer timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += (sender, args) => UpdateDateTime();
-            timer.Start();
-        }
         public async void SincronizarBancoDados()
         {
             // Fecha qualquer aba que esteja aberta
@@ -338,10 +303,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Deixa carregamento visível
             LoadingScreen.Visibility = Visibility.Visible;
-
-            // Altera a barra de status
-            UpdateStatusBar("Sincronizando dados com o banco de dados...", Colors.Blue);
-            UpdateConnectionStatus("Conectado");
 
             // Sincroniza arquivos cache enviando para o banco de dados
             DatabaseFileManager gerenciadorDeArquivos = new DatabaseFileManager();
@@ -357,43 +318,107 @@ namespace WMS_RadiadoresLemos_WPF
 
 
         // Abas
-        private void RegistroEntradaSaida_Click(object sender, RoutedEventArgs e)
+        private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
-            ContentArea.Content = null;
-            ContentArea.Content = new RegistroEntradaSaidaUserControl();
+            // Altera a cor do botão clicado nos itens do menu
+            foreach (var child in MenuItemsPanel.Children)
+            {
+                if (child is Button button)
+                {
+                    button.Style = (Style)FindResource("MenuButtonStyle");
+                    // Altera a cor do texto e do ícone do botão
+                    foreach (var innerChild in ((StackPanel)button.Content).Children)
+                    {
+                        if (innerChild is TextBlock textBlock)
+                        {
+                            textBlock.Foreground = (Brush)FindResource("TextBrush");
+                        }
+                        else if (innerChild is System.Windows.Shapes.Path path)
+                        {
+                            path.Fill = (Brush)FindResource("TextBrush");
+                        }
+                    }
+                }
+            }
+
+            // Altera a cor do botão clicado no rodapé do menu
+            foreach (var child in MenuItemsFooterPanel.Children)
+            {
+                if (child is Button button)
+                {
+                    button.Style = (Style)FindResource("MenuButtonStyle");
+                    // Altera a cor do texto e do ícone do botão
+                    foreach (var innerChild in ((StackPanel)button.Content).Children)
+                    {
+                        if (innerChild is TextBlock textBlock)
+                        {
+                            textBlock.Foreground = (Brush)FindResource("TextBrush");
+                        }
+                        else if (innerChild is System.Windows.Shapes.Path path)
+                        {
+                            path.Fill = (Brush)FindResource("TextBrush");
+                        }
+                    }
+                }
+            }
+
+            // Se o botão clicado for um botão
+            if (sender is Button clickedButton)
+            {
+                // Altera o estilo do botão clicado
+                clickedButton.Style = (Style)FindResource("MenuItemSelectedStyle");
+
+                // e define a aba correspondente
+                if (clickedButton == BtnAdicionar)
+                {
+                    ContentArea.Content = new AddEntradaSaidaUserControl();
+                    TitleTextBlock.Text = "Entrada/Saída";
+                }
+                else if (clickedButton == BtnVendas)
+                {
+                    ContentArea.Content = new VendasUserControl();
+                    TitleTextBlock.Text = "Vendas";
+                }
+                else if (clickedButton == BtnRegistro)
+                {
+                    ContentArea.Content = new RegistroUserControl();
+                    TitleTextBlock.Text = "Registro";
+                }
+                else if (clickedButton == BtnEstoque)
+                {
+                    ContentArea.Content = new ControleEstoqueUserControl();
+                    TitleTextBlock.Text = "Estoque";
+                }
+                else if (clickedButton == BtnDashboard)
+                {
+                    ContentArea.Content = new DashboardUserControl();
+                    TitleTextBlock.Text = "Relatório";
+                }
+                else if (clickedButton == BtnNotificacoes)
+                {
+                    ContentArea.Content = new NotificacoesUserControl();
+                    TitleTextBlock.Text = "Notificações";
+                }
+                else if (clickedButton == BtnConfiguracoes)
+                {
+                    ContentArea.Content = new ConfiguracaoUserControl();
+                    TitleTextBlock.Text = "Configurações";
+                }
+
+                // Altera a cor do texto e do ícone do botão clicado
+                foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
+                {
+                    if (innerChild is TextBlock textBlock)
+                    {
+                        textBlock.Foreground = (Brush)FindResource("AccentBrush");
+                    }
+                    else if (innerChild is System.Windows.Shapes.Path path)
+                    {
+                        path.Fill = (Brush)FindResource("AccentBrush");
+                    }
+                }
+            }
         }
-
-        private void ControleEstoque_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new ControleEstoqueUserControl();
-        }
-
-        private void Dashboard_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new DashboardUserControl();
-        }
-
-        private void Notificacoes_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new NotificacoesUserControl();
-        }
-
-        private void Usuarios_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new UsuariosUserControl();
-        }
-
-        private void BancoDados_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = null;
-            ContentArea.Content = new BancoDadosUserControl();
-        }
-
-
 
         // Botão de logout para retornar à janela de login
         private async void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -451,7 +476,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao realizar logout: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Erro ao realizar logout: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -465,28 +490,12 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-        // Atualiza a barra de status com uma mensagem e uma cor
-        public void UpdateStatusBar(string message, Color color)
-        {
-            StatusBarItem.Content = message;
-            StatusBar.Background = new SolidColorBrush(color);
-        }
-
-        // Atualiza o status da conexão com o banco de dados
-        public void UpdateConnectionStatus(string status)
-        {
-            ConnectionStatus.Text = status;
-        }
-
-
         // Função para carregar todas as tabelas no cache
         private async Task CarregarTodasTabelasNoCache(bool isConnected)
         {
             try
             {
                 var db = DatabaseConnect.Database;
-                UpdateStatusBar("Carregando dados no cache...", Colors.DarkOrange);
 
                 // Lista de tabelas a serem carregadas no cache
                 var tabelas = new List<string>
@@ -614,9 +623,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                UpdateStatusBar("Erro ao carregar dados", Colors.DarkRed);
-                UpdateConnectionStatus("ERRO");
+                //MessageBox.Show($"Erro ao carregar as tabelas no cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -643,129 +650,112 @@ namespace WMS_RadiadoresLemos_WPF
             // Exemplo de cargos e visibilidade dos botões
             switch (UsuarioLogado.Cargo)
             {
-                case "Administrador":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Visible;
-                    BtnBancoDados.Visibility = Visibility.Visible;
-                    break;
-                case "Gerente":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Visible;
-                    BtnBancoDados.Visibility = Visibility.Visible;
-                    break;
-                case "Operador":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
-                case "Estagiário":
-                    BtnRegistro.Visibility = Visibility.Visible;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Collapsed;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
-                case "Usuário":
-                    BtnRegistro.Visibility = Visibility.Collapsed;
-                    BtnEstoque.Visibility = Visibility.Collapsed;
-                    BtnDashboard.Visibility = Visibility.Visible;
-                    BtnNotificacoes.Visibility = Visibility.Visible;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
-                default:
-                    BtnRegistro.Visibility = Visibility.Collapsed;
-                    BtnEstoque.Visibility = Visibility.Visible;
-                    BtnDashboard.Visibility = Visibility.Collapsed;
-                    BtnNotificacoes.Visibility = Visibility.Collapsed;
-                    BtnUsuarios.Visibility = Visibility.Collapsed;
-                    BtnBancoDados.Visibility = Visibility.Collapsed;
-                    break;
             }
         }
 
+        private void PreviousButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Navega para a aba anterior
+            if (_currentIndex > 0)
+            {
+                _currentIndex--;
+                ContentArea.Content = _userControls[_currentIndex];
+                UpdateTitle();
+            }
+        }
+
+        private void NextButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Navega para a próxima aba
+            if (_currentIndex < _userControls.Count - 1)
+            {
+                _currentIndex++;
+                ContentArea.Content = _userControls[_currentIndex];
+                UpdateTitle();
+            }
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Atualiza a aba atual
+            if (ContentArea.Content is UserControl currentControl)
+            {
+                ContentArea.Content = Activator.CreateInstance(currentControl.GetType());
+            }
+        }
+
+        private void UpdateTitle()
+        {
+            // Atualiza o título com base no controle atual
+            if (ContentArea.Content is AddEntradaSaidaUserControl)
+            {
+                TitleTextBlock.Text = "Entrada/Saída";
+            }
+            else if (ContentArea.Content is VendasUserControl)
+            {
+                TitleTextBlock.Text = "Vendas";
+            }
+            else if (ContentArea.Content is RegistroUserControl)
+            {
+                TitleTextBlock.Text = "Registro";
+            }
+            else if (ContentArea.Content is ControleEstoqueUserControl)
+            {
+                TitleTextBlock.Text = "Estoque";
+            }
+            else if (ContentArea.Content is DashboardUserControl)
+            {
+                TitleTextBlock.Text = "Relatório";
+            }
+            else if (ContentArea.Content is NotificacoesUserControl)
+            {
+                TitleTextBlock.Text = "Notificações";
+            }
+            else if (ContentArea.Content is ConfiguracaoUserControl)
+            {
+                TitleTextBlock.Text = "Configurações";
+            }
+        }
+
+        // Função para recarregar toda a MainWindow
+        public void Reload()
+        {
+            // Recarrega a MainWindow
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
+            this.Close();
+        }
 
         // Função que representa a animação de notificação de alerta
-        private void OnAlertaAdicionado(AlertaData alerta)
-        {
-            // Incrementa a contagem de notificações
-            _notificationCount++;
+        //private void OnAlertaAdicionado(AlertaData alerta)
+        //{
+        //    // Incrementa a contagem de notificações
+        //    _notificationCount++;
 
-            // Tornar o ícone de notificação visível
-            NotificationButton.Visibility = Visibility.Visible;
+        //    // Tornar o ícone de notificação visível
+        //    NotificationButton.Visibility = Visibility.Visible;
 
-            // Altera a cor do ícone de notificação para vermelho por 2 segundos e depois fica vermelho
-            ColorAnimation colorAnimation = new ColorAnimation
-            {
-                From = Colors.Transparent,
-                To = (Color)ColorConverter.ConvertFromString("#990000"),
-                Duration = new Duration(TimeSpan.FromSeconds(0.5)),
-                AutoReverse = true,
-                RepeatBehavior = new RepeatBehavior(4) // Pisca 4 vezes (2 segundos)
-            };
+        //    // Altera a cor do ícone de notificação para vermelho por 2 segundos e depois fica vermelho
+        //    ColorAnimation colorAnimation = new ColorAnimation
+        //    {
+        //        From = Colors.Transparent,
+        //        To = (Color)ColorConverter.ConvertFromString("#990000"),
+        //        Duration = new Duration(TimeSpan.FromSeconds(0.5)),
+        //        AutoReverse = true,
+        //        RepeatBehavior = new RepeatBehavior(4) // Pisca 4 vezes (2 segundos)
+        //    };
 
-            // Aplica a animação ao fundo do botão de notificação
-            NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
-            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+        //    // Aplica a animação ao fundo do botão de notificação
+        //    NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
+        //    NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
 
-            // Define a cor final como vermelho após a animação
-            colorAnimation.AutoReverse = false;
-            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+        //    // Define a cor final como vermelho após a animação
+        //    colorAnimation.AutoReverse = false;
+        //    NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
 
-            // Atualizar o ToolTip com a quantidade de notificações
-            NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
-        }
-
-        // Função para abrir a aba de notificações
-        private void NotificationButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Limpar a contagem de notificações
-            _notificationCount = 0;
-
-            // Tornar o fundo do botão de notificação transparente
-            NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
-
-            // Abrir a aba de notificações
-            ContentArea.Content = null;
-            ContentArea.Content = new NotificacoesUserControl();
-        }
-
-        private void NotificationButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            // Atualizar o ToolTip com a quantidade de notificações
-            NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
-        }
-
-
-        // Função para abrir conexão com banco de dados
-        private void ConnectionButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Abre a aba de banco de dados
-            ContentArea.Content = null;
-            ContentArea.Content = new BancoDadosUserControl();
-        }
-        private void ConnectionButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            // Atualizar o ToolTip com base na conexão com o banco de dados
-            if (DatabaseConnect.IsConnected)
-            {
-                ConnectionToolTip.Content = "Conectado ao Banco de Dados";
-            }
-            else
-            {
-                ConnectionToolTip.Content = "Desconectado do Banco de Dados";
-            }
-        }
+        //    // Atualizar o ToolTip com a quantidade de notificações
+        //    NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
+        //}
 
 
         // Função para iniciar processo de "Modo Offline"
@@ -776,15 +766,12 @@ namespace WMS_RadiadoresLemos_WPF
             // Inicia timers caso não estejam ativos
             if (!_saveCacheTimer.IsEnabled)
             {
-                _saveCacheTimer.Start();
+                // _saveCacheTimer.Start();
             }
             if (!_connectDatabaseTimer.IsEnabled)
             {
-                _connectDatabaseTimer.Start();
+                // _connectDatabaseTimer.Start();
             }
-
-            UpdateStatusBar("Dados carregados em Arquivos Locais - Banco de Dados Offline", Colors.Purple);
-            UpdateConnectionStatus("Desconectado");
 
             // Adiciona alerta
             AlertaCache.AdicionarAlerta("Aviso",
@@ -802,10 +789,6 @@ namespace WMS_RadiadoresLemos_WPF
             // Finaliza o processo de "Modo Offline"
             _saveCacheTimer.Stop();
             _connectDatabaseTimer.Stop();
-
-            // Atualiza a barra de status
-            UpdateStatusBar("Dados carregados no Firebase - Banco de Dados Online", Colors.DarkGreen);
-            UpdateConnectionStatus("Conectado");
 
             // Adiciona alerta
             AlertaCache.AdicionarAlerta("Aviso",

@@ -82,7 +82,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- Estilo para Botões do Dashboard -->
     <Style x:Key="DashboardButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
         <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
@@ -136,7 +136,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- Estilo para Botões de Filtro -->
     <Style x:Key="FilterButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
@@ -171,44 +171,49 @@
     <!-- Estilo para "Selecionar Data" -->
     <Style x:Key="DatePickerStyle" TargetType="DatePicker">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="Padding" Value="5" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="CalendarStyle">
+        <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
             <Setter.Value>
-                <Style TargetType="Calendar">
-                    <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-                    <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
-                    <Setter Property="BorderThickness" Value="5" />
-                    <Setter Property="Padding" Value="5" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Calendar">
-                                <Grid>
-                                    <Border Background="{TemplateBinding Background}" 
-                                        BorderBrush="{TemplateBinding BorderBrush}" 
-                                        BorderThickness="{TemplateBinding BorderThickness}" 
-                                        CornerRadius="5">
-                                        <CalendarItem x:Name="PART_CalendarItem" 
-                                                  Background="{TemplateBinding Background}" 
-                                                  BorderBrush="{TemplateBinding BorderBrush}" 
-                                                  Padding="{TemplateBinding Padding}" />
-                                    </Border>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
+                <ControlTemplate TargetType="DatePicker">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="5">
+                            <Grid>
+                                <TextBox x:Name="PART_TextBox"
+                                     Background="Transparent"
+                                     Foreground="{TemplateBinding Foreground}"
+                                     FontSize="{TemplateBinding FontSize}"
+                                     Padding="{TemplateBinding Padding}"
+                                     BorderThickness="0"
+                                     IsReadOnly="True"/>
+                                <Button x:Name="PART_Button"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Width="20"
+                                    Height="20"
+                                    Cursor="Hand">
+                                    <Path Data="M 0 0 L 4 4 L 8 0"
+                                      Stroke="{StaticResource TextBrush}"
+                                      StrokeThickness="2"
+                                      Width="9"
+                                      Height="6"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>
-    <Style TargetType="DatePickerTextBox">
-        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
-        <Setter Property="BorderThickness" Value="0" />
     </Style>
 
 

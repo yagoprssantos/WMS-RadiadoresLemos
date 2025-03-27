@@ -4,7 +4,15 @@
              xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d">
+             mc:Ignorable="d"
+             Background="{StaticResource BackgroundBrush}">
+
+    <UserControl.Resources>
+        <Style x:Key="SelectedButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+    </UserControl.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -12,175 +20,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Título do Dashboard -->
-        <TextBlock Text="Dashboard" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-
-        <!-- Painéis para Contadores e Resumos -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                <!-- ComboBox para selecionar o gráfico -->
+                <ComboBox Name="GraficoComboBox" Style="{StaticResource ComboBoxStyle}" HorizontalContentAlignment="Stretch" SelectedIndex="0" Margin="0,0,0,20" MinWidth="500" 
+                          SelectionChanged="GraficoComboBox_SelectionChanged">
 
-                <!-- Contadores (Usuários, Produtos, etc.) -->
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0, 0, 0, 20">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <!-- Total de Produtos -->
-                        <Border Background="#388E3C" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Total de Produtos" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
-                                <TextBlock x:Name="TotalProdutosTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <!-- Total de Produtos com Baixo Estoque -->
-                        <Border Background="#FF5722" Padding="20" CornerRadius="15"  Margin="15" Width="Auto" MinWidth="150" Height="120">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Baixo em Estoque" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
-                                <TextBlock x:Name="ProdutosBaixoEstoqueTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <!-- Total de Marcas -->
-                        <Border Background="#E91E63" Padding="20" CornerRadius="15"  Margin="15" Width="Auto" MinWidth="150" Height="120">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Total de Marcas" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
-                                <TextBlock x:Name="TotalMarcasTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <!-- Total de Movimentações -->
-                        <Border Background="#9C27B0" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Total de Movimentações" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
-                                <TextBlock x:Name="TotalMovimentacoesTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <!-- Total de Entradas -->
-                        <Border Background="#3F51B5" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Total de Entradas" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
-                                <TextBlock x:Name="TotalEntradasTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <!-- Total de Saídas -->
-                        <Border Background="#009688" Padding="20" CornerRadius="15" Margin="15" Width="Auto" MinWidth="150" Height="120">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Total de Saídas" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
-                                <TextBlock x:Name="TotalSaidasTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <!-- Total de Usuários -->
-                        <Border Background="#1976D2" Padding="20" CornerRadius="15"  Margin="15" Width="Auto" MinWidth="150" Height="120">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Total de Usuários" FontSize="14" Foreground="White" FontWeight="Bold" TextAlignment="Center"/>
-                                <TextBlock x:Name="TotalUsuariosTextBlock" FontSize="23" Foreground="White" FontWeight="Bold" Text="0" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
+                </ComboBox>
+
+                <!-- Filtros por Período -->
+                <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="10, 5" Background="{StaticResource SecondaryBrush}">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="DiarioButton" Content="Diário" Click="FiltrarPorPeriodo_Click" Tag="Hoje" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
+                            <Button x:Name="SemanalButton" Content="Semanal" Click="FiltrarPorPeriodo_Click" Tag="Última Semana" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
+                            <Button x:Name="MensalButton" Content="Mensal" Click="FiltrarPorPeriodo_Click" Tag="Último Mês" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
+                            <Button x:Name="AnualButton" Content="Anual" Click="FiltrarPorPeriodo_Click" Tag="Último Ano" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
+                        </StackPanel>
+                        
+                        <!-- Área de Conteúdo para Gráficos -->
+                        <ContentControl x:Name="GraficoContentControl"/>
                     </StackPanel>
-                </ScrollViewer>
-                
-                <!-- Gráficos em Abas -->
-                <TabControl Margin="15">
-                    <!-- Aba 1: Gráfico de Barras - Movimentação de Produtos -->
-                    <TabItem Header="Movimentação de Produtos">
-                        <lvc:CartesianChart Series="{Binding MovimentacaoProdutosSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
-                            <lvc:CartesianChart.DataTooltip>
-                                <lvc:DefaultTooltip Background="{StaticResource AccentBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="14"/>
-                            </lvc:CartesianChart.DataTooltip>
-                            <lvc:CartesianChart.AxisX>
-                                <lvc:Axis Title="Produtos" Labels="{Binding ProdutosLabels}"/>
-                            </lvc:CartesianChart.AxisX>
-                            <lvc:CartesianChart.AxisY>
-                                <lvc:Axis Title="Quantidade Movimentada" LabelFormatter="{Binding FormatadorDeEixoY}"/>
-                            </lvc:CartesianChart.AxisY>
-                        </lvc:CartesianChart>
-                    </TabItem>
-
-                    <!-- Aba 2: Gráfico de Linhas - Histórico de Movimentação -->
-                    <TabItem Header="Histórico de Movimentação">
-                        <lvc:CartesianChart Series="{Binding HistoricoMovimentacaoSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
-                            <lvc:CartesianChart.DataTooltip>
-                                <lvc:DefaultTooltip Background="{StaticResource AccentBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="14"/>
-                            </lvc:CartesianChart.DataTooltip>
-                            <lvc:CartesianChart.AxisX>
-                                <lvc:Axis Title="Período" Labels="{Binding PeriodoLabels}"/>
-                            </lvc:CartesianChart.AxisX>
-                            <lvc:CartesianChart.AxisY>
-                                <lvc:Axis Title="Quantidade Movimentada" LabelFormatter="{Binding FormatadorDeEixoY}"/>
-                            </lvc:CartesianChart.AxisY>
-                        </lvc:CartesianChart>
-                    </TabItem>
-
-                    <!-- Aba 3: Gráfico de Pizza - Produtos com Maior Movimentação -->
-                    <TabItem Header="Produtos com Maior Movimentação">
-                        <lvc:PieChart Series="{Binding ProdutosMaiorMovimentacaoSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
-                            <lvc:PieChart.DataTooltip>
-                                <lvc:DefaultTooltip Background="{StaticResource AccentBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="14"/>
-                            </lvc:PieChart.DataTooltip>
-                        </lvc:PieChart>
-                    </TabItem>
-
-                    <!-- Aba 4: Gráfico de Linhas - Lucro Mensal -->
-                    <TabItem Header="Lucro Mensal">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="10">
-                                <TextBlock Text="Período:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
-                                <ComboBox x:Name="SelecionarPeriodoLucroMensal" Width="200" SelectedIndex="0" SelectionChanged="SelecionarPeriodoLucroMensal_SelectionChanged"/>
-                            </StackPanel>
-                            <lvc:CartesianChart Series="{Binding LucroMensalSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
-                                <lvc:CartesianChart.DataTooltip>
-                                    <lvc:DefaultTooltip Background="{StaticResource AccentBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="14"/>
-                                </lvc:CartesianChart.DataTooltip>
-                                <lvc:CartesianChart.AxisX>
-                                    <lvc:Axis Title="Meses" Labels="{Binding MesesLabels}"/>
-                                </lvc:CartesianChart.AxisX>
-                                <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis Title="Lucro" LabelFormatter="{Binding FormatadorDeEixoY}"/>
-                                </lvc:CartesianChart.AxisY>
-                            </lvc:CartesianChart>
-                        </StackPanel>
-                    </TabItem>
-
-
-                    <!-- Aba 5: Gráfico de Barras - Marcas com maior estoque -->
-                    <TabItem Header="Marcas com maior estoque">
-                        <lvc:CartesianChart Series="{Binding EstoqueMarcasSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
-                            <lvc:CartesianChart.DataTooltip>
-                                <lvc:DefaultTooltip Background="{StaticResource AccentBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="14"/>
-                            </lvc:CartesianChart.DataTooltip>
-                            <lvc:CartesianChart.AxisX>
-                                <lvc:Axis Title="Marcas" Labels="{Binding MarcasLabels}"/>
-                            </lvc:CartesianChart.AxisX>
-                            <lvc:CartesianChart.AxisY>
-                                <lvc:Axis Title="Quantidade em Estoque" LabelFormatter="{Binding FormatadorDeEixoY}"/>
-                            </lvc:CartesianChart.AxisY>
-                        </lvc:CartesianChart>
-                    </TabItem>
-
-                    <!-- Aba 6: Gráfico de Barras - Produtos Vendidos -->
-                    <TabItem Header="Produtos Vendidos">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="10">
-                                <TextBlock Text="Período:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
-                                <ComboBox x:Name="SelecionarPeriodoProdutosVendidos" Width="200" SelectedIndex="0" SelectionChanged="SelecionarPeriodoProdutosVendidos_SelectionChanged">
-                                    <ComboBoxItem Content="Hoje"/>
-                                    <ComboBoxItem Content="Última Semana"/>
-                                    <ComboBoxItem Content="Último Mês"/>
-                                    <ComboBoxItem Content="Último Ano"/>
-                                </ComboBox>
-                            </StackPanel>
-                            <lvc:CartesianChart Series="{Binding ProdutosVendidosSeries}" LegendLocation="Right" Height="300" Margin="20" Foreground="White">
-                                <lvc:CartesianChart.DataTooltip>
-                                    <lvc:DefaultTooltip Background="{StaticResource AccentBrush}" Foreground="White" BorderBrush="White" BorderThickness="1" FontSize="14"/>
-                                </lvc:CartesianChart.DataTooltip>
-                                <lvc:CartesianChart.AxisX>
-                                    <lvc:Axis Title="Produtos" Labels="{Binding ProdutosLabels}"/>
-                                </lvc:CartesianChart.AxisX>
-                                <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis Title="Quantidade Vendida" LabelFormatter="{Binding FormatadorDeEixoY}"/>
-                                </lvc:CartesianChart.AxisY>
-                            </lvc:CartesianChart>
-                        </StackPanel>
-                    </TabItem>
-                </TabControl>
+                </Border>
             </StackPanel>
-        </ScrollViewer>
+        </Border>
     </Grid>
 </UserControl>
-    
-      

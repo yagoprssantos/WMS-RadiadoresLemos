@@ -34,7 +34,6 @@ namespace WMS_RadiadoresLemos_WPF
         // Dicionário para armazenar as cores dos produtos
         private Dictionary<string, SolidColorBrush> produtoCores = new Dictionary<string, SolidColorBrush>();
 
-
         public DashboardUserControl()
         {
             InitializeComponent();
@@ -42,121 +41,60 @@ namespace WMS_RadiadoresLemos_WPF
             Setup();
         }
 
-
         // Função para carregar os dados do dashboard
         private void Setup()
         {
-            // Exibe elementos da tela
-            ExibirContadores();
-            ExibirGraficos();
-
-            // Carrega ComboBoxes - seleção de período
+            // Carrega ComboBoxes - seleção de gráfico
             CarregarComboBox();
-        }
 
-        // Exibe os contadores do dashboard
-        private void ExibirContadores()
-        {
-            TotalUsuarios();
-            TotalProdutos();
-            BaixoEstoque();
-            TotalMarcas();
-            TotalMovimentacoes();
-            TotalEntradas();
-            TotalSaidas();
+            // Carrega elementos da tela
+            CarregarGraficos("Última Semana");
+
+            // Exibe o gráfico inicial
+            AtualizarGrafico("Movimentação de Produtos", "Última Semana");
+
+            // Define o botão "Semanal" como selecionado
+            AtualizarEstiloBotoes(SemanalButton);
         }
 
         // Exibe os gráficos do dashboard
-        private void ExibirGraficos()
+        private void CarregarGraficos(string periodo)
         {
-            GraficoMovimentacaoProdutos();
-            GraficoHistoricoMovimentacao();
-            GraficoProdutosMaiorMovimentacao();
-            GraficoLucroMensal("Sem filtros");
-            GraficoEstoqueMarcas();
-            GraficoProdutosVendidos("Hoje");
+            GraficoMovimentacaoProdutos(periodo);
+            GraficoHistoricoMovimentacao(periodo);
+            GraficoProdutosMaiorMovimentacao(periodo);
+            GraficoLucro(periodo);
+            GraficoEstoqueMarcas(periodo);
+            GraficoProdutosVendidos(periodo);
         }
 
-        // Função para carregar os ComboBoxes
+        // Função para carregar os ComboBox de seleção de gráfico
         private void CarregarComboBox()
         {
-            CarregarComboBoxLucroMensal();
-        }
+            GraficoComboBox.Items.Clear();
 
+            GraficoComboBox.Items.Add(new ComboBoxItem { Content = "Movimentação de Produtos" });
+            GraficoComboBox.Items.Add(new ComboBoxItem { Content = "Histórico de Movimentação" });
+            GraficoComboBox.Items.Add(new ComboBoxItem { Content = "Produtos com Maior Movimentação" });
+            GraficoComboBox.Items.Add(new ComboBoxItem { Content = "Lucro" });
+            GraficoComboBox.Items.Add(new ComboBoxItem { Content = "Marcas com Maior Estoque" });
+            GraficoComboBox.Items.Add(new ComboBoxItem { Content = "Produtos Vendidos" });
 
-        // Contadores
-        private void TotalUsuarios()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Usuarios", out List<object>? usuarios))
-            {
-                int totalUsuarios = usuarios.Count;
-                TotalUsuariosTextBlock.Text = totalUsuarios.ToString();
-            }
+            GraficoComboBox.SelectedIndex = 0;
         }
-        private void TotalProdutos()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
-            {
-                int totalProdutos = produtos.Count;
-                TotalProdutosTextBlock.Text = totalProdutos.ToString();
-            }
-        }
-        private void BaixoEstoque()
-        {
-            int produtosBaixoEstoque = VerificarBaixoEstoque();
-            ProdutosBaixoEstoqueTextBlock.Text = produtosBaixoEstoque.ToString();
-        }
-        public int VerificarBaixoEstoque()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
-            {
-                return produtos.Count(p => ((ProdutoData)p).Quantidade < 10);
-            }
-            return 0;
-        }
-        private void TotalMarcas()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
-            {
-                int totalMarcas = produtos.Select(p => ((ProdutoData)p).Marca).Distinct().Count();
-                TotalMarcasTextBlock.Text = totalMarcas.ToString();
-            }
-        }
-        private void TotalMovimentacoes()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
-            {
-                int totalMovimentacoes = movimentacoes.Count;
-                TotalMovimentacoesTextBlock.Text = totalMovimentacoes.ToString();
-            }
-        }
-        private void TotalEntradas()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
-            {
-                int totalEntradas = movimentacoes.Count(m => ((MovimentacaoData)m).Tipo == "Entrada");
-                TotalEntradasTextBlock.Text = totalEntradas.ToString();
-            }
-        }
-        private void TotalSaidas()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
-            {
-                int totalSaidas = movimentacoes.Count(m => ((MovimentacaoData)m).Tipo == "Saída");
-                TotalSaidasTextBlock.Text = totalSaidas.ToString();
-            }
-        }
-
 
         // Gráficos
 
         // Exibe a movimentação de produtos
         // Útil para identificar os produtos mais movimentados
-        private void GraficoMovimentacaoProdutos()
+        private void GraficoMovimentacaoProdutos(string periodo)
         {
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
+                DateTime dataInicio = ObterDataInicio(periodo);
+
                 var movimentacao = movimentacoes
+                    .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
                     .GroupBy(m => new { ((MovimentacaoData)m).ProdutoId, ((MovimentacaoData)m).Tipo })
                     .Select(g => new { g.Key.ProdutoId, g.Key.Tipo, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
                     .ToList();
@@ -196,13 +134,14 @@ namespace WMS_RadiadoresLemos_WPF
 
         // Exibe o histórico de movimentação
         // Útil para identificar a movimentação de produtos ao longo do tempo
-        // TODO: MELHORAR GRÁFICO PARA SER MAIS INFORMATIVO
-        // TODO: REMOVER LEGENDA
-        private void GraficoHistoricoMovimentacao()
+        private void GraficoHistoricoMovimentacao(string periodo)
         {
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
+                DateTime dataInicio = ObterDataInicio(periodo);
+
                 var historico = movimentacoes
+                    .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
                     .GroupBy(m => ((MovimentacaoData)m).Data.Date)
                     .Select(g => new { Data = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
                     .OrderBy(t => t.Data)
@@ -231,13 +170,14 @@ namespace WMS_RadiadoresLemos_WPF
 
         // Exibe produtos com maior movimentação
         // Útil para identificar os produtos mais vendidos
-        // TODO: DEIXAR APENAS OS 5 MAIORES
-        // TODO: ADICIONAR NOME
-        private void GraficoProdutosMaiorMovimentacao()
+        private void GraficoProdutosMaiorMovimentacao(string periodo)
         {
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
+                DateTime dataInicio = ObterDataInicio(periodo);
+
                 var maiorMovimentacao = movimentacoes
+                    .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
                     .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
                     .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
                     .OrderByDescending(m => m.Quantidade)
@@ -267,40 +207,33 @@ namespace WMS_RadiadoresLemos_WPF
             DataContext = this;
         }
 
-        // Exibe o gráfico de lucro mensal
+        // Exibe o gráfico de lucro
         // Útil para identificar o lucro ao longo do tempo
-        // TODO: MELHORAR GRÁFICO PARA SER MAIS INFORMATIVO
-        // TODO: REMOVER LEGENDA
-        // TODO: DEIXAR TOOLTIP MAIS INFORMATIVA
-        private void GraficoLucroMensal(string? mesSelecionado)
+        private void GraficoLucro(string periodo)
         {
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
-                var lucroMensal = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída")
+                DateTime dataInicio = ObterDataInicio(periodo);
+
+                var lucro = movimentacoes
+                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).Data >= dataInicio)
                     .GroupBy(m => ((MovimentacaoData)m).Data.ToString("MMM/yyyy"))
                     .Select(g => new { Mes = g.Key, Lucro = g.Sum(m => ((MovimentacaoData)m).Quantidade * ((MovimentacaoData)m).Preço) })
                     .OrderBy(l => DateTime.ParseExact(l.Mes, "MMM/yyyy", null))
                     .ToList();
 
-                if (!string.IsNullOrEmpty(mesSelecionado) && mesSelecionado != "Sem filtros")
-                {
-                    var dataSelecionada = DateTime.ParseExact(mesSelecionado, "MMM/yyyy", null);
-                    lucroMensal = lucroMensal.Where(l => DateTime.ParseExact(l.Mes, "MMM/yyyy", null) <= dataSelecionada).ToList();
-                }
-
                 LucroMensalSeries.Clear();
 
                 LucroMensalSeries.Add(new LineSeries
                 {
-                    Title = "Lucro Mensal Acumulado",
-                    Values = new ChartValues<double>(lucroMensal.Select(l => l.Lucro)),
+                    Title = "Lucro Acumulado",
+                    Values = new ChartValues<double>(lucro.Select(l => l.Lucro)),
                     PointGeometry = DefaultGeometries.Circle,
                     PointGeometrySize = 10,
                     Fill = new SolidColorBrush(Color.FromRgb(0, 128, 0)), // Verde
                 });
 
-                MesesLabels = lucroMensal.Select(l => l.Mes).ToArray();
+                MesesLabels = lucro.Select(l => l.Mes).ToArray();
             }
             else
             {
@@ -309,19 +242,10 @@ namespace WMS_RadiadoresLemos_WPF
 
             DataContext = this;
         }
-        private void SelecionarPeriodoLucroMensal_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var periodoSelecionado = (sender as ComboBox)?.SelectedItem as ComboBoxItem;
-            if (periodoSelecionado != null)
-            {
-                GraficoLucroMensal(periodoSelecionado.Content.ToString());
-            }
-        }
 
         // Exibe o gráfico de barras com as marcas de maior estoque
         // Útil para identificar as marcas com maior quantidade de produtos em estoque
-        // TODO: DEIXAR APENAS OS 5 MAIORES
-        private void GraficoEstoqueMarcas()
+        private void GraficoEstoqueMarcas(string periodo)
         {
             var marcasQuantidade = new Dictionary<string, int>();
 
@@ -387,19 +311,11 @@ namespace WMS_RadiadoresLemos_WPF
 
         // Exibe o gráfico de linhas com a quantidade de produtos vendidos
         // Útil para identificar os produtos mais vendidos
-        // TODO: ADICIONAR NOME
         private void GraficoProdutosVendidos(string periodo)
         {
             if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
             {
-                DateTime dataInicio = periodo switch
-                {
-                    "Hoje" => DateTime.Today,
-                    "Última Semana" => DateTime.Today.AddDays(-7),
-                    "Último Mês" => DateTime.Today.AddMonths(-1),
-                    "Último Ano" => DateTime.Today.AddYears(-1),
-                    _ => DateTime.MinValue
-                };
+                DateTime dataInicio = ObterDataInicio(periodo);
 
                 var produtosVendidos = movimentacoes
                     .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).Data >= dataInicio)
@@ -429,44 +345,265 @@ namespace WMS_RadiadoresLemos_WPF
 
             DataContext = this;
         }
-        private void SelecionarPeriodoProdutosVendidos_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
+        // Função para obter a data de início com base no período selecionado
+        private DateTime ObterDataInicio(string periodo)
+        {
+            return periodo switch
+            {
+                "Hoje" => DateTime.Today,
+                "Última Semana" => DateTime.Today.AddDays(-7),
+                "Último Mês" => DateTime.Today.AddMonths(-1),
+                "Último Ano" => DateTime.Today.AddYears(-1),
+                _ => DateTime.MinValue
+            };
+        }
+
+        // Evento de seleção do ComboBox para gráficos
+        private void GraficoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var comboBox = sender as ComboBox;
-            if (comboBox?.SelectedItem is ComboBoxItem periodoSelecionado && periodoSelecionado.Content != null)
+            if (comboBox?.SelectedItem is ComboBoxItem graficoSelecionado && graficoSelecionado.Content != null)
             {
-                var periodo = periodoSelecionado.Content.ToString();
-                if (!string.IsNullOrEmpty(periodo))
+                var grafico = graficoSelecionado.Content.ToString();
+                if (!string.IsNullOrEmpty(grafico))
                 {
-                    GraficoProdutosVendidos(periodo);
+                    AtualizarGrafico(grafico, "Hoje");
                 }
             }
         }
 
-
-        // ComboBoxes
-
-        // ComboBox para selecionar o período do gráfico de lucro mensal - mes/ano
-        private void CarregarComboBoxLucroMensal()
+        // Evento de clique para os botões de filtro por período
+        private void FiltrarPorPeriodo_Click(object sender, RoutedEventArgs e)
         {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            var button = sender as Button;
+            if (button?.Tag != null)
             {
-                var meses = movimentacoes
-                    .Select(m => ((MovimentacaoData)m).Data.ToString("MMM/yyyy"))
-                    .Distinct()
-                    .OrderBy(m => DateTime.ParseExact(m, "MMM/yyyy", null))
-                    .ToList();
-
-                SelecionarPeriodoLucroMensal.Items.Clear();
-                SelecionarPeriodoLucroMensal.Items.Add("Sem filtros");
-
-                // Adiciona os meses existentes nas movimentações ao ComboBox
-                foreach (var mes in meses)
+                var periodo = button.Tag.ToString();
+                var graficoSelecionado = GraficoComboBox.SelectedItem as ComboBoxItem;
+                if (graficoSelecionado != null)
                 {
-                    SelecionarPeriodoLucroMensal.Items.Add(mes);
+                    AtualizarGrafico(graficoSelecionado.Content.ToString(), periodo);
+                    AtualizarEstiloBotoes(button);
                 }
+            }
+        }
 
-                // Seleciona o primeiro item por padrão
-                SelecionarPeriodoLucroMensal.SelectedIndex = 0;
+        // Função para atualizar o estilo dos botões de filtro por período
+        private void AtualizarEstiloBotoes(Button botaoSelecionado)
+        {
+            DiarioButton.Style = (Style)FindResource("DashboardButtonStyle");
+            SemanalButton.Style = (Style)FindResource("DashboardButtonStyle");
+            MensalButton.Style = (Style)FindResource("DashboardButtonStyle");
+            AnualButton.Style = (Style)FindResource("DashboardButtonStyle");
+
+            botaoSelecionado.Style = (Style)FindResource("SelectedDashboardButtonStyle");
+        }
+
+        // Função para atualizar o gráfico exibido
+        private void AtualizarGrafico(string grafico, string periodo)
+        {
+            switch (grafico)
+            {
+                case "Movimentação de Produtos":
+                    GraficoContentControl.Content = new CartesianChart
+                    {
+                        Series = MovimentacaoProdutosSeries,
+                        LegendLocation = LegendLocation.Right,
+                        Height = 300,
+                        Margin = new Thickness(20),
+                        Foreground = (Brush)FindResource("TextBrush"),
+                        DataTooltip = new DefaultTooltip
+                        {
+                            Background = (Brush)FindResource("AccentBrush"),
+                            Foreground = Brushes.White,
+                            BorderBrush = Brushes.White,
+                            BorderThickness = new Thickness(1),
+                            FontSize = 14
+                        },
+                        AxisX = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Produtos",
+                                Labels = ProdutosLabels
+                            }
+                        },
+                        AxisY = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Quantidade Movimentada",
+                                LabelFormatter = FormatadorDeEixoY
+                            }
+                        }
+                    };
+                    GraficoMovimentacaoProdutos(periodo);
+                    break;
+
+                case "Histórico de Movimentação":
+                    GraficoContentControl.Content = new CartesianChart
+                    {
+                        Series = HistoricoMovimentacaoSeries,
+                        LegendLocation = LegendLocation.Right,
+                        Height = 300,
+                        Margin = new Thickness(20),
+                        Foreground = (Brush)FindResource("TextBrush"),
+                        DataTooltip = new DefaultTooltip
+                        {
+                            Background = (Brush)FindResource("AccentBrush"),
+                            Foreground = Brushes.White,
+                            BorderBrush = Brushes.White,
+                            BorderThickness = new Thickness(1),
+                            FontSize = 14
+                        },
+                        AxisX = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Período",
+                                Labels = PeriodoLabels
+                            }
+                        },
+                        AxisY = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Quantidade Movimentada",
+                                LabelFormatter = FormatadorDeEixoY
+                            }
+                        }
+                    };
+                    GraficoHistoricoMovimentacao(periodo);
+                    break;
+
+                case "Produtos com Maior Movimentação":
+                    GraficoContentControl.Content = new PieChart
+                    {
+                        Series = ProdutosMaiorMovimentacaoSeries,
+                        LegendLocation = LegendLocation.Right,
+                        Height = 300,
+                        Margin = new Thickness(20),
+                        Foreground = (Brush)FindResource("TextBrush"),
+                        DataTooltip = new DefaultTooltip
+                        {
+                            Background = (Brush)FindResource("AccentBrush"),
+                            Foreground = Brushes.White,
+                            BorderBrush = Brushes.White,
+                            BorderThickness = new Thickness(1),
+                            FontSize = 14
+                        }
+                    };
+                    GraficoProdutosMaiorMovimentacao(periodo);
+                    break;
+
+                case "Lucro":
+                    GraficoContentControl.Content = new CartesianChart
+                    {
+                        Series = LucroMensalSeries,
+                        LegendLocation = LegendLocation.Right,
+                        Height = 300,
+                        Margin = new Thickness(20),
+                        Foreground = (Brush)FindResource("TextBrush"),
+                        DataTooltip = new DefaultTooltip
+                        {
+                            Background = (Brush)FindResource("AccentBrush"),
+                            Foreground = Brushes.White,
+                            BorderBrush = Brushes.White,
+                            BorderThickness = new Thickness(1),
+                            FontSize = 14
+                        },
+                        AxisX = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Meses",
+                                Labels = MesesLabels
+                            }
+                        },
+                        AxisY = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Lucro",
+                                LabelFormatter = FormatadorDeEixoY
+                            }
+                        }
+                    };
+                    GraficoLucro(periodo);
+                    break;
+
+                case "Marcas com Maior Estoque":
+                    GraficoContentControl.Content = new CartesianChart
+                    {
+                        Series = EstoqueMarcasSeries,
+                        LegendLocation = LegendLocation.Right,
+                        Height = 300,
+                        Margin = new Thickness(20),
+                        Foreground = (Brush)FindResource("TextBrush"),
+                        DataTooltip = new DefaultTooltip
+                        {
+                            Background = (Brush)FindResource("AccentBrush"),
+                            Foreground = Brushes.White,
+                            BorderBrush = Brushes.White,
+                            BorderThickness = new Thickness(1),
+                            FontSize = 14
+                        },
+                        AxisX = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Marcas",
+                                Labels = MarcasLabels
+                            }
+                        },
+                        AxisY = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Quantidade em Estoque",
+                                LabelFormatter = FormatadorDeEixoY
+                            }
+                        }
+                    };
+                    GraficoEstoqueMarcas(periodo);
+                    break;
+
+                case "Produtos Vendidos":
+                    GraficoContentControl.Content = new CartesianChart
+                    {
+                        Series = ProdutosVendidosSeries,
+                        LegendLocation = LegendLocation.Right,
+                        Height = 300,
+                        Margin = new Thickness(20),
+                        Foreground = (Brush)FindResource("TextBrush"),
+                        DataTooltip = new DefaultTooltip
+                        {
+                            Background = (Brush)FindResource("AccentBrush"),
+                            Foreground = Brushes.White,
+                            BorderBrush = Brushes.White,
+                            BorderThickness = new Thickness(1),
+                            FontSize = 14
+                        },
+                        AxisX = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Produtos",
+                                Labels = ProdutosLabels
+                            }
+                        },
+                        AxisY = new AxesCollection
+                        {
+                            new Axis
+                            {
+                                Title = "Quantidade Vendida",
+                                LabelFormatter = FormatadorDeEixoY
+                            }
+                        }
+                    };
+                    GraficoProdutosVendidos(periodo);
+                    break;
             }
         }
 
@@ -474,17 +611,17 @@ namespace WMS_RadiadoresLemos_WPF
         // Cores
         // Função para gerar uma cor única
         private SolidColorBrush GerarCorUnica(int index)
-        {
-            // Usar a paleta HSL para gerar cores mais vivas
-            double hue = (index * 137.508) % 360; // Usar o número áureo para distribuir uniformemente as cores
-            double saturation = 0.7 + 0.3 * ((index / 360) % 2); // Alternar entre 0.7 e 1.0 para saturação
-            double lightness = 0.5 + 0.2 * ((index / 720) % 2); // Alternar entre 0.5 e 0.7 para luminosidade
+                {
+                    // Usar a paleta HSL para gerar cores mais vivas
+                    double hue = (index * 137.508) % 360; // Usar o número áureo para distribuir uniformemente as cores
+                    double saturation = 0.7 + 0.3 * ((index / 360) % 2); // Alternar entre 0.7 e 1.0 para saturação
+                    double lightness = 0.5 + 0.2 * ((index / 720) % 2); // Alternar entre 0.5 e 0.7 para luminosidade
 
-            // Converter HSL para RGB
-            (byte r, byte g, byte b) = HslToRgb(hue, saturation, lightness);
+                    // Converter HSL para RGB
+                    (byte r, byte g, byte b) = HslToRgb(hue, saturation, lightness);
 
-            return new SolidColorBrush(Color.FromRgb(r, g, b));
-        }
+                    return new SolidColorBrush(Color.FromRgb(r, g, b));
+                }
 
         // Função para converter HSL para RGB - melhor para gerar cores vivas
         private (byte, byte, byte) HslToRgb(double h, double s, double l)

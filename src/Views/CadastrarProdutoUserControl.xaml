@@ -1,11 +1,11 @@
-﻿<Window x:Class="WMS_RadiadoresLemos_WPF.EditarProdutoWindow"
+﻿<Window x:Class="WMS_RadiadoresLemos_WPF.CadastrarProdutoWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="600" Width="600" FontSize="18"
+        Title="CadastrarProdutoWindow" Height="600" Width="600" FontSize="18"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource PanelBackgroundBrush}">
 
@@ -57,7 +57,7 @@
                 <!-- Botões -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,10,0,0">
                     <!-- Botão Salvar -->
-                    <Button Content="Atualizar Produto" Click="Salvar_Click" Width="250" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <Button Content="Cadastrar Produto" Click="Cadastrar_Click" Width="250" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
                     <!-- Botão Cancelar -->
                     <Button Content="Cancelar" Click="Cancelar_Click" Width="150" Margin="10"
                             Style="{StaticResource CancelButtonStyle}"/>
@@ -66,4 +66,3 @@
         </Grid>
     </ScrollViewer>
 </Window>
-

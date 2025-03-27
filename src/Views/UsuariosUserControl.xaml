@@ -4,45 +4,53 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="800"
-             TextBlock.Foreground="White">
+             d:DesignHeight="630" d:DesignWidth="800">
 
-    <Grid Margin="10">
-        <DockPanel Margin="10">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
-                <Button Content="Adicionar Usuário" Click="AdicionarUsuario_Click" Width="200" Margin="10" FontSize="18"/>
-                <Button Content="Editar Usuário" Click="EditarUsuario_Click" Width="150" Margin="10" FontSize="18"/>
-                <Button Content="Deletar Usuário" Click="DeletarUsuario_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}" FontSize="18"/>
-            </StackPanel>
+    <Grid Margin="15, 15, 15, 0">
+        <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="10" Padding="25" Background="{StaticResource SecondaryBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Título acima da barra de pesquisa -->
+                <Grid Margin="0,0,0,15" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="1" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="18" Padding="10" Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Image Width="24" Height="24" Margin="0,0,10,0"/>
+                            <TextBlock Text="Gerenciamento de Usuários" Foreground="{StaticResource TextBrush}" FontSize="18" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
 
-            <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Pesquisar:" VerticalAlignment="Center" FontSize="18" Margin="0,0,10,0" Foreground="White"/>
-                <TextBox Name="SearchBox" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" FontSize="18"/>
-                <Button Content="↺" ToolTip="Atualizar" Click="AtualizarDataGrid_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" Foreground="White" Margin="7, 0, 0, 0" FontSize="33" Grid.Column="3"/>
+                <Border Grid.Row="1" CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}" Padding="5" Margin="0,0,0,10">
+                    <DataGrid Name="UsuariosDataGrid" Style="{StaticResource CustomDataGridStyle}"
+                             MouseDoubleClick="UsuariosDataGrid_MouseDoubleClick"
+                             Background="Transparent">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="500"/>
+                            <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="*" MinWidth="166" MaxWidth="500"/>
+                            <DataGridTextColumn Header="Matrícula" Binding="{Binding Matrícula}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="100"/>
+                            <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="200"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <StackPanel Grid.Row="2" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                        <Button Content="Adicionar Usuário" Click="AdicionarUsuario_Click" Width="200" Margin="10" Style="{StaticResource EmphasisButtonStyle}" FontSize="18"/>
+                        <Button Content="Editar Usuário" Click="EditarUsuario_Click" Width="150" Margin="10" Style="{StaticResource EmphasisButtonStyle}" FontSize="18"/>
+                        <Button Content="Deletar Usuário" Click="DeletarUsuario_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}" FontSize="18"/>
+                    </WrapPanel>
+                </StackPanel>
             </Grid>
-
-            <DataGrid x:Name="UsuariosDataGrid" FontSize="18"
-                        AutoGenerateColumns="False" IsReadOnly="True" 
-                        SelectionMode="Single" SelectionUnit="FullRow"
-                        VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                        Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
-                        AlternatingRowBackground="Gainsboro" AlternationCount="2"
-                        CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
-                        ColumnWidth="*"
-                        MouseDoubleClick="UsuariosDataGrid_MouseDoubleClick">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="500"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="*" MinWidth="166" MaxWidth="500"/>
-                    <DataGridTextColumn Header="Matrícula" Binding="{Binding Matrícula}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="100"/>
-                    <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="200"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </DockPanel>
+        </Border>
     </Grid>
 </UserControl>

@@ -10,20 +10,20 @@ using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
 {
-    public partial class EditarProdutoWindow : Window
+    public partial class CadastrarProdutoWindow : Window
     {
         private ProdutoData produto;
         private bool isModified = false;
         private List<ProdutoData> produtos;
 
-        // Propriedade pública para acessar o produto editado
+        // Propriedade pública para acessar o produto cadastrado
         public ProdutoData Produto => produto;
 
-        // Construtor que inicializa a janela com os dados do produto ou vazio
-        public EditarProdutoWindow(ProdutoData? produto)
+        // Construtor que inicializa a janela com um novo produto
+        public CadastrarProdutoWindow()
         {
             InitializeComponent();
-            this.produto = produto ?? new ProdutoData
+            this.produto = new ProdutoData
             {
                 Nome = string.Empty,
                 Tipo = string.Empty,
@@ -31,42 +31,11 @@ namespace WMS_RadiadoresLemos_WPF
                 Codigo = string.Empty
             };
             produtos = new List<ProdutoData>();
-            PreencherCampos();
-
             isModified = false;
         }
 
-        // Preenche os campos da interface com os dados do produto
-        private void PreencherCampos()
-        {
-            try
-            {
-                NomeProduto.Text = produto.Nome;
-                TipoProduto.Text = produto.Tipo;
-                MarcaProduto.Text = produto.Marca;
-                CodigoProduto.Text = produto.Codigo;
-                PrecoProduto.Text = produto.Preço.ToString("F2");
-                QuantidadeInicial.Text = produto.Quantidade.ToString("N0");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao preencher campos da janela de edição de produto. Possíveis motivos:\n" +
-                                            "- Dados do produto não encontrados;\n" +
-                                            "- Impossibilidade de acessar os dados do produto;\n" +
-                                            "- Erro ao preencher campos da janela de edição de produto.",
-                                            "- Verifique se os dados do produto estão corretos;\n" +
-                                            "- Verifique se o produto existe no banco de dados;\n" +
-                                            "- Verifique se o banco de dados está acessível.");
-            }
-        }
-
-        // Evento disparado ao clicar no botão de atualizar produto
-        private void Salvar_Click(object sender, RoutedEventArgs e)
+        // Evento disparado ao clicar no botão de cadastrar produto
+        private async void Cadastrar_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -77,7 +46,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     if (ValidarCampos())
                     {
-                        AtualizarProduto();
+                        CadastrarProduto();
                         DialogResult = true;
                         Close();
                     }
@@ -89,12 +58,12 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao salvar produto: {ex.Message}");
+                //MessageBox.Show($"Erro ao cadastrar produto: {ex.Message}");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
-                                            "Erro ao salvar produto. Possíveis motivos:\n" +
+                                            "Erro ao cadastrar produto. Possíveis motivos:\n" +
                                             "- Dados do produto não são válidos;\n" +
                                             "- Produto inexistente no banco de dados;\n" +
                                             "- Banco de dados inacessível.",
@@ -104,17 +73,55 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Atualiza os dados do produto com os valores dos campos
-        private void AtualizarProduto()
+        // Cadastra o novo produto com os valores dos campos
+        private async void CadastrarProduto()
         {
-            produto.Nome = NomeProduto.Text;
-            produto.Tipo = TipoProduto.Text;
-            produto.Marca = MarcaProduto.Text;
-            produto.Codigo = CodigoProduto.Text;
-            produto.Preço = double.Parse(PrecoProduto.Text);
-            produto.Quantidade = int.Parse(QuantidadeInicial.Text);
-            
-            isModified = false;
+            var db = DatabaseConnect.Database;
+            ProdutoData data = DadosDoProduto();
+
+            // Se não estiver conectado ao banco
+            if (db == null || !DatabaseConnect.IsConnected)
+            {
+                // Ativa modo offline caso não esteja ativo
+                if (MainWindow.isAppOffline == false)
+                {
+                    MainWindow._instance?.ativarModoOffline();
+                }
+            }
+            else
+            {
+                // Salva o produto no banco de dados Firestore
+                var docRef = db.Collection("Produtos").Document(data.Codigo);
+                await docRef.SetAsync(data);
+            }
+
+            // Atualiza o cache local
+            if (!DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+            {
+                value = new List<object>();
+                DadosCache.Tabelas["Produtos"] = value;
+            }
+
+            // Adiciona o produto ao cache local e à fonte de dados do DataGrid
+            value.Add(data);
+            produtos.Add(data);
+
+            // Adiciona o novo produto no arquivo JSON
+            var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
+            var produtosCache = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
+            produtosCache.Add(data);
+            await DatabaseFileManager.SalvarNoArquivoAsync(caminhoArquivoProdutos, produtosCache);
+
+            // Adiciona log
+            var log = new LogData
+            {
+                Data = DateTime.UtcNow,
+                Tipo = "OPERACIONAL",
+                Nivel = "Usuário",
+                Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
+                Usuario = MainWindow.UsuarioLogado.Nome
+            };
+            await LogHistorico.RegistrarLogAsync(log);
         }
 
         // Evento disparado ao clicar no botão de cancelar
@@ -135,11 +142,11 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception)
             {
                 AlertaCache.AdicionarAlerta("Erro",
-                                            "Edição de produto.",
-                                            "Erro ao cancelar edição de produto. Possíveis motivos:\n" +
-                                            "- Erro ao fechar janela de edição de produto;\n" +
-                                            "- Impossibilidade de fechar janela de edição de produto.",
-                                            "- Verifique se a janela de edição de produto está aberta.");
+                                            "Cadastro de produto.",
+                                            "Erro ao cancelar cadastro de produto. Possíveis motivos:\n" +
+                                            "- Erro ao fechar janela de cadastro de produto;\n" +
+                                            "- Impossibilidade de fechar janela de cadastro de produto.",
+                                            "- Verifique se a janela de cadastro de produto está aberta.");
                 Close();
             }
         }
@@ -150,7 +157,6 @@ namespace WMS_RadiadoresLemos_WPF
             var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
             return result == MessageBoxResult.No;
         }
-
 
         // Restrições de entrada de texto nos TextBoxes
         private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -261,5 +267,22 @@ namespace WMS_RadiadoresLemos_WPF
             }
             return true;
         }
+
+        // Método para obter os dados do produto a partir dos TextBoxes
+        private ProdutoData DadosDoProduto() => new()
+        {
+            Nome = NomeProduto.Text.Trim(),
+            Tipo = TipoProduto.Text.Trim(),
+            Marca = MarcaProduto.Text.Trim(),
+            Codigo = CodigoProduto.Text.Trim(),
+
+            // Remove a formatação do preço (1.000,00 -> 1000 OU 1.999,99 -> 1999.99)
+            Preço = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", "."), System.Globalization.CultureInfo.InvariantCulture),
+
+            // Remove a formatação da quantidade (1.000 -> 1000)
+            Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", "")),
+
+            Id = CodigoProduto.Text.Trim()
+        };
     }
 }

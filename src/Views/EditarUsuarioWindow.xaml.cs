@@ -73,7 +73,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
+                //MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
@@ -122,7 +122,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao salvar usuário: {ex.Message}");
+                //MessageBox.Show($"Erro ao salvar usuário: {ex.Message}");
 
                 // Adiciona alerta
                 AlertaCache.AdicionarAlerta("Erro",
