@@ -38,6 +38,17 @@ namespace WMS_RadiadoresLemos_WPF
             ToggleVisibility(false);
         }
 
+        private void CarrinhoDeComprasButton_Click(object sender, RoutedEventArgs e)
+        {
+            CarrinhoDeComprasPopup.IsOpen = true;
+        }
+
+        private void FecharCarrinhoDeCompras_Click(object sender, RoutedEventArgs e)
+        {
+            CarrinhoDeComprasPopup.IsOpen = false;
+        }
+
+
         // Método para carregar produtos do cache
         private void CarregarProdutos()
         {
