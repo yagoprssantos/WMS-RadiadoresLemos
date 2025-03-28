@@ -374,7 +374,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
-                            CornerRadius="10"
+                            CornerRadius="15"
                             Padding="0">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
@@ -469,7 +469,7 @@
                             Background="{TemplateBinding Background}" 
                             BorderBrush="{TemplateBinding Background}" 
                             BorderThickness="1" 
-                            CornerRadius="10" 
+                            CornerRadius="15" 
                             Padding="5">
                             <ContentPresenter Name="ContentSite"
                                           IsHitTestVisible="False"
@@ -524,7 +524,7 @@
                                     Background="{StaticResource HoverBackgroundBrush}"
                                     BorderBrush="{StaticResource HoverBackgroundBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="10" />
+                                    CornerRadius="15" />
                                 <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
@@ -635,6 +635,16 @@
                     <Setter Property="Padding" Value="5" />
                     <Setter Property="HorizontalAlignment" Value="Stretch" />
                     <Setter Property="VerticalAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+                        </Trigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
             </Setter.Value>
         </Setter>
@@ -651,7 +661,30 @@
                     <Setter Property="FontSize" Value="16" />
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+                            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ColumnHeaderStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="Padding" Value="5" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource HoverForegroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
                             <Setter Property="Foreground" Value="White" />
                         </Trigger>
                     </Style.Triggers>

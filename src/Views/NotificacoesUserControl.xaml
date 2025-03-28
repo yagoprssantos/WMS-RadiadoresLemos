@@ -8,7 +8,7 @@
              Background="{StaticResource BackgroundBrush}">
 
     <Grid Margin="15, 15, 15, 0">
-        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -40,7 +40,7 @@
                 <!-- Tabela de Notificações -->
                 <Grid Grid.Row="1">
                     <Grid x:Name="AlertasGrid" Visibility="Visible">
-                        <Border CornerRadius="10" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,10">
+                        <Border CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,10">
                             <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}" >
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
@@ -76,7 +76,7 @@
 
         <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
             <StackPanel Background="{StaticResource PanelBackgroundBrush}">
-                <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="10" Padding="10">
+                <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="10">
                     <StackPanel Background="{StaticResource SecondaryBrush}">
                         <TextBlock Text="Filtrar por Tipo" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
                         <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">

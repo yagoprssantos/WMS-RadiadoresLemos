@@ -10,17 +10,18 @@
     <UserControl.Resources>
         <Style x:Key="SelectedButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
             <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
                 <!-- ComboBox para selecionar o gráfico -->
                 <ComboBox Name="GraficoComboBox" Style="{StaticResource ComboBoxStyle}" HorizontalContentAlignment="Stretch" SelectedIndex="0" Margin="0,0,0,20" MinWidth="500" 

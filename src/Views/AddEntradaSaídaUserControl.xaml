@@ -8,12 +8,15 @@
              Background="{StaticResource BackgroundBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="15, 15, 15, 0">
+        
+        <!-- Ajustar para ficar melhor responsivo com a tela -->
+        
         <Grid Margin="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" CornerRadius="10" Padding="25,10" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{StaticResource PanelBackgroundBrush}">
+            <Border Grid.Row="0" CornerRadius="15" Padding="25,10" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{StaticResource PanelBackgroundBrush}">
                 <Grid>
                     
                     <!-- Botão de Carrinho de Compras no canto inferior direito -->
@@ -51,6 +54,7 @@
                                                     <ColumnDefinition Width="100"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
+                                                <!-- Mostrar se é entrada ou saída  -->
                                                 <TextBlock Text="{Binding ProdutoId}" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                                 <TextBlock Text="{Binding Tipo}" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                                 <TextBlock Text="{Binding Preço, StringFormat={}{0:C}}" Foreground="{StaticResource TextBrush}" Grid.Column="2" Margin="0,0,10,0" VerticalAlignment="Center"/>
@@ -101,11 +105,11 @@
 
                         <!-- Detalhes do Produto -->
                         <StackPanel>
-                            <Border CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}" Padding="10">
+                            <Border CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}" Padding="10">
                                 <StackPanel>
                                     <!-- Detalhes do produto Selecionado -->
                                     <StackPanel x:Name="ProdutoSelecionado" Margin="0, 0, 0, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Transparent" Visibility="Visible">
-                                        <Border CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}">
+                                        <Border CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
                                             <Grid Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
