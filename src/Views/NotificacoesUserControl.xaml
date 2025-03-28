@@ -40,7 +40,7 @@
                 <!-- Tabela de Notificações -->
                 <Grid Grid.Row="1">
                     <Grid x:Name="AlertasGrid" Visibility="Visible">
-                        <Border CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,10">
+                        <Border CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5">
                             <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}" >
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>

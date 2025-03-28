@@ -51,10 +51,10 @@
 
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Row="2">
                     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                        <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" Width="160" Height="40" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
-                        <Button Content="Editar Produto" Click="EditarProduto_Click" Width="160" Height="40" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
-                        <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="170" Height="40" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
-                        <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="160" Height="40" Margin="10" Style="{StaticResource CancelButtonStyle}"/>
+                        <Button Content="Cadastrar Produto" Click="CadastrarProduto_Click" Width="160" Height="40" Margin="10, 10, 10, 0" Style="{StaticResource EmphasisButtonStyle}"/>
+                        <Button Content="Editar Produto" Click="EditarProduto_Click" Width="160" Height="40" Margin="10, 10, 10, 0" Style="{StaticResource EmphasisButtonStyle}"/>
+                        <Button Content="Alterar Quantidade" Click="AlterarQuantidade_Click" Width="170" Height="40" Margin="10, 10, 10, 0" Style="{StaticResource EmphasisButtonStyle}"/>
+                        <Button Content="Deletar Produto" Click="DeletarProduto_Click" Width="160" Height="40" Margin="10, 10, 10, 0" Style="{StaticResource CancelButtonStyle}"/>
                     </WrapPanel>
                 </StackPanel>
             </Grid>

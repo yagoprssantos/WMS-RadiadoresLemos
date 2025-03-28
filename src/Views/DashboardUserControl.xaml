@@ -14,7 +14,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="15">
+    <Grid Margin="15, 15, 15, 0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -24,9 +24,8 @@
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1">
             <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
                 <!-- ComboBox para selecionar o gráfico -->
-                <ComboBox Name="GraficoComboBox" Style="{StaticResource ComboBoxStyle}" HorizontalContentAlignment="Stretch" SelectedIndex="0" Margin="0,0,0,20" MinWidth="500" 
+                <ComboBox Name="GraficoComboBox" Style="{StaticResource ComboBoxStyle}" HorizontalContentAlignment="Stretch" SelectedIndex="0" Margin="0,0,0,20" MinWidth="500"
                           SelectionChanged="GraficoComboBox_SelectionChanged">
-
                 </ComboBox>
 
                 <!-- Filtros por Período -->
