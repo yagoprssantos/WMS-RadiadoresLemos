@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,10 +19,12 @@ namespace WMS_RadiadoresLemos_WPF
         // Declaração de variáveis privadas para armazenar dados dos produtos
         private List<ProdutoData> produtos = new List<ProdutoData>();
         private ObservableCollection<string> produtosFiltrados = new ObservableCollection<string>();
+        private ObservableCollection<MovimentacaoData> carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
         private Dictionary<string, string> produtoNomeParaId = new Dictionary<string, string>();
         private ProdutoData? produtoSelecionado;
         private bool usePositiveNumber = true;
         private static readonly string CaminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
+
 
 
         // Construtor da classe que inicializa os componentes e carrega os produtos
@@ -29,6 +32,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             ProdutoComboBox.ItemsSource = produtosFiltrados;
+            CarrinhoDeComprasItemsControl.ItemsSource = carrinhoDeCompras;
             Setup();
         }
 
@@ -36,16 +40,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             CarregarProdutos();
             ToggleVisibility(false);
-        }
-
-        private void CarrinhoDeComprasButton_Click(object sender, RoutedEventArgs e)
-        {
-            CarrinhoDeComprasPopup.IsOpen = true;
-        }
-
-        private void FecharCarrinhoDeCompras_Click(object sender, RoutedEventArgs e)
-        {
-            CarrinhoDeComprasPopup.IsOpen = false;
         }
 
 
@@ -97,6 +91,7 @@ namespace WMS_RadiadoresLemos_WPF
             ProdutoSelecionado.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
             ProdutoAntesDepois.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
         }
+
 
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -300,9 +295,8 @@ namespace WMS_RadiadoresLemos_WPF
             ProdutoComboBox.IsEnabled = true;
         }
 
-
-        // Método para confirmar a ação de registro
-        private async void ConfirmarAcao_Click(object sender, RoutedEventArgs e)
+        // Método para confirmar a ação de entrada ou saída
+        private void ConfirmarAcao_Click(object sender, RoutedEventArgs e)
         {
             if (produtoSelecionado == null)
             {
@@ -316,14 +310,16 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
-            if (usePositiveNumber)
+            var movimentacao = new MovimentacaoData
             {
-                await RegistrarMovimentacaoAsync(true, quantidade, preco);
-            }
-            else
-            {
-                await RegistrarMovimentacaoAsync(false, quantidade, preco);
-            }
+                ProdutoId = produtoSelecionado.Id,
+                Quantidade = quantidade,
+                Preço = preco,
+                Data = DateTime.UtcNow,
+                Tipo = usePositiveNumber ? "Entrada" : "Saída"
+            };
+
+            carrinhoDeCompras.Add(movimentacao);
 
             ToggleVisibility(false);
             ConfirmarRegistroButton.Visibility = Visibility.Collapsed;
@@ -331,9 +327,12 @@ namespace WMS_RadiadoresLemos_WPF
             RegistrarEntradaButton.Visibility = Visibility.Visible;
             RegistrarSaidaButton.Visibility = Visibility.Visible;
             LimparCampos();
+
+            // Ativa ComboBox para selecionar outro produto
+            ProdutoComboBox.IsHitTestVisible = true;
+            ProdutoComboBox.IsEnabled = true;
         }
 
-        // Método para cancelar a ação de registro
         private void CancelarAcao_Click(object sender, RoutedEventArgs e)
         {
             ToggleVisibility(false);
@@ -344,10 +343,52 @@ namespace WMS_RadiadoresLemos_WPF
 
             usePositiveNumber = true;
 
-            // Habilitar o ComboBox
+            // Ativa ComboBox para selecionar outro produto
             ProdutoComboBox.IsHitTestVisible = true;
             ProdutoComboBox.IsEnabled = true;
         }
+
+        // Métodos para carrinho de compras
+        private void CarrinhoDeComprasButton_Click(object sender, RoutedEventArgs e)
+        {
+            CarrinhoDeComprasPopup.IsOpen = true;
+        }
+        private void ExcluirItem_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var item = button?.DataContext;
+            if (item != null)
+            {
+                var items = CarrinhoDeComprasItemsControl.ItemsSource as IList;
+                if (items != null)
+                {
+                    items.Remove(item);
+                }
+            }
+        }
+        private void ExcluirTodosItens_Click(object sender, RoutedEventArgs e)
+        {
+            carrinhoDeCompras.Clear();
+        }
+        private async void FinalizarCarrinhoDeCompras_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var movimentacao in carrinhoDeCompras)
+            {
+                await RegistrarMovimentacaoAsync(movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preço);
+            }
+
+            carrinhoDeCompras.Clear();
+            CarrinhoDeComprasPopup.IsOpen = false;
+
+            // Garante que o ComboBox está habilitado
+            ProdutoComboBox.IsHitTestVisible = true;
+            ProdutoComboBox.IsEnabled = true;
+        }
+        private void FecharCarrinhoDeCompras_Click(object sender, RoutedEventArgs e)
+        {
+            CarrinhoDeComprasPopup.IsOpen = false;
+        }
+
 
         // Método assíncrono para registrar a movimentação de produtos
         private async Task RegistrarMovimentacaoAsync(bool isEntrada, int quantidadeMovimentacao, double precoMovimentacao)

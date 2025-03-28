@@ -25,32 +25,50 @@
                     <Popup x:Name="CarrinhoDeComprasPopup" StaysOpen="False" Placement="Center" AllowsTransparency="True">
                         <Border Background="{StaticResource SecondaryBrush}" CornerRadius="15" Padding="10" BorderBrush="{StaticResource HoverBackgroundBrush}" BorderThickness="10">
                             <StackPanel>
-                                <TextBlock Text="Carrinho de Compras" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
-                                <!-- Conteúdo do carrinho de compras -->
-                                <StackPanel>
-                                    <!-- Item 1 -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                        <TextBlock Text="Produto: Radiador" FontWeight="Bold" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Tipo: Entrada" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Preço: R$ 150,00" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Quantidade: 10" FontSize="14" Margin="0,0,10,0"/>
-                                    </StackPanel>
-                                    <!-- Item 2 -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                        <TextBlock Text="Produto: Bomba de Água" FontWeight="Bold" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Tipo: Saída" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Preço: R$ 75,00" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Quantidade: 5" FontSize="14" Margin="0,0,10,0"/>
-                                    </StackPanel>
-                                    <!-- Item 3 -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                        <TextBlock Text="Produto: Termostato" FontWeight="Bold" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Tipo: Entrada" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Preço: R$ 30,00" FontSize="14" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Quantidade: 20" FontSize="14" Margin="0,0,10,0"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Button Content="Finalizar" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" HorizontalAlignment="Right" Click="FecharCarrinhoDeCompras_Click"/>
+                                <TextBlock Text="Carrinho de Compras" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Foreground="{StaticResource TextBrush}"/>
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Produto ID" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Tipo" FontWeight="Bold" Grid.Column="1" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Preço" FontWeight="Bold" Grid.Column="2" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Quantidade" FontWeight="Bold" Grid.Column="3" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Ação" FontWeight="Bold" Grid.Column="4" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                </Grid>
+                                <ItemsControl x:Name="CarrinhoDeComprasItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Style="{StaticResource CarrinhoDeComprasGridStyle}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding ProdutoId}" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Tipo}" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Preço, StringFormat={}{0:C}}" Foreground="{StaticResource TextBrush}" Grid.Column="2" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Quantidade}" Grid.Column="3" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <Button Content="X" Style="{StaticResource DeleteButtonStyle}" Grid.Column="4" Click="ExcluirItem_Click" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Style="{StaticResource HoverButtonStyle}" Width="30" Height="30" Margin="10,0,0,0" Click="ExcluirTodosItens_Click" Content="🗑" Foreground="{StaticResource CancelButtonBrush}"/>
+                                    <Button Grid.Column="2" Content="Finalizar" Click="FinalizarCarrinhoDeCompras_Click" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" HorizontalAlignment="Right"/>
+                                </Grid>
                             </StackPanel>
                         </Border>
                     </Popup>
