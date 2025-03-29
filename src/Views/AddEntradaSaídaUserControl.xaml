@@ -7,19 +7,83 @@
              d:DesignHeight="600" d:DesignWidth="800"
              Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="0, 10, 0, 0">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="15, 15, 15, 0">
+        
+        <!-- Ajustar para ficar melhor responsivo com a tela -->
+        
+        <Grid Margin="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" CornerRadius="10,10,10,10" Padding="20" Margin="50, 0, 50, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" MaxWidth="800" Background="{StaticResource PanelBackgroundBrush}">
-                <Border CornerRadius="10,10,10,10" Padding="30, 0, 30, 10" Background="{StaticResource PanelBackgroundBrush}">
-                    <!-- Registro de Entrada/Saída -->
+            <Border Grid.Row="0" CornerRadius="15" Padding="25,10" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{StaticResource PanelBackgroundBrush}">
+                <Grid>
+                    
+                    <!-- Botão de Carrinho de Compras no canto inferior direito -->
+                    <Button Style="{StaticResource HoverButtonStyle}"
+                            FontSize="16" Width="50" Height="50" Margin="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" x:Name="CarrinhoDeComprasButton" Click="CarrinhoDeComprasButton_Click">
+                    </Button>
+                    
+                    <!-- Popup de Carrinho de Compras -->
+                    <Popup x:Name="CarrinhoDeComprasPopup" StaysOpen="False" Placement="Center" AllowsTransparency="True">
+                        <Border Background="{StaticResource SecondaryBrush}" CornerRadius="15" Padding="10" BorderBrush="{StaticResource HoverBackgroundBrush}" BorderThickness="10">
+                            <StackPanel>
+                                <TextBlock Text="Carrinho de Compras" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Foreground="{StaticResource TextBrush}"/>
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Produto ID" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Tipo" FontWeight="Bold" Grid.Column="1" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Preço" FontWeight="Bold" Grid.Column="2" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Quantidade" FontWeight="Bold" Grid.Column="3" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Ação" FontWeight="Bold" Grid.Column="4" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                </Grid>
+                                <ItemsControl x:Name="CarrinhoDeComprasItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Style="{StaticResource CarrinhoDeComprasGridStyle}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <!-- Mostrar se é entrada ou saída  -->
+                                                <TextBlock Text="{Binding ProdutoId}" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Tipo}" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Preço, StringFormat={}{0:C}}" Foreground="{StaticResource TextBrush}" Grid.Column="2" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Quantidade}" Grid.Column="3" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <Button Content="X" Style="{StaticResource DeleteButtonStyle}" Grid.Column="4" Click="ExcluirItem_Click" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Style="{StaticResource HoverButtonStyle}" Width="30" Height="30" Margin="10,0,0,0" Click="ExcluirTodosItens_Click" Content="🗑" Foreground="{StaticResource CancelButtonBrush}"/>
+                                    <Button Grid.Column="2" Content="Finalizar" Click="FinalizarCarrinhoDeCompras_Click" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+
+
+
+
                     <StackPanel Width="Auto" VerticalAlignment="Top" Margin="0, 15, 0, 0">
                         <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>
                         <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="16" Style="{StaticResource ComboBoxStyle}" HorizontalAlignment="Stretch" LostFocus="ProdutoComboBox_LostFocus"
-                                  StaysOpenOnEdit="True" IsTextSearchEnabled="True" TextBoxBase.TextChanged="SearchTextBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged"/>
+                                      StaysOpenOnEdit="True" IsTextSearchEnabled="True" TextBoxBase.TextChanged="SearchTextBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged"/>
 
                         <!-- Grid para Quantidade e Preço por unidade -->
                         <Grid>
@@ -30,22 +94,22 @@
                             <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                 <TextBlock Text="Quantidade:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>
                                 <TextBox Name="QuantidadeTextBox" Margin="0,0,0,15" FontSize="18" Style="{StaticResource {x:Type TextBox}}"
-                                         PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
+                                             PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                 <TextBlock Text="Preço por unidade:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>
                                 <TextBox Name="PrecoTextBox" Margin="0,0,0,15" FontSize="18" Style="{StaticResource {x:Type TextBox}}"
-                                         PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
+                                             PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
                             </StackPanel>
                         </Grid>
 
                         <!-- Detalhes do Produto -->
                         <StackPanel>
-                            <Border CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}" Padding="10">
+                            <Border CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}" Padding="10">
                                 <StackPanel>
                                     <!-- Detalhes do produto Selecionado -->
                                     <StackPanel x:Name="ProdutoSelecionado" Margin="0, 0, 0, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Transparent" Visibility="Visible">
-                                        <Border CornerRadius="10" Background="{StaticResource PanelBackgroundBrush}">
+                                        <Border CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
                                             <Grid Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
@@ -170,7 +234,7 @@
                         </StackPanel>
 
                         <!-- Botões de Ação -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 0, 0, 10">
                             <!-- Antes de selecionar tipo de registro -->
                             <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="16"
                                     Visibility="Visible" Width="200" Margin="10, 15, 10, 5" Style="{StaticResource EmphasisButtonStyle}" x:Name="RegistrarEntradaButton"/>
@@ -187,7 +251,7 @@
                         </StackPanel>
 
                     </StackPanel>
-                </Border>
+                </Grid>
             </Border>
         </Grid>
     </ScrollViewer>

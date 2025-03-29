@@ -7,7 +7,7 @@
             d:DesignHeight="600" d:DesignWidth="800">
 
     <Grid Margin="15, 15, 15, 0">
-        <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="10" Padding="25" Background="{StaticResource SecondaryBrush}">
+        <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource SecondaryBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -73,7 +73,7 @@
 
                 <!-- Mais Informações -->
                 <StackPanel Grid.Row="2">
-                    <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="10" Padding="40, 5" HorizontalAlignment="Center" Margin="0,0,0,15">
+                    <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="40, 5" HorizontalAlignment="Center" Margin="0,0,0,15">
                         <TextBlock Text="Mais informações:" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
                     </Border>
                     <Grid>
@@ -123,7 +123,7 @@
 
         <!-- Popup para Configurações de Exportação -->
         <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="True">
-            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="10">
+            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="15">
                 <StackPanel>
                     <!-- Textos ajustáveis de acordo com função -->
                     <TextBlock Text="Configurações para Exportar" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="18" Margin="0,0,0,10"/>
@@ -140,7 +140,7 @@
 
         <!-- Popup para Configurações de Importação -->
         <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" Width="400">
-            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="10">
+            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="15">
                 <StackPanel>
                     <!-- Textos ajustáveis de acordo com função -->
                     <TextBlock Text="Configurações para Importar" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="18" Margin="0,0,0,10" TextWrapping="Wrap"/>

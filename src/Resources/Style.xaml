@@ -234,7 +234,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <!-- Estilos dos Itens do Menu -->
     <Style x:Key="MenuItemTextStyle" TargetType="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -242,7 +241,6 @@
         <Setter Property="FontSize" Value="18"/>
         <Setter Property="Margin" Value="10,0,0,0"/>
     </Style>
-
     <!-- Estilo para Ícones do Menu -->
     <Style x:Key="MenuIconStyle" TargetType="Path">
         <Setter Property="Stretch" Value="Uniform"/>
@@ -253,7 +251,6 @@
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Fill" Value="{StaticResource TextBrush}"/>
     </Style>
-
     <!-- Estilo para Itens de Menu Selecionados -->
     <Style x:Key="MenuItemSelectedStyle" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
@@ -296,7 +293,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <!-- Estilo para Ícones de Navegação -->
     <Style x:Key="NavegationIconStyle" TargetType="Path">
         <Setter Property="Stretch" Value="Uniform"/>
@@ -353,6 +349,46 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Estilo para Carrinho de Compras -->
+    <Style x:Key="CarrinhoDeComprasGridStyle" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,10"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="DeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{StaticResource CancelButtonBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="15"
+                            Padding="0">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource CancelButtonHoverBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
 
 
     <!-- Vendas -->
@@ -433,7 +469,7 @@
                             Background="{TemplateBinding Background}" 
                             BorderBrush="{TemplateBinding Background}" 
                             BorderThickness="1" 
-                            CornerRadius="10" 
+                            CornerRadius="15" 
                             Padding="5">
                             <ContentPresenter Name="ContentSite"
                                           IsHitTestVisible="False"
@@ -488,7 +524,7 @@
                                     Background="{StaticResource HoverBackgroundBrush}"
                                     BorderBrush="{StaticResource HoverBackgroundBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="10" />
+                                    CornerRadius="15" />
                                 <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
@@ -599,6 +635,16 @@
                     <Setter Property="Padding" Value="5" />
                     <Setter Property="HorizontalAlignment" Value="Stretch" />
                     <Setter Property="VerticalAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+                        </Trigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
             </Setter.Value>
         </Setter>
@@ -615,7 +661,30 @@
                     <Setter Property="FontSize" Value="16" />
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+                            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ColumnHeaderStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="Padding" Value="5" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource HoverForegroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
                             <Setter Property="Foreground" Value="White" />
                         </Trigger>
                     </Style.Triggers>
@@ -623,6 +692,10 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
+    
+    
+    <!-- TODO: ORGANIZAR DAQUI PRA BAIXO -->
 
     <!-- Estilo para Botão padrão 1 -->
     <Style x:Key="CustomButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
