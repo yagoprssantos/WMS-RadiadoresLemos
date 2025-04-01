@@ -18,6 +18,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="src\resources\icons\CaixaS.png" />
+    <None Remove="src\resources\icons\EngrenagemS.png" />
+    <None Remove="src\resources\icons\GraficoS.png" />
+    <None Remove="src\resources\icons\historicos.png" />
+    <None Remove="src\resources\icons\PlusS.png" />
+    <None Remove="src\resources\icons\PranchetaS.png" />
+    <None Remove="src\resources\icons\SairS.png" />
+    <None Remove="src\resources\icons\SinoS.png" />
     <None Remove="src\Resources\Images\user.png" />
   </ItemGroup>
 
@@ -41,6 +49,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="src\resources\icons\CaixaS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\resources\icons\EngrenagemS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\resources\icons\GraficoS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\resources\icons\historicos.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\resources\icons\PlusS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\resources\icons\PranchetaS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\resources\icons\SairS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\resources\icons\SinoS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="src\Resources\Images\user.png" />
   </ItemGroup>
 

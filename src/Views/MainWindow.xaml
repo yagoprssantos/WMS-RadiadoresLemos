@@ -136,8 +136,10 @@
 
             <!-- Título e Ícone -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,15,0,0">
-                <Image x:Name="IconImage" Width="30" Height="30" Source="{Binding SelectedTabIcon}" Margin="0,0,10,0"/>
-                <TextBlock x:Name="TitleTextBlock" Text="{Binding SelectedTabTitle}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                <!-- Remova Source="{Binding SelectedTabIcon}" se existir -->
+                <Image x:Name="IconImage" Width="30" Height="30" Margin="0,0,10,0"/>
+                <!-- Remova Text="{Binding SelectedTabTitle}" se existir -->
+                <TextBlock x:Name="TitleTextBlock" FontSize="32" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
             </StackPanel>
 
             <!-- Área de Conteúdo -->

@@ -8,6 +8,8 @@ using System.Windows.Threading;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
+using System; // Necessário para Uri
+using System.Windows.Media.Imaging; // Necessário para BitmapImage
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -67,6 +69,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Define o índice inicial
             _currentIndex = 0;
             UpdateTitle();
+            UpdateIcon();
         }
 
         private async void SaveCacheTimer_Tick(object? sender, EventArgs e)
@@ -368,42 +371,46 @@ namespace WMS_RadiadoresLemos_WPF
                 // Altera o estilo do botão clicado
                 clickedButton.Style = (Style)FindResource("MenuItemSelectedStyle");
 
-                // e define a aba correspondente
+                // Define a aba correspondente
                 if (clickedButton == BtnAdicionar)
                 {
                     ContentArea.Content = new AddEntradaSaidaUserControl();
-                    TitleTextBlock.Text = "Entrada/Saída";
+                    // TitleTextBlock.Text = "Entrada/Saída"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnVendas)
                 {
                     ContentArea.Content = new VendasUserControl();
-                    TitleTextBlock.Text = "Vendas";
+                    // TitleTextBlock.Text = "Vendas"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnRegistro)
                 {
                     ContentArea.Content = new RegistroUserControl();
-                    TitleTextBlock.Text = "Registro";
+                    // TitleTextBlock.Text = "Registro"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnEstoque)
                 {
                     ContentArea.Content = new ControleEstoqueUserControl();
-                    TitleTextBlock.Text = "Estoque";
+                    // TitleTextBlock.Text = "Estoque"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnDashboard)
                 {
                     ContentArea.Content = new DashboardUserControl();
-                    TitleTextBlock.Text = "Relatório";
+                    // TitleTextBlock.Text = "Relatório"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnNotificacoes)
                 {
                     ContentArea.Content = new NotificacoesUserControl();
-                    TitleTextBlock.Text = "Notificações";
+                    // TitleTextBlock.Text = "Notificações"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnConfiguracoes)
                 {
                     ContentArea.Content = new ConfiguracaoUserControl();
-                    TitleTextBlock.Text = "Configurações";
+                    // TitleTextBlock.Text = "Configurações"; // <<< REMOVER
                 }
+
+                // Atualiza o título e o ícone DEPOIS de definir o conteúdo
+                UpdateTitle(); // <<< CHAMAR AQUI
+                UpdateIcon();  // <<< CHAMAR AQUI
 
                 // Altera a cor do texto e do ícone do botão clicado
                 foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
@@ -661,6 +668,7 @@ namespace WMS_RadiadoresLemos_WPF
                 _currentIndex--;
                 ContentArea.Content = _userControls[_currentIndex];
                 UpdateTitle();
+                UpdateIcon();
             }
         }
 
@@ -672,15 +680,21 @@ namespace WMS_RadiadoresLemos_WPF
                 _currentIndex++;
                 ContentArea.Content = _userControls[_currentIndex];
                 UpdateTitle();
+                UpdateIcon();
             }
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            // Atualiza a aba atual
             if (ContentArea.Content is UserControl currentControl)
             {
-                ContentArea.Content = Activator.CreateInstance(currentControl.GetType());
+                var currentType = currentControl.GetType();
+                // Remove o conteúdo antigo para garantir que a UI seja redesenhada se necessário
+                ContentArea.Content = null;
+                // Cria uma nova instância e a define como conteúdo
+                ContentArea.Content = Activator.CreateInstance(currentType);
+                UpdateTitle(); // <<< ADICIONAR AQUI
+                UpdateIcon();  // <<< ADICIONAR AQUI
             }
         }
 
@@ -714,6 +728,60 @@ namespace WMS_RadiadoresLemos_WPF
             else if (ContentArea.Content is ConfiguracaoUserControl)
             {
                 TitleTextBlock.Text = "Configurações";
+            }
+        }
+
+        private void UpdateIcon()
+        {
+            Uri? iconUri = null; // Use Uri? para indicar que pode ser nulo
+
+            // Baseado no UserControl atual em ContentArea, define o URI do ícone
+            if (ContentArea.Content is AddEntradaSaidaUserControl)
+            {
+                // Assumindo CaixaS.png para Entrada/Saída
+                iconUri = new Uri("/src/Resources/Icons/CaixaS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is VendasUserControl)
+            {
+                // Assumindo PranchetaS.png para Vendas (ajuste se necessário)
+                iconUri = new Uri("/src/Resources/Icons/PranchetaS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is RegistroUserControl)
+            {
+                // Assumindo historicos.png para Registro
+                iconUri = new Uri("/src/Resources/Icons/historicos.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is ControleEstoqueUserControl)
+            {
+                // Assumindo CaixaS.png para Estoque (ou use outro ícone)
+                iconUri = new Uri("/src/Resources/Icons/CaixaS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is DashboardUserControl)
+            {
+                // Assumindo GraficoS.png para Relatório/Dashboard
+                iconUri = new Uri("/src/Resources/Icons/GraficoS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is NotificacoesUserControl)
+            {
+                // Assumindo SinoS.png para Notificações
+                iconUri = new Uri("/src/Resources/Icons/SinoS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is ConfiguracaoUserControl)
+            {
+                // Assumindo EngrenagemS.png para Configurações
+                iconUri = new Uri("/src/Resources/Icons/EngrenagemS.png", UriKind.Relative);
+            }
+            // Adicione mais 'else if' para outros UserControls, se houver
+
+            // Define o Source do IconImage
+            if (iconUri != null)
+            {
+                IconImage.Source = new BitmapImage(iconUri);
+            }
+            else
+            {
+                // Limpa o ícone se nenhum controle corresponder ou se ContentArea estiver vazio
+                IconImage.Source = null;
             }
         }
 
