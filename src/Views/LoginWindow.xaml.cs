@@ -53,6 +53,40 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        private void LoginRapidoAdmin_Click(object sender, RoutedEventArgs e)
+        {
+            LoadingGrid.Visibility = Visibility.Visible;
+            TextoCarregamento.Text = "Logando como administrador...";
+
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var usuariosCollection = db.GetCollection<UsuarioData>("usuarios");
+                    var admin = usuariosCollection.FindOne(u => u.Cargo == "Administrador");
+
+                    if (admin != null)
+                    {
+                        TextoCarregamento.Text = "Sucesso!";
+                        LoginBemSucedido(admin);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Usuário administrador não encontrado no sistema.", "Erro de Login", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao realizar login rápido: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                LoadingGrid.Visibility = Visibility.Collapsed;
+            }
+        }
+
         private async void TentarLogin()
         {
             string username = UsernameField.Text;

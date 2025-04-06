@@ -1,6 +1,7 @@
 ﻿using LiteDB;
 using System;
 using System.IO;
+using System.Linq;
 using WMS_RadiadoresLemos_WPF.src.Models;
 
 namespace WMS_RadiadoresLemos_WPF.src.Services
@@ -13,6 +14,43 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             "Database.db"
         );
         public static LiteDatabase? Database { get; private set; }
+
+        private static string GetBackupPath(int version)
+        {
+            var directory = Path.GetDirectoryName(dbPath);
+            return Path.Combine(directory, $"Database_v{version}.db");
+        }
+
+        private static void CreateBackup()
+        {
+            try
+            {
+                // Se o banco atual existe, faz backup
+                if (File.Exists(dbPath))
+                {
+                    // Move as versões existentes
+                    for (int i = 19; i >= 1; i--)
+                    {
+                        string currentBackup = GetBackupPath(i);
+                        string nextBackup = GetBackupPath(i + 1);
+                        
+                        if (File.Exists(currentBackup))
+                        {
+                            if (File.Exists(nextBackup))
+                                File.Delete(nextBackup);
+                            File.Move(currentBackup, nextBackup);
+                        }
+                    }
+
+                    // Cria nova versão 1 com o banco atual
+                    File.Copy(dbPath, GetBackupPath(1), true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao criar backup: {ex.Message}");
+            }
+        }
 
         public static string GetDatabasePath()
         {
@@ -36,6 +74,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     Console.WriteLine($"Diretório criado: {directory}");
                 }
 
+                // Cria backup antes de abrir o banco
+                CreateBackup();
+
                 // Cria ou abre o banco de dados
                 Database = new LiteDatabase(dbPath);
                 Console.WriteLine($"Banco de dados conectado: {dbPath}");
@@ -58,7 +99,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             {
                 Console.WriteLine($"Erro ao criar banco de dados: {ex.Message}");
                 Database = null;
-                throw; // Propaga a exceção para que a aplicação saiba que houve um erro
+                throw;
             }
         }
 
