@@ -57,7 +57,7 @@
                                                 <!-- Mostrar se é entrada ou saída  -->
                                                 <TextBlock Text="{Binding ProdutoId}" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                                 <TextBlock Text="{Binding Tipo}" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding Preço, StringFormat={}{0:C}}" Foreground="{StaticResource TextBrush}" Grid.Column="2" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Preco, StringFormat={}{0:C}}" Foreground="{StaticResource TextBrush}" Grid.Column="2" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                                 <TextBlock Text="{Binding Quantidade}" Grid.Column="3" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                                 <Button Content="X" Style="{StaticResource DeleteButtonStyle}" Grid.Column="4" Click="ExcluirItem_Click" VerticalAlignment="Center"/>
                                             </Grid>

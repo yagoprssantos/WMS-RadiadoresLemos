@@ -110,7 +110,6 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 ProdutoComboBox.Text = string.Empty;
                 ProdutoComboBox.SelectedItem = null;
-                ProdutoComboBox.Focus();
             }
         }
 
@@ -300,20 +299,14 @@ namespace WMS_RadiadoresLemos_WPF
             var movimentacao = new MovimentacaoData
             {
                 Id = 0, // O LiteDB irá gerar o ID automaticamente
-                Data = DateTime.Now,
                 Tipo = usePositiveNumber ? "Entrada" : "Saída",
                 Quantidade = quantidade,
                 Preco = preco,
-                ProdutoId = produtoSelecionado.Id
+                ProdutoId = produtoSelecionado.Id,
+                Data = DateTime.UtcNow,
             };
 
-            if (DatabaseConnect.Database == null)
-                return;
-
-            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
-            collection.Upsert(movimentacao);
-
-            AtualizarTabelaMovimentacoes();
+            carrinhoDeCompras.Add(movimentacao);
 
             ToggleVisibility(false);
             ConfirmarRegistroButton.Visibility = Visibility.Collapsed;
