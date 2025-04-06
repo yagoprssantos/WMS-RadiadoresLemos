@@ -31,6 +31,9 @@ namespace WMS_RadiadoresLemos_WPF
         {
             InitializeComponent();
             Setup();
+
+            // Vincular a coleção carrinhoDeCompras ao ItemsControl na interface do usuário
+            CarrinhoDeComprasItemsControl.ItemsSource = carrinhoDeCompras;
         }
 
         private void Setup()
@@ -307,6 +310,10 @@ namespace WMS_RadiadoresLemos_WPF
             };
 
             carrinhoDeCompras.Add(movimentacao);
+
+            // Atualizar a interface do usuário
+            CarrinhoDeComprasItemsControl.ItemsSource = null;
+            CarrinhoDeComprasItemsControl.ItemsSource = carrinhoDeCompras;
 
             ToggleVisibility(false);
             ConfirmarRegistroButton.Visibility = Visibility.Collapsed;
