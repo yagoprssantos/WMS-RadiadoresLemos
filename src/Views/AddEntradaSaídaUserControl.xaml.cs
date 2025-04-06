@@ -102,7 +102,11 @@ namespace WMS_RadiadoresLemos_WPF
                 inputText = selectedProductName;
             }
 
-            if (!string.IsNullOrEmpty(inputText) && !produtoNomeParaId.ContainsKey(inputText))
+            if (!string.IsNullOrEmpty(inputText) && produtos.Any(p => p.Nome == inputText))
+            {
+                produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == inputText);
+            }
+            else
             {
                 ProdutoComboBox.Text = string.Empty;
                 ProdutoComboBox.SelectedItem = null;
