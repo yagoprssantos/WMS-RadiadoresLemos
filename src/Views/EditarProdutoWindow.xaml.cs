@@ -45,7 +45,7 @@ namespace WMS_RadiadoresLemos_WPF
                 TipoProduto.Text = produto.Tipo;
                 MarcaProduto.Text = produto.Marca;
                 CodigoProduto.Text = produto.Codigo;
-                PrecoProduto.Text = produto.Preço.ToString("F2");
+                PrecoProduto.Text = produto.Preco.ToString("F2");
                 QuantidadeInicial.Text = produto.Quantidade.ToString("N0");
             }
             catch (Exception ex)
@@ -53,7 +53,7 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
 
                 // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             "Erro ao preencher campos da janela de edição de produto. Possíveis motivos:\n" +
                                             "- Dados do produto não encontrados;\n" +
@@ -92,7 +92,7 @@ namespace WMS_RadiadoresLemos_WPF
                 //MessageBox.Show($"Erro ao salvar produto: {ex.Message}");
 
                 // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             "Erro ao salvar produto. Possíveis motivos:\n" +
                                             "- Dados do produto não são válidos;\n" +
@@ -111,7 +111,7 @@ namespace WMS_RadiadoresLemos_WPF
             produto.Tipo = TipoProduto.Text;
             produto.Marca = MarcaProduto.Text;
             produto.Codigo = CodigoProduto.Text;
-            produto.Preço = double.Parse(PrecoProduto.Text);
+            produto.Preco = double.Parse(PrecoProduto.Text);
             produto.Quantidade = int.Parse(QuantidadeInicial.Text);
             
             isModified = false;
@@ -134,7 +134,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception)
             {
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             "Edição de produto.",
                                             "Erro ao cancelar edição de produto. Possíveis motivos:\n" +
                                             "- Erro ao fechar janela de edição de produto;\n" +

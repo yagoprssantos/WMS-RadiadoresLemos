@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO; // Adicione esta linha
 using System.Windows;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -11,6 +12,9 @@ namespace WMS_RadiadoresLemos_WPF
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Adiciona o usuário administrador antes de qualquer outra operação
+            AddAdminUser.AddAdmin();
+            
             base.OnStartup(e);
             LoadTheme();
         }

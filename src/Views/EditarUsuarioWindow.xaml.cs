@@ -40,7 +40,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     Nome = string.Empty,
                     Email = string.Empty,
-                    Matrícula = novaMatricula, // Gera a matrícula com base no cargo e ano atual
+                    Matricula = novaMatricula, // Gera a matrícula com base no cargo e ano atual
                     Senha = string.Empty,
                     Cargo = "Usuário",
                     Id = novaMatricula
@@ -66,7 +66,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     NomeTextBox.Text = usuario.Nome;
                     EmailTextBox.Text = usuario.Email;
-                    MatriculaTextBox.Text = usuario.Matrícula;
+                    MatriculaTextBox.Text = usuario.Matricula;
                     SenhaPasswordBox.Password = usuario.Senha.ToString();
                     PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
                 }
@@ -76,7 +76,7 @@ namespace WMS_RadiadoresLemos_WPF
                 //MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
 
                 // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             "Erro ao preencher campos de usuário. Possíveis motivos:\n" +
                                             "- O usuário não foi encontrado;\n" +
@@ -125,7 +125,7 @@ namespace WMS_RadiadoresLemos_WPF
                 //MessageBox.Show($"Erro ao salvar usuário: {ex.Message}");
 
                 // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             "Erro ao salvar usuário. Possíveis motivos:\n" +
                                             "- Dados do usuário não são válidos;\n" +
@@ -142,7 +142,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             usuario.Nome = NomeTextBox.Text;
             usuario.Email = EmailTextBox.Text;
-            usuario.Matrícula = MatriculaTextBox.Text;
+            usuario.Matricula = MatriculaTextBox.Text;
             usuario.Senha = SenhaPasswordBox.Password.ToString();
             usuario.Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty;
 
@@ -166,7 +166,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception)
             {
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             "Edição de usuário.",
                                             "Erro ao cancelar edição de usuário. Possíveis motivos:\n" +
                                             "- Erro ao fechar janela de edição de usuário;\n" +
@@ -186,11 +186,11 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para verificar se a matrícula já existe
         private bool MatriculaExiste(string matricula)
         {
-            if (DadosCache.Tabelas.TryGetValue("Usuarios", out var usuarios))
-            {
-                return usuarios.OfType<UsuarioData>().Any(u => u.Matrícula == matricula);
-            }
-            return false;
+            if (DatabaseConnect.Database == null)
+                return false;
+
+            var collection = DatabaseConnect.Database.GetCollection<UsuarioData>("usuarios");
+            return collection.Exists(u => u.Matricula == matricula);
         }
 
         // Método para gerar a matrícula do usuário com base no cargo e ano atual
@@ -276,8 +276,8 @@ namespace WMS_RadiadoresLemos_WPF
                         novaMatricula = GerarMatricula(novoCargo);
                     } while (MatriculaExiste(novaMatricula));
 
-                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
-                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                    usuario.Matricula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                    MatriculaTextBox.Text = usuario.Matricula; // Atualiza o campo de texto da matrícula
                 }
                 // Se for um usuário existente, altera apenas a matrícula se for um cargo diferente
                 else if (usuario.Cargo != novoCargo)
@@ -288,8 +288,8 @@ namespace WMS_RadiadoresLemos_WPF
                         novaMatricula = GerarMatricula(novoCargo);
                     } while (MatriculaExiste(novaMatricula));
 
-                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
-                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                    usuario.Matricula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
+                    MatriculaTextBox.Text = usuario.Matricula; // Atualiza o campo de texto da matrícula
                 }
 
                 usuario.Cargo = novoCargo;
@@ -309,7 +309,7 @@ namespace WMS_RadiadoresLemos_WPF
             if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
             {
                 MessageBox.Show("O campo Nome deve ser preenchido.");
-                return false;
+                return false;   
             }
             if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
             {

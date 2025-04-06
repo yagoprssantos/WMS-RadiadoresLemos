@@ -7,72 +7,64 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Google.Cloud.Firestore;
+using System.Windows.Data;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
+using LiteDB;
 
 namespace WMS_RadiadoresLemos_WPF
 {
     // Definição parcial da classe AddEntradaSaidaUserControl que herda de UserControl
-    public partial class AddEntradaSaidaUserControl : UserControl
+    public partial class AddEntradaSaídaUserControl : UserControl
     {
-        // Declaração de variáveis privadas para armazenar dados dos produtos
-        private List<ProdutoData> produtos = new List<ProdutoData>();
-        private ObservableCollection<string> produtosFiltrados = new ObservableCollection<string>();
-        private ObservableCollection<MovimentacaoData> carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
-        private Dictionary<string, string> produtoNomeParaId = new Dictionary<string, string>();
+        private List<ProdutoData> produtos;
+        private ObservableCollection<string> produtosFiltrados;
+        private ObservableCollection<MovimentacaoData> carrinhoDeCompras;
+        private Dictionary<string, string> produtoNomeParaId;
         private ProdutoData? produtoSelecionado;
         private bool usePositiveNumber = true;
-        private static readonly string CaminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
-
-
+        private static readonly string CollectionName = "produtos";
 
         // Construtor da classe que inicializa os componentes e carrega os produtos
-        public AddEntradaSaidaUserControl()
+        public AddEntradaSaídaUserControl()
         {
             InitializeComponent();
-            ProdutoComboBox.ItemsSource = produtosFiltrados;
-            CarrinhoDeComprasItemsControl.ItemsSource = carrinhoDeCompras;
-            Setup();
+            produtos = new List<ProdutoData>();
+            produtosFiltrados = new ObservableCollection<string>();
+            carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
+            produtoNomeParaId = new Dictionary<string, string>();
+            produtoSelecionado = null;
+            CarregarProdutos().Wait();
         }
 
         private void Setup()
         {
+            produtosFiltrados = new ObservableCollection<string>();
+            carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
+            produtoNomeParaId = new Dictionary<string, string>();
+            produtoSelecionado = null;
+            usePositiveNumber = true;
+
             CarregarProdutos();
             ToggleVisibility(false);
         }
 
-
         // Método para carregar produtos do cache
-        private void CarregarProdutos()
+        private async Task CarregarProdutos()
         {
             try
             {
-                // Carregar produtos do cache
-                if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtosCache))
+                var db = DatabaseConnect.Database;
+                if (db != null)
                 {
-                    // Converte a lista de objetos para uma lista de produtos
-                    produtos = produtosCache.Cast<ProdutoData>().ToList();
-                    produtoNomeParaId = produtos.ToDictionary(p => p.Nome, p => p.Id);
-                    produtosFiltrados.Clear();
-                    foreach (var produto in produtos)
-                    {
-                        produtosFiltrados.Add(produto.Nome);
-                    }
+                    var collection = db.GetCollection<ProdutoData>("produtos");
+                    produtos = collection.FindAll().ToList();
                 }
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao carregar produtos: {ex.Message}");
-
-                // Adicionar alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao carregar produtos do cache. Possíveis motivos:\n" +
-                                            "- Falha na conexão com o banco de dados.\n" +
-                                            "- Não foi possível carregar os produtos do cache.",
-                                            "- Verifique a conexão com a internet.\n" +
-                                            "- Reinicie o aplicativo.");
+                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -91,7 +83,6 @@ namespace WMS_RadiadoresLemos_WPF
             ProdutoSelecionado.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
             ProdutoAntesDepois.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
         }
-
 
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -135,29 +126,15 @@ namespace WMS_RadiadoresLemos_WPF
         // Método que é chamado quando a seleção do ComboBox é alterada
         private void ProdutoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ProdutoComboBox.SelectedItem is string selectedProductName)
+            if (ProdutoComboBox.SelectedItem is ProdutoData produtoSelecionado)
             {
-                produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == selectedProductName);
-                if (produtoSelecionado != null)
-                {
-                    AtualizarProdutoSelecionado(produtoSelecionado);
-                }
-                else
-                {
-                    //MessageBox.Show("Produto não encontrado no cache.");
-                }
+                NomeSelecionadoDadoTextBlock.Text = produtoSelecionado.Nome;
+                TipoSelecionadoDadoTextBlock.Text = produtoSelecionado.Tipo;
+                MarcaSelecionadoDadoTextBlock.Text = produtoSelecionado.Marca;
+                CodigoSelecionadoDadoTextBlock.Text = produtoSelecionado.Codigo;
+                QuantidadeSelecionadoDadoTextBlock.Text = produtoSelecionado.Quantidade.ToString();
+                PrecoSelecionadoDadoTextBlock.Text = produtoSelecionado.Preco.ToString("C");
             }
-        }
-
-        // Método para atualizar os detalhes do produto selecionado
-        private void AtualizarProdutoSelecionado(ProdutoData produto)
-        {
-            NomeSelecionadoDadoTextBlock.Text = produto.Nome;
-            TipoSelecionadoDadoTextBlock.Text = produto.Tipo;
-            MarcaSelecionadoDadoTextBlock.Text = produto.Marca;
-            CodigoSelecionadoDadoTextBlock.Text = produto.Codigo;
-            QuantidadeSelecionadoDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoSelecionadoDadoTextBlock.Text = produto.Preço.ToString("C");
         }
 
         // Método para atualizar os detalhes do produto selecionado
@@ -168,7 +145,7 @@ namespace WMS_RadiadoresLemos_WPF
             MarcaAntesDadoTextBlock.Text = produto.Marca;
             CodigoAntesDadoTextBlock.Text = produto.Codigo;
             QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoAntesDadoTextBlock.Text = produto.Preço.ToString("C");
+            PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C");
 
             // Se quantidade e preço forem vazios, não atualiza valores depois
             if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
@@ -202,7 +179,7 @@ namespace WMS_RadiadoresLemos_WPF
                     //MessageBox.Show("Não existem produtos suficientes no Estoque");
 
                     // Adiciona alerta
-                    AlertaCache.AdicionarAlerta("Erro",
+                    Alerta.AdicionarAlerta("Erro",
                                                 "Quantidade insuficiente",
                                                 "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
                                                 "- Quantidade insuficiente no estoque.",
@@ -217,7 +194,7 @@ namespace WMS_RadiadoresLemos_WPF
                 if (usePositiveNumber)
                 {
                     // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
-                    double precoAtual = produto.Preço;
+                    double precoAtual = produto.Preco;
                     double precoNovo = double.Parse(PrecoTextBox.Text);
                     int quantidadeAtual = produto.Quantidade;
                     int quantidadeNova = int.Parse(QuantidadeTextBox.Text);
@@ -229,7 +206,7 @@ namespace WMS_RadiadoresLemos_WPF
                 else
                 {
                     // Mantém o preço atual para saída
-                    PrecoDepoisDadoTextBlock.Text = produto.Preço.ToString("C");
+                    PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
                 }
             }
             else
@@ -312,14 +289,21 @@ namespace WMS_RadiadoresLemos_WPF
 
             var movimentacao = new MovimentacaoData
             {
-                ProdutoId = produtoSelecionado.Id,
+                Id = 0, // O LiteDB irá gerar o ID automaticamente
+                Data = DateTime.Now,
+                Tipo = usePositiveNumber ? "Entrada" : "Saída",
                 Quantidade = quantidade,
-                Preço = preco,
-                Data = DateTime.UtcNow,
-                Tipo = usePositiveNumber ? "Entrada" : "Saída"
+                Preco = preco,
+                ProdutoId = produtoSelecionado.Id
             };
 
-            carrinhoDeCompras.Add(movimentacao);
+            if (DatabaseConnect.Database == null)
+                return;
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            collection.Upsert(movimentacao);
+
+            AtualizarTabelaMovimentacoes();
 
             ToggleVisibility(false);
             ConfirmarRegistroButton.Visibility = Visibility.Collapsed;
@@ -374,7 +358,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             foreach (var movimentacao in carrinhoDeCompras)
             {
-                await RegistrarMovimentacaoAsync(movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preço);
+                await RegistrarMovimentacaoAsync(movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
             }
 
             carrinhoDeCompras.Clear();
@@ -389,87 +373,45 @@ namespace WMS_RadiadoresLemos_WPF
             CarrinhoDeComprasPopup.IsOpen = false;
         }
 
-
         // Método assíncrono para registrar a movimentação de produtos
         private async Task RegistrarMovimentacaoAsync(bool isEntrada, int quantidadeMovimentacao, double precoMovimentacao)
         {
             try
             {
-                // Verificar se o produto selecionado é válido
-                if (produtoSelecionado != null)
+                if (produtoSelecionado == null)
                 {
-                    if (produtoSelecionado == null)
-                    {
-                        MessageBox.Show("Nenhum produto selecionado.");
-                        return;
-                    }
-
-                    // Atualiza a quantidade do produto
-                    produtoSelecionado.Quantidade = isEntrada ? produtoSelecionado.Quantidade + quantidadeMovimentacao : produtoSelecionado.Quantidade - quantidadeMovimentacao;
-
-                    // Atualiza o preço do produto com o valor calculado no PrecoDepoisDadoTextBlock
-                    if (double.TryParse(PrecoDepoisDadoTextBlock.Text, System.Globalization.NumberStyles.Currency, null, out double precoAtualizado))
-                    {
-                        produtoSelecionado.Preço = precoAtualizado;
-                    }
-
-                    double preco = produtoSelecionado.Preço;
-
-
-                    // Cria um objeto de movimentação com os dados fornecidos
-                    var movimentacao = new MovimentacaoData
-                    {
-                        ProdutoId = produtoSelecionado.Id,
-                        Quantidade = quantidadeMovimentacao,
-                        Preço = precoMovimentacao,
-                        Data = DateTime.UtcNow,
-                        Tipo = isEntrada ? "Entrada" : "Saída"
-                    };
-
-                    // Adiciona a movimentação ao cache, no Firestore e no arquivo JSON
-                    await MovimentacoesCache.RegistrarMovimentacaoAsync(movimentacao);
-
-                    // Mostra mensagem de sucesso
-                    MessageBox.Show($"{(isEntrada ? "Entrada" : "Saída")} registrada com sucesso");
-
-                    // Adiciona log
-                    var log = new LogData
-                    {
-                        Data = DateTime.UtcNow,
-                        Tipo = "OPERACIONAL",
-                        Nivel = "Usuário",
-                        Detalhes = $"{(isEntrada ? "Entrada" : "Saída")} registrada: Produto - {produtoSelecionado.Nome}; Quantidade - {quantidadeMovimentacao}; Preço - {precoMovimentacao}",
-                        Usuario = MainWindow.UsuarioLogado.Nome
-                    };
-                    await LogHistorico.RegistrarLogAsync(log);
-
-                    // Limpar campos após o registro, mantendo o produto selecionado
-                    LimparCampos();
-
-                    // Atualizar detalhes do produto
-                    AtualizarDetalhesProduto(produtoSelecionado);
+                    MessageBox.Show("Selecione um produto para registrar a movimentação.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
-                else
+
+                var movimentacao = new MovimentacaoData
                 {
-                    MessageBox.Show("Selecione um produto.");
-                }
+                    Id = 0, // O LiteDB irá gerar o ID automaticamente
+                    Data = DateTime.Now,
+                    Tipo = isEntrada ? "Entrada" : "Saída",
+                    Quantidade = quantidadeMovimentacao,
+                    Preco = precoMovimentacao,
+                    ProdutoId = produtoSelecionado.Id
+                };
+
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                collection.Insert(movimentacao);
+
+                // Atualiza a quantidade do produto no banco de dados
+                produtoSelecionado.Quantidade += isEntrada ? quantidadeMovimentacao : -quantidadeMovimentacao;
+                var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
+                produtoCollection.Update(produtoSelecionado);
+
+                // Limpa os campos e atualiza a interface
+                LimparCampos();
+                await CarregarProdutos();
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}");
-
-                // Adicionar alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
-                                            "- Produto inválido ou não selecionado.\n" +
-                                            "- Quantidade inválida ou insuficiente.\n" +
-                                            "- Falha na conexão com o banco de dados.\n" +
-                                            "- Não foi possível atualizar o produto no banco de dados.",
-                                            "- Verifique se o produto foi selecionado corretamente.\n" +
-                                            "- Verifique se a quantidade um valor é válido.\n" +
-                                            "- Verifique a conexão com a internet.\n" +
-                                            "- Reinicie o aplicativo.");
+                MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -550,6 +492,20 @@ namespace WMS_RadiadoresLemos_WPF
                     MessageBox.Show("Preço inválido.");
                     textBox.Clear();
                 }
+            }
+        }
+
+        private void AtualizarTabelaMovimentacoes()
+        {
+            if (DatabaseConnect.Database == null)
+                return;
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+            carrinhoDeCompras.Clear();
+            foreach (var movimentacao in movimentacoes)
+            {
+                carrinhoDeCompras.Add(movimentacao);
             }
         }
     }
