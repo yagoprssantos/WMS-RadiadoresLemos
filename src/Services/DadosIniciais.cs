@@ -31,8 +31,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     Cargo = "Administrador",
                     Id = "ADM2401"
                 };
-                
-                try 
+
+                try
                 {
                     usuariosCollection.Upsert(admin);
                     Console.WriteLine($"Usuário administrador inserido/atualizado com sucesso. ID: {admin.Id}");
@@ -81,7 +81,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 
                 foreach (var produto in produtos)
                 {
-                    try 
+                    try
                     {
                         produtosCollection.Upsert(produto);
                         Console.WriteLine($"Produto inserido/atualizado com sucesso: {produto.Nome} (ID: {produto.Id})");
@@ -128,7 +128,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 
                 foreach (var movimentacao in movimentacoes)
                 {
-                    try 
+                    try
                     {
                         movimentacoesCollection.Upsert(movimentacao);
                         Console.WriteLine($"Movimentação inserida/atualizada com sucesso: {movimentacao.Tipo} - {movimentacao.ProdutoId} (ID: {movimentacao.Id})");
@@ -172,7 +172,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 
                 foreach (var log in logs)
                 {
-                    try 
+                    try
                     {
                         historicoCollection.Upsert(log);
                         Console.WriteLine($"Log inserido/atualizado com sucesso: {log.Detalhes}");

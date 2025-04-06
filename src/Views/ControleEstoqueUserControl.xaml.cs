@@ -45,20 +45,11 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void CadastrarProduto_Click(object sender, RoutedEventArgs e)
         {
-            var novoProduto = new ProdutoData
-            {
-                Id = Guid.NewGuid().ToString(),
-                Nome = "",
-                Codigo = "",
-                Marca = "",
-                Tipo = "",
-                Quantidade = 0,
-                Preco = 0
-            };
-
-            var window = new EditarProdutoWindow(novoProduto);
+            // Chamar a janela de cadastro de produto
+            var window = new CadastrarProdutoWindow();
             if (window.ShowDialog() == true)
             {
+                // Atualizar a tabela de estoque após o cadastro
                 AtualizarTabelaEstoque();
             }
         }

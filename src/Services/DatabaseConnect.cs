@@ -5,7 +5,7 @@ using WMS_RadiadoresLemos_WPF.src.Models;
 
 namespace WMS_RadiadoresLemos_WPF.src.Services
 {
-    internal static class DatabaseConnect
+    public static class DatabaseConnect
     {
         private static string dbPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -19,7 +19,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             return dbPath;
         }
 
-        public static void SetEnvironmentVarible()
+        public static bool DatabaseExists()
+        {
+            return File.Exists(dbPath);
+        }
+
+        public static void SetEnvironmentVariable()
         {
             try
             {
@@ -30,7 +35,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     Directory.CreateDirectory(directory);
                     Console.WriteLine($"Diretório criado: {directory}");
                 }
-                
+
                 // Cria ou abre o banco de dados
                 Database = new LiteDatabase(dbPath);
                 Console.WriteLine($"Banco de dados conectado: {dbPath}");

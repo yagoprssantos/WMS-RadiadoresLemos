@@ -18,10 +18,10 @@ namespace WMS_RadiadoresLemos_WPF
     // Definição parcial da classe AddEntradaSaidaUserControl que herda de UserControl
     public partial class AddEntradaSaídaUserControl : UserControl
     {
-        private List<ProdutoData> produtos;
-        private ObservableCollection<string> produtosFiltrados;
-        private ObservableCollection<MovimentacaoData> carrinhoDeCompras;
-        private Dictionary<string, string> produtoNomeParaId;
+        private List<ProdutoData> produtos = new List<ProdutoData>();
+        private ObservableCollection<string> produtosFiltrados = new ObservableCollection<string>();
+        private ObservableCollection<MovimentacaoData> carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
+        private Dictionary<string, string> produtoNomeParaId = new Dictionary<string, string>();
         private ProdutoData? produtoSelecionado;
         private bool usePositiveNumber = true;
         private static readonly string CollectionName = "produtos";
@@ -30,23 +30,15 @@ namespace WMS_RadiadoresLemos_WPF
         public AddEntradaSaídaUserControl()
         {
             InitializeComponent();
-            produtos = new List<ProdutoData>();
-            produtosFiltrados = new ObservableCollection<string>();
-            carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
-            produtoNomeParaId = new Dictionary<string, string>();
-            produtoSelecionado = null;
-            CarregarProdutos().Wait();
+            Setup();
         }
 
         private void Setup()
         {
-            produtosFiltrados = new ObservableCollection<string>();
-            carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
-            produtoNomeParaId = new Dictionary<string, string>();
             produtoSelecionado = null;
             usePositiveNumber = true;
 
-            CarregarProdutos();
+            CarregarProdutos().Wait();
             ToggleVisibility(false);
         }
 
@@ -60,6 +52,9 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var collection = db.GetCollection<ProdutoData>("produtos");
                     produtos = collection.FindAll().ToList();
+
+                    // Adiciona os produtos ao ComboBox
+                    ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).ToList();
                 }
             }
             catch (Exception ex)
@@ -85,7 +80,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void ProdutoComboBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchText = ProdutoComboBox.Text.ToLower();
             var filteredProducts = produtos
@@ -93,16 +88,8 @@ namespace WMS_RadiadoresLemos_WPF
                 .Select(p => p.Nome)
                 .ToList();
 
-            if (!filteredProducts.SequenceEqual(produtosFiltrados))
-            {
-                produtosFiltrados.Clear();
-                foreach (var produto in filteredProducts)
-                {
-                    produtosFiltrados.Add(produto);
-                }
-            }
-
-            ProdutoComboBox.IsDropDownOpen = produtosFiltrados.Count > 0;
+            ProdutoComboBox.ItemsSource = filteredProducts;
+            ProdutoComboBox.IsDropDownOpen = filteredProducts.Count > 0;
         }
 
         // Método para confirmar se o produto selecionado é válido
@@ -126,16 +113,35 @@ namespace WMS_RadiadoresLemos_WPF
         // Método que é chamado quando a seleção do ComboBox é alterada
         private void ProdutoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ProdutoComboBox.SelectedItem is ProdutoData produtoSelecionado)
+            if (ProdutoComboBox.SelectedItem is string selectedProductName)
             {
-                NomeSelecionadoDadoTextBlock.Text = produtoSelecionado.Nome;
-                TipoSelecionadoDadoTextBlock.Text = produtoSelecionado.Tipo;
-                MarcaSelecionadoDadoTextBlock.Text = produtoSelecionado.Marca;
-                CodigoSelecionadoDadoTextBlock.Text = produtoSelecionado.Codigo;
-                QuantidadeSelecionadoDadoTextBlock.Text = produtoSelecionado.Quantidade.ToString();
-                PrecoSelecionadoDadoTextBlock.Text = produtoSelecionado.Preco.ToString("C");
+                produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == selectedProductName);
+                if (produtoSelecionado != null)
+                {
+                    AtualizarProdutoSelecionado(produtoSelecionado);
+                }
+                else
+                {
+                    MessageBox.Show("Produto não encontrado no cache.");
+                }
             }
         }
+
+        private void AtualizarProdutoSelecionado(ProdutoData produto)
+        {
+            // Seção do produto selecionado
+            NomeSelecionadoDadoTextBlock.Text = produto.Nome;
+            TipoSelecionadoDadoTextBlock.Text = produto.Tipo;
+            MarcaSelecionadoDadoTextBlock.Text = produto.Marca;
+            CodigoSelecionadoDadoTextBlock.Text = produto.Codigo;
+            QuantidadeSelecionadoDadoTextBlock.Text = produto.Quantidade.ToString();
+            PrecoSelecionadoDadoTextBlock.Text = produto.Preco.ToString("C");
+
+            // Alterar o texto do ComboBox para o nome do produto selecionado
+            ProdutoComboBox.Text = produto.Nome;
+        }
+
+
 
         // Método para atualizar os detalhes do produto selecionado
         private bool AtualizarDetalhesProduto(ProdutoData produto)

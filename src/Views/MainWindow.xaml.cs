@@ -20,8 +20,6 @@ namespace WMS_RadiadoresLemos_WPF
         public static MainWindow? _instance;
         private bool isLogoutInitiated = false;
         private int _notificationCount = 0;
-        private DispatcherTimer _connectDatabaseTimer;
-        private string _caminhoArquivoUsuarios = Path.Combine("DadosBancoDeDadosOffline", "usuarios.json");
 
         // Variável para armazenar o usuário logado
         public static UsuarioData? UsuarioLogado { get; set; }
@@ -40,40 +38,55 @@ namespace WMS_RadiadoresLemos_WPF
         private readonly UsuariosUserControl usuariosUserControl;
         private readonly ControleEstoqueUserControl controleEstoqueUserControl;
         private readonly RegistroUserControl registroUserControl;
-        private DispatcherTimer timer;
 
         public MainWindow()
         {
             InitializeComponent();
             _instance = this;
 
-            // Configura timer para conectar com banco periodicamente
-            _connectDatabaseTimer = new DispatcherTimer();
-            _connectDatabaseTimer.Interval = TimeSpan.FromMinutes(1);
-            _connectDatabaseTimer.Tick += ConnectDatabaseTimer_Tick;
+            // Carregar os dados do usuário logado
+            usuariosUserControl = new UsuariosUserControl();
+            controleEstoqueUserControl = new ControleEstoqueUserControl();
+            registroUserControl = new RegistroUserControl();
 
-            // Adiciona o evento de alerta adicionado
-            Alerta.AlertaAdicionado += OnAlertaAdicionado;
+            InicializarElementos();
+            CarregarTodasTabelasNoCache().Wait();
+            ConfigurarEntrada();
+            ConfigurarVisibilidadeBotoes();
+        }
 
-            this.Closing += Window_Closing;
-
-            // Inicializa a lista de UserControls
-            _userControls = new List<UserControl>
+        private void InicializarElementos()
         {
-                new AddEntradaSaídaUserControl(),
-            new VendasUserControl(),
-            new RegistroUserControl(),
-            new ControleEstoqueUserControl(),
-            new DashboardUserControl(),
-            new NotificacoesUserControl(),
-            new ConfiguracaoUserControl()
-        };
+            AdicionarEventos();
+            InicializarUserControls();
+            //InicializarElementosInterface();
+        }
 
-            // Define o índice inicial
+        private void AdicionarEventos()
+        {
+            Alerta.AlertaAdicionado += OnAlertaAdicionado;
+            this.Closing += Window_Closing;
+        }
+
+        private void InicializarUserControls()
+        {
+            _userControls = new List<UserControl>
+                    {
+                        new AddEntradaSaídaUserControl(),
+                        new VendasUserControl(),
+                        new RegistroUserControl(),
+                        new ControleEstoqueUserControl(),
+                        new DashboardUserControl(),
+                        new NotificacoesUserControl(),
+                        new ConfiguracaoUserControl()
+                    };
+
             _currentIndex = 0;
             UpdateTitle();
+        }
 
-            // Inicializa elementos da interface
+        private void InicializarElementosInterface()
+        {
             try
             {
                 NotificationButton = this.FindName("NotificationButton") as Button;
@@ -88,42 +101,22 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 Console.WriteLine($"Erro ao inicializar elementos da interface: {ex.Message}");
             }
-
-            // Inicializa os UserControls
-            usuariosUserControl = new UsuariosUserControl();
-            controleEstoqueUserControl = new ControleEstoqueUserControl();
-            registroUserControl = new RegistroUserControl();
-
-            // Inicia a aplicação
-            IniciarTimer();
-            CarregarTodasTabelasNoCache().Wait();
         }
 
-        private async void ConnectDatabaseTimer_Tick(object? sender, EventArgs e)
+        private void ConfigurarEntrada()
         {
-            try
+            if (UsuarioLogado != null)
             {
-                DatabaseConnect.SetEnvironmentVarible();
-
-                if (DatabaseConnect.Database != null)
-                {
-                    isSincronized = true;
-                }
+                SetupUsuarioLogado();
+                RegistrarEntradaLog();
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"Erro ao conectar ao banco de dados: {ex.Message}");
-                isSincronized = false;
-                await Task.Delay(3000);
+                MessageBox.Show("Usuário não logado. Por favor, faça login para continuar.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                LoginWindow loginWindow = new LoginWindow();
+                loginWindow.Show();
+                this.Close();
             }
-        }
-
-        private void StartApplication()
-        {
-            SetupDatabaseConnection();
-            RegistrarEntradaLog();
-            SetupUsuarioLogado();
-            ConfigurarVisibilidadeBotoes();
         }
 
         private async void Window_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -145,7 +138,6 @@ namespace WMS_RadiadoresLemos_WPF
                 await LogHistorico.SalvarLog(log);
 
                 UsuarioLogado = null;
-                _connectDatabaseTimer.Stop();
 
                 DatabaseConnect.Disconnect();
             }
@@ -212,65 +204,6 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     matriculaTextBlock.Text = UsuarioLogado.Matricula;
                 }
-            }
-        }
-
-        public async void SetupDatabaseConnection()
-        {
-            try
-            {
-                DatabaseConnect.SetEnvironmentVarible();
-                await CarregarTodasTabelasNoCache();
-            }
-            catch (Exception ex)
-            {
-                _connectDatabaseTimer.Start();
-                Alerta.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Não foi possível carregar dados com sucesso. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com a internet;\n" +
-                                            "- Configurações incorretas do banco de dados;\n" +
-                                            "- Arquivos locais corrompidos ou ausentes.",
-                                            "- Verifique sua conexão com a internet;\n" +
-                                            "- Verifique as configurações do banco de dados;\n" +
-                                            "- Reinicie a aplicação");
-            }
-        }
-
-        public async void SincronizarBancoDados()
-        {
-            ContentArea.Content = null;
-            LoadingScreen.Visibility = Visibility.Visible;
-
-            try
-            {
-                var db = DatabaseConnect.Database;
-                if (db != null)
-                {
-                    var produtosCollection = db.GetCollection<ProdutoData>("produtos");
-                    var usuariosCollection = db.GetCollection<UsuarioData>("usuarios");
-                    var historicoCollection = db.GetCollection<LogData>("historico");
-                    var movimentacoesCollection = db.GetCollection<MovimentacaoData>("movimentacoes");
-
-                    produtosCollection.Update(produtosCollection.FindAll().ToList());
-                    usuariosCollection.Update(usuariosCollection.FindAll().ToList());
-                    historicoCollection.Update(historicoCollection.FindAll().ToList());
-                    movimentacoesCollection.Update(movimentacoesCollection.FindAll().ToList());
-                }
-
-                isSincronized = true;
-                LoadingScreen.Visibility = Visibility.Collapsed;
-            }
-            catch (Exception ex)
-            {
-                Alerta.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                    "Não foi possível sincronizar os dados com o banco. Possíveis motivos:\n" +
-                    "- Problemas de conexão com o banco;\n" +
-                    "- Dados corrompidos;\n" +
-                    "- Falha na operação de sincronização.",
-                    "- Verifique a conexão com o banco;\n" +
-                    "- Tente novamente mais tarde.");
             }
         }
 
@@ -435,8 +368,7 @@ namespace WMS_RadiadoresLemos_WPF
                         await LogHistorico.SalvarLog(log);
 
                         UsuarioLogado = null;
-                        _connectDatabaseTimer.Stop();
-            DatabaseConnect.Disconnect();
+                        DatabaseConnect.Disconnect();
                     }
 
                     LoginWindow loginWindow = new LoginWindow();
@@ -487,37 +419,6 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 UpdateTitle();
             }
-        }
-
-        private void UsuariosButton_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = usuariosUserControl;
-            usuariosUserControl.AtualizarTabelaUsuarios();
-        }
-
-        private void EstoqueButton_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = controleEstoqueUserControl;
-            controleEstoqueUserControl.AtualizarTabelaEstoque();
-        }
-
-        private void RegistroButton_Click(object sender, RoutedEventArgs e)
-        {
-            ContentArea.Content = registroUserControl;
-            registroUserControl.CarregarEntradas();
-            registroUserControl.CarregarSaidas();
-            registroUserControl.CarregarHistorico();
-        }
-
-        private void IniciarTimer()
-        {
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMinutes(1);
-            timer.Tick += async (s, e) =>
-            {
-                await CarregarTodasTabelasNoCache();
-            };
-            timer.Start();
         }
     }
 }

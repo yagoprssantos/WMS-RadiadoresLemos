@@ -15,7 +15,7 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private ProdutoData produto;
         private bool isModified = false;
-        private List<ProdutoData> produtos;
+        private List<ProdutoData> produtos = new List<ProdutoData>();
 
         // Propriedade pública para acessar o produto cadastrado
         public ProdutoData Produto => produto;
@@ -31,12 +31,11 @@ namespace WMS_RadiadoresLemos_WPF
                 Marca = string.Empty,
                 Codigo = string.Empty
             };
-            produtos = new List<ProdutoData>();
             isModified = false;
         }
 
         // Evento disparado ao clicar no botão de cadastrar produto
-        private async void Cadastrar_Click(object sender, RoutedEventArgs e)
+        private void Cadastrar_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -85,7 +84,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
 
                 var collection = db.GetCollection<ProdutoData>("produtos");
-                
+
                 // Verifica se já existe um produto com o mesmo código
                 var produtoExistente = collection.FindOne(p => p.Codigo == CodigoProduto.Text.Trim());
                 if (produtoExistente != null)
@@ -103,7 +102,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
 
                 ProdutoData data = DadosDoProduto();
-                
+
                 // Garante que o Id seja igual ao código
                 data.Id = data.Codigo;
 

@@ -77,13 +77,10 @@
                         </Border>
                     </Popup>
 
-
-
-
                     <StackPanel Width="Auto" VerticalAlignment="Top" Margin="0, 15, 0, 0">
                         <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>
                         <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="16" Style="{StaticResource ComboBoxStyle}" HorizontalAlignment="Stretch" LostFocus="ProdutoComboBox_LostFocus"
-                                      StaysOpenOnEdit="True" IsTextSearchEnabled="True" TextBoxBase.TextChanged="SearchTextBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged"/>
+                                      StaysOpenOnEdit="True" IsTextSearchEnabled="True" TextBoxBase.TextChanged="ProdutoComboBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged"/>
 
                         <!-- Grid para Quantidade e Preço por unidade -->
                         <Grid>

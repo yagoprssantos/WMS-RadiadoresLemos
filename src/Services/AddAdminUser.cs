@@ -11,7 +11,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             try
             {
                 // Garante que o banco de dados seja inicializado
-                DatabaseConnect.SetEnvironmentVarible();
+                DatabaseConnect.SetEnvironmentVariable();
 
                 if (DatabaseConnect.Database == null)
                 {

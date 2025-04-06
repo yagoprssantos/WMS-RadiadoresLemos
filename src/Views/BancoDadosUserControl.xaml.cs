@@ -599,19 +599,6 @@ namespace WMS_RadiadoresLemos_WPF
             tabelasSelecionadas.Clear();
         }
 
-        // Evento disparado ao clicar no botão de reconectar
-        private void Reconectar_Click(object sender, RoutedEventArgs e)
-        {
-            // Mostra a barra de progresso
-            ShowProgressBar.Visibility = Visibility.Visible;
-            ProgressBar.Value = 100;
-            ProgressBarMessage.Text = "Reconectando ao Banco de Dados...";
-
-            // Tenta reconectar ao banco de dados
-            MainWindow._instance.SetupDatabaseConnection();
-
-            ShowProgressBar.Visibility = Visibility.Collapsed;
-        }
 
         // Evento disparado quando o botão de gerar tabela é clicado
         private async void GerarTabela_Click(object sender, RoutedEventArgs e)
