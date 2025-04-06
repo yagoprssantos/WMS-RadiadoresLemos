@@ -56,9 +56,9 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void EditarProduto_Click(object sender, RoutedEventArgs e)
         {
+            // Chama janela com produto selecionado
             var produto = (sender as Button)?.DataContext as ProdutoData;
             if (produto == null) return;
-
             var window = new EditarProdutoWindow(produto);
             if (window.ShowDialog() == true)
             {

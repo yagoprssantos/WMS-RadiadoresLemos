@@ -24,5 +24,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
 
         [BsonId]
         public int Id { get; set; }
+
+        public string DataFormatadaSemAno => Data.ToString("dd/MM HH:mm:ss");
+        public string DataFormatadaComAno => Data.ToString("dd/MM/yyyy HH:mm:ss");
     }
 }
