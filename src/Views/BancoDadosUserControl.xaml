@@ -81,7 +81,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                             <TextBlock Foreground="{StaticResource TextBrush}">
                                 <Run Text="Banco de Dados: " FontWeight="Bold"/>
                                 <Run Text="Local" FontStyle="Italic"/>
@@ -91,7 +91,7 @@
                                 <Run Text="Conectado" FontStyle="Italic"/>
                             </TextBlock>
                         </StackPanel>
-                        <StackPanel Grid.Column="1">
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                             <TextBlock Foreground="{StaticResource TextBrush}">
                                 <Run Text="Ultimo backup importado: " FontWeight="Bold"/>
                                 <Run x:Name="UltimoBackupImport" Text="01/01/2025" FontStyle="Italic"/>

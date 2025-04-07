@@ -8,22 +8,25 @@
              Background="{StaticResource BackgroundBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="15, 15, 15, 0">
-        
+
         <!-- Ajustar para ficar melhor responsivo com a tela -->
-        
+
         <Grid Margin="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" CornerRadius="15" Padding="25,10" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{StaticResource PanelBackgroundBrush}">
-                <Grid>
-                    
+                <Grid Cursor="">
+
                     <!-- Botão de Carrinho de Compras no canto inferior direito -->
                     <Button Style="{StaticResource HoverButtonStyle}"
-                            FontSize="16" Width="50" Height="50" Margin="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" x:Name="CarrinhoDeComprasButton" Click="CarrinhoDeComprasButton_Click">
+        FontSize="16" Width="50" Height="50" Margin="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" x:Name="CarrinhoDeComprasButton" Click="CarrinhoDeComprasButton_Click">
+                        <Image Source="/src/Resources/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="28" Width="25"/>
                     </Button>
-                    
+
+
+
                     <!-- Popup de Carrinho de Compras -->
                     <Popup x:Name="CarrinhoDeComprasPopup" StaysOpen="False" Placement="Center" AllowsTransparency="True">
                         <Border Background="{StaticResource SecondaryBrush}" CornerRadius="15" Padding="10" BorderBrush="{StaticResource HoverBackgroundBrush}" BorderThickness="10">
