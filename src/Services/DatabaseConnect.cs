@@ -19,7 +19,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         {
             var directory = Path.GetDirectoryName(dbPath);
             var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            return Path.Combine(directory, $"Database_backup_{timestamp}.db");
+            return Path.Combine(directory, $"Database_v{version}_{timestamp}.db");
         }
 
         private static void CreateBackup()
@@ -31,19 +31,33 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 {
                     var directory = Path.GetDirectoryName(dbPath);
                     
-                    // Cria backup com timestamp
-                    string novoBackup = GetBackupPath(1);
-                    File.Copy(dbPath, novoBackup, true);
-
-                    // Lista todos os backups existentes
-                    var backups = Directory.GetFiles(directory, "Database_backup_*.db")
+                    // Lista todos os backups existentes para determinar a próxima versão
+                    var backups = Directory.GetFiles(directory, "Database_v*_*.db")
                         .OrderByDescending(f => f)
                         .ToList();
 
-                    // Se houver mais de 20 backups, remove os mais antigos
-                    if (backups.Count > 20)
+                    // Determina a próxima versão
+                    int proximaVersao = 1;
+                    if (backups.Any())
                     {
-                        foreach (var backup in backups.Skip(20))
+                        // Extrai a versão do backup mais recente
+                        var ultimoBackup = backups.First();
+                        var nomeArquivo = Path.GetFileName(ultimoBackup);
+                        var versaoStr = nomeArquivo.Split('_')[1].Substring(1); // Remove o 'v' do início
+                        if (int.TryParse(versaoStr, out int ultimaVersao))
+                        {
+                            proximaVersao = ultimaVersao + 1;
+                        }
+                    }
+                    
+                    // Cria backup com timestamp e nova versão
+                    string novoBackup = GetBackupPath(proximaVersao);
+                    File.Copy(dbPath, novoBackup, true);
+
+                    // Se houver mais de 20 backups, remove os mais antigos
+                    if (backups.Count >= 20)
+                    {
+                        foreach (var backup in backups.Skip(19)) // Mantém os 19 mais recentes + o novo
                         {
                             try
                             {
