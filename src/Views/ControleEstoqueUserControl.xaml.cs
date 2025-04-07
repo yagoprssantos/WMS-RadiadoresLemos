@@ -33,8 +33,9 @@ namespace WMS_RadiadoresLemos_WPF
                 if (DatabaseConnect.Database != null)
                 {
                     var collection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos");
-                    var produtos = collection.FindAll().ToList();
+                    produtos = collection.FindAll().ToList();
                     EstoqueDataGrid.ItemsSource = produtos;
+                    produtosCarregados = true;
                 }
             }
             catch (Exception ex)
@@ -46,7 +47,7 @@ namespace WMS_RadiadoresLemos_WPF
         private void CadastrarProduto_Click(object sender, RoutedEventArgs e)
         {
             // Chamar a janela de cadastro de produto
-            var window = new CadastrarProdutoWindow();
+            var window = new EditarProdutoWindow(null);
             if (window.ShowDialog() == true)
             {
                 // Atualizar a tabela de estoque após o cadastro
@@ -57,8 +58,13 @@ namespace WMS_RadiadoresLemos_WPF
         private void EditarProduto_Click(object sender, RoutedEventArgs e)
         {
             // Chama janela com produto selecionado
-            var produto = (sender as Button)?.DataContext as ProdutoData;
-            if (produto == null) return;
+            var produto = EstoqueDataGrid.SelectedItem as ProdutoData;
+            if (produto == null)
+            {
+                MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var window = new EditarProdutoWindow(produto);
             if (window.ShowDialog() == true)
             {
@@ -68,8 +74,12 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void DeletarProduto_Click(object sender, RoutedEventArgs e)
         {
-            var produto = (sender as Button)?.DataContext as ProdutoData;
-            if (produto == null) return;
+            var produto = EstoqueDataGrid.SelectedItem as ProdutoData;
+            if (produto == null)
+            {
+                MessageBox.Show("Selecione um produto para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"Tem certeza que deseja deletar o produto {produto.Nome}?",
@@ -137,34 +147,16 @@ namespace WMS_RadiadoresLemos_WPF
         // Método chamado ao alterar o texto da caixa de busca
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!produtosCarregados)
+            if (produtosCarregados)
             {
-                // Garante que produtos estejam sempre carregados
-                AtualizarTabelaEstoqueCache();
-            }
-        }
+                string searchText = SearchBox.Text.ToLower();
+                var produtosFiltrados = produtos.Where(p =>
+                    p.Nome.ToLower().Contains(searchText) ||
+                    p.Tipo.ToLower().Contains(searchText) ||
+                    p.Marca.ToLower().Contains(searchText) ||
+                    p.Codigo.ToLower().Contains(searchText)).ToList();
 
-        // Método para atualizar a tabela de estoque com os produtos do cache
-        private void AtualizarTabelaEstoqueCache()
-        {
-            try
-            {
-                if (DatabaseConnect.Database == null)
-                {
-                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                var collection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
-                produtos = collection.FindAll().ToList();
-                EstoqueDataGrid.ItemsSource = produtos;
-                produtosCarregados = true;
-                precisaAtualizarEstoque = false;
-            }
-            catch (Exception ex)
-            {
-                precisaAtualizarEstoque = true;
-                MessageBox.Show($"Erro ao carregar produtos do cache: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                EstoqueDataGrid.ItemsSource = produtosFiltrados;
             }
         }
 
@@ -236,8 +228,13 @@ namespace WMS_RadiadoresLemos_WPF
                     await AtualizarProduto(produtoSelecionado);
 
                     // Atualiza a fonte de dados do DataGrid
-                    EstoqueDataGrid.ItemsSource = null;
-                    EstoqueDataGrid.ItemsSource = produtos;
+                    var index = produtos.FindIndex(p => p.Id == produtoSelecionado.Id);
+                    if (index >= 0)
+                    {
+                        produtos[index] = produtoSelecionado;
+                        EstoqueDataGrid.ItemsSource = null;
+                        EstoqueDataGrid.ItemsSource = produtos;
+                    }
 
                     // Avisa o usuário que a quantidade foi alterada
                     MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
