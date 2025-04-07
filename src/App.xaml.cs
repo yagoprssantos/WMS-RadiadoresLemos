@@ -19,6 +19,14 @@ namespace WMS_RadiadoresLemos_WPF
             LoadTheme();
         }
 
+        // Metodo para quando aplicação for fechada
+        protected override void OnExit(ExitEventArgs e)
+        {
+            DatabaseConnect.Disconnect();
+            base.OnExit(e);
+        }
+
+
         private void LoadTheme()
         {
             string themeName = DefaultTheme;

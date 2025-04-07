@@ -101,6 +101,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 Console.WriteLine($"Erro ao inicializar elementos da interface: {ex.Message}");
             }
+
         }
 
         private void ConfigurarEntrada()
@@ -139,7 +140,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 UsuarioLogado = null;
 
-                DatabaseConnect.Disconnect();
+                
             }
             catch (Exception ex)
             {
@@ -369,7 +370,7 @@ namespace WMS_RadiadoresLemos_WPF
                         await LogHistorico.SalvarLog(log);
 
                         UsuarioLogado = null;
-                        DatabaseConnect.Disconnect();
+                        
                     }
 
                     LoginWindow loginWindow = new LoginWindow();
