@@ -336,9 +336,11 @@ namespace WMS_RadiadoresLemos_WPF
                         {
                             textBlock.Foreground = (Brush)FindResource("TextBrush");
                         }
-                        else if (innerChild is System.Windows.Shapes.Path path)
+                        else if (innerChild is Image image)
                         {
-                            path.Fill = (Brush)FindResource("TextBrush");
+                            // Define a imagem não selecionada
+                            string imageName = GetImageName(image.Name, "NotSelected");
+                            image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{imageName}.png", UriKind.Relative));
                         }
                     }
                 }
@@ -357,9 +359,11 @@ namespace WMS_RadiadoresLemos_WPF
                         {
                             textBlock.Foreground = (Brush)FindResource("TextBrush");
                         }
-                        else if (innerChild is System.Windows.Shapes.Path path)
+                        else if (innerChild is Image image)
                         {
-                            path.Fill = (Brush)FindResource("TextBrush");
+                            // Define a imagem não selecionada
+                            string imageName = GetImageName(image.Name, "NotSelected");
+                            image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{imageName}.png", UriKind.Relative));
                         }
                     }
                 }
@@ -375,42 +379,35 @@ namespace WMS_RadiadoresLemos_WPF
                 if (clickedButton == BtnAdicionar)
                 {
                     ContentArea.Content = new AddEntradaSaidaUserControl();
-                    // TitleTextBlock.Text = "Entrada/Saída"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnVendas)
                 {
                     ContentArea.Content = new VendasUserControl();
-                    // TitleTextBlock.Text = "Vendas"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnRegistro)
                 {
                     ContentArea.Content = new RegistroUserControl();
-                    // TitleTextBlock.Text = "Registro"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnEstoque)
                 {
                     ContentArea.Content = new ControleEstoqueUserControl();
-                    // TitleTextBlock.Text = "Estoque"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnDashboard)
                 {
                     ContentArea.Content = new DashboardUserControl();
-                    // TitleTextBlock.Text = "Relatório"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnNotificacoes)
                 {
                     ContentArea.Content = new NotificacoesUserControl();
-                    // TitleTextBlock.Text = "Notificações"; // <<< REMOVER
                 }
                 else if (clickedButton == BtnConfiguracoes)
                 {
                     ContentArea.Content = new ConfiguracaoUserControl();
-                    // TitleTextBlock.Text = "Configurações"; // <<< REMOVER
                 }
 
                 // Atualiza o título e o ícone DEPOIS de definir o conteúdo
-                UpdateTitle(); // <<< CHAMAR AQUI
-                UpdateIcon();  // <<< CHAMAR AQUI
+                UpdateTitle();
+                UpdateIcon();
 
                 // Altera a cor do texto e do ícone do botão clicado
                 foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
@@ -419,13 +416,34 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         textBlock.Foreground = (Brush)FindResource("AccentBrush");
                     }
-                    else if (innerChild is System.Windows.Shapes.Path path)
+                    else if (innerChild is Image image)
                     {
-                        path.Fill = (Brush)FindResource("AccentBrush");
+                        // Define a imagem selecionada
+                        string imageName = GetImageName(image.Name, "Selected");
+                        image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/Selected/{imageName}.png", UriKind.Relative));
                     }
                 }
             }
         }
+
+        private string GetImageName(string iconName, string state)
+        {
+            return iconName switch
+            {
+                "IconAdicionar" => state == "Selected" ? "PlusS" : "PlusNS",
+                "IconVendas" => state == "Selected" ? "PranchetaS" : "PranchetaNS",
+                "IconRegistro" => state == "Selected" ? "historicos" : "HistoricoNS",
+                "IconEstoque" => state == "Selected" ? "CaixaS" : "CaixaNS",
+                "IconDashboard" => state == "Selected" ? "GraficoS" : "GraficoNS",
+                "IconNotificacoes" => state == "Selected" ? "SinoS" : "SinoNS",
+                "IconConfiguracoes" => state == "Selected" ? "EngrenagemS" : "EngrenagemNS",
+                "IconSair" => state == "Selected" ? "SairS" : "SairNS",
+                _ => throw new ArgumentException("Nome de ícone desconhecido", nameof(iconName))
+            };
+        }
+
+
+
 
         // Botão de logout para retornar à janela de login
         private async void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -739,44 +757,51 @@ namespace WMS_RadiadoresLemos_WPF
             if (ContentArea.Content is AddEntradaSaidaUserControl)
             {
                 // Assumindo CaixaS.png para Entrada/Saída
-                iconUri = new Uri("/src/Resources/Icons/CaixaS.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/PlusS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is VendasUserControl)
             {
                 // Assumindo PranchetaS.png para Vendas (ajuste se necessário)
-                iconUri = new Uri("/src/Resources/Icons/PranchetaS.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/PranchetaS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is RegistroUserControl)
             {
                 // Assumindo historicos.png para Registro
-                iconUri = new Uri("/src/Resources/Icons/historicos.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/historicos.png", UriKind.Relative);
             }
             else if (ContentArea.Content is ControleEstoqueUserControl)
             {
                 // Assumindo CaixaS.png para Estoque (ou use outro ícone)
-                iconUri = new Uri("/src/Resources/Icons/CaixaS.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/CaixaS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is DashboardUserControl)
             {
                 // Assumindo GraficoS.png para Relatório/Dashboard
-                iconUri = new Uri("/src/Resources/Icons/GraficoS.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/GraficoS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is NotificacoesUserControl)
             {
                 // Assumindo SinoS.png para Notificações
-                iconUri = new Uri("/src/Resources/Icons/SinoS.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/SinoS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is ConfiguracaoUserControl)
             {
                 // Assumindo EngrenagemS.png para Configurações
-                iconUri = new Uri("/src/Resources/Icons/EngrenagemS.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/EngrenagemS.png", UriKind.Relative);
             }
             // Adicione mais 'else if' para outros UserControls, se houver
 
             // Define o Source do IconImage
             if (iconUri != null)
             {
-                IconImage.Source = new BitmapImage(iconUri);
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = iconUri;
+                bitmap.DecodePixelWidth = 64; // Ajuste a largura de decodificação conforme necessário
+                bitmap.DecodePixelHeight = 64; // Ajuste a altura de decodificação conforme necessário
+                bitmap.EndInit();
+                RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
+                IconImage.Source = bitmap;
             }
             else
             {
@@ -784,6 +809,7 @@ namespace WMS_RadiadoresLemos_WPF
                 IconImage.Source = null;
             }
         }
+
 
         // Função para recarregar toda a MainWindow
         public void Reload()
