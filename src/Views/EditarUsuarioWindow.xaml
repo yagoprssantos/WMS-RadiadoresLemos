@@ -26,8 +26,8 @@
                 <TextBox FontSize="16" Height="35" x:Name="EmailTextBox" TextChanged="TextBox_TextChanged"
                          Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>
 
-                <!-- Matrícula -->
-                <TextBlock Text="Matrícula:" Margin="0,0,0,5"
+                <!-- Matricula -->
+                <TextBlock Text="Matricula:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <TextBox FontSize="16" Height="35" x:Name="MatriculaTextBox" IsReadOnly="True"
                          Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,15"/>

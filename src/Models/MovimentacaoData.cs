@@ -1,45 +1,31 @@
-﻿using Google.Cloud.Firestore;
+﻿using LiteDB;
 
-[FirestoreData]
-public class MovimentacaoData
+namespace WMS_RadiadoresLemos_WPF.src.Models
 {
-    [FirestoreProperty]
-    public required string ProdutoId { get; set; }
-    // Id do produto que foi movimentado
-
-    [FirestoreProperty]
-    public required string Tipo { get; set; }
-    // Tipo da movimentação (Entrada ou Saída)
-
-    [FirestoreProperty]
-    public required double Preço { get; set; }
-    // Valor unitário do produto movimentado
-
-    [FirestoreProperty]
-    public required int Quantidade { get; set; }
-
-    [FirestoreProperty]
-    public required DateTime Data { get; set; }
-
-
-    // DataFormatada1 é uma propriedade que retorna a data e hora formatada, removendo a formatação gringa
-    public string DataFormatada1
+    public class MovimentacaoData
     {
-        get
-        {
-            TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
-            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(Data, timeZone);
-            return localTime.ToString("dd/MM/yyyy HH:mm:ss");
-        }
-    }
+        [BsonField("produtoId")]
+        public required string ProdutoId { get; set; }
+        // Id do produto que foi movimentado
 
-    public string DataFormatada2
-    {
-        get
-        {
-            TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
-            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(Data, timeZone);
-            return localTime.ToString("dd/MM HH:mm:ss");
-        }
+        [BsonField("tipo")]
+        public required string Tipo { get; set; }
+        // Tipo da movimentação (Entrada ou Saída)
+
+        [BsonField("preco")]
+        public required double Preco { get; set; }
+        // Valor unitário do produto movimentado
+
+        [BsonField("quantidade")]
+        public required int Quantidade { get; set; }
+
+        [BsonField("data")]
+        public required DateTime Data { get; set; }
+
+        [BsonId]
+        public int Id { get; set; }
+
+        public string DataFormatadaSemAno => Data.ToString("dd/MM HH:mm:ss");
+        public string DataFormatadaComAno => Data.ToString("dd/MM/yyyy HH:mm:ss");
     }
 }

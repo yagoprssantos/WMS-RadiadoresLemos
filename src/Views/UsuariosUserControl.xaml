@@ -6,7 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="630" d:DesignWidth="800">
 
-    <Grid Margin="15, 15, 15, 0">
+    <Grid Margin="15">
         <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource SecondaryBrush}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -37,7 +37,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="500"/>
                             <DataGridTextColumn Header="Email" Binding="{Binding Email}" IsReadOnly="True" Width="*" MinWidth="166" MaxWidth="500"/>
-                            <DataGridTextColumn Header="Matrícula" Binding="{Binding Matrícula}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="100"/>
+                            <DataGridTextColumn Header="Matricula" Binding="{Binding Matricula}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="100"/>
                             <DataGridTextColumn Header="Cargo" Binding="{Binding Cargo}" IsReadOnly="True" Width="*" MinWidth="150" MaxWidth="200"/>
                         </DataGrid.Columns>
                     </DataGrid>
@@ -45,9 +45,9 @@
 
                 <StackPanel Grid.Row="2" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom">
                     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                        <Button Content="Adicionar Usuário" Click="AdicionarUsuario_Click" Width="200" Margin="10" Style="{StaticResource EmphasisButtonStyle}" FontSize="18"/>
-                        <Button Content="Editar Usuário" Click="EditarUsuario_Click" Width="150" Margin="10" Style="{StaticResource EmphasisButtonStyle}" FontSize="18"/>
-                        <Button Content="Deletar Usuário" Click="DeletarUsuario_Click" Width="150" Margin="10" Style="{StaticResource CancelButtonStyle}" FontSize="18"/>
+                        <Button Content="Adicionar Usuário" Click="AdicionarUsuario_Click" Width="200" Margin="10, 10, 10, 0" Style="{StaticResource EmphasisButtonStyle}" FontSize="18"/>
+                        <Button Content="Editar Usuário" Click="EditarUsuario_Click" Width="150" Margin="10, 10, 10, 0" Style="{StaticResource EmphasisButtonStyle}" FontSize="18"/>
+                        <Button Content="Deletar Usuário" Click="DeletarUsuario_Click" Width="150" Margin="10, 10, 10, 0" Style="{StaticResource CancelButtonStyle}" FontSize="18"/>
                     </WrapPanel>
                 </StackPanel>
             </Grid>

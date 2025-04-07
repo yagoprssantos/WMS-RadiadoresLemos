@@ -1,36 +1,38 @@
-using Google.Cloud.Firestore;
+using LiteDB;
 
 namespace WMS_RadiadoresLemos_WPF.src.Models
 {
-    [FirestoreData]
     public class ProdutoData
     {
-        [FirestoreProperty]
+        [BsonField("nome")]
         public required string Nome { get; set; }
 
-        [FirestoreProperty]
+        [BsonField("tipo")]
         public required string Tipo { get; set; }
 
-        [FirestoreProperty]
+        [BsonField("marca")]
         public required string Marca { get; set; }
 
-        [FirestoreProperty]
+        [BsonField("codigo")]
         public required string Codigo { get; set; }
 
-        [FirestoreProperty]
-        public double Preço { get; set; }
+        [BsonField("preco")]
+        public double Preco { get; set; }
 
-        [FirestoreProperty]
+        [BsonField("quantidade")]
         public int Quantidade { get; set; }
 
+        [BsonId]
+        public string Id { get; set; } // Identificador Ãºnico do documento
 
-        [FirestoreDocumentId]
-        public string Id { get; set; } // Identificador único do documento
-
-        // Define Id como o código do produto SEMPRE que o objeto for criado
         public ProdutoData()
         {
-            Id = Codigo;
+            // Inicializa com string vazia para evitar null
+            Id = string.Empty;
+            Nome = string.Empty;
+            Tipo = string.Empty;
+            Marca = string.Empty;
+            Codigo = string.Empty;
         }
     }
 }

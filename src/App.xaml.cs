@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO; // Adicione esta linha
 using System.Windows;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -11,9 +12,20 @@ namespace WMS_RadiadoresLemos_WPF
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Adiciona o usuário administrador antes de qualquer outra operação
+            AddAdminUser.AddAdmin();
+            
             base.OnStartup(e);
             LoadTheme();
         }
+
+        // Metodo para quando aplicação for fechada
+        protected override void OnExit(ExitEventArgs e)
+        {
+            DatabaseConnect.Disconnect();
+            base.OnExit(e);
+        }
+
 
         private void LoadTheme()
         {
@@ -32,9 +44,9 @@ namespace WMS_RadiadoresLemos_WPF
             var dict = new ResourceDictionary
             {
                 // TODO: Comentado para desenvolver melhor o Style da aplicação
-                // Source = new Uri($"src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
+                Source = new Uri($"src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
 
-                Source = new Uri("src/Resources/Style.xaml", UriKind.Relative)
+                //Source = new Uri("src/Resources/Style.xaml", UriKind.Relative)
             };
 
             Application.Current.Resources.MergedDictionaries.Clear();

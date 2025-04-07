@@ -122,7 +122,7 @@
                                 <DataGrid Name="EntradaDataGrid" Style="{StaticResource CustomDataGridStyle}" Grid.Row="2" Margin="10, 0, 10, 10">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Produto" Binding="{Binding ProdutoId}" Width="Auto" />
-                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada2}" Width="Auto" />
+                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatadaSemAno}" Width="Auto" />
                                         <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
                                     </DataGrid.Columns>
                                 </DataGrid>
@@ -141,7 +141,7 @@
                                 <DataGrid Name="SaidaDataGrid" Style="{StaticResource CustomDataGridStyle}" Grid.Row="2" Margin="10, 0, 10, 10">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Produto" Binding="{Binding ProdutoId}" Width="Auto" />
-                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada2}" Width="Auto" />
+                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatadaSemAno}" Width="Auto" />
                                         <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" Width="Auto" />
                                     </DataGrid.Columns>
                                 </DataGrid>
@@ -162,7 +162,7 @@
                                 <Separator Grid.Row="1" Margin="20, 0, 20, 20"/>
                                 <DataGrid Name="HistoricoDataGrid" Style="{StaticResource CustomDataGridStyle}" Background="Transparent" Grid.Row="2" Margin="20, 0, 20, 20">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatada1}" Width="Auto" />
+                                        <DataGridTextColumn Header="Data" Binding="{Binding DataFormatadaComAno}" Width="Auto" />
                                         <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" />
                                         <DataGridTextColumn Header="Nivel" Binding="{Binding Nivel}" Width="Auto" />
                                         <DataGridTemplateColumn Header="Detalhes" Width="*">

@@ -29,6 +29,10 @@
                 <!-- Botão para Sair da aplicação -->
                 <Button Content="Sair" FontSize="16" Width="140" Height="40" Click="Sair_Click" Style="{StaticResource CancelButtonStyle}"/>
             </StackPanel>
+
+            <!-- Botão de Login Rápido para Admin (apenas para desenvolvimento) -->
+            <Button Content="Login Rápido (Admin)" FontSize="16" Width="200" Height="40" Click="LoginRapidoAdmin_Click" 
+                    Margin="0,20,0,0" Style="{StaticResource EmphasisButtonStyle}" Opacity="0.7"/>
         </StackPanel>
 
         <!-- Grid para escurecer o fundo e mostrar a barra de progresso -->
