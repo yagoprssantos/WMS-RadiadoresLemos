@@ -25,11 +25,18 @@ namespace WMS_RadiadoresLemos_WPF
         public EditarUsuarioWindow(UsuarioData? usuario)
         {
             InitializeComponent();
+            InicializarUsuario(usuario);
+            PreencherCampos();
+            isModified = false;
+        }
 
+        // Inicializa o usuário com dados existentes ou cria um novo usuário
+        private void InicializarUsuario(UsuarioData? usuario)
+        {
+            // Se usuário for nulo, cria um novo usuário
             if (usuario == null)
             {
                 isNewUser = true;
-                // Cria usuario vazio com valores padrão
                 string novaMatricula;
                 do
                 {
@@ -40,21 +47,19 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     Nome = string.Empty,
                     Email = string.Empty,
-                    Matrícula = novaMatricula, // Gera a matrícula com base no cargo e ano atual
+                    Matricula = novaMatricula,
                     Senha = string.Empty,
                     Cargo = "Usuário",
                     Id = novaMatricula
                 };
             }
+            // Se usuário não for nulo, usa os dados existentes selecionados
             else
             {
                 this.usuario = usuario;
             }
 
             usuarios = new List<UsuarioData>();
-            PreencherCampos();
-
-            isModified = false;
         }
 
         // Preenche os campos da interface com os dados do usuário
@@ -62,41 +67,25 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (usuario != null)
-                {
-                    NomeTextBox.Text = usuario.Nome;
-                    EmailTextBox.Text = usuario.Email;
-                    MatriculaTextBox.Text = usuario.Matrícula;
-                    SenhaPasswordBox.Password = usuario.Senha.ToString();
-                    PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
-                }
+                NomeTextBox.Text = usuario.Nome;
+                EmailTextBox.Text = usuario.Email;
+                MatriculaTextBox.Text = usuario.Matricula;
+                SenhaPasswordBox.Password = usuario.Senha;
+                PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao preencher campos: {ex.Message}");
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao preencher campos de usuário. Possíveis motivos:\n" +
-                                            "- O usuário não foi encontrado;\n" +
-                                            "- O usuário não foi passado corretamente para a janela de edição;\n" +
-                                            "- Ocorreu um erro ao preencher os campos da janela de edição.",
-                                            "- Verifique se o usuário foi encontrado no banco de dados;\n" +
-                                            "- Verifique se suas informações estão corretamente preenchidas;\n" +
-                                            "- Verifique conexão com o banco de dados.");
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Erro ao preencher campos de usuário. Possíveis motivos:\n" +
+                    "- O usuário não foi encontrado;\n" +
+                    "- O usuário não foi passado corretamente para a janela de edição;\n" +
+                    "- Ocorreu um erro ao preencher os campos da janela de edição.",
+                    "- Verifique se o usuário foi encontrado no banco de dados;\n" +
+                    "- Verifique se suas informações estão corretamente preenchidas;\n" +
+                    "- Verifique conexão com o banco de dados.");
             }
         }
-        private ComboBoxItem GetComboBoxItemByContent(string content)
-        {
-            foreach (ComboBoxItem item in PermissaoComboBox.Items)
-            {
-                if (item.Content.ToString() == content)
-                    return item;
-            }
-            return new ComboBoxItem { Content = string.Empty };
-        }
-
 
         // Evento disparado ao clicar no botão de salvar usuário
         private void Salvar_Click(object sender, RoutedEventArgs e)
@@ -110,7 +99,14 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     if (ValidarCampos())
                     {
-                        AtualizarUsuario();
+                        if (isNewUser)
+                        {
+                            CadastrarUsuario();
+                        }
+                        else
+                        {
+                            AtualizarUsuario();
+                        }
                         DialogResult = true;
                         Close();
                     }
@@ -122,31 +118,14 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao salvar usuário: {ex.Message}");
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao salvar usuário. Possíveis motivos:\n" +
-                                            "- Dados do usuário não são válidos;\n" +
-                                            "- Usuário inexistente no banco de dados;\n" +
-                                            "- Banco de dados inacessível.",
-                                            "- Verifique se os dados do usuário estão corretos;\n" +
-                                            "- Verifique se o usuário existe no banco de dados;\n" +
-                                            "- Verifique se o banco de dados está acessível.");
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Erro ao salvar usuário. Possíveis motivos:\n" +
+                    "- Dados do usuário não são válidos;\n" +
+                    "- Banco de dados inacessível.",
+                    "- Verifique se os dados do usuário estão corretos;\n" +
+                    "- Verifique se o banco de dados está acessível.");
             }
-        }
-
-        // Atualiza os dados do usuário com os valores dos campos
-        private void AtualizarUsuario()
-        {
-            usuario.Nome = NomeTextBox.Text;
-            usuario.Email = EmailTextBox.Text;
-            usuario.Matrícula = MatriculaTextBox.Text;
-            usuario.Senha = SenhaPasswordBox.Password.ToString();
-            usuario.Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty;
-
-            isModified = false;
         }
 
         // Evento disparado ao clicar no botão de cancelar
@@ -154,24 +133,22 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                if (isModified)
+                if (isModified && ConfirmarSaidaSemSalvar())
                 {
-                    if (ConfirmarSaidaSemSalvar())
-                    {
-                        return;
-                    }
+                    return;
                 }
                 DialogResult = false;
                 Close();
             }
             catch (Exception)
             {
-                AlertaCache.AdicionarAlerta("Erro",
-                                            "Edição de usuário.",
-                                            "Erro ao cancelar edição de usuário. Possíveis motivos:\n" +
-                                            "- Erro ao fechar janela de edição de usuário;\n" +
-                                            "- Impossibilidade de fechar janela de edição de usuário.",
-                                            "- Verifique se a janela de edição de usuário está aberta."); Close();
+                Alerta.AdicionarAlerta("Erro",
+                    "Edição de usuário.",
+                    "Erro ao cancelar edição de usuário. Possíveis motivos:\n" +
+                    "- Erro ao fechar janela de edição de usuário;\n" +
+                    "- Impossibilidade de fechar janela de edição de usuário.",
+                    "- Verifique se a janela de edição de usuário está aberta.");
+                Close();
             }
         }
 
@@ -182,15 +159,157 @@ namespace WMS_RadiadoresLemos_WPF
             return result == MessageBoxResult.No;
         }
 
+        // Valida os campos antes de salvar
+        private bool ValidarCampos()
+        {
+            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
+            {
+                MessageBox.Show("O campo Nome deve ser preenchido.");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
+            {
+                MessageBox.Show("O campo Email deve ser preenchido.");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
+            {
+                MessageBox.Show("O campo Senha deve ser preenchido.");
+                return false;
+            }
+            if (PermissaoComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("O campo Cargo deve ser selecionado.");
+                return false;
+            }
+            return true;
+        }
+
+        // Cadastra um novo usuário no banco de dados
+        private async void CadastrarUsuario()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db == null)
+                {
+                    MessageBox.Show("Erro: Banco de dados não está conectado.");
+                    return;
+                }
+
+                var collection = db.GetCollection<UsuarioData>("usuarios");
+
+                // Verifica se já existe um usuário com a mesma matrícula
+                var usuarioExistente = collection.FindOne(u => u.Matricula == usuario.Matricula);
+                if (usuarioExistente != null)
+                {
+                    MessageBox.Show("Já existe um usuário com esta matrícula.", "Usuário Existente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                UsuarioData data = DadosDoUsuario();
+
+                // Garante que o Id seja igual à matrícula
+                data.Id = data.Matricula;
+
+                // Tenta inserir o novo usuário
+                collection.Insert(data);
+
+                // Adiciona log
+                var log = new LogData
+                {
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Usuário cadastrado: {data.Nome}, Matrícula: {data.Matricula}",
+                    Usuario = MainWindow.UsuarioLogado?.Nome ?? "Sistema"
+                };
+                await LogHistorico.SalvarLog(log);
+
+                MessageBox.Show("Usuário cadastrado com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao cadastrar usuário: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Erro ao cadastrar usuário. Possíveis motivos:\n" +
+                    "- Dados do usuário não são válidos;\n" +
+                    "- Banco de dados inacessível.",
+                    "- Verifique se os dados do usuário estão corretos;\n" +
+                    "- Verifique se o banco de dados está acessível.");
+            }
+        }
+
+        // Atualiza os dados do usuário com os valores dos campos
+        private async void AtualizarUsuario()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db == null)
+                {
+                    MessageBox.Show("Erro: Banco de dados não está conectado.");
+                    return;
+                }
+
+                var collection = db.GetCollection<UsuarioData>("usuarios");
+
+                UsuarioData data = DadosDoUsuario();
+
+                // Garante que o Id seja igual à matrícula
+                data.Id = data.Matricula;
+
+                // Tenta atualizar o usuário
+                collection.Update(data);
+
+                // Adiciona log
+                var log = new LogData
+                {
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Usuário atualizado: {data.Nome}, Matrícula: {data.Matricula}",
+                    Usuario = MainWindow.UsuarioLogado?.Nome ?? "Sistema"
+                };
+                await LogHistorico.SalvarLog(log);
+
+                MessageBox.Show("Usuário atualizado com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar usuário: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Erro ao atualizar usuário. Possíveis motivos:\n" +
+                    "- Dados do usuário não são válidos;\n" +
+                    "- Banco de dados inacessível.",
+                    "- Verifique se os dados do usuário estão corretos;\n" +
+                    "- Verifique se o banco de dados está acessível.");
+            }
+        }
+
+        // Método para obter os dados do usuário a partir dos TextBoxes
+        private UsuarioData DadosDoUsuario() => new()
+        {
+            Nome = NomeTextBox.Text.Trim(),
+            Email = EmailTextBox.Text.Trim(),
+            Matricula = MatriculaTextBox.Text.Trim(),
+            Senha = SenhaPasswordBox.Password.Trim(),
+            Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty,
+            Id = MatriculaTextBox.Text.Trim()
+        };
 
         // Método para verificar se a matrícula já existe
         private bool MatriculaExiste(string matricula)
         {
-            if (DadosCache.Tabelas.TryGetValue("Usuarios", out var usuarios))
-            {
-                return usuarios.OfType<UsuarioData>().Any(u => u.Matrícula == matricula);
-            }
-            return false;
+            if (DatabaseConnect.Database == null)
+                return false;
+
+            var collection = DatabaseConnect.Database.GetCollection<UsuarioData>("usuarios");
+            return collection.Exists(u => u.Matricula == matricula);
         }
 
         // Método para gerar a matrícula do usuário com base no cargo e ano atual
@@ -198,11 +317,11 @@ namespace WMS_RadiadoresLemos_WPF
         {
             string prefixo = cargo switch
             {
-                "Administrador" => "ADM", // Administrador do Sistema
-                "Gerente" => "GER", // Gerente da Unidade
-                "Operador" => "OPE", // Operador de Produção
-                "Estagiário" => "EST", // Estagiário
-                "Usuário" => "USR", // Usuário Comum
+                "Administrador" => "ADM",
+                "Gerente" => "GER",
+                "Operador" => "OPE",
+                "Estagiário" => "EST",
+                "Usuário" => "USR",
                 _ => "UNK"
             };
 
@@ -219,9 +338,7 @@ namespace WMS_RadiadoresLemos_WPF
             CargoPopup.IsOpen = true;
         }
 
-
         // Restrições de entrada de texto nos TextBoxes
-
         private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
@@ -267,8 +384,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 string novoCargo = selectedItem.Content.ToString() ?? string.Empty;
 
-                // Se for um novo usuário, gera uma nova matrícula com base no cargo
-                if (isNewUser)
+                if (isNewUser || usuario.Cargo != novoCargo)
                 {
                     string novaMatricula;
                     do
@@ -276,20 +392,8 @@ namespace WMS_RadiadoresLemos_WPF
                         novaMatricula = GerarMatricula(novoCargo);
                     } while (MatriculaExiste(novaMatricula));
 
-                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
-                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
-                }
-                // Se for um usuário existente, altera apenas a matrícula se for um cargo diferente
-                else if (usuario.Cargo != novoCargo)
-                {
-                    string novaMatricula;
-                    do
-                    {
-                        novaMatricula = GerarMatricula(novoCargo);
-                    } while (MatriculaExiste(novaMatricula));
-
-                    usuario.Matrícula = novaMatricula; // Atualiza a matrícula com base no novo cargo e ano atual
-                    MatriculaTextBox.Text = usuario.Matrícula; // Atualiza o campo de texto da matrícula
+                    usuario.Matricula = novaMatricula;
+                    MatriculaTextBox.Text = usuario.Matricula;
                 }
 
                 usuario.Cargo = novoCargo;
@@ -303,30 +407,15 @@ namespace WMS_RadiadoresLemos_WPF
             isModified = true;
         }
 
-        // Valida os campos antes de salvar
-        private bool ValidarCampos()
+        // Método auxiliar para obter o item do ComboBox pelo conteúdo
+        private ComboBoxItem GetComboBoxItemByContent(string content)
         {
-            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
+            foreach (ComboBoxItem item in PermissaoComboBox.Items)
             {
-                MessageBox.Show("O campo Nome deve ser preenchido.");
-                return false;
+                if (item.Content.ToString() == content)
+                    return item;
             }
-            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
-            {
-                MessageBox.Show("O campo Email deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
-            {
-                MessageBox.Show("O campo Senha deve ser preenchido.");
-                return false;
-            }
-            if (PermissaoComboBox.SelectedItem == null)
-            {
-                MessageBox.Show("O campo Cargo deve ser selecionado.");
-                return false;
-            }
-            return true;
+            return new ComboBoxItem { Content = string.Empty };
         }
     }
 }

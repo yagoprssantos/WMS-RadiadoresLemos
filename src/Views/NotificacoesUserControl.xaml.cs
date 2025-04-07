@@ -24,9 +24,9 @@ namespace WMS_RadiadoresLemos_WPF
             alertas = new List<AlertaData>();
 
             // Para cada tipo de alerta, carregar os dados
-            foreach (var tipo in AlertaCache.Alertas.Keys)
+            foreach (var tipo in Alerta.Alertas.Keys)
             {
-                alertas.AddRange(AlertaCache.ObterAlertas(tipo));
+                alertas.AddRange(Alerta.ObterAlertas(tipo));
             }
 
             if (AlertaDataGrid != null)

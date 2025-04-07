@@ -89,45 +89,47 @@ namespace WMS_RadiadoresLemos_WPF
         // Útil para identificar os produtos mais movimentados
         private void GraficoMovimentacaoProdutos(string periodo)
         {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            if (DatabaseConnect.Database == null)
             {
-                DateTime dataInicio = ObterDataInicio(periodo);
-
-                var movimentacao = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
-                    .GroupBy(m => new { ((MovimentacaoData)m).ProdutoId, ((MovimentacaoData)m).Tipo })
-                    .Select(g => new { g.Key.ProdutoId, g.Key.Tipo, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
-                    .ToList();
-
-                var entradas = movimentacao.Where(m => m.Tipo == "Entrada").OrderByDescending(m => m.Quantidade).Take(5).ToList();
-                var saidas = movimentacao.Where(m => m.Tipo == "Saída").OrderByDescending(m => m.Quantidade).Take(5).ToList();
-
-                MovimentacaoProdutosSeries.Clear();
-
-                MovimentacaoProdutosSeries.Add(new ColumnSeries
-                {
-                    Title = "Entradas",
-                    Values = new ChartValues<int>(entradas.Select(e => e.Quantidade)),
-                    Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Verde
-                    ColumnPadding = 10,
-                    MaxColumnWidth = 100
-                });
-
-                MovimentacaoProdutosSeries.Add(new ColumnSeries
-                {
-                    Title = "Saídas",
-                    Values = new ChartValues<int>(saidas.Select(s => s.Quantidade)),
-                    Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Vermelho
-                    ColumnPadding = 10,
-                    MaxColumnWidth = 100
-                });
-
-                ProdutosLabels = entradas.Select(e => e.ProdutoId).Union(saidas.Select(s => s.ProdutoId)).Distinct().ToArray();
+                MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            else
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+
+            DateTime dataInicio = ObterDataInicio(periodo);
+
+            var movimentacao = movimentacoes
+                .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
+                .GroupBy(m => new { ((MovimentacaoData)m).ProdutoId, ((MovimentacaoData)m).Tipo })
+                .Select(g => new { g.Key.ProdutoId, g.Key.Tipo, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
+                .ToList();
+
+            var entradas = movimentacao.Where(m => m.Tipo == "Entrada").OrderByDescending(m => m.Quantidade).Take(5).ToList();
+            var saidas = movimentacao.Where(m => m.Tipo == "Saída").OrderByDescending(m => m.Quantidade).Take(5).ToList();
+
+            MovimentacaoProdutosSeries.Clear();
+
+            MovimentacaoProdutosSeries.Add(new ColumnSeries
             {
-                Console.WriteLine("Tabela 'Movimentacoes' não encontrada no cache de dados.");
-            }
+                Title = "Entradas",
+                Values = new ChartValues<int>(entradas.Select(e => e.Quantidade)),
+                Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Verde
+                ColumnPadding = 10,
+                MaxColumnWidth = 100
+            });
+
+            MovimentacaoProdutosSeries.Add(new ColumnSeries
+            {
+                Title = "Saídas",
+                Values = new ChartValues<int>(saidas.Select(s => s.Quantidade)),
+                Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Vermelho
+                ColumnPadding = 10,
+                MaxColumnWidth = 100
+            });
+
+            ProdutosLabels = entradas.Select(e => e.ProdutoId).Union(saidas.Select(s => s.ProdutoId)).Distinct().ToArray();
 
             DataContext = this;
         }
@@ -136,34 +138,36 @@ namespace WMS_RadiadoresLemos_WPF
         // Útil para identificar a movimentação de produtos ao longo do tempo
         private void GraficoHistoricoMovimentacao(string periodo)
         {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            if (DatabaseConnect.Database == null)
             {
-                DateTime dataInicio = ObterDataInicio(periodo);
-
-                var historico = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
-                    .GroupBy(m => ((MovimentacaoData)m).Data.Date)
-                    .Select(g => new { Data = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
-                    .OrderBy(t => t.Data)
-                    .ToList();
-
-                HistoricoMovimentacaoSeries.Clear();
-
-                HistoricoMovimentacaoSeries.Add(new LineSeries
-                {
-                    Title = "Histórico de Movimentação",
-                    Values = new ChartValues<int>(historico.Select(t => t.Quantidade)),
-                    PointGeometry = DefaultGeometries.Circle,
-                    PointGeometrySize = 10,
-                    Fill = new SolidColorBrush(Color.FromRgb(33, 150, 243)) // Blue
-                });
-
-                PeriodoLabels = historico.Select(t => t.Data.ToString("dd/MM/yyyy")).ToArray();
+                MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            else
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+
+            DateTime dataInicio = ObterDataInicio(periodo);
+
+            var historico = movimentacoes
+                .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
+                .GroupBy(m => ((MovimentacaoData)m).Data.Date)
+                .Select(g => new { Data = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
+                .OrderBy(t => t.Data)
+                .ToList();
+
+            HistoricoMovimentacaoSeries.Clear();
+
+            HistoricoMovimentacaoSeries.Add(new LineSeries
             {
-                Console.WriteLine("Tabela 'Movimentacoes' não encontrada no cache de dados.");
-            }
+                Title = "Histórico de Movimentação",
+                Values = new ChartValues<int>(historico.Select(t => t.Quantidade)),
+                PointGeometry = DefaultGeometries.Circle,
+                PointGeometrySize = 10,
+                Fill = new SolidColorBrush(Color.FromRgb(33, 150, 243)) // Blue
+            });
+
+            PeriodoLabels = historico.Select(t => t.Data.ToString("dd/MM/yyyy")).ToArray();
 
             DataContext = this;
         }
@@ -172,37 +176,39 @@ namespace WMS_RadiadoresLemos_WPF
         // Útil para identificar os produtos mais vendidos
         private void GraficoProdutosMaiorMovimentacao(string periodo)
         {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            if (DatabaseConnect.Database == null)
             {
-                DateTime dataInicio = ObterDataInicio(periodo);
+                MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-                var maiorMovimentacao = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
-                    .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
-                    .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
-                    .OrderByDescending(m => m.Quantidade)
-                    .Take(5)
-                    .ToList();
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
 
-                ProdutosMaiorMovimentacaoSeries.Clear();
+            DateTime dataInicio = ObterDataInicio(periodo);
 
-                foreach (var item in maiorMovimentacao)
+            var maiorMovimentacao = movimentacoes
+                .Where(m => ((MovimentacaoData)m).Data >= dataInicio)
+                .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
+                .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
+                .OrderByDescending(m => m.Quantidade)
+                .Take(5)
+                .ToList();
+
+            ProdutosMaiorMovimentacaoSeries.Clear();
+
+            foreach (var item in maiorMovimentacao)
+            {
+                ProdutosMaiorMovimentacaoSeries.Add(new PieSeries
                 {
-                    ProdutosMaiorMovimentacaoSeries.Add(new PieSeries
-                    {
-                        Title = item.ProdutoId,
-                        Values = new ChartValues<int> { item.Quantidade },
-                        Fill = ObterCorProduto(item.ProdutoId),
-                        DataLabels = true
-                    });
-                }
+                    Title = item.ProdutoId,
+                    Values = new ChartValues<int> { item.Quantidade },
+                    Fill = ObterCorProduto(item.ProdutoId),
+                    DataLabels = true
+                });
+            }
 
-                ProdutosLabels = maiorMovimentacao.Select(m => m.ProdutoId).ToArray();
-            }
-            else
-            {
-                Console.WriteLine("Tabela 'Movimentacoes' não encontrada no cache de dados.");
-            }
+            ProdutosLabels = maiorMovimentacao.Select(m => m.ProdutoId).ToArray();
 
             DataContext = this;
         }
@@ -211,34 +217,36 @@ namespace WMS_RadiadoresLemos_WPF
         // Útil para identificar o lucro ao longo do tempo
         private void GraficoLucro(string periodo)
         {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            if (DatabaseConnect.Database == null)
             {
-                DateTime dataInicio = ObterDataInicio(periodo);
-
-                var lucro = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).Data >= dataInicio)
-                    .GroupBy(m => ((MovimentacaoData)m).Data.ToString("MMM/yyyy"))
-                    .Select(g => new { Mes = g.Key, Lucro = g.Sum(m => ((MovimentacaoData)m).Quantidade * ((MovimentacaoData)m).Preço) })
-                    .OrderBy(l => DateTime.ParseExact(l.Mes, "MMM/yyyy", null))
-                    .ToList();
-
-                LucroMensalSeries.Clear();
-
-                LucroMensalSeries.Add(new LineSeries
-                {
-                    Title = "Lucro Acumulado",
-                    Values = new ChartValues<double>(lucro.Select(l => l.Lucro)),
-                    PointGeometry = DefaultGeometries.Circle,
-                    PointGeometrySize = 10,
-                    Fill = new SolidColorBrush(Color.FromRgb(0, 128, 0)), // Verde
-                });
-
-                MesesLabels = lucro.Select(l => l.Mes).ToArray();
+                MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            else
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+
+            DateTime dataInicio = ObterDataInicio(periodo);
+
+            var lucro = movimentacoes
+                .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).Data >= dataInicio)
+                .GroupBy(m => ((MovimentacaoData)m).Data.ToString("MMM/yyyy"))
+                .Select(g => new { Mes = g.Key, Lucro = g.Sum(m => ((MovimentacaoData)m).Quantidade * ((MovimentacaoData)m).Preco) })
+                .OrderBy(l => DateTime.ParseExact(l.Mes, "MMM/yyyy", null))
+                .ToList();
+
+            LucroMensalSeries.Clear();
+
+            LucroMensalSeries.Add(new LineSeries
             {
-                Console.WriteLine("Tabela 'Movimentacoes' não encontrada no cache de dados.");
-            }
+                Title = "Lucro Acumulado",
+                Values = new ChartValues<double>(lucro.Select(l => l.Lucro)),
+                PointGeometry = DefaultGeometries.Circle,
+                PointGeometrySize = 10,
+                Fill = new SolidColorBrush(Color.FromRgb(0, 128, 0)), // Verde
+            });
+
+            MesesLabels = lucro.Select(l => l.Mes).ToArray();
 
             DataContext = this;
         }
@@ -249,42 +257,44 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var marcasQuantidade = new Dictionary<string, int>();
 
-            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? produtos))
+            if (DatabaseConnect.Database == null)
             {
-                foreach (ProdutoData produto in produtos)
-                {
-                    if (marcasQuantidade.ContainsKey(produto.Marca))
-                    {
-                        marcasQuantidade[produto.Marca] += produto.Quantidade;
-                    }
-                    else
-                    {
-                        marcasQuantidade[produto.Marca] = produto.Quantidade;
-                    }
-                }
-
-                var topMarcas = marcasQuantidade.OrderByDescending(m => m.Value).Take(5).ToList();
-
-                EstoqueMarcasSeries.Clear();
-
-                foreach (var marca in topMarcas)
-                {
-                    EstoqueMarcasSeries.Add(new ColumnSeries
-                    {
-                        Title = marca.Key,
-                        Values = new ChartValues<int> { marca.Value },
-                        Fill = ObterCorProduto(marca.Key),
-                        ColumnPadding = 10, // Adiciona espaçamento entre as barras
-                        MaxColumnWidth = 100 // Define o limite máximo da largura das colunas
-                    });
-                }
-
-                MarcasLabels = topMarcas.Select(m => m.Key).ToArray();
+                MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            else
+
+            var collection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos");
+            var produtos = collection.FindAll().ToList();
+
+            foreach (ProdutoData produto in produtos)
             {
-                Console.WriteLine("Tabela 'Produtos' não encontrada no cache de dados.");
+                if (marcasQuantidade.ContainsKey(produto.Marca))
+                {
+                    marcasQuantidade[produto.Marca] += produto.Quantidade;
+                }
+                else
+                {
+                    marcasQuantidade[produto.Marca] = produto.Quantidade;
+                }
             }
+
+            var topMarcas = marcasQuantidade.OrderByDescending(m => m.Value).Take(5).ToList();
+
+            EstoqueMarcasSeries.Clear();
+
+            foreach (var marca in topMarcas)
+            {
+                EstoqueMarcasSeries.Add(new ColumnSeries
+                {
+                    Title = marca.Key,
+                    Values = new ChartValues<int> { marca.Value },
+                    Fill = ObterCorProduto(marca.Key),
+                    ColumnPadding = 10, // Adiciona espaçamento entre as barras
+                    MaxColumnWidth = 100 // Define o limite máximo da largura das colunas
+                });
+            }
+
+            MarcasLabels = topMarcas.Select(m => m.Key).ToArray();
 
             // Atualiza os bindings
             DataContext = null;
@@ -313,35 +323,37 @@ namespace WMS_RadiadoresLemos_WPF
         // Útil para identificar os produtos mais vendidos
         private void GraficoProdutosVendidos(string periodo)
         {
-            if (DadosCache.Tabelas.TryGetValue("Movimentacoes", out List<object>? movimentacoes))
+            if (DatabaseConnect.Database == null)
             {
-                DateTime dataInicio = ObterDataInicio(periodo);
+                MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-                var produtosVendidos = movimentacoes
-                    .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).Data >= dataInicio)
-                    .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
-                    .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
-                    .OrderByDescending(p => p.Quantidade)
-                    .ToList();
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
 
-                ProdutosVendidosSeries.Clear();
+            DateTime dataInicio = ObterDataInicio(periodo);
 
-                foreach (var produto in produtosVendidos)
+            var produtosVendidos = movimentacoes
+                .Where(m => ((MovimentacaoData)m).Tipo == "Saída" && ((MovimentacaoData)m).Data >= dataInicio)
+                .GroupBy(m => ((MovimentacaoData)m).ProdutoId)
+                .Select(g => new { ProdutoId = g.Key, Quantidade = g.Sum(m => ((MovimentacaoData)m).Quantidade) })
+                .OrderByDescending(p => p.Quantidade)
+                .ToList();
+
+            ProdutosVendidosSeries.Clear();
+
+            foreach (var produto in produtosVendidos)
+            {
+                ProdutosVendidosSeries.Add(new ColumnSeries
                 {
-                    ProdutosVendidosSeries.Add(new ColumnSeries
-                    {
-                        Title = produto.ProdutoId,
-                        Values = new ChartValues<int> { produto.Quantidade },
-                        Fill = ObterCorProduto(produto.ProdutoId)
-                    });
-                }
+                    Title = produto.ProdutoId,
+                    Values = new ChartValues<int> { produto.Quantidade },
+                    Fill = ObterCorProduto(produto.ProdutoId)
+                });
+            }
 
-                ProdutosLabels = produtosVendidos.Select(p => p.ProdutoId).ToArray();
-            }
-            else
-            {
-                Console.WriteLine("Tabela 'Movimentacoes' não encontrada no cache de dados.");
-            }
+            ProdutosLabels = produtosVendidos.Select(p => p.ProdutoId).ToArray();
 
             DataContext = this;
         }
@@ -611,17 +623,17 @@ namespace WMS_RadiadoresLemos_WPF
         // Cores
         // Função para gerar uma cor única
         private SolidColorBrush GerarCorUnica(int index)
-                {
-                    // Usar a paleta HSL para gerar cores mais vivas
-                    double hue = (index * 137.508) % 360; // Usar o número áureo para distribuir uniformemente as cores
-                    double saturation = 0.7 + 0.3 * ((index / 360) % 2); // Alternar entre 0.7 e 1.0 para saturação
-                    double lightness = 0.5 + 0.2 * ((index / 720) % 2); // Alternar entre 0.5 e 0.7 para luminosidade
+        {
+            // Usar a paleta HSL para gerar cores mais vivas
+            double hue = (index * 137.508) % 360; // Usar o número áureo para distribuir uniformemente as cores
+            double saturation = 0.7 + 0.3 * ((index / 360) % 2); // Alternar entre 0.7 e 1.0 para saturação
+            double lightness = 0.5 + 0.2 * ((index / 720) % 2); // Alternar entre 0.5 e 0.7 para luminosidade
 
-                    // Converter HSL para RGB
-                    (byte r, byte g, byte b) = HslToRgb(hue, saturation, lightness);
+            // Converter HSL para RGB
+            (byte r, byte g, byte b) = HslToRgb(hue, saturation, lightness);
 
-                    return new SolidColorBrush(Color.FromRgb(r, g, b));
-                }
+            return new SolidColorBrush(Color.FromRgb(r, g, b));
+        }
 
         // Função para converter HSL para RGB - melhor para gerar cores vivas
         private (byte, byte, byte) HslToRgb(double h, double s, double l)

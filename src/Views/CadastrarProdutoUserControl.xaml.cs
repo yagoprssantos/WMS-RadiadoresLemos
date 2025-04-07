@@ -7,6 +7,7 @@ using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
+using LiteDB;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -14,7 +15,7 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private ProdutoData produto;
         private bool isModified = false;
-        private List<ProdutoData> produtos;
+        private List<ProdutoData> produtos = new List<ProdutoData>();
 
         // Propriedade pública para acessar o produto cadastrado
         public ProdutoData Produto => produto;
@@ -30,12 +31,11 @@ namespace WMS_RadiadoresLemos_WPF
                 Marca = string.Empty,
                 Codigo = string.Empty
             };
-            produtos = new List<ProdutoData>();
             isModified = false;
         }
 
         // Evento disparado ao clicar no botão de cadastrar produto
-        private async void Cadastrar_Click(object sender, RoutedEventArgs e)
+        private void Cadastrar_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -58,10 +58,8 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao cadastrar produto: {ex.Message}");
-
                 // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             ex.Message.ToString(),
                                             "Erro ao cadastrar produto. Possíveis motivos:\n" +
                                             "- Dados do produto não são válidos;\n" +
@@ -76,52 +74,76 @@ namespace WMS_RadiadoresLemos_WPF
         // Cadastra o novo produto com os valores dos campos
         private async void CadastrarProduto()
         {
-            var db = DatabaseConnect.Database;
-            ProdutoData data = DadosDoProduto();
-
-            // Se não estiver conectado ao banco
-            if (db == null || !DatabaseConnect.IsConnected)
+            try
             {
-                // Ativa modo offline caso não esteja ativo
-                if (MainWindow.isAppOffline == false)
+                var db = DatabaseConnect.Database;
+                if (db == null)
                 {
-                    MainWindow._instance?.ativarModoOffline();
+                    MessageBox.Show("Erro: Banco de dados não está conectado.");
+                    return;
                 }
+
+                var collection = db.GetCollection<ProdutoData>("produtos");
+
+                // Verifica se já existe um produto com o mesmo código
+                var produtoExistente = collection.FindOne(p => p.Codigo == CodigoProduto.Text.Trim());
+                if (produtoExistente != null)
+                {
+                    var resultado = MessageBox.Show(
+                        "Já existe um produto com este código. Deseja atualizar?",
+                        "Produto Existente",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+                    if (resultado != MessageBoxResult.Yes)
+                    {
+                        return;
+                    }
+                }
+
+                ProdutoData data = DadosDoProduto();
+
+                // Garante que o Id seja igual ao código
+                data.Id = data.Codigo;
+
+                // Tenta inserir/atualizar o produto
+                collection.Upsert(data);
+
+                // Adiciona log
+                var log = new LogData
+                {
+                    Data = DateTime.UtcNow,
+                    Tipo = "OPERACIONAL",
+                    Nivel = "Usuário",
+                    Detalhes = $"Produto {(produtoExistente != null ? "atualizado" : "cadastrado")}: {data.Nome}, Código: {data.Codigo}",
+                    Usuario = MainWindow.UsuarioLogado?.Nome ?? "Sistema"
+                };
+                await LogHistorico.SalvarLog(log);
+
+                MessageBox.Show(
+                    $"Produto {(produtoExistente != null ? "atualizado" : "cadastrado")} com sucesso!",
+                    "Sucesso",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
-            else
+            catch (Exception ex)
             {
-                // Salva o produto no banco de dados Firestore
-                var docRef = db.Collection("Produtos").Document(data.Codigo);
-                await docRef.SetAsync(data);
+                MessageBox.Show(
+                    $"Erro ao cadastrar produto: {ex.Message}",
+                    "Erro",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Erro ao cadastrar produto. Possíveis motivos:\n" +
+                    "- Dados do produto não são válidos;\n" +
+                    "- Produto inexistente no banco de dados;\n" +
+                    "- Banco de dados inacessível.",
+                    "- Verifique se os dados do produto estão corretos;\n" +
+                    "- Verifique se o produto existe no banco de dados;\n" +
+                    "- Verifique se o banco de dados está acessível.");
             }
-
-            // Atualiza o cache local
-            if (!DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
-            {
-                value = new List<object>();
-                DadosCache.Tabelas["Produtos"] = value;
-            }
-
-            // Adiciona o produto ao cache local e à fonte de dados do DataGrid
-            value.Add(data);
-            produtos.Add(data);
-
-            // Adiciona o novo produto no arquivo JSON
-            var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
-            var produtosCache = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
-            produtosCache.Add(data);
-            await DatabaseFileManager.SalvarNoArquivoAsync(caminhoArquivoProdutos, produtosCache);
-
-            // Adiciona log
-            var log = new LogData
-            {
-                Data = DateTime.UtcNow,
-                Tipo = "OPERACIONAL",
-                Nivel = "Usuário",
-                Detalhes = $"Produto cadastrado: {data.Nome}, Código: {data.Codigo}",
-                Usuario = MainWindow.UsuarioLogado.Nome
-            };
-            await LogHistorico.RegistrarLogAsync(log);
         }
 
         // Evento disparado ao clicar no botão de cancelar
@@ -141,7 +163,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception)
             {
-                AlertaCache.AdicionarAlerta("Erro",
+                Alerta.AdicionarAlerta("Erro",
                                             "Cadastro de produto.",
                                             "Erro ao cancelar cadastro de produto. Possíveis motivos:\n" +
                                             "- Erro ao fechar janela de cadastro de produto;\n" +
@@ -260,9 +282,17 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show("O campo Código do Produto deve ser preenchido.");
                 return false;
             }
-            if (!int.TryParse(QuantidadeInicial.Text, out _))
+            if (!int.TryParse(QuantidadeInicial.Text.Replace(".", ""), out int quantidade) || quantidade < 0)
             {
-                MessageBox.Show("O campo Quantidade Inicial deve ser um número válido.");
+                MessageBox.Show("O campo Quantidade Inicial deve ser um número válido e positivo.");
+                return false;
+            }
+            if (!double.TryParse(PrecoProduto.Text.Replace(".", "").Replace(",", "."), 
+                System.Globalization.NumberStyles.Any, 
+                System.Globalization.CultureInfo.InvariantCulture, 
+                out double preco) || preco < 0)
+            {
+                MessageBox.Show("O campo Preço deve ser um valor válido e positivo.");
                 return false;
             }
             return true;
@@ -277,7 +307,7 @@ namespace WMS_RadiadoresLemos_WPF
             Codigo = CodigoProduto.Text.Trim(),
 
             // Remove a formatação do preço (1.000,00 -> 1000 OU 1.999,99 -> 1999.99)
-            Preço = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", "."), System.Globalization.CultureInfo.InvariantCulture),
+            Preco = double.Parse(PrecoProduto.Text.Trim().Replace(".", "").Replace(",", "."), System.Globalization.CultureInfo.InvariantCulture),
 
             // Remove a formatação da quantidade (1.000 -> 1000)
             Quantidade = int.Parse(QuantidadeInicial.Text.Trim().Replace(".", "")),

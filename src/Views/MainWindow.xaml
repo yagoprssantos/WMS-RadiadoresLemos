@@ -39,7 +39,7 @@
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock x:Name="NomeUsuarioTextBlock" Text="Usuário 1" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
                         <TextBlock x:Name="CargoTextBlock" Text="ADMIN" FontSize="12" Foreground="{StaticResource TextBrush}"/>
-                        <TextBlock x:Name="MatriculaTextBlock" Text="Matrícula" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                        <TextBlock x:Name="MatriculaTextBlock" Text="Matricula" FontSize="12" Foreground="{StaticResource TextBrush}"/>
                     </StackPanel>
                 </Grid>
 

@@ -13,7 +13,7 @@
     <Color x:Key="HoverForegroundColor">#707070</Color>
     <Color x:Key="CancelColor">#FF0000</Color>
     <Color x:Key="CancelHoverColor">#A00000</Color>
-
+    
     <!-- Brushes -->
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
     <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{StaticResource PanelBackgroundColor}" />
@@ -82,7 +82,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- Estilo para Botões do Dashboard -->
     <Style x:Key="DashboardButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
         <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
@@ -136,7 +136,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- Estilo para Botões de Filtro -->
     <Style x:Key="FilterButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
@@ -692,9 +692,9 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
-    
-    
+
+
+
     <!-- TODO: ORGANIZAR DAQUI PRA BAIXO -->
 
     <!-- Estilo para Botão padrão 1 -->

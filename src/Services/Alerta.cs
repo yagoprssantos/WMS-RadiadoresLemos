@@ -4,7 +4,7 @@ using WMS_RadiadoresLemos_WPF.src.Models;
 
 namespace WMS_RadiadoresLemos_WPF.src.Services
 {
-    internal static class AlertaCache
+    internal static class Alerta
     {
         public static Dictionary<string, List<AlertaData>> Alertas { get; set; } = new Dictionary<string, List<AlertaData>>()
             {

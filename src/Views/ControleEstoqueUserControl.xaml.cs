@@ -5,64 +5,118 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Google.Cloud.Firestore;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
+using System.Text.Json;
+using LiteDB;
 
 namespace WMS_RadiadoresLemos_WPF
 {
     public partial class ControleEstoqueUserControl : UserControl
     {
-        private List<ProdutoData> produtos = [];
+        private static readonly string CollectionName = "produtos";
+        private List<ProdutoData> produtos = new List<ProdutoData>();
         private bool produtosCarregados = false;
         private bool precisaAtualizarEstoque = true;
 
         public ControleEstoqueUserControl()
         {
             InitializeComponent();
-            CarregarDadosIniciais();
-            CarregarFiltro();
+            AtualizarTabelaEstoque();
         }
 
-        // Método para carregar os dados iniciais
-        private void CarregarDadosIniciais()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
-            {
-                produtos = value.Cast<ProdutoData>().ToList();
-                EstoqueDataGrid.ItemsSource = produtos;
-            }
-        }
-
-        // Método para carregar todo o filtro
-        private void CarregarFiltro()
-        {
-            // Carrega todos os ComboBox necessários
-            CarregarProdutos();
-
-            // Preenche os filtros
-            PreencherFiltros();
-        }
-
-        // Método para carregar produtos no ComboBox
-        private void CarregarProdutos()
+        public void AtualizarTabelaEstoque()
         {
             try
             {
-                if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
+                if (DatabaseConnect.Database != null)
                 {
-                    produtos = value.Cast<ProdutoData>().ToList();
-
-                    ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).Distinct().ToList();
-                    MarcaComboBox.ItemsSource = produtos.Select(p => p.Marca).Distinct().ToList();
-                    TipoComboBox.ItemsSource = produtos.Select(p => p.Tipo).Distinct().ToList();
-                    CodigoComboBox.ItemsSource = produtos.Select(p => p.Codigo).Distinct().ToList();
+                    var collection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos");
+                    produtos = collection.FindAll().ToList();
+                    EstoqueDataGrid.ItemsSource = produtos;
+                    produtosCarregados = true;
                 }
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao carregar produtos do banco: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CadastrarProduto_Click(object sender, RoutedEventArgs e)
+        {
+            // Chamar a janela de cadastro de produto
+            var window = new EditarProdutoWindow(null);
+            if (window.ShowDialog() == true)
+            {
+                // Atualizar a tabela de estoque após o cadastro
+                AtualizarTabelaEstoque();
+            }
+        }
+
+        private void EditarProduto_Click(object sender, RoutedEventArgs e)
+        {
+            // Chama janela com produto selecionado
+            var produto = EstoqueDataGrid.SelectedItem as ProdutoData;
+            if (produto == null)
+            {
+                MessageBox.Show("Selecione um produto para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var window = new EditarProdutoWindow(produto);
+            if (window.ShowDialog() == true)
+            {
+                AtualizarTabelaEstoque();
+            }
+        }
+
+        private void DeletarProduto_Click(object sender, RoutedEventArgs e)
+        {
+            var produto = EstoqueDataGrid.SelectedItem as ProdutoData;
+            if (produto == null)
+            {
+                MessageBox.Show("Selecione um produto para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Tem certeza que deseja deletar o produto {produto.Nome}?",
+                "Confirmar exclusão",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    if (DatabaseConnect.Database == null)
+                    {
+                        MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var collection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
+                    collection.Delete(produto.Id);
+                    AtualizarTabelaEstoque();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao deletar produto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void EstoqueDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var produto = EstoqueDataGrid.SelectedItem as ProdutoData;
+            if (produto == null) return;
+
+            var window = new EditarProdutoWindow(produto);
+            if (window.ShowDialog() == true)
+            {
+                AtualizarTabelaEstoque();
             }
         }
 
@@ -79,122 +133,30 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (InvalidOperationException ex)
             {
-                //MessageBox.Show($"Erro ao preencher filtros: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao preencher filtros de marca e tipo de produto no Controle de Estoque. Possíveis Motivos\n: " +
-                                            "- Não foi possível carregar os produtos;\n" +
-                                            "- Filtro de marca ou tipo não encontrado.",
-                                            "- Verifique se os produtos foram carregados corretamente;\n" +
-                                            "- Verifique se os filtros de marca e tipo existem;\n" +
-                                            "- Tente atualizar a tabela de estoque novamente.");
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Erro ao preencher filtros de marca e tipo de produto no Controle de Estoque. Possíveis Motivos\n: " +
+                    "- Não foi possível carregar os produtos;\n" +
+                    "- Filtro de marca ou tipo não encontrado.",
+                    "- Verifique se os produtos foram carregados corretamente;\n" +
+                    "- Verifique se os filtros de marca e tipo existem;\n" +
+                    "- Tente atualizar a tabela de estoque novamente.");
             }
         }
-
-        // Método chamado ao clicar no botão de cadastrar produto
-        private async void CadastrarProduto_Click(object sender, RoutedEventArgs e)
-        {
-            var cadastrarProdutoWindow = new CadastrarProdutoWindow();
-            if (cadastrarProdutoWindow.ShowDialog() == true)
-            {
-                // Obtém o produto cadastrado
-                var produtoCadastrado = cadastrarProdutoWindow.Produto;
-
-                // Atualiza o banco de dados
-                await AtualizarProduto(produtoCadastrado);
-
-                // Atualiza a fonte de dados do DataGrid
-                EstoqueDataGrid.ItemsSource = null;
-                EstoqueDataGrid.ItemsSource = produtos;
-
-                // Avisa o usuário que o produto foi cadastrado
-                MessageBox.Show("Produto cadastrado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show("Cadastro de produto cancelado.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-
-        // Método para atualizar a tabela de estoque com os produtos
-        private async Task AtualizarTabelaEstoque()
-        {
-            try
-            {
-                var db = DatabaseConnect.Database;
-
-                if (db == null || !DatabaseConnect.IsConnected)
-                {
-                    // Utiliza o arquivo JSON
-                    var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
-
-                    if (File.Exists(caminhoArquivoProdutos))
-                    {
-                        produtos = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
-                    }
-                }
-                else
-                {
-                    // Utiliza o banco de dados normalmente
-                    var produtosSnapshot = await db.Collection("Produtos").GetSnapshotAsync();
-                    produtos = produtosSnapshot.Documents.Select(doc =>
-                    {
-                        var produto = doc.ConvertTo<ProdutoData>();
-                        produto.Id = doc.Id;
-                        return produto;
-                    }).ToList();
-                }
-
-                // Atualiza o cache local e a fonte de dados do DataGrid
-                DadosCache.Tabelas["Produtos"] = produtos.Cast<object>().ToList();
-                EstoqueDataGrid.ItemsSource = produtos;
-                produtosCarregados = true;
-                precisaAtualizarEstoque = false;
-            }
-            catch (Exception ex)
-            {
-                precisaAtualizarEstoque = true;
-                MessageBox.Show($"Erro ao carregar produtos do banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao carregar produtos do banco de dados no Controle de Estoque. Possíveis Motivos:\n " +
-                                            "- Falha na conexão com o banco de dados;\n" +
-                                            "- Falha ao carregar os produtos do banco de dados.",
-                                            "- Verifique a conexão com o banco de dados;\n" +
-                                            "- Verifique se os produtos foram carregados corretamente;\n" +
-                                            "- Tente atualizar a tabela de estoque novamente.");
-            }
-        }
-
 
         // Método chamado ao alterar o texto da caixa de busca
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!produtosCarregados)
+            if (produtosCarregados)
             {
-                // Garante que produtos estejam sempre carregados
-                AtualizarTabelaEstoqueCache();
-            }
-        }
+                string searchText = SearchBox.Text.ToLower();
+                var produtosFiltrados = produtos.Where(p =>
+                    p.Nome.ToLower().Contains(searchText) ||
+                    p.Tipo.ToLower().Contains(searchText) ||
+                    p.Marca.ToLower().Contains(searchText) ||
+                    p.Codigo.ToLower().Contains(searchText)).ToList();
 
-        // Método para atualizar a tabela de estoque com os produtos do cache
-        private void AtualizarTabelaEstoqueCache()
-        {
-            if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
-            {
-                produtos = value.Cast<ProdutoData>().ToList();
-                EstoqueDataGrid.ItemsSource = produtos;
-                produtosCarregados = true;
-                precisaAtualizarEstoque = false;
-            }
-            else
-            {
-                precisaAtualizarEstoque = true;
+                EstoqueDataGrid.ItemsSource = produtosFiltrados;
             }
         }
 
@@ -233,7 +195,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -247,33 +209,8 @@ namespace WMS_RadiadoresLemos_WPF
             EmEstoqueCheckBox.IsChecked = false;
 
             // Recarregar todos os produtos
-            CarregarProdutos();
+            AtualizarTabelaEstoque();
             FiltroPopup.IsOpen = false;
-        }
-
-
-        // Método chamado ao clicar no botão de editar produto
-        private async void EditarProduto_Click(object sender, RoutedEventArgs e)
-        {
-            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
-            {
-                EditarProdutoWindow editarProdutoWindow = new(produtoSelecionado);
-                if (editarProdutoWindow.ShowDialog() == true)
-                {
-                    // Obtém o produto editado
-                    var produtoEditado = editarProdutoWindow.Produto;
-
-                    // Atualiza o banco de dados
-                    await AtualizarProduto(produtoEditado);
-
-                    // Atualiza a fonte de dados do DataGrid
-                    EstoqueDataGrid.ItemsSource = null;
-                    EstoqueDataGrid.ItemsSource = produtos;
-
-                    // Avisa o usuário que o produto foi editado
-                    MessageBox.Show("Produto editado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
         }
 
         // Método chamado ao clicar no botão de alterar quantidade
@@ -291,8 +228,13 @@ namespace WMS_RadiadoresLemos_WPF
                     await AtualizarProduto(produtoSelecionado);
 
                     // Atualiza a fonte de dados do DataGrid
-                    EstoqueDataGrid.ItemsSource = null;
-                    EstoqueDataGrid.ItemsSource = produtos;
+                    var index = produtos.FindIndex(p => p.Id == produtoSelecionado.Id);
+                    if (index >= 0)
+                    {
+                        produtos[index] = produtoSelecionado;
+                        EstoqueDataGrid.ItemsSource = null;
+                        EstoqueDataGrid.ItemsSource = produtos;
+                    }
 
                     // Avisa o usuário que a quantidade foi alterada
                     MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -300,204 +242,35 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Método chamado ao clicar no botão de deletar produto
-        private async void DeletarProduto_Click(object sender, RoutedEventArgs e)
-        {
-            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
-            {
-                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
-                confirmarSenhaWindow.ShowDialog();
-
-                if (confirmarSenhaWindow.IsConfirmed)
-                {
-                    // Exibe confirmação
-                    var result = MessageBox.Show("Tem certeza que deseja deletar este produto?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        // Deleta o produto do banco de dados
-                        await DeletarProduto(produtoSelecionado);
-
-                        // Atualiza a fonte de dados do DataGrid
-                        EstoqueDataGrid.ItemsSource = null;
-                        EstoqueDataGrid.ItemsSource = produtos;
-
-                        MessageBox.Show("Produto deletado com sucesso", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Ação cancelada. Senha não confirmada.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Selecione um produto para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-
         // Método para atualizar um produto
-        private static async Task AtualizarProduto(ProdutoData produto)
+        private async Task AtualizarProduto(ProdutoData produto)
         {
-            var db = DatabaseConnect.Database;
-
             try
             {
-                // Se não estiver conectado ao banco
-                if (db == null || !DatabaseConnect.IsConnected)
+                if (DatabaseConnect.Database == null)
                 {
-                    // Ativa modo offline caso não esteja ativo
-                    if (MainWindow.isAppOffline == false)
-                    {
-                        MainWindow._instance?.ativarModoOffline();
-                    }
-                }
-                else
-                {
-                    // Atualiza o produto no banco de dados Firestore
-                    DocumentReference docRef = db.Collection("Produtos").Document(produto.Id);
-                    await docRef.SetAsync(produto, SetOptions.Overwrite);
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
 
-                // Atualiza o cache local
-                if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
-                {
-                    var posicao = value.FindIndex(p => ((ProdutoData)p).Id == produto.Id);
-                    if (posicao >= 0)
-                    {
-                        value[posicao] = produto;
-                    }
-                }
+                var collection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
+                collection.Update(produto);
 
-                // Atualiza o produto no arquivo JSON
-                var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
-                var produtos = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
-                var index = produtos.FindIndex(p => p.Id == produto.Id);
-                if (index >= 0)
-                {
-                    produtos[index] = produto;
-                    await DatabaseFileManager.SalvarNoArquivoAsync(caminhoArquivoProdutos, produtos);
-                }
-                else
-                {
-                    throw new Exception("Produto não encontrado no arquivo JSON.");
-                }
-
-                // Adiciona log
-                var log = new LogData
-                {
-                    Data = DateTime.UtcNow,
-                    Tipo = "OPERACIONAL",
-                    Nivel = "Usuário",
-                    Detalhes = $"Produto atualizado: {produto.Nome}, Código: {produto.Codigo}, Quantidade: {produto.Quantidade}, Preço: {produto.Preço}, Tipo: {produto.Tipo}, Marca: {produto.Marca}",
-                    Usuario = MainWindow.UsuarioLogado.Nome
-                };
-                await LogHistorico.RegistrarLogAsync(log);
+                // Recarrega a lista de produtos
+                AtualizarTabelaEstoque();
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao atualizar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao atualizar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
-                                            "- Falha na conexão com o banco de dados;\n" +
-                                            "- Falha ao atualizar o produto no banco de dados.",
-                                            "- Verifique a conexão com o banco de dados;\n" +
-                                            "- Verifique se o produto foi atualizado corretamente.");
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Não foi possível atualizar o produto. Possíveis motivos:\n" +
+                    "- Problemas de conexão com o banco;\n" +
+                    "- Dados corrompidos;\n" +
+                    "- Falha na operação de atualização.",
+                    "- Verifique a conexão com o banco;\n" +
+                    "- Tente novamente mais tarde.");
             }
         }
-
-        // Método para deletar um produto
-        private async Task DeletarProduto(ProdutoData produto)
-        {
-            var db = DatabaseConnect.Database;
-
-            try
-            {
-                // Se não estiver conectado ao banco
-                if (db == null || !DatabaseConnect.IsConnected)
-                {
-                    // Ativa modo offline caso não esteja ativo
-                    if (MainWindow.isAppOffline == false)
-                    {
-                        MainWindow._instance?.ativarModoOffline();
-                    }
-                }
-                else
-                {
-                    // Deleta o produto do banco de dados Firestore
-                    DocumentReference docRef = db.Collection("Produtos").Document(produto.Id);
-                    await docRef.DeleteAsync();
-                }
-
-                // Atualiza o cache local
-                if (DadosCache.Tabelas.TryGetValue("Produtos", out List<object>? value))
-                {
-                    var produtoParaRemover1 = value.FirstOrDefault(p => ((ProdutoData)p).Id == produto.Id);
-                    if (produtoParaRemover1 != null)
-                    {
-                        value.Remove(produtoParaRemover1);
-                    }
-                }
-
-                // Atualiza o arquivo JSON
-                var caminhoArquivoProdutos = new DatabaseFileManager().ObterCaminhoArquivo("Produtos");
-                var produtos = await DatabaseFileManager.LerDoArquivoAsync<ProdutoData>(caminhoArquivoProdutos);
-                var produtoParaRemover2 = produtos.FirstOrDefault(p => p.Id == produto.Id);
-                if (produtoParaRemover2 != null)
-                {
-                    produtos.Remove(produtoParaRemover2);
-                    await DatabaseFileManager.SalvarNoArquivoAsync(caminhoArquivoProdutos, produtos);
-                }
-
-                // Adiciona log
-                var log = new LogData
-                {
-                    Data = DateTime.UtcNow,
-                    Tipo = "OPERACIONAL",
-                    Nivel = "Usuário",
-                    Detalhes = $"Produto deletado: {produto.Nome}, Código: {produto.Codigo}, Quantidade: {produto.Quantidade}, Preço: {produto.Preço}, Tipo: {produto.Tipo}, Marca: {produto.Marca}",
-                    Usuario = MainWindow.UsuarioLogado.Nome
-                };
-                await LogHistorico.RegistrarLogAsync(log);
-            }
-            catch (Exception ex)
-            {
-                //MessageBox.Show($"Erro ao deletar produto no banco de dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Adiciona alerta
-                AlertaCache.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Erro ao deletar produto no banco de dados no Controle de Estoque. Possíveis Motivos\n: " +
-                                            "- Falha na conexão com o banco de dados;\n" +
-                                            "- Falha ao deletar o produto no banco de dados.",
-                                            "- Verifique a conexão com o banco de dados;\n" +
-                                            "- Verifique se o produto foi deletado corretamente.");
-            }
-        }
-
-
-        // Método para abrir edição de produto ao dar duplo clique na linha da tabela
-        private async void EstoqueDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            // Exatamente igual ao método EditarProduto_Click
-            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
-            {
-                EditarProdutoWindow editarProdutoWindow = new(produtoSelecionado);
-                if (editarProdutoWindow.ShowDialog() == true)
-                {
-                    var produtoEditado = editarProdutoWindow.Produto;
-                    await AtualizarProduto(produtoEditado);
-                    EstoqueDataGrid.ItemsSource = null;
-                    EstoqueDataGrid.ItemsSource = produtos;
-                    MessageBox.Show("Produto editado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-        }
-
-
 
         // Tratamento de entradas
 
@@ -561,7 +334,6 @@ namespace WMS_RadiadoresLemos_WPF
                 }
             }
         }
-
 
         // Verifica se o texto é permitido baseado no padrão regex
         private static bool IsTextAllowed(string text, string pattern) =>

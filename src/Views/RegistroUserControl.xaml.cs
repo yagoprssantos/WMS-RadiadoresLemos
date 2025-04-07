@@ -32,11 +32,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         }
 
         // Método para carregar dados no DataGrid de Entradas
-        private void CarregarEntradas()
+        public void CarregarEntradas()
         {
             try
             {
-                var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                var movimentacoes = collection.FindAll().ToList();
                 var entradas = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
                 EntradaDataGrid.ItemsSource = entradas;
             }
@@ -47,11 +54,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         }
 
         // Método para carregar dados no DataGrid de Saídas
-        private void CarregarSaidas()
+        public void CarregarSaidas()
         {
             try
             {
-                var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                var movimentacoes = collection.FindAll().ToList();
                 var saidas = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
                 SaidaDataGrid.ItemsSource = saidas;
             }
@@ -62,11 +76,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         }
 
         // Método para carregar dados no DataGrid de Histórico
-        private async void CarregarHistorico()
+        public void CarregarHistorico()
         {
             try
             {
-                var historico = await Task.Run(() => LogHistorico.ObterLogs());
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<LogData>("historico");
+                var historico = collection.FindAll().ToList();
                 HistoricoDataGrid.ItemsSource = historico;
             }
             catch (Exception ex)
@@ -80,7 +101,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                var movimentacoes = collection.FindAll().ToList();
                 var produtos = movimentacoes.Select(m => m.ProdutoId).Distinct().ToList();
                 ProdutoComboBox.ItemsSource = produtos;
             }
@@ -162,7 +190,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                var movimentacoes = MovimentacoesCache.ObterMovimentacoes();
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                var movimentacoes = collection.FindAll().ToList();
 
                 // Filtrar entradas
                 var entradasFiltradas = movimentacoes.Where(m =>
@@ -205,20 +240,26 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                var historico = LogHistorico.ObterLogs();
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<LogData>("historico");
+                var historico = collection.FindAll().ToList();
 
                 var historicoFiltrado = historico.Where(h =>
-                    (string.IsNullOrEmpty(tipo) || h.Tipo.Equals(tipo, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(tipo) || h.Tipo == tipo) &&
                     (string.IsNullOrEmpty(nivel) || h.Nivel == nivel) &&
                     (!dataInicio.HasValue || h.Data >= dataInicio.Value) &&
                     (!dataFim.HasValue || h.Data <= dataFim.Value)).ToList();
 
-                // Atualizar HistoricoDataGrid
                 HistoricoDataGrid.ItemsSource = historicoFiltrado;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao aplicar filtro: {ex.Message}");
+                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -233,6 +274,70 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Recarregar histórico
             CarregarHistorico();
             FiltroHistoricoPopup.IsOpen = false;
+        }
+
+        private void AtualizarTabelaRegistro()
+        {
+            if (DatabaseConnect.Database == null)
+                return;
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
+            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
+        }
+
+        private void FiltrarPorData()
+        {
+            if (DatabaseConnect.Database == null)
+                return;
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+            
+            if (DataInicioPicker.SelectedDate.HasValue && DataFimPicker.SelectedDate.HasValue)
+            {
+                movimentacoes = movimentacoes.Where(m => m.Data >= DataInicioPicker.SelectedDate.Value && m.Data <= DataFimPicker.SelectedDate.Value).ToList();
+            }
+            
+            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
+            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
+        }
+
+        private void FiltrarPorTipo()
+        {
+            if (DatabaseConnect.Database == null)
+                return;
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+            
+            if (TipoComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string tipo = selectedItem.Content.ToString();
+                if (tipo != "Todos")
+                {
+                    movimentacoes = movimentacoes.Where(m => m.Tipo == tipo).ToList();
+                }
+            }
+            
+            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
+            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
+        }
+
+        private void LimparFiltros()
+        {
+            if (DatabaseConnect.Database == null)
+                return;
+
+            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+            var movimentacoes = collection.FindAll().ToList();
+            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
+            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
+            
+            DataInicioPicker.SelectedDate = null;
+            DataFimPicker.SelectedDate = null;
+            TipoComboBox.SelectedIndex = 0;
         }
     }
 }

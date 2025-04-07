@@ -88,7 +88,7 @@ namespace WMS_RadiadoresLemos_WPF
         private void HandleException(string title, Exception ex, string message, string suggestions)
         {
             //MessageBox.Show($"{title}: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            AlertaCache.AdicionarAlerta("Erro", ex.Message, message, suggestions);
+            Alerta.AdicionarAlerta("Erro", ex.Message, message, suggestions);
         }
     }
 }
