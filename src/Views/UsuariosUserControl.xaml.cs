@@ -42,17 +42,8 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void AdicionarUsuario_Click(object sender, RoutedEventArgs e)
         {
-            var novoUsuario = new UsuarioData
-            {
-                Id = Guid.NewGuid().ToString(),
-                Nome = "",
-                Email = "",
-                Matricula = "",
-                Senha = "",
-                Cargo = "Usuário"
-            };
-
-            var window = new EditarUsuarioWindow(novoUsuario);
+            // Abre a janela de edição de usuário com um usuário null
+            var window = new EditarUsuarioWindow(null);
             if (window.ShowDialog() == true)
             {
                 AtualizarTabelaUsuarios();
@@ -61,9 +52,15 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void EditarUsuario_Click(object sender, RoutedEventArgs e)
         {
-            var usuario = (sender as Button)?.DataContext as UsuarioData;
-            if (usuario == null) return;
+            // Obtém o usuário selecionado
+            var usuario = UsuariosDataGrid.SelectedItem as UsuarioData;
+            if (usuario == null)
+            {
+                MessageBox.Show("Selecione um usuário para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
+            // Abre a janela de edição de usuário com o usuário selecionado
             var window = new EditarUsuarioWindow(usuario);
             if (window.ShowDialog() == true)
             {
@@ -73,8 +70,12 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void DeletarUsuario_Click(object sender, RoutedEventArgs e)
         {
-            var usuario = (sender as Button)?.DataContext as UsuarioData;
-            if (usuario == null) return;
+            var usuario = UsuariosDataGrid.SelectedItem as UsuarioData;
+            if (usuario == null)
+            {
+                MessageBox.Show("Selecione um usuário para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"Tem certeza que deseja deletar o usuário {usuario.Nome}?",
@@ -95,7 +96,7 @@ namespace WMS_RadiadoresLemos_WPF
                     var collection = DatabaseConnect.Database.GetCollection<UsuarioData>(CollectionName);
                     collection.Delete(usuario.Id);
                     AtualizarTabelaUsuarios();
-                }   
+                }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Erro ao deletar usuário: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
