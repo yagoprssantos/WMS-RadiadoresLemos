@@ -19,6 +19,7 @@ namespace WMS_RadiadoresLemos_WPF
     {
         public static MainWindow? _instance;
         private bool isLogoutInitiated = false;
+        private bool isThemeChange = false;
         private int _notificationCount = 0;
 
         // Variável para armazenar o usuário logado
@@ -122,7 +123,7 @@ namespace WMS_RadiadoresLemos_WPF
 
         private async void Window_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (isLogoutInitiated) return;
+            if (isLogoutInitiated || isThemeChange) return; // Verifica se é logout ou troca de tema
 
             try
             {
@@ -301,6 +302,7 @@ namespace WMS_RadiadoresLemos_WPF
 
         public void Reload()
         {
+            isThemeChange = true;
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
             this.Close();
