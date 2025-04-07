@@ -18,7 +18,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         private static string GetBackupPath(int version)
         {
             var directory = Path.GetDirectoryName(dbPath);
-            return Path.Combine(directory, $"Database_v{version}.db");
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            return Path.Combine(directory, $"Database_backup_{timestamp}.db");
         }
 
         private static void CreateBackup()
@@ -28,22 +29,33 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 // Se o banco atual existe, faz backup
                 if (File.Exists(dbPath))
                 {
-                    // Move as versões existentes
-                    for (int i = 19; i >= 1; i--)
+                    var directory = Path.GetDirectoryName(dbPath);
+                    
+                    // Cria backup com timestamp
+                    string novoBackup = GetBackupPath(1);
+                    File.Copy(dbPath, novoBackup, true);
+
+                    // Lista todos os backups existentes
+                    var backups = Directory.GetFiles(directory, "Database_backup_*.db")
+                        .OrderByDescending(f => f)
+                        .ToList();
+
+                    // Se houver mais de 20 backups, remove os mais antigos
+                    if (backups.Count > 20)
                     {
-                        string currentBackup = GetBackupPath(i);
-                        string nextBackup = GetBackupPath(i + 1);
-                        
-                        if (File.Exists(currentBackup))
+                        foreach (var backup in backups.Skip(20))
                         {
-                            if (File.Exists(nextBackup))
-                                File.Delete(nextBackup);
-                            File.Move(currentBackup, nextBackup);
+                            try
+                            {
+                                File.Delete(backup);
+                                Console.WriteLine($"Backup antigo removido: {backup}");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Erro ao remover backup antigo {backup}: {ex.Message}");
+                            }
                         }
                     }
-
-                    // Cria nova versão 1 com o banco atual
-                    File.Copy(dbPath, GetBackupPath(1), true);
                 }
             }
             catch (Exception ex)
