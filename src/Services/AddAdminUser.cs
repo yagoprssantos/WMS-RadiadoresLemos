@@ -29,7 +29,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                         Id = Guid.NewGuid().ToString(),
                         Nome = "admin",
                         Email = "admin@radiadoreslemos.com",
-                        Matricula = "ADM" + DateTime.Now.Year.ToString().Substring(2, 2) + "01",
+                        Matricula = "ADM",
                         Senha = "admin", // Senha inicial que deve ser alterada
                         Cargo = "Administrador"
                     };

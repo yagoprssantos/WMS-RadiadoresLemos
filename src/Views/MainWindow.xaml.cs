@@ -355,6 +355,7 @@ namespace WMS_RadiadoresLemos_WPF
                     isLogoutInitiated = true;
                     this.Hide();
 
+                    // Verifica se o usuário está logado e registra o log de logout
                     if (UsuarioLogado != null)
                     {
                         var log = new LogData
@@ -391,9 +392,56 @@ namespace WMS_RadiadoresLemos_WPF
 
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button)
+            // Altera a cor do botão clicado nos itens do menu
+            foreach (var child in MenuItemsPanel.Children)
             {
-                switch (button.Name)
+                if (child is Button button)
+                {
+                    button.Style = (Style)FindResource("MenuButtonStyle");
+                    // Altera a cor do texto e do ícone do botão
+                    foreach (var innerChild in ((StackPanel)button.Content).Children)
+                    {
+                        if (innerChild is TextBlock textBlock)
+                        {
+                            textBlock.Foreground = (Brush)FindResource("TextBrush");
+                        }
+                        else if (innerChild is System.Windows.Shapes.Path path)
+                        {
+                            path.Fill = (Brush)FindResource("TextBrush");
+                        }
+                    }
+                }
+            }
+
+            // Altera a cor do botão clicado no rodapé do menu
+            foreach (var child in MenuItemsFooterPanel.Children)
+            {
+                if (child is Button button)
+                {
+                    button.Style = (Style)FindResource("MenuButtonStyle");
+                    // Altera a cor do texto e do ícone do botão
+                    foreach (var innerChild in ((StackPanel)button.Content).Children)
+                    {
+                        if (innerChild is TextBlock textBlock)
+                        {
+                            textBlock.Foreground = (Brush)FindResource("TextBrush");
+                        }
+                        else if (innerChild is System.Windows.Shapes.Path path)
+                        {
+                            path.Fill = (Brush)FindResource("TextBrush");
+                        }
+                    }
+                }
+            }
+
+            // Se o botão clicado for um botão
+            if (sender is Button clickedButton)
+            {
+                // Altera o estilo do botão clicado
+                clickedButton.Style = (Style)FindResource("MenuItemSelectedStyle");
+
+                // Define a aba correspondente
+                switch (clickedButton.Name)
                 {
                     case "BtnAdicionar":
                         ContentArea.Content = new AddEntradaSaídaUserControl();
@@ -417,7 +465,22 @@ namespace WMS_RadiadoresLemos_WPF
                         ContentArea.Content = new ConfiguracaoUserControl();
                         break;
                 }
+
+                // Atualiza o título
                 UpdateTitle();
+
+                // Altera a cor do texto e do ícone do botão clicado
+                foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
+                {
+                    if (innerChild is TextBlock textBlock)
+                    {
+                        textBlock.Foreground = (Brush)FindResource("AccentBrush");
+                    }
+                    else if (innerChild is System.Windows.Shapes.Path path)
+                    {
+                        path.Fill = (Brush)FindResource("AccentBrush");
+                    }
+                }
             }
         }
     }
