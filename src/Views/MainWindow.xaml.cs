@@ -13,7 +13,6 @@ using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using WMS_RadiadoresLemos_WPF;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace WMS_RadiadoresLemos_WPF
 {

@@ -28,15 +28,15 @@
                     </Border>
                     
                     <!-- Opções com outra tela -->
-                    <Button x:Name="BtnUsuarios" Style="{StaticResource CustomButtonStyle}" Click="BtnUsuarios_Click"  Height="65">
+                    <Button x:Name="BtnUsuarios" Style="{StaticResource CustomButtonStyle}" Click="BtnUsuarios_Click" Height="65" MouseEnter="BtnUsuarios_MouseEnter" MouseLeave="BtnUsuarios_MouseLeave">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconUsuarios"  Source="pack://application:,,,/src/resources/icons/Genericos/Usuário Config.png" Stretch="Uniform" Height="30" Width="25" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconUsuarios" Source="/src/Resources/Icons/NotSelected/UsuárioNS.png" Stretch="Uniform" Height="30" Width="25" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextUsuarios" Text="Gerenciar Usuários" Style="{StaticResource TextBoxCustomButtonStyle}"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnBancoDados" Style="{StaticResource CustomButtonStyle}" Click="BtnBancoDados_Click" Height="65">
+                    <Button x:Name="BtnBancoDados" Style="{StaticResource CustomButtonStyle}" Click="BtnBancoDados_Click" Height="65" MouseEnter="BtnBancoDados_MouseEnter" MouseLeave="BtnBancoDados_MouseLeave">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconBancoDados"  Source="/src/Resources/Icons/Genericos/DataCenter Config.png" Stretch="Uniform" Height="30" Width="25" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconBancoDados" Source="/src/Resources/Icons/NotSelected/DataCenterNS.png" Stretch="Uniform" Height="30" Width="25" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextBancoDados" Text="Banco de Dados" Style="{StaticResource TextBoxCustomButtonStyle}"/>
                         </StackPanel>
                     </Button>
