@@ -19,9 +19,7 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class AddEntradaSaídaUserControl : UserControl
     {
         private List<ProdutoData> produtos = new List<ProdutoData>();
-        private ObservableCollection<string> produtosFiltrados = new ObservableCollection<string>();
         private ObservableCollection<MovimentacaoData> carrinhoDeCompras = new ObservableCollection<MovimentacaoData>();
-        private Dictionary<string, string> produtoNomeParaId = new Dictionary<string, string>();
         private ProdutoData? produtoSelecionado;
         private bool usePositiveNumber = true;
         private static readonly string CollectionName = "produtos";
@@ -82,6 +80,8 @@ namespace WMS_RadiadoresLemos_WPF
             ProdutoAntesDepois.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
         }
 
+
+        // Produto ComboBox
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
         private void ProdutoComboBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -133,6 +133,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método chamado quando um produto é selecionado, altera as informações apresentadas na tela
         private void AtualizarProdutoSelecionado(ProdutoData produto)
         {
             // Seção do produto selecionado
@@ -148,6 +149,59 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
+        // Botões de registrar entrada e saída
+        private void RegistrarEntrada_Click(object sender, RoutedEventArgs e)
+        {
+            usePositiveNumber = true;
+
+            bool detalhesAtualizados = false;
+
+            if (produtoSelecionado != null)
+            {
+                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            if (!detalhesAtualizados)
+            {
+                return;
+            }
+
+            ToggleVisibility(true);
+            ConfirmarRegistroButton.Visibility = Visibility.Visible;
+            CancelarRegistroButton.Visibility = Visibility.Visible;
+            RegistrarEntradaButton.Visibility = Visibility.Collapsed;
+            RegistrarSaidaButton.Visibility = Visibility.Collapsed;
+
+            // Desabilitar o ComboBox
+            ProdutoComboBox.IsHitTestVisible = false;
+            ProdutoComboBox.IsEnabled = true;
+        }
+        private void RegistrarSaida_Click(object sender, RoutedEventArgs e)
+        {
+            usePositiveNumber = false;
+
+            bool detalhesAtualizados = false;
+
+            if (produtoSelecionado != null)
+            {
+                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
+            }
+
+            if (!detalhesAtualizados)
+            {
+                return;
+            }
+
+            ToggleVisibility(true);
+            ConfirmarRegistroButton.Visibility = Visibility.Visible;
+            CancelarRegistroButton.Visibility = Visibility.Visible;
+            RegistrarEntradaButton.Visibility = Visibility.Collapsed;
+            RegistrarSaidaButton.Visibility = Visibility.Collapsed;
+
+            // Desabilitar o ComboBox
+            ProdutoComboBox.IsHitTestVisible = false;
+            ProdutoComboBox.IsEnabled = true;
+        }
 
         // Método para atualizar os detalhes do produto selecionado
         private bool AtualizarDetalhesProduto(ProdutoData produto)
@@ -230,61 +284,8 @@ namespace WMS_RadiadoresLemos_WPF
             return true;
         }
 
-        private void RegistrarEntrada_Click(object sender, RoutedEventArgs e)
-        {
-            usePositiveNumber = true;
 
-            bool detalhesAtualizados = false;
-
-            if (produtoSelecionado != null)
-            {
-                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
-            }
-
-            if (!detalhesAtualizados)
-            {
-                return;
-            }
-
-            ToggleVisibility(true);
-            ConfirmarRegistroButton.Visibility = Visibility.Visible;
-            CancelarRegistroButton.Visibility = Visibility.Visible;
-            RegistrarEntradaButton.Visibility = Visibility.Collapsed;
-            RegistrarSaidaButton.Visibility = Visibility.Collapsed;
-
-            // Desabilitar o ComboBox
-            ProdutoComboBox.IsHitTestVisible = false;
-            ProdutoComboBox.IsEnabled = true;
-        }
-
-        private void RegistrarSaida_Click(object sender, RoutedEventArgs e)
-        {
-            usePositiveNumber = false;
-
-            bool detalhesAtualizados = false;
-
-            if (produtoSelecionado != null)
-            {
-                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
-            }
-
-            if (!detalhesAtualizados)
-            {
-                return;
-            }
-
-            ToggleVisibility(true);
-            ConfirmarRegistroButton.Visibility = Visibility.Visible;
-            CancelarRegistroButton.Visibility = Visibility.Visible;
-            RegistrarEntradaButton.Visibility = Visibility.Collapsed;
-            RegistrarSaidaButton.Visibility = Visibility.Collapsed;
-
-            // Desabilitar o ComboBox
-            ProdutoComboBox.IsHitTestVisible = false;
-            ProdutoComboBox.IsEnabled = true;
-        }
-
-        // Método para confirmar a ação de entrada ou saída
+        // Botões de confirmar e cancelar movimentação
         private void ConfirmarAcao_Click(object sender, RoutedEventArgs e)
         {
             if (produtoSelecionado == null)
@@ -326,7 +327,6 @@ namespace WMS_RadiadoresLemos_WPF
             ProdutoComboBox.IsHitTestVisible = true;
             ProdutoComboBox.IsEnabled = true;
         }
-
         private void CancelarAcao_Click(object sender, RoutedEventArgs e)
         {
             ToggleVisibility(false);
@@ -341,6 +341,7 @@ namespace WMS_RadiadoresLemos_WPF
             ProdutoComboBox.IsHitTestVisible = true;
             ProdutoComboBox.IsEnabled = true;
         }
+
 
         // Métodos para carrinho de compras
         private void CarrinhoDeComprasButton_Click(object sender, RoutedEventArgs e)
@@ -377,10 +378,6 @@ namespace WMS_RadiadoresLemos_WPF
             // Garante que o ComboBox está habilitado
             ProdutoComboBox.IsHitTestVisible = true;
             ProdutoComboBox.IsEnabled = true;
-        }
-        private void FecharCarrinhoDeCompras_Click(object sender, RoutedEventArgs e)
-        {
-            CarrinhoDeComprasPopup.IsOpen = false;
         }
 
         // Método assíncrono para registrar a movimentação de produtos
@@ -432,7 +429,12 @@ namespace WMS_RadiadoresLemos_WPF
             PrecoTextBox.Clear();
         }
 
-        // Métodos para validar a entrada de texto na caixa de quantidade (apenas números inteiros)
+
+
+
+
+        // Todos os métodos de validação de entrada de texto
+        // Quantidade
         private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !int.TryParse(e.Text, out _);
@@ -463,8 +465,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
             }
         }
-
-        // Métodos para validar a entrada de texto na caixa de preço (apenas números decimais)
+        // Preço
         private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (e.Text == ",")
@@ -502,20 +503,6 @@ namespace WMS_RadiadoresLemos_WPF
                     MessageBox.Show("Preço inválido.");
                     textBox.Clear();
                 }
-            }
-        }
-
-        private void AtualizarTabelaMovimentacoes()
-        {
-            if (DatabaseConnect.Database == null)
-                return;
-
-            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
-            var movimentacoes = collection.FindAll().ToList();
-            carrinhoDeCompras.Clear();
-            foreach (var movimentacao in movimentacoes)
-            {
-                carrinhoDeCompras.Add(movimentacao);
             }
         }
     }
