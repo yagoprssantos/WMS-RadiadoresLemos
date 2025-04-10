@@ -31,11 +31,19 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Evento disparado ao alterar o texto da caixa de texto de quantidade
         private void QuantidadeTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             isModified = true;
         }
 
+        // Evento para validar a entrada de texto, permitindo apenas números
+        private void QuantidadeTextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !int.TryParse(e.Text, out _);
+        }
+
+        // Lida com o clique no botão "Salvar", validando e salvando a nova quantidade
         private void Salvar_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -66,6 +74,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Lida com o clique no botão "Cancelar", verificando se há alterações não salvas
         private void Cancelar_Click(object sender, RoutedEventArgs e)
         {
             if (isModified)
@@ -80,14 +89,9 @@ namespace WMS_RadiadoresLemos_WPF
             Close();
         }
 
-        private void QuantidadeTextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
-        {
-            e.Handled = !int.TryParse(e.Text, out _);
-        }
-
+        // Lida com exceções, exibindo mensagens de erro detalhadas
         private void HandleException(string title, Exception ex, string message, string suggestions)
         {
-            //MessageBox.Show($"{title}: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             Alerta.AdicionarAlerta("Erro", ex.Message, message, suggestions);
         }
     }
