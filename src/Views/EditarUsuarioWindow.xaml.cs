@@ -86,6 +86,15 @@ namespace WMS_RadiadoresLemos_WPF
                     "- Verifique conexão com o banco de dados.");
             }
         }
+        private ComboBoxItem GetComboBoxItemByContent(string content)
+        {
+            foreach (ComboBoxItem item in PermissaoComboBox.Items)
+            {
+                if (item.Content.ToString() == content)
+                    return item;
+            }
+            return new ComboBoxItem { Content = string.Empty };
+        }
 
         // Evento disparado ao clicar no botão de salvar usuário
         private void Salvar_Click(object sender, RoutedEventArgs e)
@@ -126,63 +135,6 @@ namespace WMS_RadiadoresLemos_WPF
                     "- Verifique se os dados do usuário estão corretos;\n" +
                     "- Verifique se o banco de dados está acessível.");
             }
-        }
-
-        // Evento disparado ao clicar no botão de cancelar
-        private void Cancelar_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (isModified && ConfirmarSaidaSemSalvar())
-                {
-                    return;
-                }
-                DialogResult = false;
-                Close();
-            }
-            catch (Exception)
-            {
-                Alerta.AdicionarAlerta("Erro",
-                    "Edição de usuário.",
-                    "Erro ao cancelar edição de usuário. Possíveis motivos:\n" +
-                    "- Erro ao fechar janela de edição de usuário;\n" +
-                    "- Impossibilidade de fechar janela de edição de usuário.",
-                    "- Verifique se a janela de edição de usuário está aberta.");
-                Close();
-            }
-        }
-
-        // Confirma se o usuário deseja sair sem salvar as alterações
-        private bool ConfirmarSaidaSemSalvar()
-        {
-            var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
-            return result == MessageBoxResult.No;
-        }
-
-        // Valida os campos antes de salvar
-        private bool ValidarCampos()
-        {
-            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
-            {
-                MessageBox.Show("O campo Nome deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
-            {
-                MessageBox.Show("O campo Email deve ser preenchido.");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
-            {
-                MessageBox.Show("O campo Senha deve ser preenchido.");
-                return false;
-            }
-            if (PermissaoComboBox.SelectedItem == null)
-            {
-                MessageBox.Show("O campo Cargo deve ser selecionado.");
-                return false;
-            }
-            return true;
         }
 
         // Cadastra um novo usuário no banco de dados
@@ -302,7 +254,41 @@ namespace WMS_RadiadoresLemos_WPF
             Id = MatriculaTextBox.Text.Trim()
         };
 
-        // Método para verificar se a matrícula já existe
+        // Método de criação do Popup de "Sobre o cargo"
+        private void MaisSobreCargo_Click(object sender, RoutedEventArgs e)
+        {
+            CargoPopup.IsOpen = true;
+        }
+
+        // Evento disparado ao clicar no botão de cancelar
+        private void Cancelar_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (isModified)
+                {
+                    var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.No)
+                    {
+                        return;
+                    }
+                }
+                DialogResult = false;
+                Close();
+            }
+            catch (Exception)
+            {
+                Alerta.AdicionarAlerta("Erro",
+                    "Edição de usuário.",
+                    "Erro ao cancelar edição de usuário. Possíveis motivos:\n" +
+                    "- Erro ao fechar janela de edição de usuário;\n" +
+                    "- Impossibilidade de fechar janela de edição de usuário.",
+                    "- Verifique se a janela de edição de usuário está aberta.");
+                Close();
+            }
+        }
+
+        // Matrícula
         private bool MatriculaExiste(string matricula)
         {
             if (DatabaseConnect.Database == null)
@@ -311,8 +297,6 @@ namespace WMS_RadiadoresLemos_WPF
             var collection = DatabaseConnect.Database.GetCollection<UsuarioData>("usuarios");
             return collection.Exists(u => u.Matricula == matricula);
         }
-
-        // Método para gerar a matrícula do usuário com base no cargo e ano atual
         private string GerarMatricula(string cargo)
         {
             string prefixo = cargo switch
@@ -332,52 +316,19 @@ namespace WMS_RadiadoresLemos_WPF
             return $"{prefixo}{ano}{posicao}";
         }
 
-        // Método de criação do Popup de "Sobre o cargo"
-        private void MaisSobreCargo_Click(object sender, RoutedEventArgs e)
+        // Tratamento de entradas
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CargoPopup.IsOpen = true;
+            isModified = true;
         }
-
-        // Restrições de entrada de texto nos TextBoxes
         private void NomeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
         }
-
-        private void NomeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            HandlePasting(e, "[^a-zA-Z ]+");
-        }
-
         private void SenhaPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
             isModified = true;
         }
-
-        // Verifica se o texto é permitido com base no padrão fornecido
-        private static bool IsTextAllowed(string text, string pattern)
-        {
-            return !Regex.IsMatch(text, pattern);
-        }
-
-        // Lida com a colagem de texto, verificando se o texto colado é permitido
-        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
-        {
-            if (e.DataObject.GetDataPresent(typeof(string)))
-            {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                if (!IsTextAllowed(text, pattern))
-                {
-                    e.CancelCommand();
-                }
-            }
-            else
-            {
-                e.CancelCommand();
-            }
-        }
-
-        // Evento disparado ao mudar a seleção do cargo do usuário
         private void PermissaoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (PermissaoComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
@@ -400,22 +351,50 @@ namespace WMS_RadiadoresLemos_WPF
                 isModified = true;
             }
         }
-
-        // Evento disparado ao modificar qualquer campo de texto
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private static bool IsTextAllowed(string text, string pattern)
         {
-            isModified = true;
+            return !Regex.IsMatch(text, pattern);
+        }
+        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsTextAllowed(text, pattern))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
         }
 
-        // Método auxiliar para obter o item do ComboBox pelo conteúdo
-        private ComboBoxItem GetComboBoxItemByContent(string content)
+        // Valida os campos antes de salvar
+        private bool ValidarCampos()
         {
-            foreach (ComboBoxItem item in PermissaoComboBox.Items)
+            if (string.IsNullOrWhiteSpace(NomeTextBox.Text))
             {
-                if (item.Content.ToString() == content)
-                    return item;
+                MessageBox.Show("O campo Nome deve ser preenchido.");
+                return false;
             }
-            return new ComboBoxItem { Content = string.Empty };
+            if (string.IsNullOrWhiteSpace(EmailTextBox.Text))
+            {
+                MessageBox.Show("O campo Email deve ser preenchido.");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(SenhaPasswordBox.Password))
+            {
+                MessageBox.Show("O campo Senha deve ser preenchido.");
+                return false;
+            }
+            if (PermissaoComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("O campo Cargo deve ser selecionado.");
+                return false;
+            }
+            return true;
         }
     }
 }

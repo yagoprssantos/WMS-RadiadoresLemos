@@ -261,7 +261,8 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 if (isModified)
                 {
-                    if (ConfirmarSaidaSemSalvar())
+                    var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.No)
                     {
                         return;
                     }
@@ -281,34 +282,28 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Confirma se o usuário deseja sair sem salvar as alterações
-        private bool ConfirmarSaidaSemSalvar()
-        {
-            var result = MessageBox.Show("Existem alterações não salvas. Deseja sair sem salvar?", "Confirmação", MessageBoxButton.YesNo);
-            return result == MessageBoxResult.No;
-        }
 
-        // Restrições de entrada de texto nos TextBoxes
-        private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        // Tratamento de entradas
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
+            isModified = true;
         }
-
-        private void QuantidadeInicial_Pasting(object sender, DataObjectPastingEventArgs e)
+        private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            HandlePasting(e, "[^0-9]+");
+            if (TipoProduto.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
+            {
+                produto.Tipo = selectedItem.Content.ToString() ?? string.Empty;
+                isModified = true;
+            }
         }
-
         private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
         }
-
         private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             HandlePasting(e, "[^a-zA-Z ]+");
         }
-
         private void PrecoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (e.Text == ",")
@@ -322,19 +317,22 @@ namespace WMS_RadiadoresLemos_WPF
 
             e.Handled = !IsTextAllowed(e.Text, "[^0-9,]+");
         }
-
         private void PrecoProduto_Pasting(object sender, DataObjectPastingEventArgs e)
         {
             HandlePasting(e, "[^0-9,]+");
         }
-
-        // Verifica se o texto é permitido com base no padrão fornecido
+        private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
+        }
+        private void QuantidadeInicial_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            HandlePasting(e, "[^0-9]+");
+        }
         private static bool IsTextAllowed(string text, string pattern)
         {
             return !Regex.IsMatch(text, pattern);
         }
-
-        // Lida com a colagem de texto, verificando se o texto colado é permitido
         private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
         {
             if (e.DataObject.GetDataPresent(typeof(string)))
@@ -349,22 +347,6 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 e.CancelCommand();
             }
-        }
-
-        // Evento disparado ao mudar a seleção do tipo de produto
-        private void TipoProduto_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (TipoProduto.SelectedItem is ComboBoxItem selectedItem && selectedItem.Content != null)
-            {
-                produto.Tipo = selectedItem.Content.ToString() ?? string.Empty;
-                isModified = true;
-            }
-        }
-
-        // Evento disparado ao modificar qualquer campo de texto
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            isModified = true;
         }
 
         // Valida os campos antes de salvar
