@@ -26,6 +26,7 @@ namespace WMS_RadiadoresLemos_WPF
             AtualizarTabelaEstoque();
         }
 
+        // Método para apresentar a tabela de estoque atualizada
         public void AtualizarTabelaEstoque()
         {
             try
@@ -36,6 +37,9 @@ namespace WMS_RadiadoresLemos_WPF
                     produtos = collection.FindAll().ToList();
                     EstoqueDataGrid.ItemsSource = produtos;
                     produtosCarregados = true;
+
+                    // Preencher os filtros após carregar os produtos
+                    PreencherFiltros();
                 }
             }
             catch (Exception ex)
@@ -44,6 +48,39 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para preencher os filtros
+        private void PreencherFiltros()
+        {
+            try
+            {
+                if (produtos != null && produtos.Any())
+                {
+                    var marcas = produtos.Select(p => p.Marca).Where(m => !string.IsNullOrEmpty(m)).Distinct().ToList();
+                    var tipos = produtos.Select(p => p.Tipo).Where(t => !string.IsNullOrEmpty(t)).Distinct().ToList();
+                    var codigos = produtos.Select(p => p.Codigo).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+                    var nomes = produtos.Select(p => p.Nome).Where(n => !string.IsNullOrEmpty(n)).Distinct().ToList();
+
+                    MarcaComboBox.ItemsSource = marcas;
+                    TipoComboBox.ItemsSource = tipos;
+                    CodigoComboBox.ItemsSource = codigos;
+                    ProdutoComboBox.ItemsSource = nomes;
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Erro ao preencher filtros de marca e tipo de produto no Controle de Estoque. Possíveis Motivos\n: " +
+                    "- Não foi possível carregar os produtos;\n" +
+                    "- Filtro de marca ou tipo não encontrado.",
+                    "- Verifique se os produtos foram carregados corretamente;\n" +
+                    "- Verifique se os filtros de marca e tipo existem;\n" +
+                    "- Tente atualizar a tabela de estoque novamente.");
+            }
+        }
+
+
+        // Botões de ação
         private void CadastrarProduto_Click(object sender, RoutedEventArgs e)
         {
             // Chamar a janela de cadastro de produto
@@ -69,6 +106,62 @@ namespace WMS_RadiadoresLemos_WPF
             if (window.ShowDialog() == true)
             {
                 AtualizarTabelaEstoque();
+            }
+        }
+
+        private async void AlterarQuantidade_Click(object sender, RoutedEventArgs e)
+        {
+            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
+            {
+                AlterarQuantidadeWindow alterarQuantidadeWindow = new(produtoSelecionado);
+                if (alterarQuantidadeWindow.ShowDialog() == true)
+                {
+                    // Obtém nova quantidade do produto
+                    produtoSelecionado.Quantidade = alterarQuantidadeWindow.Quantidade;
+
+                    // Atualiza o produto no banco de dados
+                    await AtualizarProduto(produtoSelecionado);
+
+                    // Atualiza a fonte de dados do DataGrid
+                    var index = produtos.FindIndex(p => p.Id == produtoSelecionado.Id);
+                    if (index >= 0)
+                    {
+                        produtos[index] = produtoSelecionado;
+                        EstoqueDataGrid.ItemsSource = null;
+                        EstoqueDataGrid.ItemsSource = produtos;
+                    }
+
+                    // Avisa o usuário que a quantidade foi alterada
+                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+        private async Task AtualizarProduto(ProdutoData produto)
+        {
+            try
+            {
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
+                collection.Update(produto);
+
+                // Recarrega a lista de produtos
+                AtualizarTabelaEstoque();
+            }
+            catch (Exception ex)
+            {
+                Alerta.AdicionarAlerta("Erro",
+                    ex.Message.ToString(),
+                    "Não foi possível atualizar o produto. Possíveis motivos:\n" +
+                    "- Problemas de conexão com o banco;\n" +
+                    "- Dados corrompidos;\n" +
+                    "- Falha na operação de atualização.",
+                    "- Verifique a conexão com o banco;\n" +
+                    "- Tente novamente mais tarde.");
             }
         }
 
@@ -108,42 +201,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void EstoqueDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            var produto = EstoqueDataGrid.SelectedItem as ProdutoData;
-            if (produto == null) return;
-
-            var window = new EditarProdutoWindow(produto);
-            if (window.ShowDialog() == true)
-            {
-                AtualizarTabelaEstoque();
-            }
-        }
-
-        // Método para preencher os filtros de marca e tipo de produto
-        private void PreencherFiltros()
-        {
-            try
-            {
-                var marcas = produtos.Select(p => p.Marca).Distinct().ToList();
-                var tipos = produtos.Select(p => p.Tipo).Distinct().ToList();
-
-                MarcaComboBox.ItemsSource = marcas;
-                TipoComboBox.ItemsSource = tipos;
-            }
-            catch (InvalidOperationException ex)
-            {
-                Alerta.AdicionarAlerta("Erro",
-                    ex.Message.ToString(),
-                    "Erro ao preencher filtros de marca e tipo de produto no Controle de Estoque. Possíveis Motivos\n: " +
-                    "- Não foi possível carregar os produtos;\n" +
-                    "- Filtro de marca ou tipo não encontrado.",
-                    "- Verifique se os produtos foram carregados corretamente;\n" +
-                    "- Verifique se os filtros de marca e tipo existem;\n" +
-                    "- Tente atualizar a tabela de estoque novamente.");
-            }
-        }
-
+        // Métodos diversos
         // Método chamado ao alterar o texto da caixa de busca
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -160,13 +218,11 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Método chamado ao clicar no botão de filtrar
+        // Filtro
         private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
             FiltroPopup.IsOpen = true;
         }
-
-        // Método chamado ao clicar no botão de aplicar filtro
         private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
             string produto = ProdutoComboBox.SelectedItem?.ToString();
@@ -178,8 +234,6 @@ namespace WMS_RadiadoresLemos_WPF
             AplicarFiltro(produto, tipo, marca, codigo, emEstoque);
             FiltroPopup.IsOpen = false;
         }
-
-        // Método para aplicar os filtros na tabela de estoque
         private void AplicarFiltro(string produto, string tipo, string marca, string codigo, bool emEstoque)
         {
             try
@@ -198,8 +252,6 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        // Evento para limpar os filtros
         private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
         {
             ProdutoComboBox.SelectedItem = null;
@@ -213,146 +265,17 @@ namespace WMS_RadiadoresLemos_WPF
             FiltroPopup.IsOpen = false;
         }
 
-        // Método chamado ao clicar no botão de alterar quantidade
-        private async void AlterarQuantidade_Click(object sender, RoutedEventArgs e)
+
+        // Método para lidar com o duplo clique em um item no DataGrid
+        private void EstoqueDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (EstoqueDataGrid.SelectedItem is ProdutoData produtoSelecionado)
+            var produto = EstoqueDataGrid.SelectedItem as ProdutoData;
+            if (produto == null) return;
+
+            var window = new EditarProdutoWindow(produto);
+            if (window.ShowDialog() == true)
             {
-                AlterarQuantidadeWindow alterarQuantidadeWindow = new(produtoSelecionado);
-                if (alterarQuantidadeWindow.ShowDialog() == true)
-                {
-                    // Obtém nova quantidade do produto
-                    produtoSelecionado.Quantidade = alterarQuantidadeWindow.Quantidade;
-
-                    // Atualiza o produto no banco de dados
-                    await AtualizarProduto(produtoSelecionado);
-
-                    // Atualiza a fonte de dados do DataGrid
-                    var index = produtos.FindIndex(p => p.Id == produtoSelecionado.Id);
-                    if (index >= 0)
-                    {
-                        produtos[index] = produtoSelecionado;
-                        EstoqueDataGrid.ItemsSource = null;
-                        EstoqueDataGrid.ItemsSource = produtos;
-                    }
-
-                    // Avisa o usuário que a quantidade foi alterada
-                    MessageBox.Show("Quantidade alterada com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-        }
-
-        // Método para atualizar um produto
-        private async Task AtualizarProduto(ProdutoData produto)
-        {
-            try
-            {
-                if (DatabaseConnect.Database == null)
-                {
-                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                var collection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
-                collection.Update(produto);
-
-                // Recarrega a lista de produtos
                 AtualizarTabelaEstoque();
-            }
-            catch (Exception ex)
-            {
-                Alerta.AdicionarAlerta("Erro",
-                    ex.Message.ToString(),
-                    "Não foi possível atualizar o produto. Possíveis motivos:\n" +
-                    "- Problemas de conexão com o banco;\n" +
-                    "- Dados corrompidos;\n" +
-                    "- Falha na operação de atualização.",
-                    "- Verifique a conexão com o banco;\n" +
-                    "- Tente novamente mais tarde.");
-            }
-        }
-
-        // Tratamento de entradas
-
-        // Quantidade
-        // Método para validar a entrada de texto no TextBox de quantidade inicial
-        private void QuantidadeInicial_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
-            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
-
-        // Método para validar a colagem de texto no TextBox de quantidade inicial
-        private void QuantidadeInicial_Pasting(object sender, DataObjectPastingEventArgs e) =>
-            HandlePasting(e, "[^0-9]+");
-
-        // Método para formatar o texto da caixa de quantidade ao perder o foco (1.000)
-        private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox)
-            {
-                if (int.TryParse(textBox.Text, out int quantidade))
-                {
-                    textBox.Text = quantidade.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
-                }
-                else
-                {
-                    MessageBox.Show("Quantidade inválida.");
-                    textBox.Clear();
-                }
-            }
-        }
-
-        // Marca
-        // Método para validar a entrada de texto no TextBox de marca do produto
-        private void MarcaProduto_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
-            e.Handled = !IsTextAllowed(e.Text, "[^a-zA-Z ]+");
-
-        // Método para validar a colagem de texto no TextBox de marca do produto
-        private void MarcaProduto_Pasting(object sender, DataObjectPastingEventArgs e) =>
-            HandlePasting(e, "[^a-zA-Z ]+");
-
-        // Preço
-        // Método para validar a entrada de texto no TextBox de preço do produto (incluindo decimais e uma única vírgula)
-        private void PrecoProduto_PreviewTextInput(object sender, TextCompositionEventArgs e) =>
-            e.Handled = !IsTextAllowed(e.Text, "[^0-9]+");
-
-        // Método para validar a colagem de texto no TextBox de preço do produto (incluindo decimais e uma única vírgula)
-        private void PrecoProduto_Pasting(object sender, DataObjectPastingEventArgs e) =>
-            HandlePasting(e, "[^0-9]+");
-
-        // Método para formatar o texto da caixa de preço ao perder o foco (1.000,00)
-        private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox)
-            {
-                if (double.TryParse(textBox.Text.Trim().Replace(".", "").Replace(",", "."), out double preco))
-                {
-                    textBox.Text = preco.ToString("N2", new System.Globalization.CultureInfo("pt-BR"));
-                }
-                else
-                {
-                    MessageBox.Show("Preço inválido.");
-                    textBox.Clear();
-                }
-            }
-        }
-
-        // Verifica se o texto é permitido baseado no padrão regex
-        private static bool IsTextAllowed(string text, string pattern) =>
-            !new Regex(pattern).IsMatch(text);
-
-        // Método para lidar com a colagem de texto e validar se é permitido
-        private static void HandlePasting(DataObjectPastingEventArgs e, string pattern)
-        {
-            if (e.DataObject.GetDataPresent(typeof(string)))
-            {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                if (!IsTextAllowed(text, pattern))
-                {
-                    e.CancelCommand();
-                }
-            }
-            else
-            {
-                e.CancelCommand();
             }
         }
     }
