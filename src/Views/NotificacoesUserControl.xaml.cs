@@ -11,6 +11,9 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private List<AlertaData> alertas;
 
+        // Evento para notificar o MainWindow sobre novas notificações
+        public static event Action<AlertaData>? NovaNotificacaoAdicionada;
+
         public NotificacoesUserControl()
         {
             InitializeComponent();
@@ -46,6 +49,22 @@ namespace WMS_RadiadoresLemos_WPF
         {
             TipoComboBox.ItemsSource = alertas.Select(a => a.Tipo).Distinct().ToList();
             DataComboBox.ItemsSource = alertas.Select(a => DateTime.Parse(a.Data).ToString("dd/MM/yyyy")).Distinct().ToList();
+        }
+
+        // Método para adicionar uma nova notificação
+        public void AdicionarNovaNotificacao(AlertaData alerta)
+        {
+            alertas.Add(alerta);
+
+            // Atualiza a tabela de notificações
+            if (AlertaDataGrid != null)
+            {
+                AlertaDataGrid.ItemsSource = null;
+                AlertaDataGrid.ItemsSource = alertas;
+            }
+
+            // Dispara o evento para notificar o MainWindow
+            NovaNotificacaoAdicionada?.Invoke(alerta);
         }
 
         // Método chamado ao clicar no botão de aplicar filtro

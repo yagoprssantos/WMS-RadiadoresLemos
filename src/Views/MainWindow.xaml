@@ -76,7 +76,7 @@
                             <TextBlock x:Name="TextDashboard" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Relatório"/></TextBlock>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnNotificacoes" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
+                    <Button x:Name="BtnNotificacoes" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click" ToolTip="Clique para ver as notificações">
                         <StackPanel Orientation="Horizontal">
                             <Image x:Name="IconNotificacoes" Source="/src/Resources/Icons/NotSelected/SinoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextNotificacoes" Text="Notificações" Style="{StaticResource MenuItemTextStyle}"/>

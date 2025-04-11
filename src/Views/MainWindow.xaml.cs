@@ -32,14 +32,12 @@ namespace WMS_RadiadoresLemos_WPF
         // Variáveis de controle
         private List<UserControl> _userControls;
         private int _currentIndex;
-
-        // Elementos da interface
-        private Button? NotificationButton;
-        private ToolTip? NotificationToolTip;
-
         private readonly UsuariosUserControl usuariosUserControl;
         private readonly ControleEstoqueUserControl controleEstoqueUserControl;
         private readonly RegistroUserControl registroUserControl;
+
+        private Stack<UserControl> _navigationHistory = new Stack<UserControl>();
+        private Stack<UserControl> _forwardHistory = new Stack<UserControl>();
 
         public MainWindow()
         {
@@ -51,64 +49,13 @@ namespace WMS_RadiadoresLemos_WPF
             controleEstoqueUserControl = new ControleEstoqueUserControl();
             registroUserControl = new RegistroUserControl();
 
-            InicializarElementos();
+            InicializarUserControls();
             ConfigurarEntrada();
             ConfigurarVisibilidadeBotoes();
+
+            // Evento de Nova Notificação 
+            NotificacoesUserControl.NovaNotificacaoAdicionada += OnAlertaAdicionado;
         }
-
-        // Inicia os elementos da interface
-        private void InicializarElementos()
-        {
-            AdicionarEventos();
-            InicializarUserControls();
-            //InicializarNotificações();
-        }
-
-        // Adiciona eventos necessários
-        private void AdicionarEventos()
-        {
-            Alerta.AlertaAdicionado += OnAlertaAdicionado;
-            this.Closing += Window_Closing;
-        }
-        private void OnAlertaAdicionado(AlertaData alerta)
-        {
-            _notificationCount++;
-
-            if (NotificationButton == null)
-            {
-                NotificationButton = (Button)FindName("NotificationButton");
-            }
-
-            if (NotificationToolTip == null)
-            {
-                NotificationToolTip = (ToolTip)FindName("NotificationToolTip");
-            }
-
-            if (NotificationButton == null) return;
-
-            NotificationButton.Visibility = Visibility.Visible;
-
-            ColorAnimation colorAnimation = new ColorAnimation
-            {
-                From = Colors.Transparent,
-                To = (Color)ColorConverter.ConvertFromString("#990000"),
-                Duration = new Duration(TimeSpan.FromSeconds(0.5)),
-                AutoReverse = true,
-                RepeatBehavior = new RepeatBehavior(4)
-            };
-
-            NotificationButton.Background = new SolidColorBrush(Colors.Transparent);
-            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
-
-            colorAnimation.AutoReverse = false;
-            NotificationButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
-
-            if (NotificationToolTip != null)
-            {
-                NotificationToolTip.Content = $"Você tem {_notificationCount} novas notificações";
-            }
-        }
-
 
         // Inicializa os UserControls
         private void InicializarUserControls()
@@ -126,26 +73,6 @@ namespace WMS_RadiadoresLemos_WPF
 
             _currentIndex = 0;
             UpdateTitle();
-        }
-
-        // Inicializa os elementos para notificações
-        private void InicializarNotificações()
-        {
-            try
-            {
-                NotificationButton = this.FindName("NotificationButton") as Button;
-                NotificationToolTip = this.FindName("NotificationToolTip") as ToolTip;
-
-                if (NotificationButton != null)
-                {
-                    NotificationButton.Visibility = Visibility.Collapsed;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao inicializar elementos da interface: {ex.Message}");
-            }
-
         }
 
 
@@ -237,9 +164,54 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
+        // Método para lidar com a adição de um novo alerta
+        private void OnAlertaAdicionado(AlertaData alerta)
+        {
+            _notificationCount++;
+
+            AtualizarBotaoNotificacoes();
+        }
+
+        // Método para atualizar o botão de notificações
+        private void AtualizarBotaoNotificacoes()
+        {
+            var notificacoesButton = (Button)FindName("BtnNotificacoes");
+            var notificacoesIcon = (Image)FindName("IconNotificacoes");
+            var notificacoesText = (TextBlock)FindName("TextNotificacoes");
+
+            if (notificacoesButton != null && notificacoesIcon != null && notificacoesText != null)
+            {
+                // Atualiza o texto do botão com o número de notificações
+                notificacoesText.Text = $"Notificações ({_notificationCount})";
+
+                // Aplica uma animação de destaque no botão
+                ColorAnimation colorAnimation = new ColorAnimation
+                {
+                    From = Colors.Transparent,
+                    To = (Color)ColorConverter.ConvertFromString("#FF0000"), // Vermelho
+                    Duration = new Duration(TimeSpan.FromSeconds(0.5)),
+                    AutoReverse = true,
+                    RepeatBehavior = new RepeatBehavior(3)
+                };
+
+                notificacoesButton.Background = new SolidColorBrush(Colors.Transparent);
+                notificacoesButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+
+                // Atualiza o ícone para o estado "notificado"
+                notificacoesIcon.Source = new BitmapImage(new Uri("/src/Resources/Icons/Selected/SinoS.png", UriKind.Relative));
+            }
+        }
+
+
         // Método para lidar com o clique nos botões do menu
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
+            // Salva a tela atual no histórico de navegação
+            if (ContentArea.Content is UserControl currentControl)
+            {
+                _navigationHistory.Push(currentControl); // Salva a tela atual no histórico
+            }
+
             // Altera a cor do botão clicado nos itens do menu
             foreach (var child in MenuItemsPanel.Children)
             {
@@ -312,6 +284,7 @@ namespace WMS_RadiadoresLemos_WPF
                         break;
                     case "BtnNotificacoes":
                         ContentArea.Content = new NotificacoesUserControl();
+                        ResetarBotaoNotificacoes(); // Reseta o botão de notificações
                         break;
                     case "BtnConfiguracoes":
                         ContentArea.Content = new ConfiguracaoUserControl();
@@ -339,24 +312,62 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para resetar o botão de notificações
+        private void ResetarBotaoNotificacoes()
+        {
+            var notificacoesButton = (Button)FindName("BtnNotificacoes");
+            var notificacoesIcon = (Image)FindName("IconNotificacoes");
+            var notificacoesText = (TextBlock)FindName("TextNotificacoes");
+
+            if (notificacoesButton != null && notificacoesIcon != null && notificacoesText != null)
+            {
+                // Reseta o texto do botão
+                notificacoesText.Text = "Notificações";
+
+                // Reseta o ícone para o estado "não notificado"
+                notificacoesIcon.Source = new BitmapImage(new Uri("/src/Resources/Icons/NotSelected/SinoNS.png", UriKind.Relative));
+
+                // Reseta o contador de notificações
+                _notificationCount = 0;
+            }
+        }
+
 
         // Método para lidar com botões de navegação
         private void PreviousButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentIndex > 0)
+            if (_navigationHistory.Count > 0)
             {
-                _currentIndex--;
-                ContentArea.Content = _userControls[_currentIndex];
+                if (ContentArea.Content is UserControl currentControl)
+                {
+                    _forwardHistory.Push(currentControl); // Salva a tela atual no histórico de avanço
+                }
+
+                ContentArea.Content = _navigationHistory.Pop(); // Carrega a última tela do histórico
                 UpdateTitle();
+                UpdateIcon();
+            }
+            else
+            {
+                MessageBox.Show("Não há telas anteriores no histórico.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         private void NextButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentIndex < _userControls.Count - 1)
+            if (_forwardHistory.Count > 0)
             {
-                _currentIndex++;
-                ContentArea.Content = _userControls[_currentIndex];
+                if (ContentArea.Content is UserControl currentControl)
+                {
+                    _navigationHistory.Push(currentControl); // Salva a tela atual no histórico de navegação
+                }
+
+                ContentArea.Content = _forwardHistory.Pop(); // Carrega a próxima tela do histórico de avanço
                 UpdateTitle();
+                UpdateIcon();
+            }
+            else
+            {
+                MessageBox.Show("Não há telas futuras no histórico.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
