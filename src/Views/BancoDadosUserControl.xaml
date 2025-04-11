@@ -68,7 +68,7 @@
 
                     <!-- Menu de Tabelas -->
                     <TextBlock Text="Visualizar Menu de Tabelas:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14" />
-                    <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                    <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirMenuTabelasButton_Click"/>
                 </StackPanel>
 
                 <!-- Mais Informações -->

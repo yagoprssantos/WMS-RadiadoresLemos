@@ -699,5 +699,14 @@ namespace WMS_RadiadoresLemos_WPF
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
         }
+
+
+        // Adiciona o evento de clique ao botão "Abrir Menu Tabelas"
+        private void AbrirMenuTabelasButton_Click(object sender, RoutedEventArgs e)
+        {
+            var menuTabelasWindow = new MenuTabelasWindow();
+            menuTabelasWindow.ShowDialog();
+        }
+
     }
 }
