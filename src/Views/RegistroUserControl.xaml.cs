@@ -31,7 +31,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CategoriasComboBox.SelectedIndex = 0;
         }
 
-        // Método para carregar dados no DataGrid de Entradas
+        // Método para carregar dados no DataGrid de Entradas/Saídas
         public void CarregarEntradas()
         {
             try
@@ -52,8 +52,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 //MessageBox.Show($"Erro ao carregar entradas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        // Método para carregar dados no DataGrid de Saídas
         public void CarregarSaidas()
         {
             try
@@ -109,7 +107,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
                 var movimentacoes = collection.FindAll().ToList();
-                var produtos = movimentacoes.Select(m => m.ProdutoId).Distinct().ToList();
+                var produtos = movimentacoes.Select(m => m.ProdutoId).Distinct().OrderBy(p => p).ToList();
                 ProdutoComboBox.ItemsSource = produtos;
             }
             catch (Exception ex)
@@ -129,11 +127,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 if (selectedCategory != null)
                 {
                     string category = selectedCategory.Content.ToString();
+
+                    // Aba Entrada/Saída
                     if (category == "Entrada/Saída")
                     {
                         EntradasSaidasGrid.Visibility = Visibility.Visible;
                         HistoricoGrid.Visibility = Visibility.Collapsed;
                     }
+                    // Aba Histórico
                     else if (category == "Histórico")
                     {
                         EntradasSaidasGrid.Visibility = Visibility.Collapsed;
@@ -150,10 +151,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (selectedCategory != null)
             {
                 string category = selectedCategory.Content.ToString();
+
+                // Popup para Entrada/Saída
                 if (category == "Entrada/Saída")
                 {
                     FiltroEntradaSaidaPopup.IsOpen = true;
                 }
+                // Popup para Histórico
                 else if (category == "Histórico")
                 {
                     FiltroHistoricoPopup.IsOpen = true;
@@ -161,7 +165,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        // Evento para aplicar o filtro de Entrada/Saída
+
+        // Evento Filtros Entrada/Saída
         private void AplicarFiltroEntradaSaidaButton_Click(object sender, RoutedEventArgs e)
         {
             string produto = ProdutoComboBox.SelectedItem?.ToString();
@@ -171,8 +176,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             AplicarFiltroEntradaSaida(produto, dataInicio, dataFim);
             FiltroEntradaSaidaPopup.IsOpen = false;
         }
-
-        // Evento para limpar os filtros de Entrada/Saída
         private void LimparFiltroEntradaSaidaButton_Click(object sender, RoutedEventArgs e)
         {
             ProdutoComboBox.SelectedItem = null;
@@ -184,8 +187,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CarregarSaidas();
             FiltroEntradaSaidaPopup.IsOpen = false;
         }
-
-        // Método para aplicar o filtro de Entrada/Saída
         private void AplicarFiltroEntradaSaida(string produto, DateTime? dataInicio, DateTime? dataFim)
         {
             try
@@ -202,16 +203,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Filtrar entradas
                 var entradasFiltradas = movimentacoes.Where(m =>
                     m.Tipo == "Entrada" &&
-                    (string.IsNullOrEmpty(produto) || m.ProdutoId == produto) &&
-                    (!dataInicio.HasValue || m.Data >= dataInicio.Value) &&
-                    (!dataFim.HasValue || m.Data <= dataFim.Value)).ToList();
+                    (string.IsNullOrEmpty(produto) || m.ProdutoId.Equals(produto, StringComparison.OrdinalIgnoreCase)) &&
+                    (!dataInicio.HasValue || m.Data.Date >= dataInicio.Value.Date) &&
+                    (!dataFim.HasValue || m.Data.Date <= dataFim.Value.Date)).ToList();
 
                 // Filtrar saídas
                 var saidasFiltradas = movimentacoes.Where(m =>
                     m.Tipo == "Saída" &&
-                    (string.IsNullOrEmpty(produto) || m.ProdutoId == produto) &&
-                    (!dataInicio.HasValue || m.Data >= dataInicio.Value) &&
-                    (!dataFim.HasValue || m.Data <= dataFim.Value)).ToList();
+                    (string.IsNullOrEmpty(produto) || m.ProdutoId.Equals(produto, StringComparison.OrdinalIgnoreCase)) &&
+                    (!dataInicio.HasValue || m.Data.Date >= dataInicio.Value.Date) &&
+                    (!dataFim.HasValue || m.Data.Date <= dataFim.Value.Date)).ToList();
 
                 // Atualizar DataGrids
                 EntradaDataGrid.ItemsSource = entradasFiltradas;
@@ -219,11 +220,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // Evento para aplicar o filtro de Histórico
+
+        // Evento Filtros Histórico
         private void AplicarFiltroHistoricoButton_Click(object sender, RoutedEventArgs e)
         {
             string tipo = (TipoComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
@@ -234,8 +236,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             AplicarFiltroHistorico(tipo, nivel, dataInicio, dataFim);
             FiltroHistoricoPopup.IsOpen = false;
         }
-
-        // Método para aplicar o filtro de Histórico
         private void AplicarFiltroHistorico(string tipo, string nivel, DateTime? dataInicio, DateTime? dataFim)
         {
             try
@@ -250,20 +250,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 var historico = collection.FindAll().ToList();
 
                 var historicoFiltrado = historico.Where(h =>
-                    (string.IsNullOrEmpty(tipo) || h.Tipo == tipo) &&
-                    (string.IsNullOrEmpty(nivel) || h.Nivel == nivel) &&
-                    (!dataInicio.HasValue || h.Data >= dataInicio.Value) &&
-                    (!dataFim.HasValue || h.Data <= dataFim.Value)).ToList();
+                    (string.IsNullOrEmpty(tipo) || h.Tipo.Equals(tipo, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(nivel) || h.Nivel.Equals(nivel, StringComparison.OrdinalIgnoreCase)) &&
+                    (!dataInicio.HasValue || h.Data.Date >= dataInicio.Value.Date) &&
+                    (!dataFim.HasValue || h.Data.Date <= dataFim.Value.Date)).ToList();
 
                 HistoricoDataGrid.ItemsSource = historicoFiltrado;
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        // Evento para limpar os filtros de Histórico
         private void LimparFiltroHistoricoButton_Click(object sender, RoutedEventArgs e)
         {
             TipoComboBox.SelectedItem = null;
@@ -274,70 +272,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Recarregar histórico
             CarregarHistorico();
             FiltroHistoricoPopup.IsOpen = false;
-        }
-
-        private void AtualizarTabelaRegistro()
-        {
-            if (DatabaseConnect.Database == null)
-                return;
-
-            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
-            var movimentacoes = collection.FindAll().ToList();
-            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
-            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
-        }
-
-        private void FiltrarPorData()
-        {
-            if (DatabaseConnect.Database == null)
-                return;
-
-            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
-            var movimentacoes = collection.FindAll().ToList();
-            
-            if (DataInicioPicker.SelectedDate.HasValue && DataFimPicker.SelectedDate.HasValue)
-            {
-                movimentacoes = movimentacoes.Where(m => m.Data >= DataInicioPicker.SelectedDate.Value && m.Data <= DataFimPicker.SelectedDate.Value).ToList();
-            }
-            
-            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
-            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
-        }
-
-        private void FiltrarPorTipo()
-        {
-            if (DatabaseConnect.Database == null)
-                return;
-
-            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
-            var movimentacoes = collection.FindAll().ToList();
-            
-            if (TipoComboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                string tipo = selectedItem.Content.ToString();
-                if (tipo != "Todos")
-                {
-                    movimentacoes = movimentacoes.Where(m => m.Tipo == tipo).ToList();
-                }
-            }
-            
-            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
-            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
-        }
-
-        private void LimparFiltros()
-        {
-            if (DatabaseConnect.Database == null)
-                return;
-
-            var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
-            var movimentacoes = collection.FindAll().ToList();
-            EntradaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Entrada").ToList();
-            SaidaDataGrid.ItemsSource = movimentacoes.Where(m => m.Tipo == "Saída").ToList();
-            
-            DataInicioPicker.SelectedDate = null;
-            DataFimPicker.SelectedDate = null;
-            TipoComboBox.SelectedIndex = 0;
         }
     }
 }

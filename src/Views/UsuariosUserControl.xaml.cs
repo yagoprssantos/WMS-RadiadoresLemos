@@ -20,6 +20,7 @@ namespace WMS_RadiadoresLemos_WPF
             AtualizarTabelaUsuarios();
         }
 
+        // Método para atualizar a tabela de usuários
         public void AtualizarTabelaUsuarios()
         {
             try
@@ -40,6 +41,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para filtrar os usuários na tabela
         private void AdicionarUsuario_Click(object sender, RoutedEventArgs e)
         {
             // Abre a janela de edição de usuário com um usuário null
@@ -50,6 +52,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para adicionar um novo usuário
         private void EditarUsuario_Click(object sender, RoutedEventArgs e)
         {
             // Obtém o usuário selecionado
@@ -68,6 +71,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para deletar um usuário
         private void DeletarUsuario_Click(object sender, RoutedEventArgs e)
         {
             var usuario = UsuariosDataGrid.SelectedItem as UsuarioData;
@@ -104,6 +108,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Método para filtrar os usuários na tabela
         private void UsuariosDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var usuario = UsuariosDataGrid.SelectedItem as UsuarioData;
