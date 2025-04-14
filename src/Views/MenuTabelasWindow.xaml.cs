@@ -5,7 +5,8 @@ using System.Windows;
 using LiteDB;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using System.Windows.Controls;
-using WMS_RadiadoresLemos_WPF.src.Models; // Para TextChangedEventArgs e SelectionChangedEventArgs
+using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Views; // Para TextChangedEventArgs e SelectionChangedEventArgs
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -17,7 +18,7 @@ namespace WMS_RadiadoresLemos_WPF
         public MenuTabelasWindow()
         {
             InitializeComponent();
-            _database = DatabaseConnect.Database; // Conexão com o banco de dados
+            _database = DatabaseConnect.Database;
             CarregarTabelas();
         }
 
@@ -26,11 +27,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var tabelas = _database.GetCollectionNames().ToList();
             TabelasComboBox.ItemsSource = tabelas;
-
-            if (tabelas.Any())
-            {
-                TabelasComboBox.SelectedIndex = 0; // Seleciona a primeira tabela por padrão
-            }
         }
 
         // Evento disparado ao alterar a seleção no ComboBox de tabelas.
@@ -40,6 +36,8 @@ namespace WMS_RadiadoresLemos_WPF
             if (TabelasComboBox.SelectedItem != null)
             {
                 _tabelaAtual = TabelasComboBox.SelectedItem.ToString();
+
+                // Carrega os dados da tabela selecionada
                 CarregarDadosTabela(_tabelaAtual);
             }
         }
@@ -47,22 +45,26 @@ namespace WMS_RadiadoresLemos_WPF
         // Carrega os dados da tabela selecionada no DataGrid com base no nome da tabela.
         private void CarregarDadosTabela(string tabela)
         {
+            // Limpa o DataGrid antes de carregar novos dados
+            TabelaDataGrid.ItemsSource = null;
+
+            // Verifica se a tabela é válida
             switch (tabela.ToLower())
             {
                 case "usuarios":
-                    CarregarUsuarios();
+                    CarregarDadosGenerico<UsuarioData>("usuarios");
                     break;
                 case "produtos":
-                    CarregarProdutos();
+                    CarregarDadosGenerico<ProdutoData>("produtos");
                     break;
                 case "movimentacoes":
-                    CarregarMovimentacoes();
+                    CarregarDadosGenerico<MovimentacaoData>("movimentacoes");
                     break;
                 case "historico":
-                    CarregarHistorico();
+                    CarregarDadosGenerico<LogData>("historico");
                     break;
                 case "alertas":
-                    CarregarAlertas();
+                    CarregarDadosGenerico<AlertaData>("alertas");
                     break;
                 default:
                     MessageBox.Show("Tabela desconhecida. Não foi possível carregar os dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -70,123 +72,80 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Carrega os dados da tabela "usuarios" e configura as colunas do DataGrid.
-        private void CarregarUsuarios()
+        // Método genérico para carregar os dados de qualquer tabela
+        private void CarregarDadosGenerico<T>(string tabela) where T : class
         {
-            var collection = _database.GetCollection<UsuarioData>("usuarios");
-            var usuarios = collection.FindAll().ToList();
-            TabelaDataGrid.ItemsSource = usuarios;
-            ConfigurarColunasUsuarios();
+            var collection = _database.GetCollection<T>(tabela);
+            var dados = collection.FindAll().ToList();
+            TabelaDataGrid.ItemsSource = dados;
+            ConfigurarColunasGenerico(typeof(T));
         }
 
-        // Configura as colunas do DataGrid para exibir os dados da tabela "usuarios".
-        private void ConfigurarColunasUsuarios()
-        {
-            TabelaDataGrid.Columns.Clear();
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Nome", Binding = new System.Windows.Data.Binding("Nome") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Email", Binding = new System.Windows.Data.Binding("Email") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Matrícula", Binding = new System.Windows.Data.Binding("Matricula") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Cargo", Binding = new System.Windows.Data.Binding("Cargo") });
-        }
-
-        // Carrega os dados da tabela "produtos" e configura as colunas do DataGrid.
-        private void CarregarProdutos()
-        {
-            var collection = _database.GetCollection<ProdutoData>("produtos");
-            var produtos = collection.FindAll().ToList();
-            TabelaDataGrid.ItemsSource = produtos;
-            ConfigurarColunasProdutos();
-        }
-
-        // Configura as colunas do DataGrid para exibir os dados da tabela "produtos".
-        private void ConfigurarColunasProdutos()
+        // Método genérico para configurar as colunas do DataGrid
+        private void ConfigurarColunasGenerico(Type tipoModelo)
         {
             TabelaDataGrid.Columns.Clear();
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Nome", Binding = new System.Windows.Data.Binding("Nome") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Tipo", Binding = new System.Windows.Data.Binding("Tipo") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Marca", Binding = new System.Windows.Data.Binding("Marca") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Código", Binding = new System.Windows.Data.Binding("Codigo") });
+
+            foreach (var propriedade in tipoModelo.GetProperties())
+            {
+                TabelaDataGrid.Columns.Add(new DataGridTextColumn
+                {
+                    Header = propriedade.Name,
+                    Binding = new System.Windows.Data.Binding(propriedade.Name)
+                });
+            }
         }
 
-        // Carrega os dados da tabela "movimentacoes" e configura as colunas do DataGrid.
-        private void CarregarMovimentacoes()
-        {
-            var collection = _database.GetCollection<MovimentacaoData>("movimentacoes");
-            var movimentacoes = collection.FindAll().ToList();
-            TabelaDataGrid.ItemsSource = movimentacoes;
-            ConfigurarColunasMovimentacoes();
-        }
-
-        // Configura as colunas do DataGrid para exibir os dados da tabela "movimentacoes".
-        private void ConfigurarColunasMovimentacoes()
-        {
-            TabelaDataGrid.Columns.Clear();
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Produto", Binding = new System.Windows.Data.Binding("ProdutoId") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Tipo", Binding = new System.Windows.Data.Binding("Tipo") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Data", Binding = new System.Windows.Data.Binding("DataFormatadaComAno") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Quantidade", Binding = new System.Windows.Data.Binding("Quantidade") });
-        }
-
-        // Carrega os dados da tabela "historico" e configura as colunas do DataGrid.
-        private void CarregarHistorico()
-        {
-            var collection = _database.GetCollection<LogData>("historico");
-            var historicos = collection.FindAll().ToList();
-            TabelaDataGrid.ItemsSource = historicos;
-            ConfigurarColunasHistorico();
-        }
-
-        // Configura as colunas do DataGrid para exibir os dados da tabela "historico".
-        private void ConfigurarColunasHistorico()
-        {
-            TabelaDataGrid.Columns.Clear();
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Data", Binding = new System.Windows.Data.Binding("DataFormatadaComAno") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Tipo", Binding = new System.Windows.Data.Binding("Tipo") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Nível", Binding = new System.Windows.Data.Binding("Nivel") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Detalhes", Binding = new System.Windows.Data.Binding("Detalhes") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Usuário", Binding = new System.Windows.Data.Binding("Usuario") });
-        }
-
-        // Carrega os dados da tabela "alertas" e configura as colunas do DataGrid.
-        private void CarregarAlertas()
-        {
-            var collection = _database.GetCollection<AlertaData>("alertas");
-            var alertas = collection.FindAll().ToList();
-            TabelaDataGrid.ItemsSource = alertas;
-            ConfigurarColunasAlertas();
-        }
-
-        // Configura as colunas do DataGrid para exibir os dados da tabela "alertas".
-        private void ConfigurarColunasAlertas()
-        {
-            TabelaDataGrid.Columns.Clear();
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Data", Binding = new System.Windows.Data.Binding("Data") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Tipo", Binding = new System.Windows.Data.Binding("Tipo") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Sistema", Binding = new System.Windows.Data.Binding("Sistema") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Detalhes", Binding = new System.Windows.Data.Binding("Detalhes") });
-            TabelaDataGrid.Columns.Add(new DataGridTextColumn { Header = "Ações", Binding = new System.Windows.Data.Binding("Acoes") });
-        }
-
-        // Adiciona uma nova linha na tabela atual.
+        // Adiciona um novo registro na tabela atual
         private void AdicionarButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(_tabelaAtual)) return;
 
-            var collection = _database.GetCollection(_tabelaAtual);
-            var novaLinha = new BsonDocument(); // Cria um documento vazio para ser preenchido
-            collection.Insert(novaLinha);
-            CarregarDadosTabela(_tabelaAtual);
-        }
+            // Cria um novo BsonDocument vazio
+            var novoRegistro = new BsonDocument();
 
-        // Edita a linha selecionada no DataGrid.
-        private void EditarButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (TabelaDataGrid.SelectedItem is BsonDocument documentoSelecionado)
+            // Abre a janela de edição com o novo registro
+            var janela = new EditarGenericoWindow(_tabelaAtual, novoRegistro);
+            if (janela.ShowDialog() == true)
             {
-                var collection = _database.GetCollection(_tabelaAtual);
-                collection.Update(documentoSelecionado);
                 CarregarDadosTabela(_tabelaAtual);
             }
+        }
+
+        // Edita o registro selecionado no DataGrid
+        private void EditarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (TabelaDataGrid.SelectedItem is not null)
+            {
+                // Converte o item selecionado para um BsonDocument
+                var registroSelecionado = ConvertToBsonDocument(TabelaDataGrid.SelectedItem);
+
+                // Abre a janela de edição com o registro selecionado
+                var janela = new EditarGenericoWindow(_tabelaAtual, registroSelecionado);
+                if (janela.ShowDialog() == true)
+                {
+                    CarregarDadosTabela(_tabelaAtual);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Por favor, selecione um registro para editar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        // Método auxiliar para converter um objeto para BsonDocument
+        private BsonDocument ConvertToBsonDocument(object item)
+        {
+            var bsonDocument = new BsonDocument();
+            var propriedades = item.GetType().GetProperties();
+
+            foreach (var propriedade in propriedades)
+            {
+                var valor = propriedade.GetValue(item);
+                bsonDocument[propriedade.Name] = valor != null ? new BsonValue(valor) : BsonValue.Null;
+            }
+
+            return bsonDocument;
         }
 
         // Deleta a linha selecionada no DataGrid.
@@ -205,15 +164,22 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (string.IsNullOrEmpty(SearchBox.Text))
             {
+                // Se a barra de pesquisa estiver vazia, recarrega todos os dados da tabela.
                 CarregarDadosTabela(_tabelaAtual);
             }
             else
             {
                 var textoPesquisa = SearchBox.Text.ToLower();
-                var collection = _database.GetCollection(_tabelaAtual);
+
+                // Obtém a coleção da tabela atual
+                var collection = _database.GetCollection<BsonDocument>(_tabelaAtual);
+
+                // Filtra os dados com base no texto de pesquisa
                 var dadosFiltrados = collection.FindAll()
-                    .Where(doc => doc.Values.Any(valor => valor.ToString().ToLower().Contains(textoPesquisa)))
+                    .Where(doc => doc.RawValue.ToString().ToLower().Contains(textoPesquisa))
                     .ToList();
+
+                // Atualiza o DataGrid com os dados filtrados
                 TabelaDataGrid.ItemsSource = dadosFiltrados;
             }
         }
