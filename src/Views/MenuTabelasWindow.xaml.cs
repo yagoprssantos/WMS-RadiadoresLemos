@@ -162,27 +162,59 @@ namespace WMS_RadiadoresLemos_WPF
         // Filtra os dados no DataGrid com base no texto digitado na barra de pesquisa.
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (string.IsNullOrEmpty(SearchBox.Text))
+            if (string.IsNullOrEmpty(_tabelaAtual) || TabelaDataGrid.ItemsSource == null)
+                return;
+
+            // Obtém o texto digitado na barra de pesquisa
+            string textoPesquisa = SearchBox.Text.ToLower();
+
+            // Recupera os dados originais da tabela atual
+            var collection = _database.GetCollection(_tabelaAtual);
+            var dadosOriginais = collection.FindAll().Cast<BsonDocument>().ToList();
+
+            // Filtra os dados com base no texto de pesquisa
+            var dadosFiltrados = dadosOriginais.Where(dado =>
             {
-                // Se a barra de pesquisa estiver vazia, recarrega todos os dados da tabela.
-                CarregarDadosTabela(_tabelaAtual);
-            }
-            else
+                foreach (var propriedade in dado.Keys)
+                {
+                    var valor = dado[propriedade]?.ToString()?.ToLower();
+                    if (!string.IsNullOrEmpty(valor) && valor.Contains(textoPesquisa))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }).ToList();
+
+            // Converte os dados filtrados para o tipo correto
+            switch (_tabelaAtual.ToLower())
             {
-                var textoPesquisa = SearchBox.Text.ToLower();
-
-                // Obtém a coleção da tabela atual
-                var collection = _database.GetCollection<BsonDocument>(_tabelaAtual);
-
-                // Filtra os dados com base no texto de pesquisa
-                var dadosFiltrados = collection.FindAll()
-                    .Where(doc => doc.RawValue.ToString().ToLower().Contains(textoPesquisa))
-                    .ToList();
-
-                // Atualiza o DataGrid com os dados filtrados
-                TabelaDataGrid.ItemsSource = dadosFiltrados;
+                case "usuarios":
+                    TabelaDataGrid.ItemsSource = dadosFiltrados.Select(d => BsonMapper.Global.ToObject<UsuarioData>(d)).ToList();
+                    ConfigurarColunasGenerico(typeof(UsuarioData));
+                    break;
+                case "produtos":
+                    TabelaDataGrid.ItemsSource = dadosFiltrados.Select(d => BsonMapper.Global.ToObject<ProdutoData>(d)).ToList();
+                    ConfigurarColunasGenerico(typeof(ProdutoData));
+                    break;
+                case "movimentacoes":
+                    TabelaDataGrid.ItemsSource = dadosFiltrados.Select(d => BsonMapper.Global.ToObject<MovimentacaoData>(d)).ToList();
+                    ConfigurarColunasGenerico(typeof(MovimentacaoData));
+                    break;
+                case "historico":
+                    TabelaDataGrid.ItemsSource = dadosFiltrados.Select(d => BsonMapper.Global.ToObject<LogData>(d)).ToList();
+                    ConfigurarColunasGenerico(typeof(LogData));
+                    break;
+                case "alertas":
+                    TabelaDataGrid.ItemsSource = dadosFiltrados.Select(d => BsonMapper.Global.ToObject<AlertaData>(d)).ToList();
+                    ConfigurarColunasGenerico(typeof(AlertaData));
+                    break;
+                default:
+                    MessageBox.Show("Tabela desconhecida. Não foi possível aplicar o filtro.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
             }
         }
+
 
         // Exibe uma mensagem informando que a funcionalidade de filtro ainda não foi implementada.
         private void FiltrarButton_Click(object sender, RoutedEventArgs e)
