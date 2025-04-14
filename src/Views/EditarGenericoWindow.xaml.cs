@@ -36,7 +36,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             GerarCampos();
         }
 
-        // Obtém o modelo correspondente à tabela
         private Type ObterModelo(string tabela)
         {
             return tabela.ToLower() switch
@@ -45,19 +44,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 "produtos" => typeof(ProdutoData),
                 "historico" => typeof(LogData),
                 "movimentacoes" => typeof(MovimentacaoData),
+                "alertas" => typeof(AlertaData),
                 _ => throw new InvalidOperationException($"Modelo para a tabela '{tabela}' não encontrado.")
             };
         }
 
-        // Gera os campos dinamicamente com base nas chaves do BsonDocument
         private void GerarCampos()
         {
             foreach (var chave in _registro.Keys)
             {
-                // Ignorar a chave "_id"
                 if (chave == "_id") continue;
 
-                // Cria um rótulo para o campo
                 var label = new TextBlock
                 {
                     Text = $"{chave}:",
@@ -66,42 +63,96 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 };
                 CamposStackPanel.Children.Add(label);
 
-                // Cria um TextBox para editar o valor
+                // Remove aspas duplas do valor antes de exibir
+                var valorSemAspas = _registro[chave]?.ToString()?.Replace("\"", string.Empty) ?? string.Empty;
+
                 var campo = new TextBox
                 {
-                    Text = _registro[chave]?.ToString() ?? string.Empty,
+                    Text = valorSemAspas,
                     Background = (Brush)FindResource("SecondaryBrush"),
                     Foreground = (Brush)FindResource("TextBrush"),
                     Margin = new Thickness(0, 0, 0, 15)
                 };
 
-                // Adiciona o controle ao painel e ao dicionário
                 CamposStackPanel.Children.Add(campo);
                 _campos[chave] = campo;
             }
         }
 
-        // Evento disparado ao clicar no botão "Salvar"
         private void Salvar_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                // Captura os valores
+                var valoresCapturados = new Dictionary<string, object>();
                 foreach (var campo in _campos)
                 {
-                    var valor = (campo.Value as TextBox)?.Text ?? string.Empty;
-                    _registro[campo.Key] = valor; // Atualiza o valor no BsonDocument
+                    var valorTexto = (campo.Value as TextBox)?.Text ?? string.Empty;
+                    valoresCapturados[campo.Key] = valorTexto;
                 }
 
+                // Trata os valores de acordo com cada atributo e sua classe
+                foreach (var chave in valoresCapturados.Keys.ToList())
+                {
+                    var propriedade = _modelo.GetProperty(chave);
+                    if (propriedade == null) continue;
+
+                    var tipo = propriedade.PropertyType;
+                    var valorTexto = valoresCapturados[chave]?.ToString() ?? string.Empty;
+
+                    try
+                    {
+                        // Converte o valor para o tipo correto
+                        object? valorConvertido = tipo switch
+                        {
+                            Type t when t == typeof(double) =>
+                                double.TryParse(valorTexto, out var doubleValue) ? doubleValue : throw new FormatException($"O valor '{valorTexto}' não é um número decimal válido."),
+                            Type t when t == typeof(int) =>
+                                int.TryParse(valorTexto, out var intValue) ? intValue : throw new FormatException($"O valor '{valorTexto}' não é um número inteiro válido."),
+                            Type t when t == typeof(DateTime) =>
+                                DateTime.TryParse(valorTexto, out var dateValue) ? dateValue : throw new FormatException($"O valor '{valorTexto}' não é uma data válida."),
+                            Type t when t == typeof(string) => valorTexto, // Strings não precisam de conversão
+                            _ => throw new FormatException($"O tipo '{tipo.Name}' não é suportado.")
+                        };
+
+                        valoresCapturados[chave] = valorConvertido;
+                    }
+                    catch (FormatException ex)
+                    {
+                        // Caso esteja errado, pede ao usuário para inserir um valor válido
+                        MessageBox.Show(ex.Message, "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+
+                // Adiciona o novo dado à tabela ou edita o existente
                 var db = DatabaseConnect.Database;
                 var collection = db.GetCollection(_tabela);
 
-                if (_registro.ContainsKey("_id"))
+                // Cria uma instância do modelo e preenche com os valores tratados
+                var registro = Activator.CreateInstance(_modelo);
+                foreach (var chave in valoresCapturados.Keys)
                 {
-                    collection.Update(_registro); // Atualiza o registro existente
+                    var propriedade = _modelo.GetProperty(chave);
+                    if (propriedade != null)
+                    {
+                        propriedade.SetValue(registro, valoresCapturados[chave]);
+                    }
                 }
-                else
+
+                // Verifica se o registro já existe (edição) ou é novo (inserção)
+                var idPropriedade = _modelo.GetProperty("Id");
+                if (idPropriedade != null)
                 {
-                    collection.Insert(_registro); // Insere um novo registro
+                    var idValor = idPropriedade.GetValue(registro);
+                    if (idValor != null && collection.Exists(Query.EQ("_id", new BsonValue(idValor))))
+                    {
+                        collection.Update(BsonMapper.Global.ToDocument(registro)); // Atualiza o registro existente
+                    }
+                    else
+                    {
+                        collection.Insert(BsonMapper.Global.ToDocument(registro)); // Insere um novo registro
+                    }
                 }
 
                 MessageBox.Show("Registro salvo com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -114,7 +165,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        // Evento disparado ao clicar no botão "Cancelar"
         private void Cancelar_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

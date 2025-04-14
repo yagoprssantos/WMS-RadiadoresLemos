@@ -101,8 +101,15 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (string.IsNullOrEmpty(_tabelaAtual)) return;
 
-            // Cria um novo BsonDocument vazio
+            // Cria um novo BsonDocument com valores padrão
             var novoRegistro = new BsonDocument();
+            var modelo = ObterModelo(_tabelaAtual);
+
+            foreach (var propriedade in modelo.GetProperties())
+            {
+                object? valorPadrao = propriedade.PropertyType.IsValueType ? Activator.CreateInstance(propriedade.PropertyType) : null;
+                novoRegistro[propriedade.Name] = new BsonValue(valorPadrao);
+            }
 
             // Abre a janela de edição com o novo registro
             var janela = new EditarGenericoWindow(_tabelaAtual, novoRegistro);
@@ -110,6 +117,20 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 CarregarDadosTabela(_tabelaAtual);
             }
+        }
+
+        // Método auxiliar para obter o modelo da tabela
+        private Type ObterModelo(string tabela)
+        {
+            return tabela.ToLower() switch
+            {
+                "usuarios" => typeof(UsuarioData),
+                "produtos" => typeof(ProdutoData),
+                "historico" => typeof(LogData),
+                "movimentacoes" => typeof(MovimentacaoData),
+                "alertas" => typeof(AlertaData),
+                _ => throw new InvalidOperationException($"Modelo para a tabela '{tabela}' não encontrado.")
+            };
         }
 
         // Edita o registro selecionado no DataGrid
@@ -133,6 +154,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+
         // Método auxiliar para converter um objeto para BsonDocument
         private BsonDocument ConvertToBsonDocument(object item)
         {
@@ -151,11 +173,36 @@ namespace WMS_RadiadoresLemos_WPF
         // Deleta a linha selecionada no DataGrid.
         private void DeletarButton_Click(object sender, RoutedEventArgs e)
         {
-            if (TabelaDataGrid.SelectedItem is BsonDocument documentoSelecionado)
+            if (TabelaDataGrid.SelectedItem is not null)
             {
-                var collection = _database.GetCollection(_tabelaAtual);
-                collection.Delete(documentoSelecionado["_id"]);
-                CarregarDadosTabela(_tabelaAtual);
+                // Obtém o item selecionado e o ID
+                var registroSelecionado = TabelaDataGrid.SelectedItem;
+                var idPropriedade = registroSelecionado.GetType().GetProperty("Id");
+
+                if (idPropriedade != null)
+                {
+                    var idValor = idPropriedade.GetValue(registroSelecionado);
+
+                    // Deleta o registro com base no ID
+                    var collection = _database.GetCollection(_tabelaAtual);
+                    if (collection.Delete(new BsonValue(idValor)))
+                    {
+                        MessageBox.Show("Registro deletado com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        CarregarDadosTabela(_tabelaAtual);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Não foi possível deletar o registro. ID não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("O registro selecionado não possui um ID válido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Por favor, selecione um registro para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
