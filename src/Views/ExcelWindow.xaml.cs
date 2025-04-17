@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -21,261 +22,365 @@ namespace WMS_RadiadoresLemos_WPF
         public ExcelWindow()
         {
             InitializeComponent();
-            CarregarTabelasDisponiveis();
         }
 
-        // Preenche o ComboBox com as tabelas disponíveis
-        private void CarregarTabelasDisponiveis()
-        {
-            TabelaComboBox.ItemsSource = TabelasDisponiveis;
-            TabelaComboBox.SelectedIndex = 0; // Seleciona a primeira tabela por padrão
-        }
-
-        // Evento disparado ao alterar a tabela selecionada no ComboBox
-        private void TabelaComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (TabelaComboBox.SelectedItem is string tabelaSelecionada)
-            {
-                AtualizarPreviewDataGrid(tabelaSelecionada);
-            }
-        }
-
-        // Atualiza o DataGrid com os dados da tabela selecionada
-        private void AtualizarPreviewDataGrid(string tabela)
-        {
-            TabelaAtual = tabela;
-            var collection = DatabaseConnect.Database?.GetCollection<BsonDocument>(tabela);
-
-            if (collection != null)
-            {
-                var dadosTabela = collection.FindAll().ToList();
-                PreviewDataGrid.ItemsSource = dadosTabela.Select(d => d.ToDictionary(k => k.Key, v => v.Value));
-            }
-            else
-            {
-                PreviewDataGrid.ItemsSource = null;
-                MessageBox.Show($"A tabela '{tabela}' não possui dados disponíveis.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
 
         // Importa os dados do Excel para o DataGrid
         private async void ImportarDados_Click(object sender, RoutedEventArgs e)
         {
             // Reseta a barra de progresso e a mensagem de status
             ResetarProgresso();
+            AtualizarProgresso(10, "Status: Iniciando importação de dados...");
 
             // Esconde a pré-visualização dos dados
             PreviewPanel.Visibility = Visibility.Collapsed;
 
-            try
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                OpenFileDialog openFileDialog = new OpenFileDialog
-                {
-                    Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-                    Title = "Importar dados do Excel"
-                };
-
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    using (var workbook = new XLWorkbook(openFileDialog.FileName))
-                    {
-                        List<string> abasInvalidas = new List<string>();
-                        int totalTabelas = TabelasDisponiveis.Length;
-                        int tabelaAtual = 0;
-
-                        foreach (var tabela in TabelasDisponiveis)
-                        {
-                            var worksheet = workbook.Worksheets.FirstOrDefault(ws => ws.Name.Equals(tabela, StringComparison.OrdinalIgnoreCase));
-                            if (worksheet != null && ValidarFormatoAba(worksheet, tabela))
-                            {
-                                ProcessarAba(worksheet, tabela);
-                                tabelaAtual++;
-                                AtualizarProgresso((double)tabelaAtual / totalTabelas * 100, $"Status: Dados carregados para pré-visualização da tabela '{tabela}'.");
-                                await Task.Delay(500); // Simula um pequeno atraso para visualização do progresso
-                            }
-                            else
-                            {
-                                abasInvalidas.Add(tabela);
-                                AtualizarProgresso((double)tabelaAtual / totalTabelas * 100, $"Status: Aba '{tabela}' ignorada (formato inválido).");
-                            }
-                        }
-
-                        ExibirResultadosImportacao(abasInvalidas, tabelaAtual);
-
-                        // Mostra a pré-visualização dos dados
-                        PreviewPanel.Visibility = Visibility.Visible;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Esconde a pré-visualização dos dados
-                PreviewPanel.Visibility = Visibility.Collapsed;
-
-                MessageBox.Show($"Erro ao importar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        // Processa uma aba válida do Excel
-        private void ProcessarAba(IXLWorksheet worksheet, string tabela)
-        {
-            TabelaAtual = tabela;
-            DadosPreVisualizacao.Clear();
-
-            var headers = worksheet.FirstRowUsed()?.Cells().Select(c => NormalizarTexto(c.Value.ToString())).ToList() ?? new List<string>();
-            var propriedades = ObterPropriedadesDoModelo(tabela);
-
-            foreach (var row in worksheet.RowsUsed().Skip(1))
-            {
-                var document = new BsonDocument();
-                for (int i = 0; i < headers.Count; i++)
-                {
-                    string header = headers[i];
-                    if (propriedades.Contains(header))
-                    {
-                        string value = row.Cell(i + 1).Value.ToString();
-                        document[header] = value;
-                    }
-                }
-                DadosPreVisualizacao.Add(document);
-            }
-
-            // Atualiza o DataGrid com os dados para pré-visualização
-            PreviewDataGrid.ItemsSource = DadosPreVisualizacao.Select(d => d.ToDictionary(k => k.Key, v => v.Value));
-        }
-
-        private List<string> ObterPropriedadesDoModelo(string tabela)
-        {
-            Type? tipoModelo = tabela.ToLower() switch
-            {
-                "usuarios" => typeof(UsuarioData),
-                "produtos" => typeof(ProdutoData),
-                "movimentacoes" => typeof(MovimentacaoData),
-                "historico" => typeof(LogData),
-                "alertas" => typeof(AlertaData),
-                _ => null
+                Filter = "Excel Files (*.xlsx;*.xls)|*.xlsx;*.xls",
+                Title = "Selecione um arquivo Excel"
             };
 
-            if (tipoModelo == null)
+            if (openFileDialog.ShowDialog() == true)
             {
-                Console.WriteLine($"Tabela '{tabela}' não possui um modelo correspondente.");
-                return new List<string>();
-            }
+                try
+                {
+                    AtualizarProgresso(30, "Status: Carregando dados do arquivo Excel...");
 
-            // Obtém os nomes das propriedades do modelo
-            return tipoModelo.GetProperties()
-                             .Select(p => NormalizarTexto(p.Name))
-                             .ToList();
-        }
+                    // Carrega os dados do Excel
+                    var dadosExcel = CarregarDadosExcel(openFileDialog.FileName);
 
-        private string NormalizarTexto(string texto)
-        {
-            if (string.IsNullOrWhiteSpace(texto)) return string.Empty;
+                    AtualizarProgresso(50, "Status: Formatando dados para pré-visualização...");
 
-            // Remove espaços, acentos e converte para minúsculas
-            return new string(texto
-                .Normalize(NormalizationForm.FormD)
-                .Where(c => char.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
-                .ToArray())
-                .Replace(" ", "")
-                .ToLower();
-        }
+                    // Etapa 1: Tratar os dados para apresentação
+                    var dadosFormatados = new Dictionary<string, DataTable>();
+                    foreach (var aba in dadosExcel.Keys)
+                    {
+                        dadosFormatados[aba] = FormatarDadosParaApresentacao(dadosExcel[aba]);
+                    }
 
-        // Exibe os resultados da importação
-        private void ExibirResultadosImportacao(List<string> abasInvalidas, int tabelasValidas)
-        {
-            if (abasInvalidas.Any())
-            {
-                MessageBox.Show($"As seguintes abas foram ignoradas por formato inválido:\n{string.Join(", ", abasInvalidas)}", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+                    AtualizarProgresso(70, "Status: Atualizando pré-visualização...");
 
-            if (tabelasValidas == 0)
-            {
-                MessageBox.Show("Nenhuma tabela válida foi encontrada no arquivo Excel.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    // Exibe os dados na pré-visualização
+                    AtualizarPreviewDatagrid(dadosFormatados);
+
+                    // Etapa 2: Tratar os dados para o banco de dados
+                    DadosPreVisualizacao = ConverterExcelParaBsonDocument(dadosExcel);
+
+                    AtualizarProgresso(100, "Status: Dados carregados com sucesso!");
+                    MessageBox.Show("Dados carregados com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Mostra a pré-visualização
+                    PreviewPanel.Visibility = Visibility.Visible;
+                }
+                catch (Exception ex)
+                {
+                    AtualizarProgresso(0, "Status: Erro ao carregar os dados.");
+                    MessageBox.Show($"Erro ao carregar o arquivo Excel: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             else
             {
-                PreviewPanel.Visibility = Visibility.Visible;
-                MessageBox.Show("Importação concluída com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                AtualizarProgresso(0, "Status: Importação cancelada pelo usuário.");
             }
         }
 
-        // Valida o formato da aba do Excel
-        private bool ValidarFormatoAba(IXLWorksheet worksheet, string tabela)
+        // Função para carregar os dados do Excel
+        private Dictionary<string, DataTable> CarregarDadosExcel(string caminhoArquivo)
         {
-            try
+            var dadosPorAba = new Dictionary<string, DataTable>();
+
+            using (var workbook = new XLWorkbook(caminhoArquivo))
             {
-                // Obtém os cabeçalhos da primeira linha
-                var headers = worksheet.FirstRowUsed()?.Cells().Select(c => NormalizarTexto(c.Value.ToString())).ToList();
-
-                if (headers == null || !headers.Any())
+                foreach (var worksheet in workbook.Worksheets)
                 {
-                    MessageBox.Show($"A aba '{worksheet.Name}' não possui cabeçalhos.");
-                    return false;
+                    var dataTable = new DataTable(worksheet.Name);
+
+                    // Adiciona as colunas com base nos cabeçalhos
+                    var headers = worksheet.Row(1).CellsUsed().Select(c => c.Value.ToString().Trim()).ToList();
+                    foreach (var header in headers)
+                    {
+                        dataTable.Columns.Add(header);
+                    }
+
+                    // Adiciona as linhas com base nos dados
+                    foreach (var row in worksheet.RowsUsed().Skip(1)) // Ignora a linha de cabeçalho
+                    {
+                        var dataRow = dataTable.NewRow();
+                        for (int i = 0; i < headers.Count; i++)
+                        {
+                            dataRow[i] = row.Cell(i + 1).Value.ToString();
+                        }
+                        dataTable.Rows.Add(dataRow);
+                    }
+
+                    // Log para verificar os nomes das colunas
+                    Console.WriteLine($"Tabela: {worksheet.Name}");
+                    foreach (DataColumn column in dataTable.Columns)
+                    {
+                        Console.WriteLine($"Coluna: {column.ColumnName}");
+                    }
+
+                    dadosPorAba.Add(worksheet.Name, dataTable);
                 }
-
-                // Obtém os nomes das propriedades do modelo correspondente
-                var propriedades = ObterPropriedadesDoModelo(tabela);
-
-                // Verifica se pelo menos um cabeçalho corresponde a uma propriedade do modelo
-                if (headers.Any(h => propriedades.Contains(h)))
-                {
-                    return true;
-                }
-
-                MessageBox.Show($"A aba '{worksheet.Name}' possui cabeçalhos inválidos: {string.Join(", ", headers)}");
-                return false;
             }
-            catch (Exception ex)
+
+            return dadosPorAba;
+        }
+
+        // Formata os dados para apresentação  
+        private DataTable FormatarDadosParaApresentacao(DataTable dataTable)
+        {
+            // Cria uma nova tabela formatada
+            var tabelaFormatada = new DataTable();
+
+            // Adiciona as colunas renomeadas à nova tabela
+            foreach (DataColumn coluna in dataTable.Columns)
             {
-                MessageBox.Show($"Erro ao validar a aba '{worksheet.Name}': {ex.Message}");
-                return false;
+                tabelaFormatada.Columns.Add(RenomearColuna(coluna.ColumnName), typeof(string));
+            }
+
+            // Adiciona as linhas formatadas à nova tabela
+            foreach (DataRow row in dataTable.Rows)
+            {
+                var novaLinha = tabelaFormatada.NewRow();
+
+                foreach (DataColumn coluna in dataTable.Columns)
+                {
+                    var valor = row[coluna]?.ToString() ?? string.Empty;
+
+                    // Verifica e formata datas no formato {$date:...}
+                    if (coluna.ColumnName.ToLower().Contains("data") && valor.StartsWith("{$date:") && valor.EndsWith("}"))
+                    {
+                        try
+                        {
+                            // Extrai a data do formato {$date:...}
+                            var dataStr = valor.Replace("{$date:", "").Replace("}", "");
+                            if (DateTime.TryParse(dataStr, out var dataConvertida))
+                            {
+                                novaLinha[RenomearColuna(coluna.ColumnName)] = dataConvertida.ToString("dd/MM/yyyy HH:mm:ss");
+                            }
+                            else
+                            {
+                                novaLinha[RenomearColuna(coluna.ColumnName)] = valor; // Mantém o valor original se não puder converter
+                            }
+                        }
+                        catch
+                        {
+                            novaLinha[RenomearColuna(coluna.ColumnName)] = valor; // Mantém o valor original em caso de erro
+                        }
+                    }
+                    // Formata datas normais
+                    else if (coluna.ColumnName.ToLower().Contains("data") && DateTime.TryParse(valor, out var dataNormal))
+                    {
+                        novaLinha[RenomearColuna(coluna.ColumnName)] = dataNormal.ToString("dd/MM/yyyy HH:mm:ss");
+                    }
+                    else
+                    {
+                        novaLinha[RenomearColuna(coluna.ColumnName)] = valor;
+                    }
+                }
+
+                tabelaFormatada.Rows.Add(novaLinha);
+            }
+
+            return tabelaFormatada;
+        }
+
+                // Função auxiliar para renomear colunas
+        private string RenomearColuna(string nomeOriginal)
+        {
+            // Normaliza o nome da coluna
+            nomeOriginal = nomeOriginal.Trim().ToLower();
+
+            // Mapeamento genérico de nomes de colunas
+            var mapeamento = new Dictionary<string, string>
+            {
+                { "_id", "ID" },
+                { "nome", "Nome" },
+                { "email", "E-mail" },
+                { "matricula", "Matrícula" },
+                { "senha", "Senha" },
+                { "cargo", "Cargo" },
+                { "tipo", "Tipo" },
+                { "marca", "Marca" },
+                { "codigo", "Código" },
+                { "preco", "Preço" },
+                { "quantidade", "Quantidade" },
+                { "produtoid", "ID do Produto" },
+                { "data", "Data" },
+                { "nivel", "Nível" },
+                { "detalhes", "Detalhes" },
+                { "usuario", "Usuário" },
+                { "dataformatadasemano", "Data (Sem Ano)" },
+                { "dataformatadacomano", "Data (Com Ano)" }
+            };
+
+            // Retorna o nome amigável ou o nome original se não houver mapeamento
+            return mapeamento.ContainsKey(nomeOriginal) ? mapeamento[nomeOriginal] : nomeOriginal;
+        }
+
+
+        // Converte os dados do Excel para BsonDocument
+        private List<BsonDocument> ConverterExcelParaBsonDocument(Dictionary<string, DataTable> dadosPorAba)
+        {
+            var listaBson = new List<BsonDocument>();
+
+            foreach (var aba in dadosPorAba.Keys)
+            {
+                var dataTable = dadosPorAba[aba];
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    var bsonDocument = new BsonDocument();
+
+                    foreach (DataColumn column in dataTable.Columns)
+                    {
+                        var valor = row[column]?.ToString() ?? string.Empty;
+
+                        // Tenta converter valores de data no formato ISO para DateTime
+                        if (column.ColumnName.ToLower().Contains("data") && DateTime.TryParse(valor, out var dataConvertida))
+                        {
+                            bsonDocument[column.ColumnName] = dataConvertida;
+                        }
+                        else
+                        {
+                            bsonDocument[column.ColumnName] = valor;
+                        }
+                    }
+
+                    // Adiciona o nome da aba como referência
+                    bsonDocument["Tabela"] = aba;
+
+                    listaBson.Add(bsonDocument);
+                }
+            }
+
+            return listaBson;
+        }
+
+
+
+        // Função para exibir os dados na pré-visualização e preparar DadosPreVisualizacao
+        private void AtualizarPreviewDatagrid(Dictionary<string, DataTable> dadosPorAba)
+        {
+            // Limpa o ComboBox, o DataGrid e DadosPreVisualizacao
+            TabelaComboBox.Items.Clear();
+            PreviewDataGrid.ItemsSource = null;
+            DadosPreVisualizacao.Clear();
+
+            // Adiciona as abas (nomes das tabelas) ao ComboBox
+            foreach (var aba in dadosPorAba.Keys)
+            {
+                TabelaComboBox.Items.Add(aba);
+
+                // Converte os dados da aba para BsonDocument e adiciona a DadosPreVisualizacao
+                var dataTable = dadosPorAba[aba];
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    var bsonDocument = new BsonDocument();
+                    foreach (DataColumn column in dataTable.Columns)
+                    {
+                        bsonDocument[column.ColumnName] = row[column]?.ToString() ?? string.Empty;
+                    }
+                    bsonDocument["Tabela"] = aba; // Adiciona o nome da aba como referência
+                    DadosPreVisualizacao.Add(bsonDocument);
+                }
+            }
+
+            // Define o evento de seleção de tabela
+            TabelaComboBox.SelectionChanged += (s, e) =>
+            {
+                if (TabelaComboBox.SelectedItem is string tabelaSelecionada && dadosPorAba.ContainsKey(tabelaSelecionada))
+                {
+                    PreviewDataGrid.ItemsSource = dadosPorAba[tabelaSelecionada].DefaultView;
+                }
+            };
+
+            // Seleciona a primeira aba por padrão
+            if (TabelaComboBox.Items.Count > 0)
+            {
+                TabelaComboBox.SelectedIndex = 0;
+                PreviewPanel.Visibility = Visibility.Visible;
             }
         }
+
+        // Evento disparado ao alterar a seleção no ComboBox de tabelas
+        private void TabelaComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e){}
+
 
         // Confirma a importação dos dados para o banco de dados
-        private void ConfirmarImportacao_Click(object sender, RoutedEventArgs e)
+        private async void ConfirmarImportacao_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (ImportModeComboBox.SelectedItem is ComboBoxItem selectedItem)
             {
-                if (string.IsNullOrEmpty(TabelaAtual) || !DadosPreVisualizacao.Any())
+                string selectedMode = selectedItem.Content.ToString();
+
+                if (!DadosPreVisualizacao.Any())
                 {
-                    MessageBox.Show("Nenhum dado para importar. Por favor, importe os dados antes de confirmar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    AtualizarProgresso(0, "Status: Nenhum dado disponível para importação.");
+                    MessageBox.Show("Nenhum dado carregado para importação.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                var collection = DatabaseConnect.Database?.GetCollection<BsonDocument>(TabelaAtual);
-
-                if (collection == null)
+                try
                 {
-                    MessageBox.Show("Erro ao acessar a coleção do banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                    AtualizarProgresso(10, "Status: Conectando ao banco de dados...");
+                    using (var db = DatabaseConnect.Database)
+                    {
+                        if (db == null)
+                        {
+                            AtualizarProgresso(0, "Status: Erro ao conectar ao banco de dados.");
+                            MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
 
-                // Verifica a opção de importação selecionada no ComboBox
-                var selectedMode = (ImportModeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
-                if (selectedMode == "Adicionar Dados")
+                        foreach (var tabela in TabelasDisponiveis)
+                        {
+                            AtualizarProgresso(20, $"Status: Processando tabela '{tabela}'...");
+
+                            var collection = db.GetCollection<BsonDocument>(tabela);
+
+                            if (selectedMode == "Substituir Dados")
+                            {
+                                AtualizarProgresso(40, $"Status: Limpando dados existentes na tabela '{tabela}'...");
+                                collection.DeleteAll();
+                            }
+
+                            AtualizarProgresso(60, $"Status: Inserindo novos dados na tabela '{tabela}'...");
+
+                            // Filtra os dados da tabela atual
+                            var dadosTabela = DadosPreVisualizacao
+                                .Where(d => d["Tabela"].AsString == tabela)
+                                .Select(d =>
+                                {
+                                    d.Remove("Tabela"); // Remove o atributo "Tabela" antes de inserir no banco
+                                    return d;
+                                })
+                                .ToList();
+
+                            foreach (var documento in dadosTabela)
+                            {
+                                collection.Insert(documento);
+                            }
+                        }
+
+                        AtualizarProgresso(100, "Status: Dados importados com sucesso!");
+                        MessageBox.Show($"Dados importados com sucesso no modo '{selectedMode}'.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        ResetarProgresso();
+                        PreviewPanel.Visibility = Visibility.Collapsed;
+                    }
+                }
+                catch (Exception ex)
                 {
-                    collection.InsertBulk(DadosPreVisualizacao); // Adiciona os novos dados
+                    AtualizarProgresso(0, "Status: Erro ao importar os dados.");
+                    MessageBox.Show($"Erro ao importar dados: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                else if (selectedMode == "Substituir Dados")
-                {
-                    collection.DeleteAll(); // Remove os dados existentes
-                    collection.InsertBulk(DadosPreVisualizacao); // Insere os novos dados
-                }
-
-                StatusMessage.Text = $"Status: Dados confirmados e importados para a tabela '{TabelaAtual}'.";
-                MessageBox.Show($"Dados importados com sucesso para a tabela '{TabelaAtual}'.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // Limpa a pré-visualização
-                PreviewDataGrid.ItemsSource = null;
-                DadosPreVisualizacao.Clear();
-                TabelaAtual = string.Empty;
-                PreviewPanel.Visibility = Visibility.Collapsed;
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Erro ao confirmar a importação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                AtualizarProgresso(0, "Status: Nenhum modo de importação selecionado.");
+                MessageBox.Show("Selecione um modo de importação antes de confirmar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -363,6 +468,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     AtualizarProgresso(100, "Status: Dados exportados com sucesso!");
+                    MessageBox.Show("Dados exportados com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
@@ -390,23 +496,33 @@ namespace WMS_RadiadoresLemos_WPF
                         {
                             var worksheet = workbook.Worksheets.Add(tabela);
 
-                            // Obtem os cabeçalhos dinamicamente com base no tipo de dado
-                            var headers = GetHeadersForTable(tabela);
-
-                            // Adiciona cabeçalhos
-                            for (int i = 0; i < headers.Count; i++)
+                            // Obtem os cabeçalhos dinamicamente com base nos dados exportados
+                            var collection = DatabaseConnect.Database?.GetCollection<BsonDocument>(tabela);
+                            if (collection == null)
                             {
-                                var cell = worksheet.Cell(1, i + 1);
-                                cell.Value = headers[i];
-                                cell.Style.Font.Bold = true;
-                                cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#6680E8"); // Cor alterada
-                                cell.Style.Font.FontColor = XLColor.White;
-                                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                                cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                MessageBox.Show($"Erro ao acessar a coleção '{tabela}' do banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                                continue;
                             }
 
-                            // Ajusta as colunas
-                            worksheet.Columns().AdjustToContents();
+                            var dadosTabela = collection.FindAll().ToList();
+                            if (dadosTabela.Any())
+                            {
+                                // Adiciona cabeçalhos dinamicamente
+                                var headers = dadosTabela.First().Keys.ToList();
+                                for (int i = 0; i < headers.Count; i++)
+                                {
+                                    var cell = worksheet.Cell(1, i + 1);
+                                    cell.Value = headers[i];
+                                    cell.Style.Font.Bold = true;
+                                    cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#6680E8"); // Cor alterada
+                                    cell.Style.Font.FontColor = XLColor.White;
+                                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                    cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                                }
+
+                                // Ajusta as colunas
+                                worksheet.Columns().AdjustToContents();
+                            }
                         }
 
                         workbook.SaveAs(saveFileDialog.FileName);
@@ -463,7 +579,6 @@ namespace WMS_RadiadoresLemos_WPF
             TabelaAtual = string.Empty;
             PreviewPanel.Visibility = Visibility.Collapsed;
             StatusMessage.Text = "Status: Ação cancelada.";
-            MessageBox.Show("Ação cancelada com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
 
@@ -478,6 +593,24 @@ namespace WMS_RadiadoresLemos_WPF
                 "alertas" => typeof(AlertaData).GetProperties().Select(p => p.Name).ToList(),
                 _ => new List<string> { "Id", "Nome", "Descrição" }
             };
+        }
+
+        private void PreviewPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (PreviewPanel.Visibility == Visibility.Visible)
+            {
+                // Altera a altura da janela para 800 quando a pré-visualização estiver visível  
+                this.Height = 700;
+            }
+            else if (PreviewPanel.Visibility == Visibility.Collapsed)
+            {
+                // Altera a altura da janela para 320 quando a pré-visualização estiver oculta  
+                this.Height = 320;
+            }
+
+            // Reposiciona a janela no centro da tela  com base na nova altura
+            this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
+            this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
         }
     }
 }
