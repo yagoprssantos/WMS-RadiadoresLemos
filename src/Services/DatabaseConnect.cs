@@ -15,11 +15,47 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         );
         public static LiteDatabase? Database { get; private set; }
 
-        private static string GetBackupPath(int version)
+        private static string GetBackupPath(int version, string timestamp)
         {
             var directory = Path.GetDirectoryName(dbPath);
-            var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             return Path.Combine(directory, $"Database_v{version}_{timestamp}.db");
+        }
+
+        private static string CalculateFileHash(string filePath)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            using (var stream = File.OpenRead(filePath))
+            {
+                var hash = md5.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
+
+        private static bool DatabaseWasModified()
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(dbPath);
+                var backups = Directory.GetFiles(directory, "Database_v*_*.db")
+                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                    .ToList();
+
+                if (!backups.Any())
+                    return true; // Se não tem backup, considera que foi modificado
+
+                var lastBackup = backups.First();
+                var currentHash = CalculateFileHash(dbPath);
+                var lastBackupHash = CalculateFileHash(lastBackup);
+
+                return currentHash != lastBackupHash;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERRO ao verificar modificações:");
+                Console.WriteLine($"Mensagem: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                return true; // Em caso de erro, considera que foi modificado
+            }
         }
 
         private static void CreateBackup()
@@ -29,46 +65,97 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 // Se o banco atual existe, faz backup
                 if (File.Exists(dbPath))
                 {
+                    // Verifica se o banco foi modificado
+                    if (!DatabaseWasModified())
+                    {
+                        Console.WriteLine("Banco de dados não foi modificado desde o último backup. Pulando criação de backup.");
+                        return;
+                    }
+
                     var directory = Path.GetDirectoryName(dbPath);
                     
                     // Lista todos os backups existentes para determinar a próxima versão
                     var backups = Directory.GetFiles(directory, "Database_v*_*.db")
-                        .OrderByDescending(f => f)
+                        .Select(f => {
+                            var partes = Path.GetFileName(f).Split('_');
+                            var versao = int.Parse(partes[1].Substring(1));
+                            var timestamp = partes[2].Replace(".db", "");
+                            return new
+                            {
+                                Path = f,
+                                Version = versao,
+                                Timestamp = timestamp
+                            };
+                        })
+                        .OrderByDescending(x => x.Version)
                         .ToList();
 
-                    // Determina a próxima versão
-                    int proximaVersao = 1;
+                    int proximaVersao;
+                    string timestamp;
                     if (backups.Any())
                     {
-                        // Extrai a versão do backup mais recente
-                        var ultimoBackup = backups.First();
-                        var nomeArquivo = Path.GetFileName(ultimoBackup);
-                        var versaoStr = nomeArquivo.Split('_')[1].Substring(1); // Remove o 'v' do início
-                        if (int.TryParse(versaoStr, out int ultimaVersao))
+                        var ultimaVersao = backups.First().Version;
+                        if (ultimaVersao < 20)
                         {
                             proximaVersao = ultimaVersao + 1;
+                            timestamp = DateTime.Now.ToString("yyyy-MM-dd");
+                        }
+                        else
+                        {
+                            var backupV1 = backups.FirstOrDefault(b => b.Version == 1);
+                            if (backupV1 != null)
+                            {
+                                try
+                                {
+                                    File.Delete(backupV1.Path);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"ERRO ao remover backup v1:");
+                                    Console.WriteLine($"Mensagem: {ex.Message}");
+                                    Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                                }
+                            }
+
+                            for (int i = 2; i <= 20; i++)
+                            {
+                                var backupAtual = backups.FirstOrDefault(b => b.Version == i);
+                                if (backupAtual != null)
+                                {
+                                    var novoCaminho = GetBackupPath(i - 1, backupAtual.Timestamp);
+                                    try
+                                    {
+                                        File.Move(backupAtual.Path, novoCaminho, true);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine($"ERRO ao rotacionar backup v{i}:");
+                                        Console.WriteLine($"Mensagem: {ex.Message}");
+                                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                                    }
+                                }
+                            }
+                            proximaVersao = 20;
+                            timestamp = DateTime.Now.ToString("yyyy-MM-dd");
                         }
                     }
-                    
-                    // Cria backup com timestamp e nova versão
-                    string novoBackup = GetBackupPath(proximaVersao);
-                    File.Copy(dbPath, novoBackup, true);
-
-                    // Se houver mais de 20 backups, remove os mais antigos
-                    if (backups.Count >= 20)
+                    else
                     {
-                        foreach (var backup in backups.Skip(19)) // Mantém os 19 mais recentes + o novo
-                        {
-                            try
-                            {
-                                File.Delete(backup);
-                                Console.WriteLine($"Backup antigo removido: {backup}");
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"Erro ao remover backup antigo {backup}: {ex.Message}");
-                            }
-                        }
+                        proximaVersao = 1;
+                        timestamp = DateTime.Now.ToString("yyyy-MM-dd");
+                    }
+
+                    string novoBackup = GetBackupPath(proximaVersao, timestamp);
+                    try
+                    {
+                        File.Copy(dbPath, novoBackup, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"ERRO ao criar novo backup:");
+                        Console.WriteLine($"Mensagem: {ex.Message}");
+                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                        throw;
                     }
                 }
             }
