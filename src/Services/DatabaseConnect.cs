@@ -51,7 +51,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     if (backups.Any())
                     {
                         var ultimaVersao = backups.First().Version;
-                        if (ultimaVersao < 3)
+                        if (ultimaVersao < 20)
                         {
                             proximaVersao = ultimaVersao + 1;
                             timestamp = DateTime.Now.ToString("yyyy-MM-dd");
@@ -73,7 +73,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                                 }
                             }
 
-                            for (int i = 2; i <= 3; i++)
+                            for (int i = 2; i <= 20; i++)
                             {
                                 var backupAtual = backups.FirstOrDefault(b => b.Version == i);
                                 if (backupAtual != null)
@@ -91,7 +91,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                                     }
                                 }
                             }
-                            proximaVersao = 3;
+                            proximaVersao = 20;
                             timestamp = DateTime.Now.ToString("yyyy-MM-dd");
                         }
                     }
