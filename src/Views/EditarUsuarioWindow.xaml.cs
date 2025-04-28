@@ -70,7 +70,6 @@ namespace WMS_RadiadoresLemos_WPF
                 NomeTextBox.Text = usuario.Nome;
                 EmailTextBox.Text = usuario.Email;
                 MatriculaTextBox.Text = usuario.Matricula;
-                SenhaPasswordBox.Password = usuario.Senha;
                 PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
             }
             catch (Exception ex)
@@ -249,7 +248,7 @@ namespace WMS_RadiadoresLemos_WPF
             Nome = NomeTextBox.Text.Trim(),
             Email = EmailTextBox.Text.Trim(),
             Matricula = MatriculaTextBox.Text.Trim(),
-            Senha = SenhaPasswordBox.Password.Trim(),
+            Senha = string.IsNullOrEmpty(SenhaPasswordBox.Password) ? usuario.Senha : CriptografiaService.CriptografarSenha(SenhaPasswordBox.Password.Trim()),
             Cargo = ((ComboBoxItem)PermissaoComboBox.SelectedItem)?.Content?.ToString() ?? string.Empty,
             Id = MatriculaTextBox.Text.Trim()
         };
