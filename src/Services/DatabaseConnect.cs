@@ -21,6 +21,43 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             return Path.Combine(directory, $"Database_v{version}_{timestamp}.db");
         }
 
+        private static string CalculateFileHash(string filePath)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            using (var stream = File.OpenRead(filePath))
+            {
+                var hash = md5.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
+
+        private static bool DatabaseWasModified()
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(dbPath);
+                var backups = Directory.GetFiles(directory, "Database_v*_*.db")
+                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                    .ToList();
+
+                if (!backups.Any())
+                    return true; // Se não tem backup, considera que foi modificado
+
+                var lastBackup = backups.First();
+                var currentHash = CalculateFileHash(dbPath);
+                var lastBackupHash = CalculateFileHash(lastBackup);
+
+                return currentHash != lastBackupHash;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERRO ao verificar modificações:");
+                Console.WriteLine($"Mensagem: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                return true; // Em caso de erro, considera que foi modificado
+            }
+        }
+
         private static void CreateBackup()
         {
             try
@@ -28,6 +65,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 // Se o banco atual existe, faz backup
                 if (File.Exists(dbPath))
                 {
+                    // Verifica se o banco foi modificado
+                    if (!DatabaseWasModified())
+                    {
+                        Console.WriteLine("Banco de dados não foi modificado desde o último backup. Pulando criação de backup.");
+                        return;
+                    }
+
                     var directory = Path.GetDirectoryName(dbPath);
                     
                     // Lista todos os backups existentes para determinar a próxima versão
