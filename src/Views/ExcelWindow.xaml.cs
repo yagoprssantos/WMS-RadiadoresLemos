@@ -24,15 +24,6 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
         }
 
-        /* TODO:
-         * 3. Arrumar qualquer defeito causado por 1 e 2 em importação
-         * IMPORTAÇÃO:
-         * 1. Garantir que o campo de data seja formatado corretamente
-         * 2. Fazer com que a visualização do DataGrid esteja correta
-         * 3. APÓS TUDO, assegurar que dados estejam sendo tratados corretamente para importar
-         */
-
-
         // Importa os dados do Excel para o DataGrid
         private async void ImportarDados_Click(object sender, RoutedEventArgs e)
         {
@@ -259,6 +250,9 @@ namespace WMS_RadiadoresLemos_WPF
             // 2. Mapear os dados para as tabelas correspondentes
             var mapeamentoColunas = ObterMapeamentoColunas();
 
+            // Dicionário para rastrear os IDs criados por aba
+            var idsCriadosPorAba = new Dictionary<string, HashSet<int>>();
+
             foreach (var aba in dadosPorAba.Keys)
             {
                 var dataTable = dadosPorAba[aba];
@@ -269,7 +263,7 @@ namespace WMS_RadiadoresLemos_WPF
                     try
                     {
                         // 3. Criar um documento BSON para cada linha
-                        var bsonDocument = CriarDocumentoBson(row, dataTable.Columns, mapeamentoColunas, aba, ref ultimoIdNumerico);
+                        var bsonDocument = CriarDocumentoBson(row, dataTable.Columns, mapeamentoColunas, aba, ref ultimoIdNumerico, idsCriadosPorAba);
 
                         listaBson.Add(bsonDocument);
                     }
@@ -326,7 +320,13 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Função para criar um documento BSON a partir de uma linha do DataTable  
-        private BsonDocument CriarDocumentoBson(DataRow row, DataColumnCollection columns, Dictionary<string, string> mapeamentoColunas, string aba, ref int ultimoIdNumerico)
+        private BsonDocument CriarDocumentoBson(
+            DataRow row,
+            DataColumnCollection columns,
+            Dictionary<string, string> mapeamentoColunas,
+            string aba,
+            ref int ultimoIdNumerico,
+            Dictionary<string, HashSet<int>> idsCriadosPorAba)
         {
             // Inicializa um novo documento BSON vazio  
             var bsonDocument = new BsonDocument();
@@ -337,7 +337,13 @@ namespace WMS_RadiadoresLemos_WPF
                 columns.Add("_id");
             }
 
-            // Define o valor do campos extras com base na aba/tabela
+            // Garante que o dicionário de IDs criados tenha uma entrada para a aba atual
+            if (!idsCriadosPorAba.ContainsKey(aba))
+            {
+                idsCriadosPorAba[aba] = new HashSet<int>();
+            }
+
+            // Define o valor do campo _id e outros campos extras com base na aba/tabela
             switch (aba.ToLower())
             {
                 case "usuarios":
@@ -367,24 +373,40 @@ namespace WMS_RadiadoresLemos_WPF
                         .FirstOrDefault();
 
                     // Define o último ID numérico como o maior encontrado ou 0 se não houver registros
-                    ultimoIdNumerico = maiorId;
+                    ultimoIdNumerico = Math.Max(ultimoIdNumerico, maiorId);
 
-                    // Incrementa o último ID numérico e atribui ao _id da linha
-                    row["_id"] = ++ultimoIdNumerico;
+                    // Garante que o ID seja único dentro da aba
+                    do
+                    {
+                        ultimoIdNumerico++;
+                    } while (idsCriadosPorAba[aba].Contains(ultimoIdNumerico));
 
+                    // Adiciona o novo ID à lista de IDs criados para a aba
+                    idsCriadosPorAba[aba].Add(ultimoIdNumerico);
+
+                    // Atribui o ID à linha
+                    row["_id"] = ultimoIdNumerico;
 
                     // Adiciona o campo "DataFormatadaSemAno" e "DataFormatadaComAno"
-                    if (columns.Contains("data"))
+                    if (columns.Contains("data") && DateTime.TryParse(row["data"]?.ToString(), out var data))
                     {
-                        var data = DateTime.Parse(row["data"].ToString());
-
-                        // Adiciona as duas colunas
-                        columns.Add("DataFormatadaSemAno");
+                        if (!columns.Contains("DataFormatadaSemAno"))
+                        {
+                            columns.Add("DataFormatadaSemAno");
+                        }
                         row["DataFormatadaSemAno"] = data.ToString("dd/MM HH:mm:ss");
 
-                        columns.Add("DataFormatadaComAno");
+                        if (!columns.Contains("DataFormatadaComAno"))
+                        {
+                            columns.Add("DataFormatadaComAno");
+                        }
                         row["DataFormatadaComAno"] = data.ToString("dd/MM/yyyy HH:mm:ss");
                     }
+                    break;
+
+                default:
+                    // Gera um ObjectId para tabelas não especificadas
+                    row["_id"] = ObjectId.NewObjectId().ToString();
                     break;
             }
 
