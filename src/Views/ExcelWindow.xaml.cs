@@ -39,6 +39,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Reseta a barra de progresso e a mensagem de status
             ResetarProgresso();
             AtualizarProgresso(10, "Status: Iniciando importação de dados...");
+            await Task.Delay(200); // Simula um pequeno atraso para visualização do progresso
 
             // Esconde a pré-visualização dos dados
             PreviewPanel.Visibility = Visibility.Collapsed;
@@ -59,18 +60,18 @@ namespace WMS_RadiadoresLemos_WPF
                     var dadosExcel = CarregarDadosExcel(openFileDialog.FileName);
 
                     AtualizarProgresso(50, "Status: Formatando dados para pré-visualização...");
-
-                    // Exibe os dados na pré-visualização
-                    AtualizarPreviewDatagrid(dadosExcel);
-
-                    AtualizarProgresso(70, "Status: Preparando dados para importação...");
+                    await Task.Delay(200); // Simula um pequeno atraso para visualização do progresso
 
                     // Converte os dados do Excel para BsonDocument e preenche colunas não preenchidas
                     DadosPreVisualizacao = TratarDadosParaBanco(dadosExcel);
-
-                    AtualizarPreviewDatagrid(dadosExcel);
                     
 
+                    AtualizarProgresso(70, "Status: Apresentando dados para importação...");
+                    await Task.Delay(200); // Simula um pequeno atraso para visualização do progresso
+
+                    // Atualiza o DataGrid com os dados tratados
+                    AtualizarPreviewDatagrid(dadosExcel);
+                    
                     /* DEPURAÇÃO */
                     // Define o caminho do arquivo TXT
                     string caminhoArquivoTxt = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DadosTratados.txt");
@@ -79,9 +80,7 @@ namespace WMS_RadiadoresLemos_WPF
                     SalvarDadosTratadosEmTxt(DadosPreVisualizacao, caminhoArquivoTxt);
                     /* DEPURAÇÃO */
 
-
                     AtualizarProgresso(100, "Status: Dados carregados com sucesso!");
-                    MessageBox.Show("Dados carregados com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
 
                     // Mostra a pré-visualização
                     PreviewPanel.Visibility = Visibility.Visible;
@@ -115,8 +114,6 @@ namespace WMS_RadiadoresLemos_WPF
                         writer.WriteLine(new string('-', 50)); // Separador entre documentos
                     }
                 }
-
-                MessageBox.Show($"Dados tratados salvos com sucesso em: {caminhoArquivo}", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -274,12 +271,6 @@ namespace WMS_RadiadoresLemos_WPF
                         // 3. Criar um documento BSON para cada linha
                         var bsonDocument = CriarDocumentoBson(row, dataTable.Columns, mapeamentoColunas, aba, ref ultimoIdNumerico);
 
-                        // 4. Garantir unicidade do campo _id
-                        if (listaBson.Any(d => d["_id"] == bsonDocument["_id"]))
-                        {
-                            continue; // Ignora duplicatas
-                        }
-
                         listaBson.Add(bsonDocument);
                     }
                     catch (Exception ex)
@@ -340,155 +331,67 @@ namespace WMS_RadiadoresLemos_WPF
             // Inicializa um novo documento BSON vazio  
             var bsonDocument = new BsonDocument();
 
-            // 1. Preenche o documento BSON com os dados da linha  
-            foreach (DataColumn column in columns)
-            {
-                // Normaliza o nome da coluna com base no mapeamento fornecido  
-                var nomeColuna = mapeamentoColunas.ContainsKey(column.ColumnName)
-                    ? mapeamentoColunas[column.ColumnName]
-                    : column.ColumnName;
-
-                // Obtém o valor da célula correspondente  
-                var valor = row[column]?.ToString() ?? string.Empty;
-
-                // Converte os valores para os tipos corretos  
-                if (nomeColuna.Equals("preco", StringComparison.OrdinalIgnoreCase) && double.TryParse(valor, out var preco))
-                {
-                    bsonDocument[nomeColuna] = preco; // Adiciona o valor como número decimal  
-                }
-                else if (nomeColuna.Equals("quantidade", StringComparison.OrdinalIgnoreCase) && int.TryParse(valor, out var quantidade))
-                {
-                    bsonDocument[nomeColuna] = quantidade; // Adiciona o valor como número inteiro  
-                }
-                else if (nomeColuna.Equals("data", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Trata o campo de data e adiciona campos formatados  
-                    if (DateTime.TryParseExact(valor, "dd/MM/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dataConvertida))
-                    {
-                        bsonDocument["DataFormatadaComAno"] = dataConvertida.ToString("dd/MM/yyyy HH:mm:ss");
-                        bsonDocument["DataFormatadaSemAno"] = dataConvertida.ToString("dd/MM HH:mm:ss");
-                        bsonDocument["data"] = new BsonDocument { ["$date"] = dataConvertida.ToString("yyyy-MM-ddTHH:mm:ss") }; // Formato LiteDB  
-                    }
-                    else
-                    {
-                        bsonDocument["data"] = valor; // Adiciona o valor original se não puder converter  
-                    }
-                }
-                else
-                {
-                    bsonDocument[nomeColuna] = valor; // Adiciona o valor como string  
-                }
-            }
-
-            // 2. Substitui ou preenche a coluna _id com base na tabela (aba)  
+            // Cria a coluna _id com base na tabela (aba)  
             if (!columns.Contains("_id"))
             {
                 columns.Add("_id");
             }
 
-            // Define o valor do campo _id com base na aba/tabela
+            // Define o valor do campos extras com base na aba/tabela
             switch (aba.ToLower())
             {
                 case "usuarios":
                     // Usa a matrícula como _id ou gera um novo ObjectId
-
+                    row["_id"] = row.Table.Columns.Contains("matricula") && !string.IsNullOrEmpty(row["matricula"]?.ToString())
+                        ? row["matricula"].ToString()
+                        : ObjectId.NewObjectId().ToString();
                     break;
 
                 case "produtos":
                     // Usa o código como _id ou gera um novo ObjectId
-
+                    row["_id"] = row.Table.Columns.Contains("codigo") && !string.IsNullOrEmpty(row["codigo"]?.ToString())
+                        ? row["codigo"].ToString()
+                        : ObjectId.NewObjectId().ToString();
                     break;
 
                 case "movimentacoes":
-                    // Gera um ID numérico incremental e converte para string
-
-                    break;
-
-
                 case "historico":
-                    // Gera um ID numérico incremental e converte para string
+                    // Obtém a coleção correspondente com base na aba
+                    var colecao = DatabaseConnect.Database.GetCollection<BsonDocument>(aba);
 
+                    // Busca o maior valor de _id na coleção, considerando apenas valores numéricos
+                    var maiorId = colecao.Query()
+                        .Where(x => x["_id"].IsInt32) // Filtra apenas os _id que são inteiros
+                        .OrderByDescending(x => x["_id"])
+                        .Select(x => x["_id"].AsInt32) // Converte para int
+                        .FirstOrDefault();
+
+                    // Define o último ID numérico como o maior encontrado ou 0 se não houver registros
+                    ultimoIdNumerico = maiorId;
+
+                    // Incrementa o último ID numérico e atribui ao _id da linha
+                    row["_id"] = ++ultimoIdNumerico;
+
+
+                    // Adiciona o campo "DataFormatadaSemAno" e "DataFormatadaComAno"
+                    if (columns.Contains("data"))
+                    {
+                        var data = DateTime.Parse(row["data"].ToString());
+
+                        // Adiciona as duas colunas
+                        columns.Add("DataFormatadaSemAno");
+                        row["DataFormatadaSemAno"] = data.ToString("dd/MM HH:mm:ss");
+
+                        columns.Add("DataFormatadaComAno");
+                        row["DataFormatadaComAno"] = data.ToString("dd/MM/yyyy HH:mm:ss");
+                    }
                     break;
-
-                default:
-                    // Gera um ObjectId para tabelas não especificadas
-
-                    break;
-            }
-
-            // 3. Valida se os campos obrigatórios foram adicionados  
-            if (!bsonDocument.ContainsKey("_id") || string.IsNullOrEmpty(bsonDocument["_id"].AsString))
-            {
-                throw new Exception($"O campo '_id' não foi gerado corretamente para a aba '{aba}'. Verifique os dados de entrada.");
-            }
-
-            if (!bsonDocument.ContainsKey("DataFormatadaComAno") || !bsonDocument.ContainsKey("DataFormatadaSemAno"))
-            {
-                Console.WriteLine($"Aviso: Campos de data formatada não foram gerados para a aba '{aba}'.");
             }
 
             // Retorna o documento BSON completamente formatado  
             return bsonDocument;
         }
 
-
-        // Função para adicionar campos específicos com base na tabela
-        private void AdicionarCamposEspecificos(BsonDocument bsonDocument, string aba, ref int ultimoIdNumerico)
-        {
-            if (aba.Equals("usuarios", StringComparison.OrdinalIgnoreCase))
-            {
-                // Gera o campo _id com base na matrícula
-                if (!bsonDocument.ContainsKey("matricula") || string.IsNullOrEmpty(bsonDocument["matricula"].AsString))
-                {
-                    bsonDocument["matricula"] = ObjectId.NewObjectId().ToString();
-                }
-                bsonDocument["_id"] = bsonDocument["matricula"];
-            }
-            else if (aba.Equals("produtos", StringComparison.OrdinalIgnoreCase))
-            {
-                // Gera o campo _id com base no código
-                if (!bsonDocument.ContainsKey("codigo") || string.IsNullOrEmpty(bsonDocument["codigo"].AsString))
-                {
-                    bsonDocument["codigo"] = ObjectId.NewObjectId().ToString();
-                }
-                bsonDocument["_id"] = bsonDocument["codigo"];
-            }
-            else if (aba.Equals("movimentacoes", StringComparison.OrdinalIgnoreCase) || aba.Equals("historico", StringComparison.OrdinalIgnoreCase))
-            {
-                // Gera um novo ID numérico
-                bsonDocument["_id"] = ++ultimoIdNumerico;
-            }
-        }
-
-        // Função para adicionar campos de datas formatadas e converter a data para LiteDB
-        private void AdicionarCamposDeDatasFormatadasEConverter(BsonDocument bsonDocument)
-        {
-            // Verifica se o campo "data" existe e é uma string
-            if (bsonDocument.ContainsKey("data") && bsonDocument["data"].IsString)
-            {
-                var valorData = bsonDocument["data"].AsString;
-
-                // Tenta converter o valor da data
-                if (DateTime.TryParseExact(valorData, "dd/MM/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dataConvertida))
-                {
-                    // Adiciona os campos de datas formatadas
-                    bsonDocument["DataFormatadaComAno"] = dataConvertida.ToString("dd/MM/yyyy HH:mm:ss");
-                    bsonDocument["DataFormatadaSemAno"] = dataConvertida.ToString("dd/MM HH:mm:ss");
-
-                    // Substitui o campo "data" pelo formato LiteDB
-                    bsonDocument["data"] = new BsonDocument { ["$date"] = dataConvertida.ToString("yyyy-MM-ddTHH:mm:ss") };
-                }
-                else
-                {
-                    throw new FormatException($"O valor '{valorData}' não está em um formato de data válido.");
-                }
-            }
-            else
-            {
-                // Caso o campo "data" não exista ou não seja uma string, lança uma exceção ou ignora
-                throw new Exception("O campo 'data' não existe ou não é uma string válida no documento BSON.");
-            }
-        }
 
         // Evento disparado ao alterar a seleção no ComboBox de tabelas
         private void TabelaComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e){}
@@ -510,21 +413,14 @@ namespace WMS_RadiadoresLemos_WPF
 
                 try
                 {
-                    AtualizarProgresso(10, "Status: Conectando ao banco de dados...");
-                    var db = DatabaseConnect.Database; // Obtenha a instância do banco de dados sem usar 'using'
-
-                    if (db == null)
-                    {
-                        AtualizarProgresso(0, "Status: Erro ao conectar ao banco de dados.");
-                        MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                    AtualizarProgresso(10, "Status: Iniciando importação...");
+                    await Task.Delay(100); // Simula um pequeno atraso para visualização do progresso
 
                     foreach (var tabela in TabelasDisponiveis)
                     {
                         AtualizarProgresso(20, $"Status: Processando tabela '{tabela}'...");
 
-                        var collection = db.GetCollection<BsonDocument>(tabela);
+                        var collection = DatabaseConnect.Database.GetCollection<BsonDocument>(tabela);
 
                         if (selectedMode == "Substituir Dados")
                         {
@@ -534,13 +430,14 @@ namespace WMS_RadiadoresLemos_WPF
 
                         AtualizarProgresso(60, $"Status: Inserindo novos dados na tabela '{tabela}'...");
 
-                        // Filtra os dados da tabela atual
+                        // Filtra os dados da tabela atual e converte os tipos corretamente
                         var dadosTabela = DadosPreVisualizacao
                             .Where(d => d["Tabela"].AsString == tabela)
                             .Select(d =>
                             {
-                                d.Remove("Tabela"); // Remove o atributo "Tabela" antes de inserir no banco
-                                return d;
+                                var documento = ConverterTipos(d);
+                                documento.Remove("Tabela"); // Remove a coluna "Tabela" do documento
+                                return documento; // Retorna documento BsonDocument 
                             })
                             .ToList();
 
@@ -568,12 +465,44 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        // Função auxiliar para converter os tipos dos campos no BsonDocument
+        private BsonDocument ConverterTipos(BsonDocument documento)
+        {
+            var camposParaConverter = new Dictionary<string, Func<string, BsonValue>>
+            {
+                { "_id", valor => int.TryParse(valor, out var id) ? new BsonValue(id) : new BsonValue(valor) },
+                { "preco", valor => double.TryParse(valor, out var preco) ? new BsonValue(preco) : new BsonValue(valor) },
+                { "quantidade", valor => int.TryParse(valor, out var quantidade) ? new BsonValue(quantidade) : new BsonValue(valor) },
+                { "data", valor =>
+                    {
+                        if (DateTime.TryParseExact(valor, "dd/MM/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var data))
+                        {
+                            return new BsonValue(data);
+                        }
+                        return new BsonValue(valor);
+                    }
+                }
+            };
+
+            foreach (var campo in camposParaConverter.Keys)
+            {
+                if (documento.ContainsKey(campo) && documento[campo].IsString)
+                {
+                    var valor = documento[campo].AsString;
+                    documento[campo] = camposParaConverter[campo](valor);
+                }
+            }
+            return documento;
+        }
 
         // Exporta os dados do banco de dados para o Excel
         private async void ExportarDados_Click(object sender, RoutedEventArgs e)
         {
             // Reseta a barra de progresso
             ResetarProgresso();
+
+            AtualizarProgresso(10, "Status: Iniciando exportação de dados...");
+            await Task.Delay(200); // Simula um pequeno atraso para visualização do progresso
 
             try
             {
@@ -694,7 +623,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                             tabelaAtual++;
                             AtualizarProgresso((double)tabelaAtual / totalTabelas * 100, $"Status: Exportando tabela '{tabela}'...");
-                            await Task.Delay(500); // Simula um pequeno atraso para visualização do progresso
+                            await Task.Delay(100); // Simula um pequeno atraso para visualização do progresso
                         }
 
                         // Salva o arquivo Excel
@@ -704,6 +633,10 @@ namespace WMS_RadiadoresLemos_WPF
                     AtualizarProgresso(100, "Status: Dados exportados com sucesso!");
                     MessageBox.Show("Dados exportados com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+                else
+                {
+                    AtualizarProgresso(0, "Status: Exportação cancelada pelo usuário.");
+                }
             }
             catch (Exception ex)
             {
@@ -712,8 +645,14 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Gera uma tabela padrão com cabeçalhos dinâmicos
-        private void GerarTabela_Click(object sender, RoutedEventArgs e)
+        private async void GerarTabela_Click(object sender, RoutedEventArgs e)
         {
+            // Reseta a barra de progresso
+            ResetarProgresso();
+
+            AtualizarProgresso(10, "Status: Iniciando geração da tabela padrão...");
+            await Task.Delay(200); // Simula um pequeno atraso para visualização do progresso
+
             try
             {
                 // Configura o diálogo para salvar o arquivo Excel
@@ -772,6 +711,10 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                     AtualizarProgresso(100, "Status: Tabela padrão gerada com sucesso!");
                     MessageBox.Show("Tabela padrão gerada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    AtualizarProgresso(0, "Status: Geração de Tabela cancelada pelo usuário.");
                 }
             }
             catch (Exception ex)
