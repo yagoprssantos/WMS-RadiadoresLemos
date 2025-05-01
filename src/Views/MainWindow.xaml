@@ -49,7 +49,7 @@
                     <Button x:Name="BtnAdicionar" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image x:Name="IconAdicionar" Source="/src/Resources/Icons/NotSelected/PlusNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
-                            <TextBlock x:Name="TextAdicionar" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Adicionar"/></TextBlock>
+                            <TextBlock x:Name="TextAdicionar" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Movimentação"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnVendas" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">

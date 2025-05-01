@@ -31,7 +31,7 @@ namespace WMS_RadiadoresLemos_WPF
             Setup();
 
             // Vincular a coleção carrinhoDeCompras ao ItemsControl na interface do usuário
-            CarrinhoDeComprasItemsControl.ItemsSource = carrinhoDeCompras;
+            ListaItemsControl.ItemsSource = carrinhoDeCompras;
         }
 
         private void Setup()
@@ -69,15 +69,16 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
 
-            // Títulos e detalhes antes e depois
-            AntesTextBlock.Visibility = visibility;
-            DepoisTextBlock.Visibility = visibility;
-            AntesGrid.Visibility = visibility;
-            DepoisGrid.Visibility = visibility;
+            // Atualizar visibilidade dos elementos
+            ProdutoAntesDepois.Visibility = visibility;
+            ConfirmarRegistroButton.Visibility = visibility;
+            CancelarRegistroButton.Visibility = visibility;
+            RegistrarEntradaButton.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
+            RegistrarSaidaButton.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
 
-            // Produto Selecionado
-            ProdutoSelecionado.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
-            ProdutoAntesDepois.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            // Desabilitar ou habilitar o ComboBox
+            ProdutoComboBox.IsHitTestVisible = !isVisible;
+            ProdutoComboBox.IsEnabled = !isVisible;
         }
 
 
@@ -136,7 +137,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método chamado quando um produto é selecionado, altera as informações apresentadas na tela
         private void AtualizarProdutoSelecionado(ProdutoData produto)
         {
-            // Seção do produto selecionado
+            // Atualizar os detalhes do produto selecionado
             NomeSelecionadoDadoTextBlock.Text = produto.Nome;
             TipoSelecionadoDadoTextBlock.Text = produto.Tipo;
             MarcaSelecionadoDadoTextBlock.Text = produto.Marca;
