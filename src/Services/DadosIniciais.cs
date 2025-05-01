@@ -27,7 +27,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     Nome = "Administrador",
                     Email = "admin@radiadoreslemos.com",
                     Matricula = "ADM2401",
-                    Senha = "admin123",
+                    Senha = CriptografiaService.CriptografarSenha("admin123"),
                     Cargo = "Administrador",
                     Id = "ADM2401"
                 };

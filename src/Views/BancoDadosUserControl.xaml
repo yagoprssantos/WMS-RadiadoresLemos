@@ -55,20 +55,12 @@
 
                     <!-- Tabelas Excel -->
                     <TextBlock Text="Tabelas do Excel:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14"/>
-                    <Grid Margin="0,0,0,10" HorizontalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="ImportarButton" Content="IMPORTAR" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                        <Button x:Name="ExportarButton" Content="EXPORTAR" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Grid.Column="1"/>
-                        <Button x:Name="GerarButton" Content="GERAR" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Grid.Column="2"/>
-                    </Grid>
+                    <Button x:Name="VisualizarExcelButton" Content="VISUALIZAR EM EXCEL" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="VisualizarExcelButton_Click"/>
+
 
                     <!-- Menu de Tabelas -->
                     <TextBlock Text="Visualizar Menu de Tabelas:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14" />
-                    <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                    <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirMenuTabelasButton_Click"/>
                 </StackPanel>
 
                 <!-- Mais Informações -->
@@ -120,48 +112,5 @@
                              Minimum="0" Maximum="100" Value="0"/>
             </StackPanel>
         </Grid>
-
-        <!-- Popup para Configurações de Exportação -->
-        <Popup Name="ExportConfigPopup" Placement="Center" StaysOpen="True">
-            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="15">
-                <StackPanel>
-                    <!-- Textos ajustáveis de acordo com função -->
-                    <TextBlock Text="Configurações para Exportar" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="18" Margin="0,0,0,10"/>
-
-                    <!-- Tabelas adicionadas de acordo com arquivo/função -->
-                    <TextBlock Text="Selecione as Tabelas que deseja exportar:" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16"/>
-                    <ListBox x:Name="ExportTabelasListBox" SelectionMode="Multiple" Height="100"/>
-
-                    <Button Content="Confirmar exportação" Margin="5" Click="ConfirmarExportacao_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                    <Button Content="Cancelar" Margin="5" Click="FecharExportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
-                </StackPanel>
-            </Border>
-        </Popup>
-
-        <!-- Popup para Configurações de Importação -->
-        <Popup Name="ImportConfigPopup" Placement="Center" StaysOpen="True" Width="400">
-            <Border Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" Padding="15" CornerRadius="15">
-                <StackPanel>
-                    <!-- Textos ajustáveis de acordo com função -->
-                    <TextBlock Text="Configurações para Importar" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="18" Margin="0,0,0,10" TextWrapping="Wrap"/>
-
-                    <!-- Tabelas adicionadas de acordo com arquivo/função -->
-                    <TextBlock Text="Selecione as Tabelas que deseja importar:" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" TextWrapping="Wrap"/>
-                    <ListBox x:Name="ImportTabelasListBox" SelectionMode="Multiple" Height="100"/>
-
-                    <!-- ComboBox com opções para importação-->
-                    <TextBlock Text="Escolha um método de importação:" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" Margin="0,10,0,0" TextWrapping="Wrap"/>
-                    <ComboBox x:Name="ImportComboBox" Margin="0,0,0,10" Style="{StaticResource ComboBoxStyle}">
-                        <ComboBoxItem Content="Substituir Dados"/>
-                        <ComboBoxItem Content="Adicionar Dados"/>
-                    </ComboBox>
-
-                    <TextBlock Text="AVISO - as tabelas selecionadas serão substituídas se e somente se o nome da tabela for igual ao nome da tabela no arquivo de importação" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="12" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
-                    <TextBlock Text="Esta ação é irreversível e pode causar perda de dados e não funcionamento do sistema. Tem certeza que deseja confirmar?" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" Foreground="Red" Margin="0,0,0,10" TextWrapping="Wrap"/>
-                    <Button Content="Confirmar importação" Margin="5" Click="ConfirmarImportacao_Click" Style="{StaticResource EmphasisButtonStyle}"/>
-                    <Button Content="Cancelar" Margin="5" Click="FecharImportPopup_Click" Style="{StaticResource CancelButtonStyle}"/>
-                </StackPanel>
-            </Border>
-        </Popup>
     </Grid>
 </UserControl>

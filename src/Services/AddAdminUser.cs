@@ -30,7 +30,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                         Nome = "admin",
                         Email = "admin@radiadoreslemos.com",
                         Matricula = "ADM",
-                        Senha = "admin", // Senha inicial que deve ser alterada
+                        Senha = CriptografiaService.CriptografarSenha("admin"), // Senha inicial que deve ser alterada
                         Cargo = "Administrador"
                     };
 

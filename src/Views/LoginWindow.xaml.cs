@@ -74,7 +74,11 @@ namespace WMS_RadiadoresLemos_WPF
                     var usuariosCollection = db.GetCollection<UsuarioData>("usuarios");
                     var usuarios = usuariosCollection.FindAll().ToList();
 
-                    return usuarios.Find(u => (u.Nome == username || u.Matricula == username) && u.Senha == password);
+                    var usuario = usuarios.Find(u => u.Nome == username || u.Matricula == username);
+                    if (usuario != null && CriptografiaService.VerificarSenha(password, usuario.Senha))
+                    {
+                        return usuario;
+                    }
                 }
                 return null;
             }

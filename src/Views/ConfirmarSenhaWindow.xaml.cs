@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -28,7 +29,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             string senhaInserida = SenhaPasswordBox.Password;
 
             // Verifica se a senha inserida corresponde à senha do usuário logado
-            if (MainWindow.UsuarioLogado != null && MainWindow.UsuarioLogado.Senha == senhaInserida)
+            if (MainWindow.UsuarioLogado != null && CriptografiaService.VerificarSenha(senhaInserida, MainWindow.UsuarioLogado.Senha))
             {
                 IsConfirmed = true;
                 this.Close();
