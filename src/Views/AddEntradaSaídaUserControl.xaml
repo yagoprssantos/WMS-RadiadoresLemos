@@ -47,15 +47,15 @@
                             <!-- Tipo de Movimentação -->
                             <TextBlock Text="Tipo de Movimentação:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                             <ComboBox Name="TipoMovimentacaoComboBox" Margin="0,0,0,15" FontSize="14" HorizontalAlignment="Stretch"
-                                  Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                  SelectionChanged="TipoMovimentacaoComboBox_SelectionChanged">
+                                      Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                      SelectionChanged="TipoMovimentacaoComboBox_SelectionChanged" Height="35">
                                 <ComboBoxItem Content="Entrada" />
                                 <ComboBoxItem Content="Saída" />
                             </ComboBox>
 
                             <!-- Produto -->
                             <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                            <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="14" HorizontalAlignment="Stretch"
+                            <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="14" Height="35" HorizontalAlignment="Stretch"
                                       Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"
                                       LostFocus="ProdutoComboBox_LostFocus" StaysOpenOnEdit="True" IsTextSearchEnabled="True"
                                       TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
@@ -71,13 +71,13 @@
                                     <TextBlock Text="Quantidade:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                     <TextBox Name="QuantidadeTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                              Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                             LostFocus="QuantidadeTextBox_LostFocus" />
+                                             LostFocus="QuantidadeTextBox_LostFocus" Height="35" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                     <TextBlock Text="Preço:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                     <TextBox Name="PrecoTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                              Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                             LostFocus="PrecoTextBox_LostFocus" />
+                                             LostFocus="PrecoTextBox_LostFocus" Height="35" />
                                 </StackPanel>
                             </Grid>
 
@@ -155,9 +155,11 @@
                         </StackPanel>
 
                         <!-- Botão para alternar a visibilidade da ListaCompras -->
-                        <Button Content="🛒" Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40"
-                                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,0,0"
-                                Click="ToggleListaCompras_Click" />
+                        <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0"
+                                HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
+                                Click="ToggleListaCompras_Click">
+                            <Image Source="/src/Resources/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="28" Width="25"/>
+                        </Button>
                     </Grid>                        
                 </Border>
 
@@ -168,7 +170,7 @@
                         <!-- Definição das linhas da Grid -->
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" /> <!-- Título e botão fechar -->
-                            <RowDefinition Height="*" />   <!-- ScrollViewer -->
+                            <RowDefinition Height="*" />    <!-- ScrollViewer -->
                             <RowDefinition Height="Auto" /> <!-- Botão Confirmar -->
                         </Grid.RowDefinitions>
 
@@ -183,11 +185,12 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Lista" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
+                            <TextBlock Grid.Row="0" Text="Lista de Compras" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
 
-                            <Button Grid.Row="0" Content="✖" Style="{StaticResource DeleteButtonStyle}" Width="20" Height="20"
-                                    HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Column="1" 
+                            <Button Grid.Row="0" Content="✖" FontSize="15" Style="{StaticResource DeleteButtonStyle}" Width="20" Height="20"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Column="1"
+                                    Foreground="{StaticResource TextBrush}" Background="Transparent"
                                     Click="FecharListaCompras_Click" />
                             
                             <Separator Grid.Row="1" Margin="5, 15" />
@@ -236,7 +239,7 @@
                                                 </StackPanel>
 
                                                 <!-- Botão de Excluir -->
-                                                <Button Content="X" Grid.Row="1" Grid.Column="1" Style="{StaticResource DeleteButtonStyle}" 
+                                                <Button Content="✖" Grid.Row="1" FontSize="7" Grid.Column="1" Style="{StaticResource DeleteButtonStyle}" 
                                                         Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" 
                                                         Click="ExcluirItem_Click" />
                                             </Grid>
