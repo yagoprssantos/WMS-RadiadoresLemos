@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>WMS_RadiadoresLemos_WPF</RootNamespace>
     <Nullable>enable</Nullable>
@@ -74,6 +74,7 @@
 
   <ItemGroup>
     <Folder Include="assets\" />
+    <Folder Include="src\Resources\Banco de dados\" />
   </ItemGroup>
 
   <ItemGroup>

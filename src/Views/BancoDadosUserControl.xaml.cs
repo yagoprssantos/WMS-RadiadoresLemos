@@ -56,7 +56,7 @@ namespace WMS_RadiadoresLemos_WPF
             Process.Start(new ProcessStartInfo
             {
                 // Diretório "DadosBancoDeDadosOffline" dentro do diretório atual do projeto
-                FileName = Path.Combine(Directory.GetCurrentDirectory(), "DadosBancoDeDadosOffline"),
+                FileName = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath()),
 
                 // Abre o diretório no explorador de arquivos
                 UseShellExecute = true
