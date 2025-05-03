@@ -57,13 +57,6 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 listarArquivosSupabaseButton.Click += ListarArquivosSupabaseButton_Click;
             }
-
-            // Configura o evento do botão para exportar para o Supabase
-            var exportarSupaButton = FindName("ExportarSupaButton") as Button;
-            if (exportarSupaButton != null)
-            {
-                exportarSupaButton.Click += ExportarSupaButton_Click;
-            }
         }
 
         private void AbrirArquivosLocais_Click(object sender, RoutedEventArgs e)
@@ -125,9 +118,11 @@ namespace WMS_RadiadoresLemos_WPF
                     await SupabaseUploader.UploadFileAsync(caminhoTemp);
 
                     ProgressBarMessage.Text = "✅ Arquivo enviado com sucesso!";
+                    MessageBox.Show("✅ Arquivo enviado com sucesso para o Supabase!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
+                    ProgressBarMessage.Text = "❌ Erro ao exportar arquivo!";
                     MessageBox.Show($"Erro ao exportar arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
@@ -146,7 +141,7 @@ namespace WMS_RadiadoresLemos_WPF
             string supabaseUrl = "https://knuqicziazoirikljxcg.supabase.co";
             string supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtudXFpY3ppYXpvaXJpa2xqeGNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwNDU4MTAsImV4cCI6MjA1OTYyMTgxMH0.9GHg6a_YjO0jN3Mf8Wvjj0aC50j_HeH3LZCw_bKIzqg";
             string bucket = "boletwash";
-
+            
             try
             {
                 ShowProgressBar.Visibility = Visibility.Visible;
@@ -197,6 +192,63 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private string EncontrarBancoMaisRecente()
+        {
+            string diretorioBanco = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath());
+            if (string.IsNullOrEmpty(diretorioBanco) || !Directory.Exists(diretorioBanco))
+            {
+                return null;
+            }
+
+            var arquivos = Directory.GetFiles(diretorioBanco, "*.db");
+            if (arquivos.Length == 0)
+            {
+                return null;
+            }
+
+            return arquivos.OrderByDescending(f => File.GetLastWriteTime(f)).First();
+        }
+
+        private async Task FazerBackupAutomatico()
+        {
+            try
+            {
+                string arquivoMaisRecente = EncontrarBancoMaisRecente();
+                if (string.IsNullOrEmpty(arquivoMaisRecente))
+                {
+                    Console.WriteLine("❌ Nenhum arquivo de banco de dados encontrado para backup.");
+                    return;
+                }
+
+                string dataHoraFormatada = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+                string novoNome = $"Database_{dataHoraFormatada}{Path.GetExtension(arquivoMaisRecente)}";
+                string caminhoTemp = Path.Combine(Path.GetTempPath(), novoNome);
+
+                // Copia o arquivo para uma pasta temporária
+                File.Copy(arquivoMaisRecente, caminhoTemp, true);
+
+                // Faz o upload para o Supabase
+                await SupabaseUploader.UploadFileAsync(caminhoTemp);
+                Console.WriteLine($"✅ Backup automático realizado com sucesso: {Path.GetFileName(arquivoMaisRecente)}");
+
+                // Limpa o arquivo temporário
+                if (File.Exists(caminhoTemp))
+                {
+                    File.Delete(caminhoTemp);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erro ao realizar backup automático: {ex.Message}");
+            }
+        }
+
+        // Método para ser chamado quando o programa for fechado
+        public async Task OnProgramClosing()
+        {
+            await FazerBackupAutomatico();
         }
     }
 
