@@ -41,5 +41,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             var contentControl = (Parent as ContentControl);
             contentControl.Content = detalhesVendaUserControl;
         }
+
+        private void NovaTransacaoButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Implementar lógica para criar nova transação
+            MessageBox.Show("Criar nova transação", "Nova Transação", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 }
