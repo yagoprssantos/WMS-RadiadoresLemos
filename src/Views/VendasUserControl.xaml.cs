@@ -44,8 +44,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void NovaTransacaoButton_Click(object sender, RoutedEventArgs e)
         {
-            // Implementar lógica para criar nova transação
-            MessageBox.Show("Criar nova transação", "Nova Transação", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Abrir a janela de cadastro de vendas
+            CadastroVendasWindow cadastroVendasWindow = new CadastroVendasWindow();
+            cadastroVendasWindow.ShowDialog(); // Usar ShowDialog para modal
         }
     }
 }
