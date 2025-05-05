@@ -22,7 +22,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             try
             {
                 arquivos = await SupabaseUploader.ListarArquivosAsync();
-                ArquivosListView.ItemsSource = arquivos;
+                ArquivosDataGrid.ItemsSource = arquivos;
             }
             catch (Exception ex)
             {
@@ -32,7 +32,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private async void BaixarButton_Click(object sender, RoutedEventArgs e)
         {
-            var arquivoSelecionado = ArquivosListView.SelectedItem as SupabaseArquivo;
+            var arquivoSelecionado = ArquivosDataGrid.SelectedItem as SupabaseArquivo;
             if (arquivoSelecionado == null)
             {
                 MessageBox.Show("Por favor, selecione um arquivo para baixar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);

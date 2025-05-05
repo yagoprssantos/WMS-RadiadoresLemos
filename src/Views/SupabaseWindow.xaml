@@ -5,78 +5,44 @@
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
     <Grid Margin="15">
-        <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource SecondaryBrush}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-                <!-- Título -->
-                <Grid Grid.Row="0" Margin="0,0,0,15">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Grid.Column="1" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="18" Padding="10" Margin="5,0,5,10">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="Arquivos disponíveis no Supabase:" Foreground="{StaticResource TextBrush}" FontSize="18" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- Lista de Arquivos -->
-                <ListView x:Name="ArquivosListView" Grid.Row="1" Margin="0,0,0,10" Background="{StaticResource PanelBackgroundBrush}" BorderThickness="0">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Nome" Width="200" DisplayMemberBinding="{Binding name}">
-                                <GridViewColumn.HeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="Nome" Foreground="{StaticResource TextBrush}" FontWeight="Bold"/>
-                                    </DataTemplate>
-                                </GridViewColumn.HeaderTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Data de Criação" Width="150" DisplayMemberBinding="{Binding created_at, StringFormat=dd/MM/yyyy HH:mm}">
-                                <GridViewColumn.HeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="Data de Criação" Foreground="{StaticResource TextBrush}" FontWeight="Bold"/>
-                                    </DataTemplate>
-                                </GridViewColumn.HeaderTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Última Atualização" Width="150" DisplayMemberBinding="{Binding updated_at, StringFormat=dd/MM/yyyy HH:mm}">
-                                <GridViewColumn.HeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="Última Atualização" Foreground="{StaticResource TextBrush}" FontWeight="Bold"/>
-                                    </DataTemplate>
-                                </GridViewColumn.HeaderTemplate>
-                            </GridViewColumn>
-                        </GridView>
-                    </ListView.View>
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
-                                </Trigger>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                </ListView>
-
-                <!-- Botões -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button x:Name="BaixarButton" Content="BAIXAR" Margin="0,0,10,0" Style="{StaticResource EmphasisButtonStyle}" Click="BaixarButton_Click"/>
-                    <Button x:Name="FecharButton" Content="FECHAR" Style="{StaticResource EmphasisButtonStyle}" Click="FecharButton_Click"/>
-                </StackPanel>
+            <!-- Título -->
+            <Grid Grid.Row="0" Margin="0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="1" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="18" Padding="10" Margin="5,0,5,10">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Arquivos disponíveis no Supabase:" Foreground="{StaticResource TextBrush}" FontSize="18" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
             </Grid>
-        </Border>
+
+            <!-- Lista de Arquivos -->
+            <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,10">
+                <DataGrid x:Name="ArquivosDataGrid" Style="{StaticResource CustomDataGridStyle}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nome" Binding="{Binding name}" Width="*" MinWidth="200" />
+                        <DataGridTextColumn Header="Data de Criação" Binding="{Binding created_at, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150" />
+                        <DataGridTextColumn Header="Última Atualização" Binding="{Binding updated_at, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+
+            <!-- Botões -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="BaixarButton" Content="BAIXAR" Style="{StaticResource EmphasisButtonStyle}" Click="BaixarButton_Click"/>
+                <Button x:Name="FecharButton" Content="FECHAR" Style="{StaticResource EmphasisButtonStyle}" Click="FecharButton_Click"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window> 
