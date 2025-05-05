@@ -40,7 +40,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" x:Name="AbrirArquivosLocaisButton" Content="ABRIR ARQUIVOS LOCAIS" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
-                        <Button Grid.Column="1" x:Name="AbrirOneDriveButton" Content="ABRIR ONEDRIVE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                        <Button Grid.Column="1" x:Name="AbrirSupabaseButton" Content="ABRIR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirSupabaseNoNavegador_Click"/>
                     </Grid>
 
                     <!-- Backup -->
@@ -53,7 +53,7 @@
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
                         <Button Grid.Column="1" x:Name="ExportarBackupButton" Content="EXPORTAR BACKUP" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarSupaButton_Click"/>
-                        <Button Grid.Column="2" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="5,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarArquivosSupabaseButton_Click"/>
+                        <Button Grid.Column="2" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="5,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarSupabase_Click"/>
                     </Grid>
 
                     <!-- Tabelas Excel -->

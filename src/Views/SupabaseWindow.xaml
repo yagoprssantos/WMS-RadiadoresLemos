@@ -1,0 +1,30 @@
+<Window x:Class="WMS_RadiadoresLemos_WPF.src.Views.SupabaseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Arquivos no Supabase" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Arquivos disponíveis no Supabase:" Margin="0,0,0,10" FontSize="16" FontWeight="Bold"/>
+
+        <ListView x:Name="ArquivosListView" Grid.Row="1" Margin="0,0,0,10">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Nome" Width="200" DisplayMemberBinding="{Binding name}"/>
+                    <GridViewColumn Header="Data de Criação" Width="150" DisplayMemberBinding="{Binding created_at, StringFormat=dd/MM/yyyy HH:mm}"/>
+                    <GridViewColumn Header="Última Atualização" Width="150" DisplayMemberBinding="{Binding updated_at, StringFormat=dd/MM/yyyy HH:mm}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="BaixarButton" Content="BAIXAR" Margin="0,0,10,0" Padding="10,5" Click="BaixarButton_Click"/>
+            <Button x:Name="FecharButton" Content="FECHAR" Padding="10,5" Click="FecharButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window> 
