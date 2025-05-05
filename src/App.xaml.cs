@@ -12,14 +12,24 @@ namespace WMS_RadiadoresLemos_WPF
         private const string ThemeFilePath = "theme.txt";
         private const string DefaultTheme = "LightTheme";
 
+        // Metodo para quando a aplicação for iniciada
         protected override async void OnStartup(StartupEventArgs e)
-        {
-            
+        {            
             LoadTheme();
+
+            // Adiciona o usuário administrador antes de qualquer outra operação
+            AddAdminUser.AddAdmin();
             
+            base.OnStartup(e);
+        }
+
+        // Metodo para quando aplicação for fechada
+        protected override void OnExit(ExitEventArgs e)
+        {
             try
             {
-                // Fazer backup automático ao abrir
+                Console.WriteLine("Iniciando processo de backup ao fechar...");
+
                 string diretorioBanco = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath());
                 if (!string.IsNullOrEmpty(diretorioBanco) && Directory.Exists(diretorioBanco))
                 {
@@ -31,35 +41,37 @@ namespace WMS_RadiadoresLemos_WPF
                         string novoNome = $"Database_{dataHoraFormatada}{Path.GetExtension(arquivoMaisRecente)}";
                         string caminhoTemp = Path.Combine(Path.GetTempPath(), novoNome);
 
-                        // Copia o arquivo para uma pasta temporária
                         File.Copy(arquivoMaisRecente, caminhoTemp, true);
+                        Console.WriteLine($"Arquivo copiado para o caminho temporário: {caminhoTemp}");
 
-                        // Faz o upload para o Supabase
-                        await SupabaseUploader.UploadFileAsync(caminhoTemp);
-                        Console.WriteLine($"✅ Backup automático realizado com sucesso: {Path.GetFileName(arquivoMaisRecente)}");
+                        // Executa o upload de forma síncrona usando Task.Run
+                        Task.Run(async () => await SupabaseUploader.UploadFileAsync(caminhoTemp)).GetAwaiter().GetResult();
+
+                        Console.WriteLine($"✅ Backup realizado com sucesso ao fechar: {Path.GetFileName(arquivoMaisRecente)}");
 
                         // Limpa o arquivo temporário
                         if (File.Exists(caminhoTemp))
                         {
                             File.Delete(caminhoTemp);
+                            Console.WriteLine("Arquivo temporário excluído.");
                         }
                     }
+                    else
+                    {
+                        Console.WriteLine("Nenhum arquivo .db encontrado no diretório.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Diretório do banco de dados não encontrado ou inválido.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Erro ao fazer backup automático: {ex.Message}");
+                Console.WriteLine($"❌ Erro ao fazer backup ao fechar: {ex.Message}");
             }
 
-            // Adiciona o usuário administrador antes de qualquer outra operação
-            AddAdminUser.AddAdmin();
-            
-            base.OnStartup(e);
-        }
-
-        // Metodo para quando aplicação for fechada
-        protected override void OnExit(ExitEventArgs e)
-        {
+            // Desconecta do banco de dados
             DatabaseConnect.Disconnect();
             base.OnExit(e);
         }
