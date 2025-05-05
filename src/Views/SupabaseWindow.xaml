@@ -40,8 +40,8 @@
 
             <!-- Botões -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="BaixarButton" Content="BAIXAR" Style="{StaticResource EmphasisButtonStyle}" Click="BaixarButton_Click" FontSize="14"/>
-                <Button x:Name="FecharButton" Content="FECHAR" Style="{StaticResource EmphasisButtonStyle}" Click="FecharButton_Click" FontSize="14"/>
+                <Button x:Name="BaixarButton" Content="BAIXAR" Style="{StaticResource EmphasisButtonStyle}" Click="BaixarButton_Click"/>
+                <Button x:Name="FecharButton" Content="FECHAR" Style="{StaticResource EmphasisButtonStyle}" Click="FecharButton_Click"/>
             </StackPanel>
         </Grid>
     </Grid>
