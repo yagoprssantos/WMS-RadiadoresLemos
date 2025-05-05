@@ -18,6 +18,7 @@ using LiteDB;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Net.Http;
+using Supabase;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -52,26 +53,29 @@ namespace WMS_RadiadoresLemos_WPF
                 abrirOneDriveButton.Click += AbrirOneDrive_Click;
             }
 
-            
+            // Configura o evento do botão para listar arquivos do Supabase
+            var listarArquivosSupabaseButton = FindName("ListarArquivosSupabaseButton") as Button;
+            if (listarArquivosSupabaseButton != null)
+            {
+                listarArquivosSupabaseButton.Click += ListarArquivosSupabaseButton_Click;
+            }
         }
 
         private void AbrirArquivosLocais_Click(object sender, RoutedEventArgs e)
         {
-            // Abre o diretório de arquivos locais
+            // Abre o diretório no explorador de arquivos
             Process.Start(new ProcessStartInfo
             {
-                // Diretório "DadosBancoDeDadosOffline" dentro do diretório atual do projeto
                 FileName = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath()),
-
-                // Abre o diretório no explorador de arquivos
                 UseShellExecute = true
             });
         }
 
-        private void AbrirOneDrive_Click(object sender, RoutedEventArgs e)
+        private async void ListarSupabase_Click(object sender, RoutedEventArgs e)
         {
-            // Abre o OneDrive
-            Process.Start("explorer.exe", "shell:OneDrive");
+            // Abre a janela de listagem do Supabase
+            var supabaseWindow = new SupabaseWindow();
+            supabaseWindow.ShowDialog();
         }
 
         // Evento disparado para visualizar dados em Excel
@@ -345,50 +349,21 @@ namespace WMS_RadiadoresLemos_WPF
 
         private async void ListarArquivosSupabaseButton_Click(object sender, RoutedEventArgs e)
         {
-            string supabaseUrl = "https://knuqicziazoirikljxcg.supabase.co";
-            string supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtudXFpY3ppYXpvaXJpa2xqeGNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwNDU4MTAsImV4cCI6MjA1OTYyMTgxMH0.9GHg6a_YjO0jN3Mf8Wvjj0aC50j_HeH3LZCw_bKIzqg";
-            string bucket = "boletwash";
-            
             try
             {
                 ShowProgressBar.Visibility = Visibility.Visible;
                 ProgressBarMessage.Text = "🔍 Listando arquivos no Supabase...";
 
-                using var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", supabaseKey);
+                var arquivos = await SupabaseUploader.ListarArquivosAsync();
 
-                var requestBody = new
+                if (arquivos != null && arquivos.Count > 0)
                 {
-                    prefix = "",
-                    limit = 100,
-                    offset = 0,
-                    sortBy = new { column = "name", order = "asc" }
-                };
-
-                var json = System.Text.Json.JsonSerializer.Serialize(requestBody);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-                var response = await httpClient.PostAsync($"{supabaseUrl}/storage/v1/object/list/{bucket}", content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var arquivos = System.Text.Json.JsonSerializer.Deserialize<List<SupabaseArquivo>>(responseContent);
-
-                    if (arquivos != null && arquivos.Count > 0)
-                    {
-                        string nomes = string.Join("\n", arquivos.Select(a => $"📄 {a.name}"));
-                        MessageBox.Show($"Arquivos encontrados:\n\n{nomes}", "Arquivos no Supabase", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Nenhum arquivo encontrado no bucket.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
+                    string nomes = string.Join("\n", arquivos.Select(a => $"📄 {a.name}"));
+                    MessageBox.Show($"Arquivos encontrados:\n\n{nomes}", "Arquivos no Supabase", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    var erro = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erro ao listar arquivos: {response.StatusCode}\n{erro}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Nenhum arquivo encontrado no bucket.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
@@ -457,6 +432,22 @@ namespace WMS_RadiadoresLemos_WPF
         {
             await FazerBackupAutomatico();
         }
+
+        private void AbrirSupabaseNoNavegador_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://supabase.com/dashboard/project/knuqicziazoirikljxcg/storage/buckets/boletwash",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir o navegador: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 
     public class SupabaseArquivo
@@ -474,30 +465,52 @@ namespace WMS_RadiadoresLemos_WPF
         private static readonly string supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtudXFpY3ppYXpvaXJpa2xqeGNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwNDU4MTAsImV4cCI6MjA1OTYyMTgxMH0.9GHg6a_YjO0jN3Mf8Wvjj0aC50j_HeH3LZCw_bKIzqg";
         private static readonly string bucket = "boletwash";
 
+        public static async Task<List<SupabaseArquivo>> ListarArquivosAsync()
+        {
+            var client = new Supabase.Client(supabaseUrl, supabaseKey);
+            await client.InitializeAsync();
+
+            var response = await client.Storage
+                .From(bucket)
+                .List();
+
+            return response.Select(item => new SupabaseArquivo
+            {
+                name = item.Name,
+                id = item.Id,
+                bucket_id = item.BucketId,
+                created_at = item.CreatedAt,
+                updated_at = item.UpdatedAt
+            }).ToList();
+        }
+
+        public static async Task DownloadFileAsync(string fileId, string destinationPath)
+        {
+            var client = new Supabase.Client(supabaseUrl, supabaseKey);
+            await client.InitializeAsync();
+
+            var response = await client.Storage
+                .From(bucket)
+                .Download(fileId, null);
+
+            await File.WriteAllBytesAsync(destinationPath, response);
+        }
+
         public static async Task UploadFileAsync(string filePath)
         {
+            var client = new Supabase.Client(supabaseUrl, supabaseKey);
+            await client.InitializeAsync();
+
             var fileName = Path.GetFileName(filePath);
-            var uploadUrl = $"{supabaseUrl}/storage/v1/object/{bucket}/{fileName}";
-
-            using var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", supabaseKey);
-
             var fileBytes = await File.ReadAllBytesAsync(filePath);
-            var content = new ByteArrayContent(fileBytes);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-            var response = await httpClient.PostAsync(uploadUrl, content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"✅ Upload de '{fileName}' feito com sucesso!");
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"❌ Erro ao fazer upload: {response.StatusCode} - {error}");
-                throw new Exception($"Erro ao fazer upload: {response.StatusCode} - {error}");
-            }
+            await client.Storage
+                .From(bucket)
+                .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                {
+                    CacheControl = "3600",
+                    Upsert = true
+                });
         }
     }
 }

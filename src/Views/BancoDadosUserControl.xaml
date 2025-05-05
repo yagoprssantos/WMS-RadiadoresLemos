@@ -40,7 +40,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" x:Name="AbrirArquivosLocaisButton" Content="ABRIR ARQUIVOS LOCAIS" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
-                        <Button Grid.Column="1" x:Name="AbrirOneDriveButton" Content="ABRIR ONEDRIVE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                        <Button Grid.Column="1" x:Name="AbrirSupabaseButton" Content="ABRIR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirSupabaseNoNavegador_Click"/>
                     </Grid>
 
                     <!-- Backup -->
