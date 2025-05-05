@@ -15,15 +15,14 @@
         <!-- Barra de Filtros/Botões -->
         <Grid Grid.Row="0" Margin="0,0,0,15">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ComboBox Style="{StaticResource ComboBoxStyle}" Width="200" Margin="0,0,15,0">
-                    <ComboBoxItem Content="Ordenar por" IsSelected="True"/>
-                    <ComboBoxItem Content="Data (mais recente)"/>
-                    <ComboBoxItem Content="Data (mais antiga)"/>
-                    <ComboBoxItem Content="Valor (maior)"/>
-                    <ComboBoxItem Content="Valor (menor)"/>
-                    <ComboBoxItem Content="Cliente (A-Z)"/>
-                    <ComboBoxItem Content="Cliente (Z-A)"/>
-                    <ComboBoxItem Content="Pedido"/>
+                <ComboBox x:Name="cmbOrdenar" Style="{StaticResource ComboBoxStyle}" Width="200" Margin="0,0,15,0" SelectionChanged="CmbOrdenar_SelectionChanged">
+                    <ComboBoxItem Content="Ordenar por" IsSelected="True" Tag="default"/>
+                    <ComboBoxItem Content="Data (mais recente)" Tag="data_desc"/>
+                    <ComboBoxItem Content="Data (mais antiga)" Tag="data_asc"/>
+                    <ComboBoxItem Content="Valor (maior)" Tag="valor_desc"/>
+                    <ComboBoxItem Content="Valor (menor)" Tag="valor_asc"/>
+                    <ComboBoxItem Content="Cliente (A-Z)" Tag="cliente_asc"/>
+                    <ComboBoxItem Content="Cliente (Z-A)" Tag="cliente_desc"/>
                 </ComboBox>
 
                 <Button Content="Nova Transação" Style="{StaticResource EmphasisButtonStyle}" Width="180" Height="45" Click="NovaTransacaoButton_Click"/>
@@ -32,40 +31,8 @@
 
         <!-- Conteúdo Principal -->
         <ScrollViewer Grid.Row="1">
-            <WrapPanel Margin="10">
-                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="5" Width="240" Height="Auto">
-                    <StackPanel>
-                        <TextBlock Text="Nota Fiscal" Style="{StaticResource VendasTitleTextBox}" FontSize="16"/>
-                        <Separator Margin="10, 2, 10, 5" />
-                        <TextBlock Text="Cliente: ID/Nome" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Pedido: X" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Data da Compra: XX/XX/XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Valor Total: R$ X.XXX,XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="16" Width="120" Margin="4"/>
-                    </StackPanel>
-                </Border>
-                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="5" Width="240" Height="Auto">
-                    <StackPanel>
-                        <TextBlock Text="Nota Fiscal" Style="{StaticResource VendasTitleTextBox}" FontSize="16"/>
-                        <Separator Margin="10, 2, 10, 5" />
-                        <TextBlock Text="Cliente: ID/Nome" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Pedido: X" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Data da Compra: XX/XX/XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Valor Total: R$ X.XXX,XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="16" Width="120" Margin="4"/>
-                    </StackPanel>
-                </Border>
-                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="5" Width="240" Height="Auto">
-                    <StackPanel>
-                        <TextBlock Text="Nota Fiscal" Style="{StaticResource VendasTitleTextBox}" FontSize="16"/>
-                        <Separator Margin="10, 2, 10, 5" />
-                        <TextBlock Text="Cliente: ID/Nome" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Pedido: X" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Data da Compra: XX/XX/XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <TextBlock Text="Valor Total: R$ X.XXX,XX" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                        <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="16" Width="120" Margin="4"/>
-                    </StackPanel>
-                </Border>
+            <WrapPanel x:Name="vendasContainer" Margin="10">
+                <!-- Os itens de venda serão adicionados aqui dinamicamente -->
             </WrapPanel>
         </ScrollViewer>
     </Grid>
