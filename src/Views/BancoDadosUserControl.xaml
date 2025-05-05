@@ -51,7 +51,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Column="0" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ImportarBackupSupabaseButton_Click"/>
                         <Button Grid.Column="1" x:Name="ExportarBackupButton" Content="EXPORTAR BACKUP" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarSupaButton_Click"/>
                         <Button Grid.Column="2" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="5,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarArquivosSupabaseButton_Click"/>
                     </Grid>
@@ -65,6 +65,10 @@
                     <TextBlock Text="Visualizar Menu de Tabelas:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14" />
                     <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirMenuTabelasButton_Click"/>
                 </StackPanel>
+
+                
+                
+
 
                 <!-- Mais Informações -->
                 <StackPanel Grid.Row="2">
