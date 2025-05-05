@@ -448,7 +448,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (ContentArea.Content is AddEntradaSaídaUserControl)
             {
-                TitleTextBlock.Text = "Entrada/Saída";
+                TitleTextBlock.Text = "Movimentação";
             }
             else if (ContentArea.Content is VendasUserControl)
             {

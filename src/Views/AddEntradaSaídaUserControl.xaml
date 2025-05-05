@@ -7,253 +7,255 @@
              d:DesignHeight="600" d:DesignWidth="800"
              Background="{StaticResource BackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="15, 15, 15, 0">
+    <Grid Margin="15">
+        <Grid.Resources>
+            <Style TargetType="ColumnDefinition" x:Key="DynamicColumnStyle">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=ListaCompras, Path=Visibility}" Value="Collapsed">
+                        <Setter Property="Width" Value="*" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ElementName=ListaCompras, Path=Visibility}" Value="Visible">
+                        <Setter Property="Width" Value="3*" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style TargetType="ColumnDefinition" x:Key="ListaComprasColumnStyle">
+                <Setter Property="Width" Value="2*" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=ListaCompras, Path=Visibility}" Value="Collapsed">
+                        <Setter Property="Width" Value="0" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
 
-        <!-- Ajustar para ficar melhor responsivo com a tela -->
+        <!-- Border Principal -->
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+            <Grid>
+                <!-- Layout Principal -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Style="{StaticResource DynamicColumnStyle}" />
+                    <ColumnDefinition Style="{StaticResource ListaComprasColumnStyle}" />
+                </Grid.ColumnDefinitions>
 
-        <Grid Margin="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Border Grid.Row="0" CornerRadius="15" Padding="25,10" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{StaticResource PanelBackgroundBrush}">
-                <Grid Cursor="">
-
-                    <!-- Botão de Carrinho de Compras no canto inferior direito -->
-                    <Button Style="{StaticResource HoverButtonStyle}"
-        FontSize="16" Width="50" Height="50" Margin="10" HorizontalAlignment="Right" VerticalAlignment="Bottom" x:Name="CarrinhoDeComprasButton" Click="CarrinhoDeComprasButton_Click">
-                        <Image Source="/src/Resources/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="28" Width="25"/>
-                    </Button>
-
-
-
-                    <!-- Popup de Carrinho de Compras -->
-                    <Popup x:Name="CarrinhoDeComprasPopup" StaysOpen="False" Placement="Center" AllowsTransparency="True">
-                        <Border Background="{StaticResource SecondaryBrush}" CornerRadius="15" Padding="10" BorderBrush="{StaticResource HoverBackgroundBrush}" BorderThickness="10">
-                            <StackPanel>
-                                <TextBlock Text="Carrinho de Compras" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Foreground="{StaticResource TextBrush}"/>
-                                <Grid Margin="0,0,0,10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100"/>
-                                        <ColumnDefinition Width="100"/>
-                                        <ColumnDefinition Width="100"/>
-                                        <ColumnDefinition Width="100"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Produto ID" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Tipo" FontWeight="Bold" Grid.Column="1" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Preço" FontWeight="Bold" Grid.Column="2" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Quantidade" FontWeight="Bold" Grid.Column="3" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Ação" FontWeight="Bold" Grid.Column="4" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                                </Grid>
-                                <ItemsControl x:Name="CarrinhoDeComprasItemsControl">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Style="{StaticResource CarrinhoDeComprasGridStyle}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="100"/>
-                                                    <ColumnDefinition Width="100"/>
-                                                    <ColumnDefinition Width="100"/>
-                                                    <ColumnDefinition Width="100"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <!-- Mostrar se é entrada ou saída  -->
-                                                <TextBlock Text="{Binding ProdutoId}" FontWeight="Bold" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding Tipo}" Grid.Column="1" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding Preco, StringFormat={}{0:C}}" Foreground="{StaticResource TextBrush}" Grid.Column="2" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding Quantidade}" Grid.Column="3" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                <Button Content="X" Style="{StaticResource DeleteButtonStyle}" Grid.Column="4" Click="ExcluirItem_Click" VerticalAlignment="Center"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <Grid HorizontalAlignment="Stretch">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button Grid.Column="0" Style="{StaticResource HoverButtonStyle}" Width="30" Height="30" Margin="10,0,0,0" Click="ExcluirTodosItens_Click" Content="🗑" Foreground="{StaticResource CancelButtonBrush}"/>
-                                    <Button Grid.Column="2" Content="Finalizar" Click="FinalizarCarrinhoDeCompras_Click" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" HorizontalAlignment="Right"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </Popup>
-
-                    <StackPanel Width="Auto" VerticalAlignment="Top" Margin="0, 15, 0, 0">
-                        <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>
-                        <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="16" Style="{StaticResource ComboBoxStyle}" HorizontalAlignment="Stretch" LostFocus="ProdutoComboBox_LostFocus"
-                                      StaysOpenOnEdit="True" IsTextSearchEnabled="True" TextBoxBase.TextChanged="ProdutoComboBox_TextChanged" SelectionChanged="ProdutoComboBox_SelectionChanged"/>
-
-                        <!-- Grid para Quantidade e Preço por unidade -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                <TextBlock Text="Quantidade:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>
-                                <TextBox Name="QuantidadeTextBox" Margin="0,0,0,15" FontSize="18" Style="{StaticResource {x:Type TextBox}}"
-                                             PreviewTextInput="QuantidadeTextBox_PreviewTextInput" DataObject.Pasting="QuantidadeTextBox_Pasting" LostFocus="QuantidadeTextBox_LostFocus"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock Text="Preço por unidade:" Margin="0,0,0,5" FontSize="18" Foreground="{StaticResource TextBrush}"/>
-                                <TextBox Name="PrecoTextBox" Margin="0,0,0,15" FontSize="18" Style="{StaticResource {x:Type TextBox}}"
-                                             PreviewTextInput="PrecoTextBox_PreviewTextInput" DataObject.Pasting="PrecoTextBox_Pasting" LostFocus="PrecoTextBox_LostFocus"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Detalhes do Produto -->
+                <!-- Primeira Border (Conteúdo Principal) -->
+                <Border x:Name="Principal" Grid.Column="0" CornerRadius="15" Padding="25" Margin="0"
+                        Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
+                    <Grid>
+                        <!-- Principal -->
                         <StackPanel>
-                            <Border CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}" Padding="10">
-                                <StackPanel>
-                                    <!-- Detalhes do produto Selecionado -->
-                                    <StackPanel x:Name="ProdutoSelecionado" Margin="0, 0, 0, 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Transparent" Visibility="Visible">
-                                        <Border CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
-                                            <Grid Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Center">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
+                            <!-- Tipo de Movimentação -->
+                            <TextBlock Text="Tipo de Movimentação:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                            <ComboBox Name="TipoMovimentacaoComboBox" Margin="0,0,0,15" FontSize="14" HorizontalAlignment="Stretch"
+                                      Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                      SelectionChanged="TipoMovimentacaoComboBox_SelectionChanged" Height="35">
+                                <ComboBoxItem Content="Entrada" />
+                                <ComboBoxItem Content="Saída" />
+                            </ComboBox>
 
-                                                <!-- Produto Selecionado -->
-                                                <StackPanel Grid.Column="0" Width="Auto" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
-                                                    <TextBlock Text="Produto Selecionado" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="ProdutoSelecionadoTextBlock"/>
-                                                    <Grid Margin="5" x:Name="ProdutoSelecionadoGrid">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*" MinWidth="200"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
+                            <!-- Produto -->
+                            <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                            <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="14" Height="35" HorizontalAlignment="Stretch"
+                                      Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                      LostFocus="ProdutoComboBox_LostFocus" StaysOpenOnEdit="True" IsTextSearchEnabled="True"
+                                      TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
+                                      SelectionChanged="ProdutoComboBox_SelectionChanged"/>
+                            
+                            <!-- Quantidade e Preço -->
+                            <Grid Margin="0,0,0,15">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                    <TextBlock Text="Quantidade:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                    <TextBox Name="QuantidadeTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
+                                             Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                             LostFocus="QuantidadeTextBox_LostFocus" Height="35" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <TextBlock Text="Preço:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                    <TextBox Name="PrecoTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
+                                             Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                             LostFocus="PrecoTextBox_LostFocus" Height="35" />
+                                </StackPanel>
+                            </Grid>
 
-                                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProdutoSelecionado.Nome}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="NomeSelecionadoDadoTextBlock"/>
+                            <!-- Antes e Depois -->
+                            <Grid x:Name="ProdutoAntesDepois" Margin="0,0,0,15" Visibility="Visible">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProdutoSelecionado.Tipo}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="TipoSelecionadoDadoTextBlock"/>
-
-                                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProdutoSelecionado.Marca}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="MarcaSelecionadoDadoTextBlock"/>
-
-                                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProdutoSelecionado.Codigo}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="CodigoSelecionadoDadoTextBlock"/>
-
-                                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProdutoSelecionado.Preco, StringFormat={}{0:C}}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="PrecoSelecionadoDadoTextBlock"/>
-
-                                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ProdutoSelecionado.Quantidade}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="QuantidadeSelecionadoDadoTextBlock"/>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </StackPanel>
-
-                                    <!-- Detalhes do produto Antes e Depois de adicionar entrada/saída -->
-                                    <Grid x:Name="ProdutoAntesDepois" Width="Auto" VerticalAlignment="Top" HorizontalAlignment="Center" Visibility="Collapsed">
+                                <!-- Antes -->
+                                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                    <TextBlock Text="Antes:" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0" />
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-
-                                        <!-- Antes -->
-                                        <StackPanel Grid.Column="0" Width="Auto" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
-                                            <TextBlock Text="Antes" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="AntesTextBlock"/>
-                                            <Grid Margin="5" x:Name="AntesGrid">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*" MinWidth="200"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-
-                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProdutoAntes.Tipo}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="TipoAntesDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProdutoAntes.Marca}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="MarcaAntesDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProdutoAntes.Codigo}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="CodigoAntesDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProdutoAntes.Preco, StringFormat={}{0:C}}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="PrecoAntesDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProdutoAntes.Quantidade}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="QuantidadeAntesDadoTextBlock"/>
-                                            </Grid>
-                                        </StackPanel>
-
-                                        <!-- Depois -->
-                                        <StackPanel Grid.Column="1" Width="Auto" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Center">
-                                            <TextBlock Text="Depois" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="DepoisTextBlock"/>
-                                            <Grid Margin="5" x:Name="DepoisGrid">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*" MinWidth="200"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-
-                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Tipo:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="TipoDepoisTextoTextBlock"/>
-                                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProdutoDepois.Tipo}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="TipoDepoisDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Marca:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="MarcaDepoisTextoTextBlock"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProdutoDepois.Marca}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="MarcaDepoisDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Código:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="CodigoDepoisTextoTextBlock"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProdutoDepois.Codigo}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="CodigoDepoisDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Preço:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="PrecoDepoisTextoTextBlock"/>
-                                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ProdutoDepois.Preco, StringFormat={}{0:C}}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="PrecoDepoisDadoTextBlock"/>
-
-                                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Quantidade:" FontWeight="Bold" Margin="5" FontSize="16" Foreground="{StaticResource TextBrush}" x:Name="QuantidadeDepoisTextoTextBlock"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProdutoDepois.Quantidade}" Margin="5" Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}" Padding="2" FontSize="16" x:Name="QuantidadeDepoisDadoTextBlock"/>
-                                            </Grid>
-                                        </StackPanel>
+                                        <TextBlock Text="Tipo:" Grid.Row="0" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="TipoAntesDadoTextBlock" Grid.Row="0" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Marca:" Grid.Row="1" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="MarcaAntesDadoTextBlock" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Código:" Grid.Row="2" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="CodigoAntesDadoTextBlock" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Preço:" Grid.Row="3" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="PrecoAntesDadoTextBlock" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Quantidade:" Grid.Row="4" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,5" />
+                                        <TextBlock x:Name="QuantidadeAntesDadoTextBlock" Grid.Row="4" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,5" />
                                     </Grid>
                                 </StackPanel>
-                            </Border>
+
+                                <!-- Separador -->
+                                <Border Grid.Column="1" Width="1" Background="{StaticResource HoverBackgroundBrush}" Margin="5,0" />
+
+                                <!-- Depois -->
+                                <StackPanel Grid.Column="2" Margin="10,0,0,0">
+                                    <TextBlock Text="Depois:" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0" />
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Tipo:" Grid.Row="0" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="TipoDepoisDadoTextBlock" Grid.Row="0" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Marca:" Grid.Row="1" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="MarcaDepoisDadoTextBlock" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Código:" Grid.Row="2" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="CodigoDepoisDadoTextBlock" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Preço:" Grid.Row="3" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
+                                        <TextBlock x:Name="PrecoDepoisDadoTextBlock" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
+                                        <TextBlock Text="Quantidade:" Grid.Row="4" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,5" />
+                                        <TextBlock x:Name="QuantidadeDepoisDadoTextBlock" Grid.Row="4" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,5" />
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+
+
+                            <!-- Botão Adicionar -->
+                            <Button Content="Adicionar na Lista" Style="{StaticResource EmphasisButtonStyle}" Width="200" HorizontalAlignment="Center" Click="AdicionarNaLista_Click" />
                         </StackPanel>
 
-                        <!-- Botões de Ação -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 0, 0, 10">
-                            <!-- Antes de selecionar tipo de registro -->
-                            <Button Content="Registrar Entrada" Click="RegistrarEntrada_Click" FontSize="16"
-                                    Visibility="Visible" Width="200" Margin="10, 15, 10, 5" Style="{StaticResource EmphasisButtonStyle}" x:Name="RegistrarEntradaButton"/>
-                            <Button Content="Registrar Saída" Click="RegistrarSaida_Click" FontSize="16"
-                                    Visibility="Visible" Width="200" Margin="10, 15, 10, 5" Style="{StaticResource CancelButtonStyle}" x:Name="RegistrarSaidaButton"/>
+                        <!-- Botão para alternar a visibilidade da ListaCompras -->
+                        <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0"
+                                HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
+                                Click="ToggleListaCompras_Click">
+                            <Image Source="/src/Resources/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="28" Width="25"/>
+                        </Button>
+                    </Grid>                        
+                </Border>
 
-                            <!-- Após selecionar tipo de registro -->
-                            <Button Content="Confirmar registro" HorizontalContentAlignment="Center"
-                                    FontSize="16" Width="200" Margin="10, 15, 10, 5" Style="{StaticResource EmphasisButtonStyle}"
-                                    Visibility="Collapsed" Click="ConfirmarAcao_Click" x:Name="ConfirmarRegistroButton"/>
-                            <Button Content="Cancelar registro" HorizontalContentAlignment="Center"
-                                    FontSize="16" Width="200" Margin="10, 15, 10, 5" Style="{StaticResource CancelButtonStyle}"
-                                    Visibility="Collapsed" Click="CancelarAcao_Click" x:Name="CancelarRegistroButton"/>
-                        </StackPanel>
+                <!-- Segunda Border (Lista Retrátil) -->
+                <Border x:Name="ListaCompras" Grid.Column="1" CornerRadius="15" Padding="15" Margin="20,0,0,0" Visibility="Visible"
+                        Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
+                    <Grid>
+                        <!-- Definição das linhas da Grid -->
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" /> <!-- Título e botão fechar -->
+                            <RowDefinition Height="*" />    <!-- ScrollViewer -->
+                            <RowDefinition Height="Auto" /> <!-- Botão Confirmar -->
+                        </Grid.RowDefinitions>
 
-                    </StackPanel>
-                </Grid>
-            </Border>
-        </Grid>
-    </ScrollViewer>
+                        <!-- Cabeçalho: Título e botão fechar -->
+                        <Grid Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="Lista de Compras" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
+
+                            <Button Grid.Row="0" Content="✖" FontSize="15" Style="{StaticResource DeleteButtonStyle}" Width="20" Height="20"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Column="1"
+                                    Foreground="{StaticResource TextBrush}" Background="Transparent"
+                                    Click="FecharListaCompras_Click" />
+                            
+                            <Separator Grid.Row="1" Margin="5, 15" />
+                        </Grid>
+
+                        <!-- ScrollViewer para a lista -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl x:Name="ListaItemsControl">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,2,0,2" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="8" Padding="8">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Tipo de Movimentação -->
+                                                <TextBlock Text="{Binding Tipo}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontSize="13"
+                                                           FontWeight="Bold" Foreground="{StaticResource AccentBrush}" 
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                                <!-- StackPanel para os outros elementos -->
+                                                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                    <!-- Produto -->
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Produto:" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding ProdutoId}" Foreground="{StaticResource TextBrush}" />
+                                                    </StackPanel>
+                                                    
+                                                    <!-- Quantidade -->
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Quantidade:" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding Quantidade}" Foreground="{StaticResource TextBrush}" />
+                                                    </StackPanel>
+
+                                                    <!-- Preço -->
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Preço:" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding Preco, StringFormat=C}" Foreground="{StaticResource TextBrush}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <!-- Botão de Excluir -->
+                                                <Button Content="✖" Grid.Row="1" FontSize="7" Grid.Column="1" Style="{StaticResource DeleteButtonStyle}" 
+                                                        Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                                                        Click="ExcluirItem_Click" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <!-- Botão Confirmar -->
+                        <Button Grid.Row="2" Content="Confirmar" Style="{StaticResource EmphasisButtonStyle}" Width="200" 
+                                HorizontalAlignment="Center" Margin="0,10,0,0" Click="ConfimarPedido_Click" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>
 
