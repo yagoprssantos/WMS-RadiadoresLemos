@@ -224,6 +224,170 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show($"Erro ao abrir o navegador: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private async void ImportarBancoDados_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ShowProgressBar.Visibility = Visibility.Visible;
+                ProgressBarMessage.Text = "🔍 Buscando arquivos no Supabase...";
+
+                var arquivos = await SupabaseUploader.ListarArquivosAsync();
+
+                if (arquivos == null || arquivos.Count == 0)
+                {
+                    MessageBox.Show("Nenhum arquivo de banco de dados encontrado no Supabase.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Abre a janela para o usuário escolher o arquivo
+                var pickerWindow = new SupabaseFilePickerWindow(arquivos);
+                var resultado = pickerWindow.ShowDialog();
+
+                if (resultado != true || pickerWindow.ArquivoSelecionado == null)
+                    return;
+
+                var arquivo = pickerWindow.ArquivoSelecionado;
+                string bancoAtual = DatabaseConnect.GetDatabasePath();
+
+                var confirmacao = MessageBox.Show(
+                    "⚠️ Atenção! Esta operação irá substituir o banco de dados atual.\n\n" +
+                    $"Banco atual: {Path.GetFileName(bancoAtual)}\n" +
+                    $"Novo banco: {arquivo.name}\n\n" +
+                    "Deseja continuar?",
+                    "Confirmação de Importação",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (confirmacao == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        ProgressBarMessage.Text = $"⬇️ Baixando {arquivo.name}...";
+
+                        // Cria um arquivo temporário para o download
+                        string caminhoTemp = Path.Combine(Path.GetTempPath(), "Database.db");
+                        await SupabaseUploader.DownloadFileAsync(arquivo.name, caminhoTemp);
+
+                        // Fecha todas as conexões com o banco atual
+                        DatabaseConnect.Disconnect();
+
+                        // Aguarda um momento para garantir que todas as conexões foram fechadas
+                        await Task.Delay(1000);
+
+                        // Faz backup do banco atual antes de substituir usando o sistema padrão
+                        if (File.Exists(bancoAtual))
+                        {
+                            DatabaseBackup.CreateBackup(bancoAtual);
+                        }
+
+                        // Tenta substituir o banco de dados
+                        try
+                        {
+                            // Se o arquivo existir, tenta deletá-lo primeiro
+                            if (File.Exists(bancoAtual))
+                            {
+                                File.Delete(bancoAtual);
+                            }
+
+                            // Copia o novo arquivo
+                            File.Copy(caminhoTemp, bancoAtual, true);
+
+                            // Verifica se o banco é válido
+                            try
+                            {
+                                using (var testDb = new LiteDatabase(bancoAtual))
+                                {
+                                    // Se chegou aqui, o banco está íntegro
+                                    testDb.Dispose();
+                                }
+
+                                ProgressBarMessage.Text = "✅ Banco de dados importado com sucesso!";
+
+                                // Obtém informações do backup mais recente
+                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                                    .ToList();
+
+                                if (!backups.Any())
+                                {
+                                    MessageBox.Show(
+                                        "❌ Erro: Nenhum backup encontrado na pasta local.",
+                                        "Erro",
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Error);
+                                    return;
+                                }
+
+                                var successWindow = new ImportSuccessWindow(
+                                    Path.GetFileName(backups.First()),
+                                    File.GetLastWriteTime(backups.First()),
+                                    caminhoTemp,
+                                    bancoAtual);
+
+                                successWindow.ShowDialog();
+
+                                if (!successWindow.Confirmado)
+                                {
+                                    // Se o usuário cancelou, não faz nada
+                                    return;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // Se o banco estiver corrompido, restaura o backup mais recente
+                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                                    .ToList();
+
+                                if (backups.Any())
+                                {
+                                    File.Copy(backups.First(), bancoAtual, true);
+                                }
+
+                                MessageBox.Show(
+                                    $"❌ O banco de dados importado está corrompido:\n{ex.Message}\n\n" +
+                                    "O banco anterior foi restaurado.",
+                                    "Erro",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(
+                                $"❌ Erro ao substituir o banco de dados:\n{ex.Message}\n\n" +
+                                "Tente fechar o programa e tentar novamente.",
+                                "Erro",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"❌ Erro ao importar banco de dados:\n{ex.Message}",
+                            "Erro",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"❌ Erro ao importar banco de dados:\n{ex.Message}",
+                    "Erro",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
+        }
     }
 
     public class SupabaseArquivo

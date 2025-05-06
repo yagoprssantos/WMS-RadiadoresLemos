@@ -59,6 +59,34 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     throw;
                 }
 
+                // Verifica se o banco existe e tenta repará-lo se necessário
+                if (File.Exists(dbPath))
+                {
+                    try
+                    {
+                        // Tenta abrir o banco para verificar integridade
+                        using (var testDb = new LiteDatabase(dbPath))
+                        {
+                            // Se chegou aqui, o banco está íntegro
+                            testDb.Dispose();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Banco de dados corrompido detectado: {ex.Message}");
+                        // Faz backup do banco corrompido
+                        string dataHoraFormatada = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+                        string backupPath = Path.Combine(
+                            directory,
+                            $"Database_corrupted_{dataHoraFormatada}.db"
+                        );
+                        File.Copy(dbPath, backupPath, true);
+                        // Remove o banco corrompido
+                        File.Delete(dbPath);
+                        Console.WriteLine($"Backup do banco corrompido criado em: {backupPath}");
+                    }
+                }
+
                 // Cria backup antes de abrir o banco
                 DatabaseBackup.CreateBackup(dbPath);
 

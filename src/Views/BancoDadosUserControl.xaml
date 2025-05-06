@@ -50,10 +50,12 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
-                        <Button Grid.Column="1" x:Name="ExportarBackupButton" Content="EXPORTAR BACKUP" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarSupaButton_Click"/>
-                        <Button Grid.Column="2" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarSupabase_Click"/>
+                        <Button Grid.Column="0" x:Name="ImportarBancoDadosButton" Content="IMPORTAR BANCO" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ImportarBancoDados_Click"/>
+                        <Button Grid.Column="1" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Column="2" x:Name="ExportarBackupButton" Content="EXPORTAR BACKUP" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarSupaButton_Click"/>
+                        <Button Grid.Column="3" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarSupabase_Click"/>
                     </Grid>
 
                     <!-- Tabelas Excel -->
