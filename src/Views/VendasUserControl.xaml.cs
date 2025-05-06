@@ -15,6 +15,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
     public partial class VendasUserControl : UserControl
     {
         private List<Venda> _listaVendas;
+        private string _ordenacaoAtual = "recente"; // Padrão: mais recente primeiro
+        private string _filtroTexto = "Ordenar por";
 
         public VendasUserControl()
         {
@@ -57,36 +59,63 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        private void BtnOrdenar_Click(object sender, RoutedEventArgs e)
+        {
+            // Abrir/fechar o popup de ordenação
+            popupOrdenar.IsOpen = !popupOrdenar.IsOpen;
+        }
+
+        private void OrdenacaoItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string tipoOrdenacao)
+            {
+                _ordenacaoAtual = tipoOrdenacao;
+
+                // Atualiza o texto do botão para refletir a seleção atual
+                _filtroTexto = $"Ordenar por {button.Content}";
+
+                // Acessar o TextBlock dentro do template do botão
+                if (btnOrdenar.Template.FindName("OrderButtonText", btnOrdenar) is TextBlock textBlock)
+                {
+                    textBlock.Text = _filtroTexto;
+                }
+
+                // Fecha o popup
+                popupOrdenar.IsOpen = false;
+
+                // Aplica a ordenação e atualiza a interface
+                if (_listaVendas != null && _listaVendas.Count > 0)
+                {
+                    AplicarOrdenacao();
+                    AtualizarInterfaceVendas();
+                }
+            }
+        }
+
         private void AplicarOrdenacao()
         {
             if (_listaVendas == null || _listaVendas.Count == 0)
                 return;
 
-            ComboBoxItem selectedItem = cmbOrdenar.SelectedItem as ComboBoxItem;
-            string ordenacao = selectedItem?.Tag?.ToString() ?? "default";
-
-            switch (ordenacao)
+            switch (_ordenacaoAtual)
             {
-                case "data_desc":
-                    _listaVendas = _listaVendas.OrderByDescending(v => v.DataCompra).ToList();
-                    break;
-                case "data_asc":
-                    _listaVendas = _listaVendas.OrderBy(v => v.DataCompra).ToList();
-                    break;
-                case "valor_desc":
+                case "preco":
                     _listaVendas = _listaVendas.OrderByDescending(v => v.ValorTotal).ToList();
                     break;
-                case "valor_asc":
-                    _listaVendas = _listaVendas.OrderBy(v => v.ValorTotal).ToList();
+                case "produto":
+                    _listaVendas = _listaVendas.OrderBy(v => v.Produto).ToList();
                     break;
-                case "cliente_asc":
+                case "cliente":
                     _listaVendas = _listaVendas.OrderBy(v => v.Cliente).ToList();
                     break;
-                case "cliente_desc":
-                    _listaVendas = _listaVendas.OrderByDescending(v => v.Cliente).ToList();
+                case "recente":
+                    _listaVendas = _listaVendas.OrderByDescending(v => v.DataCompra).ToList();
+                    break;
+                case "antigo":
+                    _listaVendas = _listaVendas.OrderBy(v => v.DataCompra).ToList();
                     break;
                 default:
-                    // Ordem padrão (mais recentes primeiro por data de cadastro)
+                    // Ordem padrão (mais recentes primeiro)
                     _listaVendas = _listaVendas.OrderByDescending(v => v.DataCadastro).ToList();
                     break;
             }
@@ -229,15 +258,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Abrir a janela de cadastro de vendas
             CadastroVendasWindow cadastroVendasWindow = new CadastroVendasWindow();
             cadastroVendasWindow.ShowDialog(); // Usar ShowDialog para modal
-        }
-
-        private void CmbOrdenar_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_listaVendas != null && _listaVendas.Count > 0)
-            {
-                AplicarOrdenacao();
-                AtualizarInterfaceVendas();
-            }
         }
     }
 }

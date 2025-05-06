@@ -6,6 +6,33 @@
              xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF.src.Views" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="FilterItemStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0"/>
+                                <Setter Property="Foreground" Value="#444444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,18 +41,70 @@
 
         <!-- Barra de Filtros/Botões -->
         <Grid Grid.Row="0" Margin="0,0,0,15">
+            <!-- Menu Ordenar por -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <ComboBox x:Name="cmbOrdenar" Style="{StaticResource ComboBoxStyle}" Width="200" Margin="0,0,15,0" SelectionChanged="CmbOrdenar_SelectionChanged">
-                    <ComboBoxItem Content="Ordenar por" IsSelected="True" Tag="default"/>
-                    <ComboBoxItem Content="Data (mais recente)" Tag="data_desc"/>
-                    <ComboBoxItem Content="Data (mais antiga)" Tag="data_asc"/>
-                    <ComboBoxItem Content="Valor (maior)" Tag="valor_desc"/>
-                    <ComboBoxItem Content="Valor (menor)" Tag="valor_asc"/>
-                    <ComboBoxItem Content="Cliente (A-Z)" Tag="cliente_asc"/>
-                    <ComboBoxItem Content="Cliente (Z-A)" Tag="cliente_desc"/>
-                </ComboBox>
+                <!-- Dropdown de ordenação -->
+                <Grid Margin="0,0,15,0">
+                    <Button x:Name="btnOrdenar" 
+                            Height="45"
+                            Width="220"
+                            Click="BtnOrdenar_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{StaticResource PanelBackgroundBrush}" 
+                                        CornerRadius="15" 
+                                        Padding="15,0">
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock x:Name="OrderButtonText"
+                                                     Text="Ordenar por" 
+                                                     Foreground="{StaticResource TextBrush}"
+                                                     FontSize="16"
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,8,0"/>
 
-                <Button Content="Nova Transação" Style="{StaticResource EmphasisButtonStyle}" Width="180" Height="45" Click="NovaTransacaoButton_Click"/>
+                                            <!-- Seta estilizada para baixo -->
+                                            <Path x:Name="ArrowIcon"
+                                                  Width="12" 
+                                                  Height="6"
+                                                  Margin="0,0,0,0"
+                                                  Data="M 0,0 L 12,0 L 6,6 Z"
+                                                  Fill="{StaticResource TextBrush}"
+                                                  Stretch="Fill"
+                                                  VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- Popup dropdown -->
+                    <Popup x:Name="popupOrdenar" 
+                           PlacementTarget="{Binding ElementName=btnOrdenar}" 
+                           Placement="Bottom"
+                           AllowsTransparency="True"
+                           PopupAnimation="Fade"
+                           StaysOpen="False">
+                        <Border Background="{StaticResource PanelBackgroundBrush}" 
+                                CornerRadius="15" 
+                                BorderThickness="0"
+                                Width="220"
+                                Margin="0,5,0,0">
+                            <StackPanel Margin="0,5">
+                                <Button Content="Preço" Tag="preco" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}"/>
+                                <Button Content="Produto" Tag="produto" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}"/>
+                                <Button Content="Cliente" Tag="cliente" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}"/>
+                                <Button Content="Recente" Tag="recente" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}"/>
+                                <Button Content="Antigo" Tag="antigo" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+
+                <!-- Botão Nova Transação -->
+                <Button Content="Nova Transação" Style="{StaticResource EmphasisButtonStyle}" 
+                        Width="180" Height="45" Click="NovaTransacaoButton_Click"/>
             </StackPanel>
         </Grid>
 
