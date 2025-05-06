@@ -51,11 +51,13 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" x:Name="ImportarBancoDadosButton" Content="IMPORTAR BANCO" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ImportarBancoDados_Click"/>
-                        <Button Grid.Column="1" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
-                        <Button Grid.Column="2" x:Name="ExportarBackupButton" Content="EXPORTAR BACKUP" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarSupaButton_Click"/>
-                        <Button Grid.Column="3" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarSupabase_Click"/>
+                        <Button Grid.Column="0" x:Name="ImportarBancoDadosButton" Content="IMPORTAR DA NUVEM" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ImportarBancoDados_Click"/>
+                        <Button Grid.Column="1" x:Name="ImportarBackupButton" Content="IMPORTAR ARQUIVO" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Column="2" x:Name="ExportarBackupButton" Content="EXPORTAR PARA NUVEM" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarSupaButton_Click"/>
+                        <Button Grid.Column="3" x:Name="ExportarLocalButton" Content="EXPORTAR LOCAL" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarLocalButton_Click"/>
+                        <Button Grid.Column="4" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarSupabase_Click"/>
                     </Grid>
 
                     <!-- Tabelas Excel -->
@@ -101,9 +103,9 @@
                                  Margin="0,0,0,5"/>
 
                         <!-- OneDrive -->
-                        <TextBlock x:Name="OneDriveText" 
+                        <TextBlock x:Name="SupabaseText" 
                                  Grid.Row="2"
-                                 Text="Conexão com o OneDrive: Conectado" 
+                                 Text="Conexão com o SupaBase: Conectado" 
                                  Foreground="{StaticResource TextBrush}"
                                  FontSize="14"
                                  Margin="0,0,0,5"/>
