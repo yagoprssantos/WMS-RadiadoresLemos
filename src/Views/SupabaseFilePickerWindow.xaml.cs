@@ -23,14 +23,14 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
-            DialogResult = true;
-            Close();
-        }
+                DialogResult = true;
+                Close();
+            }
 
         private void CancelarButton_Click(object sender, RoutedEventArgs e)
-        {
+            {
             DialogResult = false;
             Close();
         }
     }
-} 
+}

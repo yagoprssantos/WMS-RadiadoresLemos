@@ -49,6 +49,6 @@
                     Content="SELECIONAR" 
                     Style="{StaticResource EmphasisButtonStyle}"
                     Click="SelecionarButton_Click"/>
-        </StackPanel>
+    </StackPanel>
     </Grid>
 </Window>

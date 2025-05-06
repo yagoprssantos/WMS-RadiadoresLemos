@@ -68,6 +68,10 @@
                     <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirMenuTabelasButton_Click"/>
                 </StackPanel>
 
+                
+                
+
+
                 <!-- Mais Informações -->
                 <StackPanel Grid.Row="2">
                     <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="40, 5" HorizontalAlignment="Center" Margin="0,0,0,15">
