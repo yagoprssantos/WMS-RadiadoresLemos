@@ -49,17 +49,17 @@
                 </Grid>
 
                 <!-- Exibição de dados -->
-                <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,10,0">
+                <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0">
                     <StackPanel>
                         <!-- Título da tabela atual -->
                         <TextBlock Text="{Binding ElementName=TabelaComboBox, Path=SelectedItem.Content}" 
                                    FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
                                    HorizontalAlignment="Center" Margin="0,15,0,10"/>
-                        <Separator Margin="5,15,5,5"/>
+                        <Separator Margin="15,15,15,5"/>
 
                         <!-- DataGrid para exibição de dados -->
                         <DataGrid x:Name="CadastroDataGrid" AutoGenerateColumns="False" HeadersVisibility="Column" 
-                                  Style="{StaticResource CustomDataGridStyle}" Margin="0,0,0,20"/>
+                                  Style="{StaticResource CustomDataGridStyle}" Margin="15,5,15,20"/>
                     </StackPanel>
                 </Border>
                 
