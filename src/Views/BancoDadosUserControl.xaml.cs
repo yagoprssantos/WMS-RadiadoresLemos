@@ -71,6 +71,23 @@ namespace WMS_RadiadoresLemos_WPF
             });
         }
 
+        private void AbrirOneDrive_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Abre o OneDrive no navegador
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://onedrive.live.com/",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir o OneDrive: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private async void ListarSupabase_Click(object sender, RoutedEventArgs e)
         {
             // Abre a janela de listagem do Supabase
