@@ -1,28 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows.Controls;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
-    /// <summary>
-    /// Interação lógica para CadastroUserControl.xam
-    /// </summary>
     public partial class CadastroUserControl : UserControl
     {
         public CadastroUserControl()
         {
             InitializeComponent();
+        }
+
+        private void FiltrarButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para o botão "Filtrar"
+        }
+
+        private void TabelaComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Lógica para a mudança de seleção no ComboBox
+        }
+
+        private void CadastrarButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para o botão "Cadastrar"
+        }
+
+        private void EditarButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para o botão "Editar"
+        }
+
+        private void DeletarButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para o botão "Deletar"
         }
     }
 }
