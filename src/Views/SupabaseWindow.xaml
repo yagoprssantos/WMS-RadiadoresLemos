@@ -1,9 +1,13 @@
 <Window x:Class="WMS_RadiadoresLemos_WPF.src.Views.SupabaseWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF.src.Views"
         Title="Arquivos no Supabase" Height="450" Width="800"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
+    <Window.Resources>
+        <local:DateTimeToLocalConverter x:Key="DateTimeToLocalConverter"/>
+    </Window.Resources>
     <Grid Margin="15">
         <Grid>
             <Grid.RowDefinitions>
@@ -31,12 +35,11 @@
                 <DataGrid x:Name="ArquivosDataGrid" Style="{StaticResource CustomDataGridStyle}" AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Nome" Binding="{Binding name}" Width="*" MinWidth="200" />
-                        <DataGridTextColumn Header="Data de Criação" Binding="{Binding created_at, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150" />
-                        <DataGridTextColumn Header="Última Atualização" Binding="{Binding updated_at, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150" />
+                        <DataGridTextColumn Header="Data de Criação" Binding="{Binding created_at, Converter={StaticResource DateTimeToLocalConverter}, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150" />
+                        <DataGridTextColumn Header="Última Atualização" Binding="{Binding updated_at, Converter={StaticResource DateTimeToLocalConverter}, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
-
 
             <!-- Botões -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">

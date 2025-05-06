@@ -47,18 +47,11 @@ namespace WMS_RadiadoresLemos_WPF
                 abrirArquivosLocaisButton.Click += AbrirArquivosLocais_Click;
             }
 
-            // Configura o evento do botão para abrir o OneDrive
-            var abrirOneDriveButton = FindName("AbrirOneDriveButton") as Button;
-            if (abrirOneDriveButton != null)
+            // Configura o evento do botão para importar backup local
+            var importarBackupButton = FindName("ImportarBackupButton") as Button;
+            if (importarBackupButton != null)
             {
-                abrirOneDriveButton.Click += AbrirOneDrive_Click;
-            }
-
-            // Configura o evento do botão para listar arquivos do Supabase
-            var listarArquivosSupabaseButton = FindName("ListarArquivosSupabaseButton") as Button;
-            if (listarArquivosSupabaseButton != null)
-            {
-                listarArquivosSupabaseButton.Click += ListarArquivosSupabaseButton_Click;
+                importarBackupButton.Click += ImportarBackupButton_Click;
             }
         }
 
@@ -647,7 +640,7 @@ namespace WMS_RadiadoresLemos_WPF
                 // Conexão com o OneDrive: Verifica se está conectado
                 var onedrivePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "OneDrive");
                 var onedriveStatus = Directory.Exists(onedrivePath) ? "Conectado" : "Desconectado";
-                OneDriveText.Text = $"Conexão com o OneDrive: {onedriveStatus}";
+                SupabaseText.Text = $"Conexão com o Supabase: {onedriveStatus}";
 
                 // Último backup importado
                 var backupDir = Path.Combine(bancoDir, "local");
@@ -746,6 +739,214 @@ namespace WMS_RadiadoresLemos_WPF
         private async void AtualizarButton_Click(object sender, RoutedEventArgs e)
         {
             await AtualizarInformacoes();
+        }
+
+        private async void ImportarBackupButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecione o arquivo de banco de dados para importar",
+                Filter = "Arquivo de Banco de Dados (*.db)|*.db",
+                InitialDirectory = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath()),
+                RestoreDirectory = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                string bancoAtual = DatabaseConnect.GetDatabasePath();
+                string novoBanco = dialog.FileName;
+
+                var confirmacao = MessageBox.Show(
+                    "⚠️ Atenção! Esta operação irá substituir o banco de dados atual.\n\n" +
+                    $"Banco atual: {Path.GetFileName(bancoAtual)}\n" +
+                    $"Novo banco: {Path.GetFileName(novoBanco)}\n\n" +
+                    "Deseja continuar?",
+                    "Confirmação de Importação",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (confirmacao == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        ShowProgressBar.Visibility = Visibility.Visible;
+                        ProgressBarMessage.Text = "🔄 Importando banco de dados...";
+
+                        // Fecha todas as conexões com o banco atual
+                        DatabaseConnect.Disconnect();
+
+                        // Aguarda um momento para garantir que todas as conexões foram fechadas
+                        await Task.Delay(1000);
+
+                        // Faz backup do banco atual antes de substituir
+                        if (File.Exists(bancoAtual))
+                        {
+                            DatabaseBackup.CreateBackup(bancoAtual);
+                        }
+
+                        // Tenta substituir o banco de dados
+                        try
+                        {
+                            // Se o arquivo existir, tenta deletá-lo primeiro
+                            if (File.Exists(bancoAtual))
+                            {
+                                File.Delete(bancoAtual);
+                            }
+
+                            // Copia o novo arquivo
+                            File.Copy(novoBanco, bancoAtual, true);
+
+                            // Verifica se o banco é válido
+                            try
+                            {
+                                using (var testDb = new LiteDatabase(bancoAtual))
+                                {
+                                    // Se chegou aqui, o banco está íntegro
+                                    testDb.Dispose();
+                                }
+
+                                ProgressBarMessage.Text = "✅ Banco de dados importado com sucesso!";
+
+                                // Obtém informações do backup mais recente
+                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                                    .ToList();
+
+                                if (!backups.Any())
+                                {
+                                    MessageBox.Show(
+                                        "❌ Erro: Nenhum backup encontrado na pasta local.",
+                                        "Erro",
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Error);
+                                    return;
+                                }
+
+                                var successWindow = new ImportSuccessWindow(
+                                    Path.GetFileName(backups.First()),
+                                    File.GetLastWriteTime(backups.First()),
+                                    novoBanco,
+                                    bancoAtual);
+
+                                successWindow.ShowDialog();
+
+                                if (!successWindow.Confirmado)
+                                {
+                                    // Se o usuário cancelou, restaura o backup
+                                    var backupMaisRecente = backups.First();
+                                    File.Copy(backupMaisRecente, bancoAtual, true);
+                                    return;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // Se o banco estiver corrompido, restaura o backup mais recente
+                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                                    .ToList();
+
+                                if (backups.Any())
+                                {
+                                    File.Copy(backups.First(), bancoAtual, true);
+                                }
+
+                                MessageBox.Show(
+                                    $"❌ O banco de dados importado está corrompido:\n{ex.Message}\n\n" +
+                                    "O banco anterior foi restaurado.",
+                                    "Erro",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(
+                                $"❌ Erro ao substituir o banco de dados:\n{ex.Message}\n\n" +
+                                "Tente fechar o programa e tentar novamente.",
+                                "Erro",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"❌ Erro ao importar banco de dados:\n{ex.Message}",
+                            "Erro",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                    finally
+                    {
+                        ShowProgressBar.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+        }
+
+        private async void ExportarLocalButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string bancoAtual = DatabaseConnect.GetDatabasePath();
+                if (!File.Exists(bancoAtual))
+                {
+                    MessageBox.Show("❌ Banco de dados atual não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    FileName = $"Database_{DateTime.Now:ddMMyyyy_HHmmss}.db",
+                    Filter = "Arquivos de Banco de Dados (*.db)|*.db|Todos os arquivos (*.*)|*.*",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    Title = "Salvar banco de dados como"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    ShowProgressBar.Visibility = Visibility.Visible;
+                    ProgressBarMessage.Text = "🔄 Exportando banco de dados...";
+
+                    try
+                    {
+                        // Copia o arquivo para o local escolhido
+                        File.Copy(bancoAtual, saveFileDialog.FileName, true);
+
+                        ProgressBarMessage.Text = "✅ Banco de dados exportado com sucesso!";
+                        MessageBox.Show(
+                            $"✅ Banco de dados exportado com sucesso!\n\n" +
+                            $"Origem: {Path.GetFileName(bancoAtual)}\n" +
+                            $"Destino: {saveFileDialog.FileName}",
+                            "Sucesso",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        ProgressBarMessage.Text = "❌ Erro ao exportar banco de dados!";
+                        MessageBox.Show(
+                            $"❌ Erro ao exportar banco de dados:\n{ex.Message}",
+                            "Erro",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                    finally
+                    {
+                        ShowProgressBar.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"❌ Erro ao exportar banco de dados:\n{ex.Message}",
+                    "Erro",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 
