@@ -73,41 +73,75 @@
 
 
                 <!-- Mais Informações -->
-                <StackPanel Grid.Row="2">
-                    <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="40, 5" HorizontalAlignment="Center" Margin="0,0,0,15">
-                        <TextBlock Text="Mais informações:" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                    </Border>
+                <Border Grid.Row="2" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="0,10">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Banco de Dados: " FontWeight="Bold"/>
-                                <Run Text="Local" FontStyle="Italic"/>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Conexão com o OneDrive: " FontWeight="Bold"/>
-                                <Run Text="Conectado" FontStyle="Italic"/>
-                            </TextBlock>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Ultimo backup importado: " FontWeight="Bold"/>
-                                <Run x:Name="UltimoBackupImport" Text="01/01/2025" FontStyle="Italic"/>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Ultimo backup exportado: " FontWeight="Bold"/>
-                                <Run x:Name="UltimoBackupExport" Text="19/03/2025" FontStyle="Italic"/>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Backup Atual: " FontWeight="Bold"/>
-                                <Run x:Name="BackupStatus" Text="Salvo" FontStyle="Italic"/>
-                            </TextBlock>
-                        </StackPanel>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Título -->
+                        <TextBlock Grid.Row="0" 
+                                 Text="Mais Informações" 
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="16" 
+                                 FontWeight="Bold"
+                                 Margin="0,0,0,10"/>
+
+                        <!-- Banco de Dados -->
+                        <TextBlock x:Name="BancoDadosText" 
+                                 Grid.Row="1"
+                                 Text="Banco de Dados: Local" 
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="14"
+                                 Margin="0,0,0,5"/>
+
+                        <!-- OneDrive -->
+                        <TextBlock x:Name="OneDriveText" 
+                                 Grid.Row="2"
+                                 Text="Conexão com o OneDrive: Conectado" 
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="14"
+                                 Margin="0,0,0,5"/>
+
+                        <!-- Último Backup Importado -->
+                        <TextBlock x:Name="UltimoBackupImportadoText" 
+                                 Grid.Row="3"
+                                 Text="Último backup importado: Nenhum" 
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="14"
+                                 Margin="0,0,0,5"/>
+
+                        <!-- Último Backup Exportado -->
+                        <TextBlock x:Name="UltimoBackupExportadoText" 
+                                 Grid.Row="4"
+                                 Text="Último backup exportado: Nenhum" 
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="14"
+                                 Margin="0,0,0,5"/>
+
+                        <!-- Backup Atual -->
+                        <TextBlock x:Name="BackupAtualText" 
+                                 Grid.Row="5"
+                                 Text="Backup Atual: Não salvo" 
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="14"
+                                 Margin="0,0,0,5"/>
+
+                        <!-- Botão Atualizar -->
+                        <Button x:Name="AtualizarButton"
+                                Grid.Row="6"
+                                Content="ATUALIZAR"
+                                Style="{StaticResource EmphasisButtonStyle}"
+                                Click="AtualizarButton_Click"
+                                HorizontalAlignment="Right"
+                                Margin="0,10,0,0"/>
                     </Grid>
-                </StackPanel>
+                </Border>
             </Grid>
         </Border>
 

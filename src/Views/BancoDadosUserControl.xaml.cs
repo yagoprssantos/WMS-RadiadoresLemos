@@ -34,6 +34,7 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
             DataContext = this;
             SetupLinks();
+            AtualizarInformacoes();
         }
 
         // Método para configurar botões de links (arquivos locais e banco de dados)
@@ -628,6 +629,123 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private async Task AtualizarInformacoes()
+        {
+            try
+            {
+                ShowProgressBar.Visibility = Visibility.Visible;
+                ProgressBarMessage.Text = "Atualizando informações...";
+
+                // Banco de Dados: Local
+                var bancoPath = DatabaseConnect.GetDatabasePath();
+                var bancoDir = Path.GetDirectoryName(bancoPath);
+                var bancoNome = Path.GetFileName(bancoPath);
+                BancoDadosText.Text = $"Banco de Dados: {bancoNome}";
+
+                // Conexão com o OneDrive: Verifica se está conectado
+                var onedrivePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "OneDrive");
+                var onedriveStatus = Directory.Exists(onedrivePath) ? "Conectado" : "Desconectado";
+                OneDriveText.Text = $"Conexão com o OneDrive: {onedriveStatus}";
+
+                // Último backup importado
+                var backupDir = Path.Combine(bancoDir, "local");
+                if (Directory.Exists(backupDir))
+                {
+                    var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                        .OrderByDescending(f => File.GetLastWriteTime(f))
+                        .ToList();
+
+                    if (backups.Any())
+                    {
+                        var ultimoBackup = backups.First();
+                        var dataBackup = File.GetLastWriteTime(ultimoBackup);
+                        UltimoBackupImportadoText.Text = $"Último backup importado: {dataBackup:dd/MM/yyyy HH:mm}";
+                    }
+                    else
+                    {
+                        UltimoBackupImportadoText.Text = "Último backup importado: Nenhum";
+                    }
+                }
+                else
+                {
+                    UltimoBackupImportadoText.Text = "Último backup importado: Nenhum";
+                }
+
+                // Último backup exportado (do Supabase)
+                var ultimoExportado = await ObterUltimoBackupExportado();
+                UltimoBackupExportadoText.Text = $"Último backup exportado: {ultimoExportado:dd/MM/yyyy HH:mm}";
+
+                // Backup Atual
+                var backupAtual = VerificarBackupAtual();
+                BackupAtualText.Text = $"Backup Atual: {backupAtual}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar informações: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async Task<DateTime> ObterUltimoBackupExportado()
+        {
+            try
+            {
+                var arquivos = await SupabaseUploader.ListarArquivosAsync();
+                if (arquivos != null && arquivos.Any())
+                {
+                    return arquivos.Max(a => a.updated_at ?? DateTime.MinValue);
+                }
+            }
+            catch { /* Ignora erro ao obter arquivos do Supabase */ }
+            
+            return DateTime.MinValue;
+        }
+
+        private string VerificarBackupAtual()
+        {
+            try
+            {
+                var bancoPath = DatabaseConnect.GetDatabasePath();
+                var bancoDir = Path.GetDirectoryName(bancoPath);
+                var backupDir = Path.Combine(bancoDir, "local");
+
+                if (!Directory.Exists(backupDir))
+                    return "Não salvo";
+
+                var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                    .ToList();
+
+                if (!backups.Any())
+                    return "Não salvo";
+
+                var ultimoBackup = backups.First();
+                var dataBackup = File.GetLastWriteTime(ultimoBackup);
+                var dataBanco = File.GetLastWriteTime(bancoPath);
+
+                return dataBackup >= dataBanco ? "Salvo" : "Não salvo";
+            }
+            catch
+            {
+                return "Erro ao verificar";
+            }
+        }
+
+        // Atualiza as informações quando o controle é carregado
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            await AtualizarInformacoes();
+        }
+
+        // Atualiza as informações quando o botão de atualizar é clicado
+        private async void AtualizarButton_Click(object sender, RoutedEventArgs e)
+        {
+            await AtualizarInformacoes();
         }
     }
 
