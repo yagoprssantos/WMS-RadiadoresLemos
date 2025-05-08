@@ -44,7 +44,9 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
             _instance = this;
 
-            // Carregar os dados do usuário logado
+            // Escuta o evento de alteração na contagem de notificações
+            Alerta.ContagemAlterada += AtualizarBotaoNotificacoes;
+
             usuariosUserControl = new UsuariosUserControl();
             controleEstoqueUserControl = new ControleEstoqueUserControl();
             registroUserControl = new RegistroUserControl();
@@ -52,9 +54,6 @@ namespace WMS_RadiadoresLemos_WPF
             InicializarUserControls();
             ConfigurarEntrada();
             ConfigurarVisibilidadeBotoes();
-
-            // Evento de Nova Notificação 
-            NotificacoesUserControl.NovaNotificacaoAdicionada += OnAlertaAdicionado;
         }
 
         // Inicializa os UserControls
@@ -164,42 +163,21 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
-        // Método para lidar com a adição de um novo alerta
-        private void OnAlertaAdicionado(AlertaData alerta)
-        {
-            _notificationCount++;
-
-            AtualizarBotaoNotificacoes();
-        }
-
         // Método para atualizar o botão de notificações
-        private void AtualizarBotaoNotificacoes()
+        private void AtualizarBotaoNotificacoes(int totalNovasNotificacoes)
         {
+            _notificationCount = totalNovasNotificacoes; // Atualiza a contagem interna
             var notificacoesButton = (Button)FindName("BtnNotificacoes");
             var notificacoesIcon = (Image)FindName("IconNotificacoes");
             var notificacoesText = (TextBlock)FindName("TextNotificacoes");
 
             if (notificacoesButton != null && notificacoesIcon != null && notificacoesText != null)
             {
-                // Atualiza o texto do botão com o número de notificações
-                notificacoesText.Text = $"Notificações ({_notificationCount})";
+                notificacoesText.Text = totalNovasNotificacoes > 0
+                    ? $"Notificações ({totalNovasNotificacoes})"
+                    : "Notificações";
 
-                // Aplica uma animação de destaque no botão
-                ColorAnimation colorAnimation = new ColorAnimation
-                {
-                    From = Colors.Transparent,
-                    To = (Color)ColorConverter.ConvertFromString("#FF0000"), // Vermelho
-                    Duration = new Duration(TimeSpan.FromSeconds(0.5)),
-                    AutoReverse = true,
-                    RepeatBehavior = new RepeatBehavior(3)
-                };
-
-                notificacoesButton.Background = new SolidColorBrush(Colors.Transparent);
-                notificacoesButton.Background.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
-
-                // Atualiza o ícone para o estado "notificado"
-                notificacoesIcon.Source = new BitmapImage(new Uri("/src/Resources/Icons/Selected/SinoS.png", UriKind.Relative));
+                notificacoesIcon.Source = new BitmapImage(new Uri("/src/Resources/Icons/NotSelected/SinoNotNS.png", UriKind.Relative));
             }
         }
 
@@ -228,9 +206,22 @@ namespace WMS_RadiadoresLemos_WPF
                         }
                         else if (innerChild is Image image)
                         {
-                            // Define a imagem não selecionada
-                            string imageName = GetImageName(image.Name, "NotSelected");
-                            image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{imageName}.png", UriKind.Relative));
+                            // Verifica se é o botão de notificações
+                            if (button.Name == "BtnNotificacoes")
+                            {
+                                // Mantém o ícone de notificações se houver notificações não lidas
+                                image.Source = new BitmapImage(new Uri(
+                                    _notificationCount > 0
+                                        ? "/src/Resources/Icons/NotSelected/SinoNotNS.png"
+                                        : "/src/Resources/Icons/NotSelected/SinoNS.png",
+                                    UriKind.Relative));
+                            }
+                            else
+                            {
+                                // Define a imagem não selecionada para os outros botões
+                                string imageName = GetImageName(image.Name, "NotSelected");
+                                image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{imageName}.png", UriKind.Relative));
+                            }
                         }
                     }
                 }
@@ -319,23 +310,9 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para resetar o botão de notificações
         private void ResetarBotaoNotificacoes()
         {
-            var notificacoesButton = (Button)FindName("BtnNotificacoes");
-            var notificacoesIcon = (Image)FindName("IconNotificacoes");
-            var notificacoesText = (TextBlock)FindName("TextNotificacoes");
-
-            if (notificacoesButton != null && notificacoesIcon != null && notificacoesText != null)
-            {
-                // Reseta o texto do botão
-                notificacoesText.Text = "Notificações";
-
-                // Reseta o ícone para o estado "não notificado"
-                notificacoesIcon.Source = new BitmapImage(new Uri("/src/Resources/Icons/NotSelected/SinoNS.png", UriKind.Relative));
-
-                // Reseta o contador de notificações
-                _notificationCount = 0;
-            }
+            Alerta.ResetarNovasNotificacoes(); // Reseta a contagem de novas notificações
+            AtualizarBotaoNotificacoes(0); // Atualiza o botão de notificações
         }
-
 
         // Método para lidar com botões de navegação
         private void PreviousButton_Click(object sender, RoutedEventArgs e)

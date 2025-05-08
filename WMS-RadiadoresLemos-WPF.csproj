@@ -42,6 +42,7 @@
     <None Remove="src\resources\icons\NotSelected\PlusNS.png" />
     <None Remove="src\resources\icons\NotSelected\PranchetaNS.png" />
     <None Remove="src\resources\icons\NotSelected\SairNS.png" />
+    <None Remove="src\Resources\Icons\NotSelected\SinoNotNS.png" />
     <None Remove="src\resources\icons\NotSelected\SinoNS.png" />
     <None Remove="src\Resources\icons\NotSelected\SwapNS.png" />
     <None Remove="src\Resources\Icons\NotSelected\UsuárioNS.png" />
@@ -138,6 +139,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="src\resources\icons\NotSelected\SairNS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\Resources\Icons\NotSelected\SinoNotNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="src\resources\icons\NotSelected\SinoNS.png">

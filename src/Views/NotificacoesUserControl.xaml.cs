@@ -24,13 +24,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para carregar todas as notificações
         private void CarregarNotificacoes()
         {
-            alertas = new List<AlertaData>();
-
-            // Para cada tipo de alerta, carregar os dados
-            foreach (var tipo in Alerta.Alertas.Keys)
-            {
-                alertas.AddRange(Alerta.ObterAlertas(tipo));
-            }
+            alertas = Alerta.Alertas.Values.SelectMany(lista => lista).ToList();
 
             if (AlertaDataGrid != null)
             {
@@ -49,22 +43,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             TipoComboBox.ItemsSource = alertas.Select(a => a.Tipo).Distinct().ToList();
             DataComboBox.ItemsSource = alertas.Select(a => DateTime.Parse(a.Data).ToString("dd/MM/yyyy")).Distinct().ToList();
-        }
-
-        // Método para adicionar uma nova notificação
-        public void AdicionarNovaNotificacao(AlertaData alerta)
-        {
-            alertas.Add(alerta);
-
-            // Atualiza a tabela de notificações
-            if (AlertaDataGrid != null)
-            {
-                AlertaDataGrid.ItemsSource = null;
-                AlertaDataGrid.ItemsSource = alertas;
-            }
-
-            // Dispara o evento para notificar o MainWindow
-            NovaNotificacaoAdicionada?.Invoke(alerta);
         }
 
         // Método chamado ao clicar no botão de aplicar filtro

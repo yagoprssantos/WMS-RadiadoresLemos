@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WMS_RadiadoresLemos_WPF.src.Models;
 
 namespace WMS_RadiadoresLemos_WPF.src.Services
@@ -7,14 +8,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
     internal static class Alerta
     {
         public static Dictionary<string, List<AlertaData>> Alertas { get; set; } = new Dictionary<string, List<AlertaData>>()
-            {
-                { "Importante", new List<AlertaData>() },
-                { "Erro", new List<AlertaData>() },
-                { "Aviso", new List<AlertaData>() }
-            };
+        {
+            { "Importante", new List<AlertaData>() },
+            { "Erro", new List<AlertaData>() },
+            { "Aviso", new List<AlertaData>() }
+        };
 
-        // Evento para notificar quando um novo alerta é adicionado
-        public static event Action<AlertaData>? AlertaAdicionado;
+        // Contagem de novas notificações
+        private static int _novasNotificacoes = 0;
+
+        // Evento para notificar mudanças na contagem de novas notificações
+        public static event Action<int>? ContagemAlterada;
 
         public static void AdicionarAlerta(string tipo, string sysmsg, string mensagem, string acoes)
         {
@@ -26,13 +30,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     Tipo = tipo,
                     Sistema = sysmsg,
                     Detalhes = mensagem,
-                    Acoes = acoes // Pode ser preenchido conforme necessário
+                    Acoes = acoes
                 };
 
                 Alertas[tipo].Add(novoAlerta);
 
-                // Disparar o evento quando um novo alerta é adicionado
-                AlertaAdicionado?.Invoke(novoAlerta);
+                // Incrementa a contagem de novas notificações
+                _novasNotificacoes++;
+
+                // Dispara o evento para notificar a mudança na contagem de novas notificações
+                ContagemAlterada?.Invoke(_novasNotificacoes);
             }
             else
             {
@@ -40,16 +47,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        public static List<AlertaData> ObterAlertas(string tipo)
+        public static void ResetarNovasNotificacoes()
         {
-            if (Alertas.ContainsKey(tipo))
-            {
-                return Alertas[tipo];
-            }
-            else
-            {
-                throw new ArgumentException("Tipo de alerta inválido");
-            }
+            _novasNotificacoes = 0;
+
+            // Dispara o evento para atualizar a contagem
+            ContagemAlterada?.Invoke(_novasNotificacoes);
         }
     }
 }

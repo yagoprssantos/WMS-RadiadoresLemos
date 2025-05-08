@@ -13,6 +13,7 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using LiteDB;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -135,7 +136,7 @@ namespace WMS_RadiadoresLemos_WPF
                 produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == selectedProductName);
                 if (produtoSelecionado != null)
                 {
-                    AtualizarProdutoSelecionado(produtoSelecionado);
+                    AtualizarCamposProduto(produtoSelecionado);
                     DestacarMudancas();
                 }
                 else
@@ -146,26 +147,85 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método chamado quando um produto é selecionado, altera as informações apresentadas na tela
-        private void AtualizarProdutoSelecionado(ProdutoData produto)
+        private bool AtualizarCamposProduto(ProdutoData produto)
         {
-            // Preencher os campos "Antes" com os dados atuais do produto
+            if (produto == null)
+            {
+                MessageBox.Show("Produto inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            // Atualizar os campos "Antes" com os dados do produto
             TipoAntesDadoTextBlock.Text = produto.Tipo;
             MarcaAntesDadoTextBlock.Text = produto.Marca;
             CodigoAntesDadoTextBlock.Text = produto.Codigo;
             QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString();
             PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C");
 
-            // Preencher os campos "Depois" com os mesmos valores inicialmente
+            // Atualizar os campos "Depois" com os mesmos valores inicialmente
             TipoDepoisDadoTextBlock.Text = produto.Tipo;
             MarcaDepoisDadoTextBlock.Text = produto.Marca;
             CodigoDepoisDadoTextBlock.Text = produto.Codigo;
-            QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
 
-            // Atualizar visibilidade
+            // Validar os campos de entrada (Quantidade e Preço)
+            if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
+            {
+                // Se os campos estiverem vazios, apenas inicializa os valores "Depois" com os valores "Antes"
+                QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
+                PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                return true;
+            }
+
+            // Realizar cálculos com os valores inseridos
+            if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
+            {
+                int quantidadeFinal = usePositiveNumber
+                    ? produto.Quantidade + quantidadeAlterada // Entrada
+                    : produto.Quantidade - quantidadeAlterada; // Saída
+
+                if (quantidadeFinal < 0)
+                {
+                    // Quantidade final não pode ser negativa
+                    Alerta.AdicionarAlerta("Erro",
+                                           "Quantidade insuficiente",
+                                           "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
+                                           "- Quantidade insuficiente no estoque.",
+                                           "- Verifique a quantidade disponível no estoque.\n" +
+                                           "- Verifique se a quantidade inserida é válida.\n" +
+                                           "- Atualize a quantidade de produtos no estoque.");
+                    return false;
+                }
+
+                QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
+
+                if (usePositiveNumber)
+                {
+                    // Calcular o preço médio ponderado para entrada
+                    double precoAtual = produto.Preco;
+                    int quantidadeAtual = produto.Quantidade;
+                    int quantidadeNova = quantidadeAlterada;
+                    int quantidadeTotal = quantidadeAtual + quantidadeNova;
+
+                    double precoPonderado = ((precoAtual * quantidadeAtual) + (precoAlterado * quantidadeNova)) / quantidadeTotal;
+                    PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
+                }
+                else
+                {
+                    // Para saída, mantém o preço atual
+                    PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Por favor, insira valores válidos para quantidade e preço.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            // Atualizar visibilidade do painel de detalhes
             ProdutoAntesDepois.Visibility = Visibility.Visible;
-        }
 
+            return true;
+        }
         private void DestacarMudancas()
         {
             // Comparar e destacar mudanças
@@ -190,191 +250,16 @@ namespace WMS_RadiadoresLemos_WPF
                 : (Brush)FindResource("TextBrush");
         }
 
-
-        // Botões de registrar entrada e saída
-        private void RegistrarEntrada_Click(object sender, RoutedEventArgs e)
-        {
-            usePositiveNumber = true;
-
-            bool detalhesAtualizados = false;
-
-            if (produtoSelecionado != null)
-            {
-                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
-            }
-
-            if (!detalhesAtualizados)
-            {
-                return;
-            }
-
-            ToggleVisibility(true);
-
-            // Desabilitar o ComboBox
-            ProdutoComboBox.IsHitTestVisible = false;
-            ProdutoComboBox.IsEnabled = true;
-        }
-        private void RegistrarSaida_Click(object sender, RoutedEventArgs e)
-        {
-            usePositiveNumber = false;
-
-            bool detalhesAtualizados = false;
-
-            if (produtoSelecionado != null)
-            {
-                detalhesAtualizados = AtualizarDetalhesProduto(produtoSelecionado);
-            }
-
-            if (!detalhesAtualizados)
-            {
-                return;
-            }
-
-            ToggleVisibility(true);
-
-            // Desabilitar o ComboBox
-            ProdutoComboBox.IsHitTestVisible = false;
-            ProdutoComboBox.IsEnabled = true;
-        }
-
         // Método para atualizar os detalhes do produto selecionado
-        private bool AtualizarDetalhesProduto(ProdutoData produto)
-        {
-            // Mostrar os detalhes atuais do produto (TextBlock1)
-            TipoAntesDadoTextBlock.Text = produto.Tipo;
-            MarcaAntesDadoTextBlock.Text = produto.Marca;
-            CodigoAntesDadoTextBlock.Text = produto.Codigo;
-            QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C");
-
-            // Se quantidade e preço forem vazios, não atualiza valores depois
-            if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
-            {
-                return false;
-            }
-
-            // Mostrar os detalhes depois do produto (TextBlock2)
-            TipoDepoisDadoTextBlock.Text = produto.Tipo;
-            MarcaDepoisDadoTextBlock.Text = produto.Marca;
-            CodigoDepoisDadoTextBlock.Text = produto.Codigo;
-
-            // Se a quantidade e preço forem um número válido, atualiza a quantidade e o preço depois
-            if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
-            {
-                int quantidadeFinal;
-                if (usePositiveNumber)
-                {
-                    // Entrada
-                    quantidadeFinal = produto.Quantidade + quantidadeAlterada;
-                }
-                else
-                {
-                    // Saída
-                    quantidadeFinal = produto.Quantidade - quantidadeAlterada;
-                }
-
-                if (quantidadeFinal < 0)
-                {
-                    // Avisa que quantidade não pode ser negativa e retorna
-                    //MessageBox.Show("Não existem produtos suficientes no Estoque");
-
-                    // Adiciona alerta
-                    Alerta.AdicionarAlerta("Erro",
-                                                "Quantidade insuficiente",
-                                                "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
-                                                "- Quantidade insuficiente no estoque.",
-                                                "- Verifique a quantidade disponível no estoque.\n" +
-                                                "- Verifique se a quantidade inserida é válida.\n" +
-                                                "- Atualize a quantidade de produtos no estoque.");
-                    return false;
-                }
-
-                QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
-
-                if (usePositiveNumber)
-                {
-                    // Mostra o preço alterado do produto (calcula média ponderada) com base na nova quantidade (QuantidadeDepoisDadoTextBlock)
-                    double precoAtual = produto.Preco;
-                    double precoNovo = double.Parse(PrecoTextBox.Text);
-                    int quantidadeAtual = produto.Quantidade;
-                    int quantidadeNova = int.Parse(QuantidadeTextBox.Text);
-                    int quantidadeTotal = quantidadeAtual + quantidadeNova;
-
-                    double precoPonderado = ((precoAtual * quantidadeAtual) + (precoNovo * quantidadeNova)) / quantidadeTotal;
-                    PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
-                }
-                else
-                {
-                    // Mantém o preço atual para saída
-                    PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
-                }
-            }
-            else
-            {
-                MessageBox.Show("Por favor, insira um valor numérico válido para a quantidade.");
-                return false;
-            }
-
-            return true;
-        }
-
-
-        // Botões de confirmar e cancelar movimentação
-        private void ConfirmarAcao_Click(object sender, RoutedEventArgs e)
-        {
-            if (produtoSelecionado == null)
-            {
-                MessageBox.Show("Nenhum produto selecionado.");
-                return;
-            }
-
-            if (!int.TryParse(QuantidadeTextBox.Text, out int quantidade) || !double.TryParse(PrecoTextBox.Text, out double preco))
-            {
-                MessageBox.Show("Por favor, insira valores válidos para quantidade e preço.");
-                return;
-            }
-
-            var movimentacao = new MovimentacaoData
-            {
-                Id = 0, // O LiteDB irá gerar o ID automaticamente
-                Tipo = usePositiveNumber ? "Entrada" : "Saída",
-                Quantidade = quantidade,
-                Preco = preco,
-                ProdutoId = produtoSelecionado.Id,
-                Data = DateTime.UtcNow,
-            };
-
-            listaMovimentacoes.Add(movimentacao);
-
-            // Atualizar a interface do usuário
-            ListaItemsControl.ItemsSource = null;
-            ListaItemsControl.ItemsSource = listaMovimentacoes;
-
-            ToggleVisibility(false);
-
-            LimparCampos();
-
-            // Ativa ComboBox para selecionar outro produto
-            ProdutoComboBox.IsHitTestVisible = true;
-            ProdutoComboBox.IsEnabled = true;
-        }
-        private void CancelarAcao_Click(object sender, RoutedEventArgs e)
-        {
-            ToggleVisibility(false);
-
-
-            usePositiveNumber = true;
-
-            // Ativa ComboBox para selecionar outro produto
-            ProdutoComboBox.IsHitTestVisible = true;
-            ProdutoComboBox.IsEnabled = true;
-        }
-
 
         // Métodos para Lista de Compras
         private void ToggleListaCompras_Click(object sender, RoutedEventArgs e)
         {
+            // Deixa lista visível
             ListaCompras.Visibility = ListaCompras.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+
+            // Oculta botão
+            ToggleListaCompras.Visibility = ToggleListaCompras.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
         {
@@ -406,7 +291,27 @@ namespace WMS_RadiadoresLemos_WPF
             ListaItemsControl.ItemsSource = null;
             ListaItemsControl.ItemsSource = listaMovimentacoes;
 
+            // Adiciona animação ao ToggleListaCompras
+            AnimateToggleListaCompras();
+
             LimparCampos();
+        }
+        private void AnimateToggleListaCompras()
+        {
+            // Cria uma animação de cor piscando usando o AccentBrush
+            ColorAnimation colorAnimation = new ColorAnimation
+            {
+                From = ((SolidColorBrush)FindResource("PanelBackgroundBrush")).Color,
+                To = ((SolidColorBrush)FindResource("AccentBrush")).Color,
+                Duration = TimeSpan.FromSeconds(0.3),
+                AutoReverse = true,
+                RepeatBehavior = new RepeatBehavior(2)
+            };
+
+            SolidColorBrush brush = new SolidColorBrush(((SolidColorBrush)FindResource("PanelBackgroundBrush")).Color);
+            ToggleListaCompras.Background = brush;
+
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation); // Inicia a animação
         }
 
         private void ExcluirItem_Click(object sender, RoutedEventArgs e)
@@ -440,8 +345,11 @@ namespace WMS_RadiadoresLemos_WPF
         }
         private void FecharListaCompras_Click(object sender, RoutedEventArgs e)
         {
-            // Fecha a ListaCompras
+            // Deixa lista invisível
             ListaCompras.Visibility = Visibility.Collapsed;
+
+            // Mostra botão
+            ToggleListaCompras.Visibility = Visibility.Visible;
         }
 
         // Método assíncrono para registrar a movimentação de produtos
@@ -524,7 +432,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                     if (produtoSelecionado != null)
                     {
-                        AtualizarDetalhesProduto(produtoSelecionado);
+                        AtualizarCamposProduto(produtoSelecionado);
                         DestacarMudancas();
                     }
                     else
@@ -537,6 +445,14 @@ namespace WMS_RadiadoresLemos_WPF
                     MessageBox.Show("Quantidade inválida.");
                     textBox.Clear();
                 }
+            }
+        }
+        private void QuantidadeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
             }
         }
         // Preço
@@ -574,7 +490,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                     if (produtoSelecionado != null)
                     {
-                        AtualizarDetalhesProduto(produtoSelecionado);
+                        AtualizarCamposProduto(produtoSelecionado);
                         DestacarMudancas();
                     }
                     else
@@ -589,5 +505,14 @@ namespace WMS_RadiadoresLemos_WPF
                 }
             }
         }
+        private void PrecoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+            }
+        }
+
     }
 }

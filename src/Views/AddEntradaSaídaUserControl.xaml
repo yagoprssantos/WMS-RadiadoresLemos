@@ -71,13 +71,13 @@
                                     <TextBlock Text="Quantidade:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                     <TextBox Name="QuantidadeTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                              Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                             LostFocus="QuantidadeTextBox_LostFocus" Height="35" />
+                                             LostFocus="QuantidadeTextBox_LostFocus" TextChanged="QuantidadeTextBox_TextChanged" Height="35" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                     <TextBlock Text="Preço:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                     <TextBox Name="PrecoTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                              Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                             LostFocus="PrecoTextBox_LostFocus" Height="35" />
+                                             LostFocus="PrecoTextBox_LostFocus" TextChanged="PrecoTextBox_TextChanged" Height="35" />
                                 </StackPanel>
                             </Grid>
 
@@ -155,16 +155,16 @@
                         </StackPanel>
 
                         <!-- Botão para alternar a visibilidade da ListaCompras -->
-                        <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0"
+                        <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0" Visibility="Visible"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
-                                Click="ToggleListaCompras_Click">
+                                x:Name="ToggleListaCompras" Click="ToggleListaCompras_Click">
                             <Image Source="/src/Resources/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="28" Width="25"/>
                         </Button>
                     </Grid>                        
                 </Border>
 
                 <!-- Segunda Border (Lista Retrátil) -->
-                <Border x:Name="ListaCompras" Grid.Column="1" CornerRadius="15" Padding="15" Margin="20,0,0,0" Visibility="Visible"
+                <Border x:Name="ListaCompras" Grid.Column="1" CornerRadius="15" Padding="15" Margin="20,0,0,0" Visibility="Collapsed"
                         Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
                     <Grid>
                         <!-- Definição das linhas da Grid -->
