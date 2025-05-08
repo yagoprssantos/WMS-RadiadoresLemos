@@ -18,14 +18,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _caminhoTemp = caminhoTemp;
             _bancoAtual = bancoAtual;
 
-            NomeBackupText.Text = $"📄 {nomeBackup}";
-            DataBackupText.Text = $"⏰ {dataBackup:dd/MM/yyyy HH:mm:ss}";
-        }
-
-        private void CancelarButton_Click(object sender, RoutedEventArgs e)
-        {
-            Confirmado = false;
-            Close();
+            NomeBackupText.Text = $"{nomeBackup}";
+            DataBackupText.Text = $"{dataBackup:dd/MM/yyyy HH:mm:ss}";
         }
 
         private void ConfirmarButton_Click(object sender, RoutedEventArgs e)
