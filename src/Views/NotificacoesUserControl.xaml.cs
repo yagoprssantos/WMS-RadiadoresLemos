@@ -110,5 +110,10 @@ namespace WMS_RadiadoresLemos_WPF
         {
             FiltroPopup.IsOpen = true;
         }
+
+        private void AlertaDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

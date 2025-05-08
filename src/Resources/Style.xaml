@@ -693,8 +693,6 @@
         </Setter>
     </Style>
 
-
-
     <!-- TODO: ORGANIZAR DAQUI PRA BAIXO -->
 
     <!-- Estilo para Botão padrão 1 -->
@@ -751,7 +749,6 @@
         </Style.Triggers>
     </Style>
 
-
     <!-- Estilo para Ícone - Botão padrão 2-->
     <Style x:Key="IconCustom2ButtonStyle" TargetType="Path">
         <Setter Property="Stretch" Value="Uniform"/>
@@ -773,5 +770,59 @@
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
     </Style>
 
+    <!-- Estilo ListView -->
+    <Style x:Key="CustomListViewItemStyle" TargetType="ListViewItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Estilo para o ListView -->
+    <Style x:Key="CustomListViewStyle" TargetType="ListView">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="10,5" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource CustomListViewItemStyle}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    </Style>
+
+    <!-- Estilo para os cabeçalhos do GridViewColumn -->
+    <Style x:Key="CustomGridViewColumnHeaderStyle" TargetType="GridViewColumnHeader">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource HoverForegroundBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
 </ResourceDictionary>
