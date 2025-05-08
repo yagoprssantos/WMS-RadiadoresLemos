@@ -26,11 +26,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 {
                     var adminUser = new UsuarioData
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        Nome = "admin",
+                        Id = "ADM2401",
+                        Nome = "Administrador",
                         Email = "admin@radiadoreslemos.com",
-                        Matricula = "ADM",
-                        Senha = CriptografiaService.CriptografarSenha("admin"), // Senha inicial que deve ser alterada
+                        Matricula = "ADM2401",
+                        Senha = CriptografiaService.CriptografarSenha("admin"),  // Senha inicial
                         Cargo = "Administrador"
                     };
 

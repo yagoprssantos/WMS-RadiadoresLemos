@@ -11,159 +11,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         private static string dbPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "WMS-RadiadoresLemos",
+            "src",
+            "Resources",
+            "bancodedados",
             "Database.db"
         );
         public static LiteDatabase? Database { get; private set; }
-
-        private static string GetBackupPath(int version, string timestamp)
-        {
-            var directory = Path.GetDirectoryName(dbPath);
-            return Path.Combine(directory, $"Database_v{version}_{timestamp}.db");
-        }
-
-        private static string CalculateFileHash(string filePath)
-        {
-            using (var md5 = System.Security.Cryptography.MD5.Create())
-            using (var stream = File.OpenRead(filePath))
-            {
-                var hash = md5.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-            }
-        }
-
-        private static bool DatabaseWasModified()
-        {
-            try
-            {
-                var directory = Path.GetDirectoryName(dbPath);
-                var backups = Directory.GetFiles(directory, "Database_v*_*.db")
-                    .OrderByDescending(f => File.GetLastWriteTime(f))
-                    .ToList();
-
-                if (!backups.Any())
-                    return true; // Se não tem backup, considera que foi modificado
-
-                var lastBackup = backups.First();
-                var currentHash = CalculateFileHash(dbPath);
-                var lastBackupHash = CalculateFileHash(lastBackup);
-
-                return currentHash != lastBackupHash;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"ERRO ao verificar modificações:");
-                Console.WriteLine($"Mensagem: {ex.Message}");
-                Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                return true; // Em caso de erro, considera que foi modificado
-            }
-        }
-
-        private static void CreateBackup()
-        {
-            try
-            {
-                // Se o banco atual existe, faz backup
-                if (File.Exists(dbPath))
-                {
-                    // Verifica se o banco foi modificado
-                    if (!DatabaseWasModified())
-                    {
-                        Console.WriteLine("Banco de dados não foi modificado desde o último backup. Pulando criação de backup.");
-                        return;
-                    }
-
-                    var directory = Path.GetDirectoryName(dbPath);
-                    
-                    // Lista todos os backups existentes para determinar a próxima versão
-                    var backups = Directory.GetFiles(directory, "Database_v*_*.db")
-                        .Select(f => {
-                            var partes = Path.GetFileName(f).Split('_');
-                            var versao = int.Parse(partes[1].Substring(1));
-                            var timestamp = partes[2].Replace(".db", "");
-                            return new
-                            {
-                                Path = f,
-                                Version = versao,
-                                Timestamp = timestamp
-                            };
-                        })
-                        .OrderByDescending(x => x.Version)
-                        .ToList();
-
-                    int proximaVersao;
-                    string timestamp;
-                    if (backups.Any())
-                    {
-                        var ultimaVersao = backups.First().Version;
-                        if (ultimaVersao < 20)
-                        {
-                            proximaVersao = ultimaVersao + 1;
-                            timestamp = DateTime.Now.ToString("yyyy-MM-dd");
-                        }
-                        else
-                        {
-                            var backupV1 = backups.FirstOrDefault(b => b.Version == 1);
-                            if (backupV1 != null)
-                            {
-                                try
-                                {
-                                    File.Delete(backupV1.Path);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine($"ERRO ao remover backup v1:");
-                                    Console.WriteLine($"Mensagem: {ex.Message}");
-                                    Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                                }
-                            }
-
-                            for (int i = 2; i <= 20; i++)
-                            {
-                                var backupAtual = backups.FirstOrDefault(b => b.Version == i);
-                                if (backupAtual != null)
-                                {
-                                    var novoCaminho = GetBackupPath(i - 1, backupAtual.Timestamp);
-                                    try
-                                    {
-                                        File.Move(backupAtual.Path, novoCaminho, true);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Console.WriteLine($"ERRO ao rotacionar backup v{i}:");
-                                        Console.WriteLine($"Mensagem: {ex.Message}");
-                                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                                    }
-                                }
-                            }
-                            proximaVersao = 20;
-                            timestamp = DateTime.Now.ToString("yyyy-MM-dd");
-                        }
-                    }
-                    else
-                    {
-                        proximaVersao = 1;
-                        timestamp = DateTime.Now.ToString("yyyy-MM-dd");
-                    }
-
-                    string novoBackup = GetBackupPath(proximaVersao, timestamp);
-                    try
-                    {
-                        File.Copy(dbPath, novoBackup, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"ERRO ao criar novo backup:");
-                        Console.WriteLine($"Mensagem: {ex.Message}");
-                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                        throw;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao criar backup: {ex.Message}");
-            }
-        }
 
         public static string GetDatabasePath()
         {
@@ -179,28 +32,78 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         {
             try
             {
+                Console.WriteLine($"Pasta Documentos: {Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}");
+                Console.WriteLine($"Caminho do banco: {dbPath}");
+
                 // Cria o diretório se não existir
                 var directory = Path.GetDirectoryName(dbPath);
+                Console.WriteLine($"Diretório do banco: {directory}");
+
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                     Console.WriteLine($"Diretório criado: {directory}");
                 }
 
+                // Verifica permissões de escrita
+                try
+                {
+                    var testFile = Path.Combine(directory, "test.tmp");
+                    File.WriteAllText(testFile, "test");
+                    File.Delete(testFile);
+                    Console.WriteLine("Permissões de escrita verificadas com sucesso");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"ERRO: Sem permissão de escrita no diretório: {ex.Message}");
+                    throw;
+                }
+
+                // Verifica se o banco existe e tenta repará-lo se necessário
+                if (File.Exists(dbPath))
+                {
+                    try
+                    {
+                        // Tenta abrir o banco para verificar integridade
+                        using (var testDb = new LiteDatabase(dbPath))
+                        {
+                            // Se chegou aqui, o banco está íntegro
+                            testDb.Dispose();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Banco de dados corrompido detectado: {ex.Message}");
+                        // Faz backup do banco corrompido
+                        string dataHoraFormatada = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+                        string backupPath = Path.Combine(
+                            directory,
+                            $"Database_corrupted_{dataHoraFormatada}.db"
+                        );
+                        File.Copy(dbPath, backupPath, true);
+                        // Remove o banco corrompido
+                        File.Delete(dbPath);
+                        Console.WriteLine($"Backup do banco corrompido criado em: {backupPath}");
+                    }
+                }
+
                 // Cria backup antes de abrir o banco
-                CreateBackup();
+                DatabaseBackup.CreateBackup(dbPath);
 
                 // Cria ou abre o banco de dados
+                Console.WriteLine("Tentando abrir o banco de dados...");
                 Database = new LiteDatabase(dbPath);
                 Console.WriteLine($"Banco de dados conectado: {dbPath}");
 
                 // Cria as coleções se não existirem
+                Console.WriteLine("Criando coleções...");
                 var usuarios = Database.GetCollection<UsuarioData>("usuarios");
                 var produtos = Database.GetCollection<ProdutoData>("produtos");
                 var movimentacoes = Database.GetCollection<MovimentacaoData>("movimentacoes");
                 var historico = Database.GetCollection<LogData>("historico");
 
                 // Cria índices para melhor performance
+                Console.WriteLine("Criando índices...");
                 usuarios.EnsureIndex(x => x.Matricula, unique: true);
                 produtos.EnsureIndex(x => x.Codigo, unique: true);
                 movimentacoes.EnsureIndex(x => x.Data);
@@ -210,7 +113,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao criar banco de dados: {ex.Message}");
+                Console.WriteLine($"ERRO ao criar banco de dados:");
+                Console.WriteLine($"Mensagem: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 Database = null;
                 throw;
             }

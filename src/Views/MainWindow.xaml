@@ -46,10 +46,10 @@
                 <!-- Itens do Menu -->
                 <StackPanel Grid.Row="1" x:Name="MenuItemsPanel">
                     <Separator Margin="15"/>
-                    <Button x:Name="BtnAdicionar" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
+                    <Button x:Name="BtnMovimentacao" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconAdicionar" Source="/src/Resources/Icons/NotSelected/PlusNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
-                            <TextBlock x:Name="TextAdicionar" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Adicionar"/></TextBlock>
+                            <Image x:Name="IconMovimentacao" Source="/src/Resources/Icons/NotSelected/SwapNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock x:Name="TextMovimentacao" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Movimentação"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnVendas" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
@@ -68,6 +68,12 @@
                         <StackPanel Orientation="Horizontal">
                             <Image x:Name="IconEstoque" Source="/src/Resources/Icons/NotSelected/CaixaNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextEstoque" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Estoque"/></TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnCadastro" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image x:Name="IconCadastro" Source="/src/Resources/Icons/NotSelected/CadastroNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock x:Name="TextCadastro" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Cadastrar"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnDashboard" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">

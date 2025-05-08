@@ -66,6 +66,7 @@ namespace WMS_RadiadoresLemos_WPF
                         new VendasUserControl(),
                         new RegistroUserControl(),
                         new ControleEstoqueUserControl(),
+                        new CadastroUserControl(),
                         new DashboardUserControl(),
                         new NotificacoesUserControl(),
                         new ConfiguracaoUserControl()
@@ -267,7 +268,7 @@ namespace WMS_RadiadoresLemos_WPF
                 // Define a aba correspondente
                 switch (clickedButton.Name)
                 {
-                    case "BtnAdicionar":
+                    case "BtnMovimentacao":
                         ContentArea.Content = new AddEntradaSaídaUserControl();
                         break;
                     case "BtnVendas":
@@ -278,6 +279,9 @@ namespace WMS_RadiadoresLemos_WPF
                         break;
                     case "BtnEstoque":
                         ContentArea.Content = new ControleEstoqueUserControl();
+                        break;
+                    case "BtnCadastro":
+                        ContentArea.Content = new CadastroUserControl();
                         break;
                     case "BtnDashboard":
                         ContentArea.Content = new DashboardUserControl();
@@ -431,10 +435,11 @@ namespace WMS_RadiadoresLemos_WPF
         {
             return iconName switch
             {
-                "IconAdicionar" => state == "Selected" ? "PlusS" : "PlusNS",
+                "IconMovimentacao" => state == "Selected" ? "SwapS" : "SwapNS",
                 "IconVendas" => state == "Selected" ? "PranchetaS" : "PranchetaNS",
                 "IconRegistro" => state == "Selected" ? "historicos" : "HistoricoNS",
                 "IconEstoque" => state == "Selected" ? "CaixaS" : "CaixaNS",
+                "IconCadastro" => state == "Selected" ? "CadastroS" : "CadastroNS",
                 "IconDashboard" => state == "Selected" ? "GraficoS" : "GraficoNS",
                 "IconNotificacoes" => state == "Selected" ? "SinoS" : "SinoNS",
                 "IconConfiguracoes" => state == "Selected" ? "EngrenagemS" : "EngrenagemNS",
@@ -448,7 +453,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (ContentArea.Content is AddEntradaSaídaUserControl)
             {
-                TitleTextBlock.Text = "Entrada/Saída";
+                TitleTextBlock.Text = "Movimentação";
             }
             else if (ContentArea.Content is VendasUserControl)
             {
@@ -461,6 +466,10 @@ namespace WMS_RadiadoresLemos_WPF
             else if (ContentArea.Content is ControleEstoqueUserControl)
             {
                 TitleTextBlock.Text = "Estoque";
+            }
+            else if (ContentArea.Content is CadastroUserControl)
+            {
+                TitleTextBlock.Text = "Cadastro";
             }
             else if (ContentArea.Content is DashboardUserControl)
             {
@@ -481,7 +490,7 @@ namespace WMS_RadiadoresLemos_WPF
 
             if (ContentArea.Content is AddEntradaSaídaUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/PlusS.png", UriKind.Relative);
+                iconUri = new Uri("/src/Resources/Icons/Selected/SwapS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is VendasUserControl)
             {
@@ -494,6 +503,10 @@ namespace WMS_RadiadoresLemos_WPF
             else if (ContentArea.Content is ControleEstoqueUserControl)
             {
                 iconUri = new Uri("/src/Resources/Icons/Selected/CaixaS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is CadastroUserControl)
+            {
+                iconUri = new Uri("/src/Resources/Icons/Selected/CadastroS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is DashboardUserControl)
             {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>WMS_RadiadoresLemos_WPF</RootNamespace>
     <Nullable>enable</Nullable>
@@ -33,6 +33,7 @@
     <None Remove="src\resources\icons\Genericos\Usuário Config.png" />
     <None Remove="src\resources\icons\GraficoS.png" />
     <None Remove="src\resources\icons\historicos.png" />
+    <None Remove="src\Resources\icons\NotSelected\CadastroNS.png" />
     <None Remove="src\resources\icons\NotSelected\CaixaNS.png" />
     <None Remove="src\Resources\Icons\NotSelected\DataCenterNS.png" />
     <None Remove="src\resources\icons\NotSelected\EngrenagemNS.png" />
@@ -42,11 +43,14 @@
     <None Remove="src\resources\icons\NotSelected\PranchetaNS.png" />
     <None Remove="src\resources\icons\NotSelected\SairNS.png" />
     <None Remove="src\resources\icons\NotSelected\SinoNS.png" />
+    <None Remove="src\Resources\icons\NotSelected\SwapNS.png" />
     <None Remove="src\Resources\Icons\NotSelected\UsuárioNS.png" />
     <None Remove="src\resources\icons\PlusS.png" />
     <None Remove="src\resources\icons\PranchetaS.png" />
     <None Remove="src\resources\icons\SairS.png" />
+    <None Remove="src\Resources\icons\Selected\CadastroS.png" />
     <None Remove="src\Resources\Icons\Selected\DataCenterS.png" />
+    <None Remove="src\Resources\icons\Selected\SwapS.png" />
     <None Remove="src\Resources\Icons\Selected\UsuárioS.png" />
     <None Remove="src\resources\icons\SinoS.png" />
     <None Remove="src\Resources\Images\user.png" />
@@ -70,10 +74,12 @@
     <PackageReference Include="ClosedXML" Version="0.104.1" />
     <PackageReference Include="LiteDB" Version="5.0.17" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
+    <PackageReference Include="Supabase" Version="0.12.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="assets\" />
+    <Folder Include="src\Resources\Banco de dados\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -107,6 +113,9 @@
     <Resource Include="src\resources\icons\Genericos\Usuário Config.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="src\Resources\icons\NotSelected\CadastroNS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="src\resources\icons\NotSelected\CaixaNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -134,7 +143,13 @@
     <Resource Include="src\resources\icons\NotSelected\SinoNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="src\Resources\icons\NotSelected\SwapNS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="src\Resources\Icons\NotSelected\UsuárioNS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\Resources\icons\Selected\CadastroS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="src\Resources\Icons\Selected\CaixaS.png">
@@ -162,6 +177,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="src\Resources\Icons\Selected\SinoS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="src\Resources\icons\Selected\SwapS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="src\Resources\Icons\Selected\UsuárioS.png">

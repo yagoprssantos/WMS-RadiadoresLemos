@@ -3,16 +3,22 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-            mc:Ignorable="d"
+            xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
+            mc:Ignorable="d" Background="{StaticResource PanelBackgroundBrush}"
             d:DesignHeight="600" d:DesignWidth="800">
 
     <Grid Margin="15">
-        <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource SecondaryBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Título e Área Principal -->
+        <Border Grid.Row="0" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource SecondaryBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Título -->
@@ -37,9 +43,11 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" x:Name="AbrirArquivosLocaisButton" Content="ABRIR ARQUIVOS LOCAIS" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
-                        <Button Grid.Column="1" x:Name="AbrirOneDriveButton" Content="ABRIR ONEDRIVE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12"/>
+                        <Button Grid.Column="0" x:Name="AbrirArquivosLocaisButton" Content="ABRIR ARQUIVOS LOCAIS" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirArquivosLocais_Click"/>
+                        <Button Grid.Column="1" x:Name="AbrirSupabaseButton" Content="ABRIR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirSupabase_Click"/>
+                        <Button Grid.Column="2" x:Name="ListarArquivosSupabaseButton" Content="LISTAR SUPABASE" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ListarSupabase_Click"/>
                     </Grid>
 
                     <!-- Backup -->
@@ -48,66 +56,81 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" x:Name="ImportarBackupButton" Content="IMPORTAR BACKUP" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
-                        <Button Grid.Column="1" x:Name="ExportarBackupButton" Content="EXPORTAR BACKUP" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch"/>
+                        <Button Grid.Column="0" x:Name="ImportarBancoDadosButton" Content="IMPORTAR DA NUVEM" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ImportarBancoDadosButton_Click"/>
+                        <Button Grid.Column="1" x:Name="ImportarBackupButton" Content="IMPORTAR ARQUIVO" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ImportarBackupButton_Click"/>
+                        <Button Grid.Column="2" x:Name="ExportarBackupButton" Content="EXPORTAR PARA NUVEM" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarSupabaseButton_Click"/>
+                        <Button Grid.Column="3" x:Name="ExportarLocalButton" Content="EXPORTAR LOCAL" Margin="15,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="ExportarLocalButton_Click"/>
                     </Grid>
 
                     <!-- Tabelas Excel -->
-                    <TextBlock Text="Tabelas do Excel:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14"/>
-                    <Button x:Name="VisualizarExcelButton" Content="VISUALIZAR EM EXCEL" Margin="5" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="VisualizarExcelButton_Click"/>
-
-
-                    <!-- Menu de Tabelas -->
-                    <TextBlock Text="Visualizar Menu de Tabelas:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14" />
-                    <Button x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirMenuTabelasButton_Click"/>
-                </StackPanel>
-
-                <!-- Mais Informações -->
-                <StackPanel Grid.Row="2">
-                    <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="40, 5" HorizontalAlignment="Center" Margin="0,0,0,15">
-                        <TextBlock Text="Mais informações:" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                    </Border>
-                    <Grid>
+                    <TextBlock Text="Visualizar Tabelas:" Style="{StaticResource TextBoxCustom2ButtonStyle}" HorizontalAlignment="Left" FontSize="14" />
+                    <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Banco de Dados: " FontWeight="Bold"/>
-                                <Run Text="Local" FontStyle="Italic"/>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Conexão com o OneDrive: " FontWeight="Bold"/>
-                                <Run Text="Conectado" FontStyle="Italic"/>
-                            </TextBlock>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Ultimo backup importado: " FontWeight="Bold"/>
-                                <Run x:Name="UltimoBackupImport" Text="01/01/2025" FontStyle="Italic"/>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Ultimo backup exportado: " FontWeight="Bold"/>
-                                <Run x:Name="UltimoBackupExport" Text="19/03/2025" FontStyle="Italic"/>
-                            </TextBlock>
-                            <TextBlock Foreground="{StaticResource TextBrush}">
-                                <Run Text="Backup Atual: " FontWeight="Bold"/>
-                                <Run x:Name="BackupStatus" Text="Salvo" FontStyle="Italic"/>
-                            </TextBlock>
-                        </StackPanel>
+                        <Button Grid.Column="0" x:Name="VisualizarExcelButton" Content="VISUALIZAR EM EXCEL" Margin="5,0,15,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" HorizontalAlignment="Stretch" Click="VisualizarExcelButton_Click"/>
+                        <Button Grid.Column="1" x:Name="AbrirMenuTabelasButton" Content="ABRIR MENU DE TABELAS" Margin="15,0,5,0" Style="{StaticResource EmphasisButtonStyle}" FontSize="12" Click="AbrirMenuTabelasButton_Click"/>
                     </Grid>
                 </StackPanel>
             </Grid>
         </Border>
 
+        <!-- Mais Informações -->
+        <Border Grid.Row="1" Background="{StaticResource SecondaryBrush}" CornerRadius="15" Padding="25" Margin="0, 25, 0, 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Botão Atualizar -->
+                <Button Grid.Row="0" x:Name="AtualizarButton" Content="⟳" Style="{StaticResource DeleteButtonStyle}" 
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" FontSize="26" Width="35" Height="35"
+                        Foreground="{StaticResource TextBrush}" Background="Transparent"
+                        Click="AtualizarButton_Click" />
+
+                <!-- Título -->
+                <Border Grid.Row="0" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="7" Width="180" HorizontalAlignment="Center" Margin="0,0,0,15">
+                    <TextBlock Text="Mais informações:" Foreground="{StaticResource TextBrush}" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                </Border>
+
+                <!-- Informações em duas colunas -->
+                <Grid Grid.Row="1" HorizontalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Coluna Esquerda -->
+                    <StackPanel Grid.Column="0" Margin="10,0,8,0" HorizontalAlignment="Center">
+                        <TextBlock x:Name="BancoDadosText" Text="Banco de Dados: Local" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBlock x:Name="SupabaseText" Text="Conexão com o SupaBase: Conectado" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
+                    </StackPanel>
+
+                    <!-- Espaçamento entre as colunas -->
+                    <Grid Grid.Column="1" Width="45"/>
+
+                    <!-- Coluna Direita -->
+                    <StackPanel Grid.Column="2" Margin="8,0,10,0" HorizontalAlignment="Center">
+                        <TextBlock x:Name="UltimoBackupImportadoText" Text="Último backup importado: Nenhum" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBlock x:Name="UltimoBackupExportadoText" Text="Último backup exportado: Nenhum" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBlock x:Name="BackupAtualText" Text="Backup Atual: Não salvo" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
         <!-- Barra de Progresso -->
-        <Grid Name="ShowProgressBar" Background="#80000000" Visibility="Collapsed">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="{StaticResource BackgroundBrush}" Height="Auto" Width="600">
-                <TextBlock Text="Processando Informações. Por favor, Aguarde" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="20" Margin="0, 20, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <TextBlock Name="ProgressBarMessage" Text="Aguardando próxima ação..." Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="16" Margin="0, 0, 0, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <ProgressBar Name="ProgressBar" Height="20" Width="500" Margin="0, 0, 0, 30"
+        <Grid Grid.Row="0" Name="ShowProgressBar" Background="#80000000" Visibility="Visible" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="{StaticResource BackgroundBrush}" Height="Auto" Width="500">
+                <TextBlock Text="Processando Informações. Por favor, Aguarde" Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="18" Margin="0, 10, 0, 10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Name="ProgressBarMessage" Text="Aguardando próxima ação..." Style="{StaticResource TextBoxCustom2ButtonStyle}" FontSize="14" Margin="0, 0, 0, 15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ProgressBar Name="ProgressBar" Height="20" Width="400" Margin="0, 0, 0, 20"
                              VerticalAlignment="Center" HorizontalAlignment="Center" 
                              Minimum="0" Maximum="100" Value="0"/>
             </StackPanel>
