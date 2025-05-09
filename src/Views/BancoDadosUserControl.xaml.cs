@@ -574,7 +574,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Último backup exportado (do Supabase)
                 var ultimoExportado = await ObterUltimoBackupExportado();
-                UltimoBackupExportadoText.Text = $"Último backup exportado: {ultimoExportado:dd/MM/yyyy HH:mm}";
+                UltimoBackupExportadoText.Text = $"Último backup exportado: {ultimoExportado.ToLocalTime():dd/MM/yyyy HH:mm}";
 
                 // Backup Atual
                 var backupAtual = VerificarBackupAtual();
