@@ -22,27 +22,37 @@
 
         <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
                 <!-- ComboBox para selecionar o gráfico -->
                 <ComboBox Name="GraficoComboBox" Style="{StaticResource ComboBoxStyle}" HorizontalContentAlignment="Stretch" SelectedIndex="0" Margin="0,0,0,20" MinWidth="500"
-                          SelectionChanged="GraficoComboBox_SelectionChanged">
+                          Grid.Row="0" SelectionChanged="GraficoComboBox_SelectionChanged">
                 </ComboBox>
 
-                <!-- Filtros por Período -->
-                <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="10, 5" Background="{StaticResource SecondaryBrush}">
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <!-- Filtros e gráficos -->
+                <Border BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1" CornerRadius="15" Padding="10, 5" Background="{StaticResource SecondaryBrush}" Grid.Row="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0">
                             <Button x:Name="DiarioButton" Content="Diário" Click="FiltrarPorPeriodo_Click" Tag="Hoje" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
                             <Button x:Name="SemanalButton" Content="Semanal" Click="FiltrarPorPeriodo_Click" Tag="Última Semana" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
                             <Button x:Name="MensalButton" Content="Mensal" Click="FiltrarPorPeriodo_Click" Tag="Último Mês" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
                             <Button x:Name="AnualButton" Content="Anual" Click="FiltrarPorPeriodo_Click" Tag="Último Ano" Style="{StaticResource DashboardButtonStyle}" Margin="10"/>
                         </StackPanel>
-                        
+
                         <!-- Área de Conteúdo para Gráficos -->
-                        <ContentControl x:Name="GraficoContentControl"/>
-                    </StackPanel>
+                        <ContentControl x:Name="GraficoContentControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"/>
+                    </Grid>
                 </Border>
-            </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

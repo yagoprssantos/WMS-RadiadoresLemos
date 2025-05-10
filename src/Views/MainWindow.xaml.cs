@@ -261,7 +261,6 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     case "BtnMovimentacao":
                         ContentArea.Content = new AddEntradaSaídaUserControl();
-                        Alerta.AdicionarAlerta("Importante", "Teste", "Teste", "Teste");
                         break;
                     case "BtnVendas":
                         ContentArea.Content = new VendasUserControl();

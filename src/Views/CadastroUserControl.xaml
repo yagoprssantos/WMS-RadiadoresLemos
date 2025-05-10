@@ -41,20 +41,15 @@
                     <Button Grid.Column="1" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
 
                     <!-- ComboBox para seleção de tabela -->
-                    <ComboBox Grid.Column="2" x:Name="TabelaComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectionChanged="TabelaComboBox_SelectionChanged">
-                        <ComboBoxItem Content="Produtos" IsSelected="True"/>
-                        <ComboBoxItem Content="Clientes"/>
-                        <ComboBoxItem Content="Usuários"/>
-                    </ComboBox>
+                    <ComboBox Grid.Column="2" x:Name="TabelasComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged"/>
                 </Grid>
 
                 <!-- Exibição de dados -->
                 <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0">
                     <StackPanel>
                         <!-- Título da tabela atual -->
-                        <TextBlock Text="{Binding ElementName=TabelaComboBox, Path=SelectedItem.Content}" 
-                                   FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
-                                   HorizontalAlignment="Center" Margin="0,15,0,10"/>
+                        <TextBlock x:Name="Titulo" Text="Selecione uma tabela" FontSize="18" FontWeight="Bold" 
+                                   Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,15,0,10"/>
                         <Separator Margin="15,15,15,5"/>
 
                         <!-- DataGrid para exibição de dados -->
@@ -63,12 +58,11 @@
                     </StackPanel>
                 </Border>
                 
-
                 <!-- Botões de ação -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,10">
-                    <Button Content="Cadastrar" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0,5,0,0" Click="CadastrarButton_Click"/>
-                    <Button Content="Editar" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="15,5,0,0" Click="EditarButton_Click"/>
-                    <Button Content="Deletar" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="15,5,0,0" Click="DeletarButton_Click"/>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
+                    <Button Content="Cadastrar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="0,10,0,0" Click="CadastrarButton_Click"/>
+                    <Button Content="Editar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="15,10,0,0" Click="EditarButton_Click"/>
+                    <Button Content="Deletar" Width="150" Style="{StaticResource CancelButtonStyle}" Margin="15,10,0,0" Click="DeletarButton_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

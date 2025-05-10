@@ -13,12 +13,12 @@ namespace WMS_RadiadoresLemos_WPF
     public partial class MenuTabelasWindow : Window
     {
         private LiteDatabase _database;
-        private string _tabelaAtual;
+        private string _tabelaAtual = string.Empty;
 
         public MenuTabelasWindow()
         {
             InitializeComponent();
-            _database = DatabaseConnect.Database;
+            _database = DatabaseConnect.Database ?? throw new InvalidOperationException("Database não pode ser nulo."); // Evita CS8601 e CS8618  
             CarregarTabelas();
         }
 
@@ -35,7 +35,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (TabelasComboBox.SelectedItem != null)
             {
-                _tabelaAtual = TabelasComboBox.SelectedItem.ToString();
+                _tabelaAtual = TabelasComboBox.SelectedItem?.ToString() ?? string.Empty;
 
                 // Carrega os dados da tabela selecionada
                 CarregarDadosTabela(_tabelaAtual);
@@ -75,6 +75,11 @@ namespace WMS_RadiadoresLemos_WPF
         // Método genérico para carregar os dados de qualquer tabela
         private void CarregarDadosGenerico<T>(string tabela) where T : class
         {
+            // Limpa o DataGrid antes de carregar novos dados
+            TabelaDataGrid.ItemsSource = null;
+            TabelaDataGrid.Columns.Clear();
+            TabelaDataGrid.Items.Clear();
+
             var collection = _database.GetCollection<T>(tabela);
             var dados = collection.FindAll().ToList();
             TabelaDataGrid.ItemsSource = dados;

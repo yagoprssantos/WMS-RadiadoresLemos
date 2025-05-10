@@ -42,8 +42,12 @@
                 </Grid>
 
                 <!-- DataGrid para exibir os dados -->
-                <DataGrid x:Name="TabelaDataGrid" Grid.Row="1" AutoGenerateColumns="True" Margin="0,0,0,15"
+                <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0">
+                    <StackPanel>
+                        <DataGrid x:Name="TabelaDataGrid" Grid.Row="1" AutoGenerateColumns="True" Margin="0,0,0,15"
                           Style="{StaticResource CustomDataGridStyle}" IsReadOnly="False"/>
+                    </StackPanel>
+                </Border>
 
                 <!-- Botões de ação -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
