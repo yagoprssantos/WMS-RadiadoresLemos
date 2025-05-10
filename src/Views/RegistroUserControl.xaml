@@ -49,10 +49,10 @@
                                 <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
                                 <TextBlock Text="Filtrar por Período" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <Border  BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="10, 0, 0, 10" BorderThickness="0" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
+                                    <Border  BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="10, 0, 0, 10" BorderThickness="5" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
                                         <DatePicker x:Name="DataInicioPicker" Width="125" Style="{StaticResource DatePickerStyle}"/>
                                     </Border>
-                                    <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="5, 0, 10, 10" BorderThickness="0" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
+                                    <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="5, 0, 10, 10" BorderThickness="5" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
                                         <DatePicker x:Name="DataFimPicker" Width="125" Style="{StaticResource DatePickerStyle}"/>
                                     </Border>
                                 </StackPanel>

@@ -111,18 +111,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     {
                         await SupabaseUploader.DownloadFileAsync(arquivoSelecionado.name, saveFileDialog.FileName);
                         progressWindow.Close();
-                        MessageBox.Show("✅ Arquivo baixado com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Arquivo baixado com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
                         progressWindow.Close();
-                        MessageBox.Show($"❌ Erro ao baixar arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Erro ao baixar arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"❌ Erro ao baixar arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao baixar arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

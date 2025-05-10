@@ -14,11 +14,11 @@
         <StackPanel Width="300" VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Campo de Texto para Usuário -->
             <TextBlock Foreground="{StaticResource TextBrush}" Text="Usuário" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
-            <TextBox Name="UsernameField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14" VerticalAlignment="Center" KeyDown="LoginField_KeyDown"/>
+            <TextBox Name="UsernameField" Background="{StaticResource SecondaryBrush}" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14" VerticalAlignment="Center" KeyDown="LoginField_KeyDown"/>
 
             <!-- Campo de Texto para Senha -->
             <TextBlock Foreground="{StaticResource TextBrush}" Text="Senha" Margin="0,0,0,10" FontWeight="Bold" FontSize="16"/>
-            <PasswordBox Name="PasswordField" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"
+            <PasswordBox Name="PasswordField" Background="{StaticResource SecondaryBrush}" Width="Auto" Height="30" Margin="0,0,0,20" FontSize="14"
                          KeyDown="LoginField_KeyDown"/>
 
             <StackPanel Orientation="Horizontal" Width="300" HorizontalAlignment="Center" VerticalAlignment="Center">

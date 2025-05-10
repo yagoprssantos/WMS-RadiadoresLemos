@@ -6,7 +6,7 @@
     <Color x:Key="BackgroundColor">#1A2B4C</Color>
     <Color x:Key="PanelBackgroundColor">#0B1933</Color>
     <Color x:Key="PrimaryColor">#0B1933</Color>
-    <Color x:Key="SecondaryColor">#1A2B4C</Color>
+    <Color x:Key="SecondaryColor">#172741</Color>
     <Color x:Key="AccentColor">#3366CC</Color>
     <Color x:Key="TextColor">White</Color>
     <Color x:Key="HoverBackgroundColor">#162A50</Color>
@@ -167,7 +167,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    
     <!-- Estilo para "Selecionar Data" -->
     <Style x:Key="DatePickerStyle" TargetType="DatePicker">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -178,7 +178,7 @@
         <Setter Property="CalendarStyle">
             <Setter.Value>
                 <Style TargetType="Calendar">
-                    <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+                    <Setter Property="Background" Value="White" />
                     <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
                     <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
                     <Setter Property="BorderThickness" Value="5" />
@@ -205,10 +205,11 @@
         </Setter>
     </Style>
     <Style TargetType="DatePickerTextBox">
-        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="0, 0, 5, 0" />
     </Style>
 
 

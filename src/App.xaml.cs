@@ -36,7 +36,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Faz o upload para o Supabase
                         await SupabaseUploader.UploadFileAsync(caminhoTemp);
-                        Console.WriteLine($"✅ Backup automático realizado com sucesso: {Path.GetFileName(arquivoMaisRecente)}");
+                        Console.WriteLine($"Backup automático realizado com sucesso: {Path.GetFileName(arquivoMaisRecente)}");
 
                         // Limpa o arquivo temporário
                         if (File.Exists(caminhoTemp))
@@ -48,7 +48,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Erro ao fazer backup automático: {ex.Message}");
+                Console.WriteLine($"Erro ao fazer backup automático: {ex.Message}");
             }
 
             // Adiciona o usuário administrador antes de qualquer outra operação
@@ -81,7 +81,24 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var dict = new ResourceDictionary
             {
-                Source = new Uri($"pack://application:,,,/src/Resources/Themes/{themeName}.xaml")
+                /* COMO FUNCIONA AS LINHAS ABAIXO
+                 * 
+                 * Apenas uma das linhas abaixo deve ser usada
+                 * 
+                 * Caso precise alterar o Style.xaml, use a segunda linha, assim você poderá
+                 * ver as mudanças apenas alterando o Style.xaml, o que facilita o desenvolvimento.
+                 * 
+                 * Caso tenha terminado de desenvolver, tenha certeza que os outros temas em
+                 * src/Resources/Themes estão prontos e funcionando e iguais ao novo Styel.xaml.
+                 * 
+                 * APENAS USE A PRIMEIRA LINHA SE O ARQUIVO XAML DO TEMA ESTIVER PRONTO.
+                 */
+
+                // A LINHA DEBAIXO É A LINHA QUE CARREGA O ARQUIVO XAML DO TEMA CORRETAMENTE
+                Source = new Uri($"src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
+
+                // A LINHA DEBAIXO SERVE PARA USAR O Style.xaml PADRÃO - PARA DESENVOLVIMENTO
+                //Source = new Uri("src/Resources/Style.xaml", UriKind.Relative)
             };
 
             Application.Current.Resources.MergedDictionaries.Clear();
