@@ -9,8 +9,8 @@
     <Color x:Key="SecondaryColor">#4A4A4A</Color>
     <Color x:Key="AccentColor">#6680E8</Color>
     <Color x:Key="TextColor">#E0E0E0</Color>
-    <Color x:Key="HoverBackgroundColor">#5A5A5A</Color>
-    <Color x:Key="HoverForegroundColor">#A0A0A0</Color>
+    <Color x:Key="HoverBackgroundColor">#404040</Color>
+    <Color x:Key="HoverForegroundColor">#808080</Color>
     <Color x:Key="CancelColor">#DD4444</Color>
     <Color x:Key="CancelHoverColor">#FF0000</Color>
 
@@ -148,10 +148,10 @@
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
                             CornerRadius="15"
-                            Padding="10">
+                            Padding="7">
                         <Grid>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0, 0, 15, 0"/>
-                            <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5, 0, 25, 0"/>
+                            <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -170,40 +170,39 @@
 
     <!-- Estilo para "Selecionar Data" -->
     <Style x:Key="DatePickerStyle" TargetType="DatePicker">
-       <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-       <Setter Property="Background" Value="Transparent" />
-       <Setter Property="FontSize" Value="14" />
-       <Setter Property="Padding" Value="5" />
-       <Setter Property="BorderThickness" Value="0" />
-       <Setter Property="CalendarStyle">
-           <Setter.Value>
-               <Style TargetType="Calendar">
-                   <Setter Property="Background" Value="White" />
-                   <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-                   <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
-                   <Setter Property="BorderThickness" Value="5" />
-                   <Setter Property="Padding" Value="5" />
-                   <Setter Property="Template">
-                       <Setter.Value>
-                           <ControlTemplate TargetType="Calendar">
-                               <Grid>
-                                   <Border Background="{TemplateBinding Background}" 
-                                       BorderBrush="{TemplateBinding BorderBrush}" 
-                                       BorderThickness="{TemplateBinding BorderThickness}" 
-                                       CornerRadius="5">
-                                       <CalendarItem x:Name="PART_CalendarItem" 
-                                                 Background="{TemplateBinding Background}" 
-                                                 BorderBrush="{TemplateBinding BorderBrush}" 
-                                                 Foreground="{StaticResource TextBrush}" 
-                                                 Padding="{TemplateBinding Padding}" />
-                                   </Border>
-                               </Grid>
-                           </ControlTemplate>
-                       </Setter.Value>
-                   </Setter>
-               </Style>
-           </Setter.Value>
-       </Setter>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CalendarStyle">
+            <Setter.Value>
+                <Style TargetType="Calendar">
+                    <Setter Property="Background" Value="White" />
+                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
+                    <Setter Property="BorderThickness" Value="5" />
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Calendar">
+                                <Grid>
+                                    <Border Background="{TemplateBinding Background}" 
+                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                        CornerRadius="5">
+                                        <CalendarItem x:Name="PART_CalendarItem" 
+                                                  Background="{TemplateBinding Background}" 
+                                                  BorderBrush="{TemplateBinding BorderBrush}" 
+                                                  Padding="{TemplateBinding Padding}" />
+                                    </Border>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style TargetType="DatePickerTextBox">
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
@@ -461,38 +460,24 @@
         <Setter Property="Padding" Value="10" />
         <Setter Property="Margin" Value="5" />
         <Setter Property="Width" Value="Auto"/>
-        <Setter Property="IsTextSearchEnabled" Value="True"/>
+        <Setter Property="IsEditable" Value="True" />
+        <Setter Property="IsTextSearchEnabled" Value="False"/>
         <Setter Property="StaysOpenOnEdit" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
-                        <Border Name="Border" 
-                            Background="{TemplateBinding Background}" 
-                            BorderBrush="{TemplateBinding Background}" 
-                            BorderThickness="1" 
-                            CornerRadius="15" 
-                            Padding="5">
-                            <ContentPresenter Name="ContentSite"
-                                          IsHitTestVisible="False"
-                                          Content="{TemplateBinding SelectionBoxItem}"
-                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                          Margin="3,3,23,3"
-                                          VerticalAlignment="Center"
-                                          HorizontalAlignment="Left" />
-                        </Border>
-                        <ToggleButton Name="ToggleButton"  
-                                     Grid.Column="1"  
-                                     Focusable="True"  
-                                     IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"  
-                                     ClickMode="Press"  
-                                     Background="Transparent"  
-                                     BorderThickness="0"  
-                                     HorizontalAlignment="Right"
-                                     Width="Auto"
-                                     MinWidth="40"
-                                     Cursor="Hand">
+                        <!-- ToggleButton para abrir/fechar o dropdown -->
+                        <ToggleButton Name="TransparentToggleButton"
+                                      Background="Transparent"
+                                      Foreground="Transparent"
+                                      BorderThickness="0"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      ClickMode="Press"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      Cursor="Hand"
+                                      Panel.ZIndex="1">
                             <ToggleButton.Style>
                                 <Style TargetType="ToggleButton">
                                     <Setter Property="Background" Value="Transparent" />
@@ -501,32 +486,89 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ToggleButton">
-                                                <Border Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" />
-                                                </Border>
+                                                <Border Background="{TemplateBinding Background}"/>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Style>
                             </ToggleButton.Style>
                         </ToggleButton>
+
+                        <!-- Border para o conteúdo do ComboBox -->
+                        <Border Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding Background}" 
+                                BorderThickness="1" 
+                                CornerRadius="15" 
+                                Width="Auto"
+                                Padding="7">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- PART_EditableTextBox para permitir edição -->
+                                <TextBox x:Name="PART_EditableTextBox"
+                                         Grid.Column="0"
+                                         Style="{x:Null}"
+                                         Background="Transparent"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         IsReadOnly="{TemplateBinding IsReadOnly}"
+                                         BorderThickness="0"
+                                         VerticalContentAlignment="Center"
+                                         Focusable="True" />
+
+
+                                <!-- ToggleButton para o ícone de dropdown -->
+                                <ToggleButton Name="ToggleButton"  
+                                              Grid.Column="1"  
+                                              Focusable="True"  
+                                              ClickMode="Press"  
+                                              Background="Transparent"  
+                                              BorderThickness="0"  
+                                              HorizontalAlignment="Right"
+                                              MinWidth="30"
+                                              Cursor="Hand">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}">
+                                                            <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" />
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+                            </Grid>
+                        </Border>
+
+                        <!-- Popup para o dropdown -->
                         <Popup Name="Popup"
-                           Placement="Bottom"
-                           IsOpen="{TemplateBinding IsDropDownOpen}"
-                           AllowsTransparency="True"
-                           Focusable="False"
-                           PopupAnimation="Slide">
+                               Placement="Bottom"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               PopupAnimation="Slide">
                             <Grid Name="DropDown"
-                              SnapsToDevicePixels="True"
-                              MinWidth="{TemplateBinding ActualWidth}"
-                              MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                  SnapsToDevicePixels="True"
+                                  MinWidth="{TemplateBinding ActualWidth}"
+                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                 <Border Name="DropDownBorder"
-                                    Background="{StaticResource HoverBackgroundBrush}"
-                                    BorderBrush="{StaticResource HoverBackgroundBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="15" />
+                                        Background="{StaticResource HoverBackgroundBrush}"
+                                        BorderBrush="{StaticResource HoverBackgroundBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="15" />
                                 <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
@@ -534,6 +576,10 @@
                         </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <!-- Gatilho para definir o foco no PART_EditableTextBox quando o dropdown for aberto -->
+                        <Trigger SourceName="TransparentToggleButton" Property="IsChecked" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}" />
+                        </Trigger>
                         <Trigger Property="HasItems" Value="false">
                             <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
                         </Trigger>
@@ -548,6 +594,11 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
 
     <!-- Estilo para GroupBoxes -->
     <Style x:Key="GroupBoxStyle" TargetType="GroupBox">

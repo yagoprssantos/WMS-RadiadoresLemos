@@ -24,7 +24,7 @@
                 <TextBlock Text="Tipo do Produto:" Margin="0,0,0,5"
                            Foreground="{StaticResource TextBrush}"/>
                 <ComboBox Name="TipoProduto" Margin="0,0,0,15" Width="500" SelectionChanged="TipoProduto_SelectionChanged"
-                          Style="{StaticResource ComboBoxStyle}">
+                          Style="{StaticResource ComboBoxSearchStyle}">
                     <!-- Tipos de Produtos -->
                     <ComboBoxItem Content="Caixa"/>
                     <ComboBoxItem Content="Radiador"/>

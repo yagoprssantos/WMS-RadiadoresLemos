@@ -48,22 +48,22 @@
                            <StackPanel>
                                <!-- Tipo de Movimentação -->
                                <TextBlock Text="Tipo de Movimentação:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                               <ComboBox Name="TipoMovimentacaoComboBox" Margin="0,0,0,15" FontSize="14" HorizontalAlignment="Stretch"
-                                         Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                         SelectionChanged="TipoMovimentacaoComboBox_SelectionChanged" Height="35">
-                                   <ComboBoxItem Content="Entrada" />
+                                <ComboBox Name="TipoMovimentacaoComboBox" Margin="0,0,0,15" FontSize="14" Height="35" HorizontalAlignment="Stretch"
+                                         Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                         SelectionChanged="TipoMovimentacaoComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="Entrada" />
                                    <ComboBoxItem Content="Saída" />
                                </ComboBox>
 
                                <!-- Produto -->
                                <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                               <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="14" Height="35" HorizontalAlignment="Stretch"
-                                         Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                         LostFocus="ProdutoComboBox_LostFocus" StaysOpenOnEdit="True" IsTextSearchEnabled="True"
-                                         TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
-                                         SelectionChanged="ProdutoComboBox_SelectionChanged"/>
+                                <ComboBox Name="ProdutoComboBox" Margin="0,0,0,15" FontSize="14" Height="35" HorizontalAlignment="Stretch"
+                                          Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                          LostFocus="ProdutoComboBox_LostFocus" TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
+                                          SelectionChanged="ProdutoComboBox_SelectionChanged" />
 
-                               <!-- Quantidade e Preço -->
+
+                                <!-- Quantidade e Preço -->
                                <Grid Margin="0,0,0,15">
                                    <Grid.ColumnDefinitions>
                                        <ColumnDefinition Width="*" />

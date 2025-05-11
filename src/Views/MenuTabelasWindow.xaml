@@ -37,7 +37,7 @@
                         </Grid>
                     </Border>
                     <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
-                    <ComboBox Grid.Column="3" x:Name="TabelasComboBox" ToolTip="Selecionar Tabela" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged">
+                    <ComboBox Grid.Column="3" x:Name="TabelasComboBox" ToolTip="Selecionar Tabela" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged">
                     </ComboBox>
                 </Grid>
 

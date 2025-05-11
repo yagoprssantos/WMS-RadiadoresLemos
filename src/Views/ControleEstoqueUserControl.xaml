@@ -69,16 +69,16 @@
                             <TextBlock Text="Ver apenas itens em estoque" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" />
                         </StackPanel>
                         <TextBlock Text="Filtrar por Produto" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                        <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}">
                         </ComboBox>
                         <TextBlock Text="Filtrar por Tipo" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                        <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}">
                         </ComboBox>
                         <TextBlock Text="Filtrar por Marca" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                        <ComboBox x:Name="MarcaComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        <ComboBox x:Name="MarcaComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}">
                         </ComboBox>
                         <TextBlock Text="Filtrar por Código" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                        <ComboBox x:Name="CodigoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                        <ComboBox x:Name="CodigoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}">
                         </ComboBox>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 5, 0, 10">

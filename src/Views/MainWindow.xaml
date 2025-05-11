@@ -141,8 +141,8 @@
                         <Ellipse Fill="Transparent"/>
                         <Image Source="/src/resources/icons/Genericos/Recarregar.png" Width="30" Height="30" Margin="10,10,10,10" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
-                </Button> 
-
+                </Button>
+                
             </StackPanel>
 
             <!-- Título e Ícone -->

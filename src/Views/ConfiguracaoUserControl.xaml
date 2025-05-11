@@ -19,7 +19,7 @@
                             <!-- Ícone de Sol -->
                             <Image x:Name="IconAlterarTema"  Source="/src/Resources/Icons/Genericos/Sol Config.png" Stretch="Uniform" Height="30" Width="25" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock Text="Alterar Tema" Style="{StaticResource TextBoxCustom2ButtonStyle}" />
-                            <ComboBox x:Name="ThemeSelector" Style="{StaticResource ComboBoxStyle}" DockPanel.Dock="Right" Width="225">
+                            <ComboBox x:Name="ThemeSelector" Style="{StaticResource ComboBoxSelectStyle}" DockPanel.Dock="Right" Width="225">
                                 <ComboBoxItem x:Name="LightTheme" Content="Tema Claro"/>
                                 <ComboBoxItem x:Name="DarkTheme" Content="Tema Escuro"/>
                                 <ComboBoxItem x:Name="MidnightTheme" Content="Tema Azul"/>

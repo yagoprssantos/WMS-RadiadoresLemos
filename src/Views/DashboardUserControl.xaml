@@ -29,7 +29,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- ComboBox para selecionar o gráfico -->
-                <ComboBox Name="GraficoComboBox" Style="{StaticResource ComboBoxStyle}" HorizontalContentAlignment="Stretch" SelectedIndex="0" Margin="0,0,0,20" MinWidth="500"
+                <ComboBox Name="GraficoComboBox" Style="{StaticResource ComboBoxSelectStyle}" HorizontalContentAlignment="Stretch" SelectedIndex="0" Margin="0,0,0,20" MinWidth="500"
                           Grid.Row="0" SelectionChanged="GraficoComboBox_SelectionChanged">
                 </ComboBox>
 

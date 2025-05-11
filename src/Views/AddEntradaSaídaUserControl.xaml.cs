@@ -34,6 +34,11 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Vincular a coleção listaMovimentacoes ao ItemsControl na interface do usuário
             ListaItemsControl.ItemsSource = listaMovimentacoes;
+
+
+
+            ProdutoComboBox.Focus();
+
         }
 
         private void Setup()
@@ -97,14 +102,26 @@ namespace WMS_RadiadoresLemos_WPF
         // Método que é chamado quando o texto da caixa de pesquisa é alterado
         private void ProdutoComboBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchText = ProdutoComboBox.Text.ToLower();
-            var filteredProducts = produtos
-                .Where(p => p.Nome.ToLower().Contains(searchText))
-                .Select(p => p.Nome)
-                .ToList();
+            if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
+            {
+                string searchText = textBox.Text.ToLower();
 
-            ProdutoComboBox.ItemsSource = filteredProducts;
-            ProdutoComboBox.IsDropDownOpen = filteredProducts.Count > 0;
+                // Filtrar os produtos com base no texto digitado
+                var filteredProducts = produtos
+                    .Where(p => p.Nome.ToLower().Contains(searchText))
+                    .Select(p => p.Nome)
+                    .ToList();
+
+                // Atualizar os itens do ComboBox
+                comboBox.ItemsSource = filteredProducts;
+
+                // Manter o texto digitado
+                textBox.Text = searchText;
+                textBox.CaretIndex = searchText.Length;
+
+                // Abrir o dropdown para mostrar as opções filtradas
+                comboBox.IsDropDownOpen = true;
+            }
         }
 
         // Método para confirmar se o produto selecionado é válido

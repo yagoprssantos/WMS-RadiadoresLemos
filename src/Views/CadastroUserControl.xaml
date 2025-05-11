@@ -41,7 +41,7 @@
                     <Button Grid.Column="1" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
 
                     <!-- ComboBox para seleção de tabela -->
-                    <ComboBox Grid.Column="2" x:Name="TabelasComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged"/>
+                    <ComboBox Grid.Column="2" x:Name="TabelasComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged"/>
                 </Grid>
 
                 <!-- Exibição de dados -->

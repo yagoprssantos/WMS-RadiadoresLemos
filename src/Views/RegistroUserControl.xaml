@@ -34,7 +34,7 @@
                         </Grid>
                     </Border>
                     <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
-                    <ComboBox Grid.Column="3" x:Name="CategoriasComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectionChanged="CategoriasComboBox_SelectionChanged">
+                    <ComboBox Grid.Column="3" x:Name="CategoriasComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="CategoriasComboBox_SelectionChanged">
                         <ComboBoxItem Content="Entrada/Saída"/>
                         <ComboBoxItem Content="Histórico"/>
                     </ComboBox>
@@ -46,7 +46,7 @@
                         <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="10">
                             <StackPanel Background="{StaticResource SecondaryBrush}">
                                 <TextBlock Text="Filtrar por Produto" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                                <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
+                                <ComboBox x:Name="ProdutoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
                                 <TextBlock Text="Filtrar por Período" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
                                 <StackPanel Orientation="Horizontal">
                                     <Border  BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="10, 0, 0, 10" BorderThickness="5" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
@@ -71,12 +71,12 @@
                         <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="10">
                             <StackPanel Background="{StaticResource SecondaryBrush}">
                                 <TextBlock Text="Filtrar por Tipo" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                                <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                                <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}">
                                     <ComboBoxItem Content="Operacional"/>
                                     <ComboBoxItem Content="Erro"/>
                                 </ComboBox>
                                 <TextBlock Text="Filtrar por Nível" FontWeight="Bold" Margin="10" Foreground="{StaticResource TextBrush}"/>
-                                <ComboBox x:Name="NivelComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxStyle}" Background="{StaticResource PanelBackgroundBrush}">
+                                <ComboBox x:Name="NivelComboBox" HorizontalAlignment="Stretch" Margin="10, 0" Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}">
                                     <ComboBoxItem Content="Usuário"/>
                                     <ComboBoxItem Content="Sistema"/>
                                 </ComboBox>
