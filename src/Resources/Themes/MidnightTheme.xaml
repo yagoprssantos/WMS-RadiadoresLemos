@@ -450,7 +450,7 @@
     </Style>
 
     <!-- Estilo para ComboBoxes -->
-    <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+    <Style x:Key="ComboBoxSearchStyle" TargetType="ComboBox">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
         <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -515,10 +515,154 @@
                                          Style="{x:Null}"
                                          Background="Transparent"
                                          Foreground="{TemplateBinding Foreground}"
-                                         IsReadOnly="{TemplateBinding IsReadOnly}"
                                          BorderThickness="0"
                                          VerticalContentAlignment="Center"
-                                         Focusable="True" />
+                                         Focusable="True"
+                                         Text="{TemplateBinding Text}" />
+
+
+                                <!-- ToggleButton para o ícone de dropdown -->
+                                <ToggleButton Name="ToggleButton"  
+                                              Grid.Column="1"  
+                                              Focusable="True"  
+                                              ClickMode="Press"  
+                                              Background="Transparent"  
+                                              BorderThickness="0"  
+                                              HorizontalAlignment="Right"
+                                              MinWidth="30"
+                                              Cursor="Hand">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}">
+                                                            <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,0,0" VerticalAlignment="Center" />
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+                            </Grid>
+                        </Border>
+
+                        <!-- Popup para o dropdown -->
+                        <Popup Name="Popup"
+                               Placement="Bottom"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               PopupAnimation="Slide">
+                            <Grid Name="DropDown"
+                                  SnapsToDevicePixels="True"
+                                  MinWidth="{TemplateBinding ActualWidth}"
+                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                <Border Name="DropDownBorder"
+                                        Background="{StaticResource HoverBackgroundBrush}"
+                                        BorderBrush="{StaticResource HoverBackgroundBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="15" />
+                                <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                </ScrollViewer>
+                            </Grid>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <!-- Gatilho para definir o foco no PART_EditableTextBox quando o dropdown for aberto -->
+                        <Trigger SourceName="TransparentToggleButton" Property="IsChecked" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}" />
+                        </Trigger>
+                        <Trigger Property="HasItems" Value="false">
+                            <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsGrouping" Value="true">
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ComboBoxSelectStyle" TargetType="ComboBox">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="Width" Value="Auto"/>
+        <Setter Property="IsEditable" Value="False" />
+        <Setter Property="IsTextSearchEnabled" Value="False"/>
+        <Setter Property="StaysOpenOnEdit" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <!-- ToggleButton para abrir/fechar o dropdown -->
+                        <ToggleButton Name="TransparentToggleButton"
+                                      Background="Transparent"
+                                      Foreground="Transparent"
+                                      BorderThickness="0"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      ClickMode="Press"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      Cursor="Hand"
+                                      Panel.ZIndex="1">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="{TemplateBinding Background}"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+
+                        <!-- Border para o conteúdo do ComboBox -->
+                        <Border Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding Background}" 
+                                BorderThickness="1" 
+                                CornerRadius="15" 
+                                Width="Auto"
+                                Padding="7">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- PART_EditableTextBox para permitir edição -->
+                                <TextBox x:Name="PART_EditableTextBox"
+                                         Grid.Column="0"
+                                         Style="{x:Null}"
+                                         Background="Transparent"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         BorderThickness="0"
+                                         VerticalContentAlignment="Center"
+                                         Focusable="False"
+                                         Text="{TemplateBinding Text}" />
 
 
                                 <!-- ToggleButton para o ícone de dropdown -->

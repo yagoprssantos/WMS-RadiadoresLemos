@@ -115,8 +115,180 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Funcionalidade de filtro não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (string.IsNullOrEmpty(_tabelaAtual))
+            {
+                MessageBox.Show("Selecione uma tabela antes de aplicar o filtro.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Exibe o popup de filtro correspondente à tabela selecionada
+            switch (_tabelaAtual.ToLower())
+            {
+                case "produtos":
+                    ProdutosPopup.IsOpen = true;
+                    PreencherFiltrosProdutos();
+                    break;
+
+                case "clientes":
+                    MessageBox.Show("Funcionalidade de filtro para clientes não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                    break;
+
+                case "usuários":
+                    UsuariosPopup.IsOpen = true;
+                    PreencherFiltrosUsuarios();
+                    break;
+
+                default:
+                    MessageBox.Show("Tabela desconhecida. Não foi possível aplicar o filtro.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+            }
         }
+
+        private void PreencherFiltrosProdutos()
+        {
+            try
+            {
+                var collection = _database.GetCollection<ProdutoData>("produtos");
+                var produtos = collection.FindAll().ToList();
+
+                var marcas = produtos.Select(p => p.Marca).Where(m => !string.IsNullOrEmpty(m)).Distinct().ToList();
+                var tipos = produtos.Select(p => p.Tipo).Where(t => !string.IsNullOrEmpty(t)).Distinct().ToList();
+                var codigos = produtos.Select(p => p.Codigo).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+                var nomes = produtos.Select(p => p.Nome).Where(n => !string.IsNullOrEmpty(n)).Distinct().ToList();
+
+                MarcaComboBox.ItemsSource = marcas;
+                TipoComboBox.ItemsSource = tipos;
+                CodigoComboBox.ItemsSource = codigos;
+                ProdutoComboBox.ItemsSource = nomes;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao preencher filtros de produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void PreencherFiltrosUsuarios()
+        {
+            try
+            {
+                var collection = _database.GetCollection<UsuarioData>("usuarios");
+                var usuarios = collection.FindAll().ToList();
+
+                var cargos = usuarios.Select(u => u.Cargo).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+                CargoComboBox.ItemsSource = cargos;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao preencher filtros de usuários: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_tabelaAtual))
+            {
+                MessageBox.Show("Selecione uma tabela antes de aplicar o filtro.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            switch (_tabelaAtual.ToLower())
+            {
+                case "produtos":
+                    AplicarFiltroProdutos();
+                    ProdutosPopup.IsOpen = false;
+                    break;
+
+                case "usuários":
+                    AplicarFiltroUsuarios();
+                    UsuariosPopup.IsOpen = false;
+                    break;
+
+                default:
+                    MessageBox.Show("Tabela desconhecida. Não foi possível aplicar o filtro.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+            }
+        }
+
+        private void AplicarFiltroProdutos()
+        {
+            try
+            {
+                var produto = ProdutoComboBox.SelectedItem?.ToString();
+                var tipo = TipoComboBox.SelectedItem?.ToString();
+                var marca = MarcaComboBox.SelectedItem?.ToString();
+                var codigo = CodigoComboBox.SelectedItem?.ToString();
+                var emEstoque = EmEstoqueCheckBox.IsChecked == true;
+
+                var collection = _database.GetCollection<ProdutoData>("produtos");
+                var produtos = collection.FindAll().ToList();
+
+                var produtosFiltrados = produtos.Where(p =>
+                    (string.IsNullOrEmpty(produto) || p.Nome.Contains(produto, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(tipo) || p.Tipo == tipo) &&
+                    (string.IsNullOrEmpty(marca) || p.Marca == marca) &&
+                    (string.IsNullOrEmpty(codigo) || p.Codigo.Contains(codigo, StringComparison.OrdinalIgnoreCase)) &&
+                    (!emEstoque || p.Quantidade > 0)).ToList();
+
+                CadastroDataGrid.ItemsSource = produtosFiltrados;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao aplicar filtro de produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AplicarFiltroUsuarios()
+        {
+            try
+            {
+                var cargo = CargoComboBox.SelectedItem?.ToString();
+
+                var collection = _database.GetCollection<UsuarioData>("usuarios");
+                var usuarios = collection.FindAll().ToList();
+
+                var usuariosFiltrados = usuarios.Where(u =>
+                    string.IsNullOrEmpty(cargo) || u.Cargo.Equals(cargo, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                CadastroDataGrid.ItemsSource = usuariosFiltrados;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao aplicar filtro de usuários: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_tabelaAtual))
+            {
+                MessageBox.Show("Selecione uma tabela antes de limpar o filtro.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            switch (_tabelaAtual.ToLower())
+            {
+                case "produtos":
+                    ProdutoComboBox.SelectedItem = null;
+                    TipoComboBox.SelectedItem = null;
+                    MarcaComboBox.SelectedItem = null;
+                    CodigoComboBox.SelectedItem = null;
+                    EmEstoqueCheckBox.IsChecked = false;
+                    CarregarDadosTabela(_tabelaAtual);
+                    ProdutosPopup.IsOpen = false;
+                    break;
+
+                case "usuários":
+                    CargoComboBox.SelectedItem = null;
+                    CarregarDadosTabela(_tabelaAtual);
+                    UsuariosPopup.IsOpen = false;
+                    break;
+
+                default:
+                    MessageBox.Show("Tabela desconhecida. Não foi possível limpar o filtro.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+            }
+        }
+
 
         private void CadastrarButton_Click(object sender, RoutedEventArgs e)
         {
