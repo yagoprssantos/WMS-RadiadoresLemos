@@ -234,6 +234,17 @@ namespace WMS_RadiadoresLemos_WPF
             DateTime? dataFim = null;
 
             // Atualiza os filtros aplicados
+            AtualizarFiltrosAplicados(ref dataInicio, ref dataFim);
+
+            // Aplica os filtros
+            var dadosFiltrados = FiltrarDados(dataInicio, dataFim);
+
+            // Atualiza o DataGrid
+            AtualizarDataGrid(dadosFiltrados);
+        }
+
+        private void AtualizarFiltrosAplicados(ref DateTime? dataInicio, ref DateTime? dataFim)
+        {
             foreach (var child in FiltroContainer.Children)
             {
                 if (child is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem)
@@ -244,8 +255,8 @@ namespace WMS_RadiadoresLemos_WPF
                 else if (child is CheckBox checkBox)
                 {
                     var coluna = checkBox.Content.ToString()?.ToLower();
-                    if (!string.IsNullOrEmpty(coluna))
-                        _filtrosAplicados[coluna] = checkBox.IsChecked == true ? "true" : "false";
+                    if (!string.IsNullOrEmpty(coluna) && coluna.Contains("estoque"))
+                        _filtrosAplicados["Quantidade"] = checkBox.IsChecked == true ? "true" : "false";
                 }
                 else if (child is StackPanel panel)
                 {
@@ -261,34 +272,73 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                 }
             }
+        }
 
-            // Aplica os filtros
+        private List<BsonDocument> FiltrarDados(DateTime? dataInicio, DateTime? dataFim)
+        {
             var collection = _database.GetCollection(_tabelaAtual);
             var dados = collection.FindAll().Cast<BsonDocument>().ToList();
 
-            var dadosFiltrados = dados.Where(dado =>
+            return dados.Where(dado =>
             {
-                // Verifica os filtros de texto
-                bool atendeFiltrosTexto = _filtrosAplicados.All(filtro =>
-                {
-                    var valor = dado[filtro.Key]?.ToString()?.Replace("\"", "").Trim().ToLower();
-                    return valor != null && valor.Contains(filtro.Value);
-                });
+                bool atendeFiltrosTexto = VerificarFiltrosTexto(dado);
+                bool atendeFiltroData = VerificarFiltrosData(dado, dataInicio, dataFim);
 
-                // Verifica os filtros de data
-                if (dataInicio.HasValue || dataFim.HasValue)
+                return atendeFiltrosTexto && atendeFiltroData;
+            }).ToList();
+        }
+
+        private bool VerificarFiltrosTexto(BsonDocument dado)
+        {
+            return _filtrosAplicados.All(filtro =>
+            {
+                var coluna = filtro.Key == "Produto" && _tabelaAtual.ToLower() == "movimentacoes" ? "ProdutoId" :
+                             filtro.Key == "Produto" && _tabelaAtual.ToLower() == "produtos" ? "Nome" :
+                             filtro.Key;
+                var valor = dado.ContainsKey(coluna) ? dado[coluna]?.ToString()?.Replace("\"", "").Trim().ToLower() : null;
+
+                if (_tabelaAtual.ToLower() == "produtos" && coluna == "Quantidade")
                 {
-                    var data = dado["Data"]?.AsDateTime;
-                    if (dataInicio.HasValue && data < dataInicio.Value)
-                        return false;
-                    if (dataFim.HasValue && data > dataFim.Value)
-                        return false;
+                    return VerificarFiltroQuantidade(valor, filtro.Value);
                 }
 
-                return atendeFiltrosTexto;
-            }).ToList();
+                return valor != null && valor.Contains(filtro.Value);
+            });
+        }
 
-            // Atualiza o DataGrid
+        private bool VerificarFiltroQuantidade(string? valor, string filtroValue)
+        {
+            if (filtroValue == "true")
+            {
+                return valor != null && int.TryParse(valor, out var quantidade) && quantidade > 0;
+            }
+            else
+            {
+                return valor != null && int.TryParse(valor, out var quantidade) && quantidade >= 0;
+            }
+        }
+
+        private bool VerificarFiltrosData(BsonDocument dado, DateTime? dataInicio, DateTime? dataFim)
+        {
+            if (_tabelaAtual.ToLower() == "movimentacoes" || _tabelaAtual.ToLower() == "historico")
+            {
+                if (dado.ContainsKey("Data"))
+                {
+                    var data = dado["Data"]?.AsDateTime;
+
+                    if (dataInicio.HasValue && (!data.HasValue || data <= dataInicio.Value))
+                        return false;
+
+                    if (dataFim.HasValue && (!data.HasValue || data >= dataFim.Value))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void AtualizarDataGrid(List<BsonDocument> dadosFiltrados)
+        {
             TabelaDataGrid.Columns.Clear();
             ConfigurarColunasGenerico(ObterModelo(_tabelaAtual));
             TabelaDataGrid.ItemsSource = dadosFiltrados.Select(d => BsonMapper.Global.ToObject(ObterModelo(_tabelaAtual), d)).ToList();
