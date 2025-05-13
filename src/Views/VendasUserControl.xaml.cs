@@ -9,26 +9,22 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
-    /// <summary>
-    /// Interação lógica para VendasUserControl.xaml
-    /// </summary>
     public partial class VendasUserControl : UserControl
     {
-        private List<Venda> _listaVendas;
-        private string _ordenacaoAtual = "recente"; // Padrão: mais recente primeiro
+        private List<Venda> _todasVendas;      // Lista completa de vendas
+        private List<Venda> _vendasFiltradas;  // Lista filtrada e ordenada
+        private string _ordenacaoAtual = "recente";
         private string _filtroTexto = "Ordenar por";
 
         public VendasUserControl()
         {
             InitializeComponent();
 
-            // Registrar no evento de adição de venda
             CadastroVendasWindow.VendaAdicionada += CadastroVendasWindow_VendaAdicionada;
-
-            // Carregar vendas ao inicializar
             Loaded += VendasUserControl_Loaded;
         }
 
+        // 1. Carregamento inicial
         private void VendasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarVendas();
@@ -36,7 +32,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void CadastroVendasWindow_VendaAdicionada(object sender, Venda e)
         {
-            // Recarregar vendas quando uma nova for adicionada
             CarregarVendas();
         }
 
@@ -44,13 +39,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                // Obter vendas do serviço
-                _listaVendas = VendaService.ObterVendas();
-
-                // Aplicar ordenação atual
+                _todasVendas = VendaService.ObterVendas();
+                _vendasFiltradas = new List<Venda>(_todasVendas);
                 AplicarOrdenacao();
-
-                // Limpar container e adicionar vendas
                 AtualizarInterfaceVendas();
             }
             catch (Exception ex)
@@ -59,10 +50,55 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        private void BtnOrdenar_Click(object sender, RoutedEventArgs e)
+        // 2. Pesquisa
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Abrir/fechar o popup de ordenação
-            popupOrdenar.IsOpen = !popupOrdenar.IsOpen;
+            if (_todasVendas == null) return;
+
+            string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
+            _vendasFiltradas = _todasVendas
+                .Where(v =>
+                    (v.Cliente?.ToLower().Contains(textoBusca) ?? false) ||
+                    (v.Pedido?.ToLower().Contains(textoBusca) ?? false) ||
+                    (v.Produto?.ToLower().Contains(textoBusca) ?? false) ||
+                    (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
+                )
+                .ToList();
+
+            AplicarOrdenacao();
+            AtualizarInterfaceVendas();
+        }
+
+        // 3. Filtro
+        private void FiltrarButton_Click(object sender, RoutedEventArgs e)
+        {
+            FiltroPopup.IsOpen = true;
+        }
+
+        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Adicionar lógica de filtro
+            FiltroPopup.IsOpen = false;
+            // string clienteSelecionado = ClienteComboBox.SelectedItem?.ToString();
+            // _vendasFiltradas = _todasVendas.Where(v => v.Cliente == clienteSelecionado).ToList();
+            AplicarOrdenacao();
+            AtualizarInterfaceVendas();
+        }
+
+        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Limpar filtros
+
+            FiltroPopup.IsOpen = false;
+            _vendasFiltradas = new List<Venda>(_todasVendas);
+            AplicarOrdenacao();
+            AtualizarInterfaceVendas();
+        }
+
+        // 4. Ordenação
+        private void OrdenarButton_Click(object sender, RoutedEventArgs e)
+        {
+            OrdenarPopup.IsOpen = !OrdenarPopup.IsOpen;
         }
 
         private void OrdenacaoItem_Click(object sender, RoutedEventArgs e)
@@ -70,62 +106,58 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (sender is Button button && button.Tag is string tipoOrdenacao)
             {
                 _ordenacaoAtual = tipoOrdenacao;
-
-                // Atualiza o texto do botão para refletir a seleção atual
                 _filtroTexto = $"Ordenar por {button.Content}";
 
-                // Acessar o TextBlock dentro do template do botão
-                if (btnOrdenar.Template.FindName("OrderButtonText", btnOrdenar) is TextBlock textBlock)
+                // Atualiza o texto do botão de ordenação, se houver TextBlock no template
+                if (OrderButton.Template.FindName("OrderButtonText", OrderButton) is TextBlock textBlock)
                 {
                     textBlock.Text = _filtroTexto;
                 }
-
-                // Fecha o popup
-                popupOrdenar.IsOpen = false;
-
-                // Aplica a ordenação e atualiza a interface
-                if (_listaVendas != null && _listaVendas.Count > 0)
+                else
                 {
-                    AplicarOrdenacao();
-                    AtualizarInterfaceVendas();
+                    OrderButton.Content = _filtroTexto;
                 }
+
+                OrdenarPopup.IsOpen = false;
+                AplicarOrdenacao();
+                AtualizarInterfaceVendas();
             }
         }
 
         private void AplicarOrdenacao()
         {
-            if (_listaVendas == null || _listaVendas.Count == 0)
+            if (_vendasFiltradas == null || _vendasFiltradas.Count == 0)
                 return;
 
             switch (_ordenacaoAtual)
             {
                 case "preco":
-                    _listaVendas = _listaVendas.OrderByDescending(v => v.ValorTotal).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
                     break;
                 case "produto":
-                    _listaVendas = _listaVendas.OrderBy(v => v.Produto).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.Produto).ToList();
                     break;
                 case "cliente":
-                    _listaVendas = _listaVendas.OrderBy(v => v.Cliente).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.Cliente).ToList();
                     break;
                 case "recente":
-                    _listaVendas = _listaVendas.OrderByDescending(v => v.DataCompra).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
                     break;
                 case "antigo":
-                    _listaVendas = _listaVendas.OrderBy(v => v.DataCompra).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.DataCompra).ToList();
                     break;
                 default:
-                    // Ordem padrão (mais recentes primeiro)
-                    _listaVendas = _listaVendas.OrderByDescending(v => v.DataCadastro).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.DataCadastro).ToList();
                     break;
             }
         }
 
+        // 5. Atualização da interface
         private void AtualizarInterfaceVendas()
         {
             vendasContainer.Children.Clear();
 
-            if (_listaVendas == null || _listaVendas.Count == 0)
+            if (_vendasFiltradas == null || _vendasFiltradas.Count == 0)
             {
                 TextBlock mensagem = new TextBlock
                 {
@@ -140,7 +172,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 return;
             }
 
-            foreach (var venda in _listaVendas)
+            foreach (var venda in _vendasFiltradas)
             {
                 Border border = new Border
                 {
@@ -217,20 +249,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        // 6. Botões de ação
         private void DetalhesButton_Click(object sender, RoutedEventArgs e)
         {
-            // Obtenha os dados da venda correspondente
             var venda = (sender as Button)?.DataContext as Venda;
 
             if (venda != null)
             {
-                // Crie uma nova instância do UserControl de detalhes
                 var detalhesVendaUserControl = new DetalhesVendaUserControl
                 {
                     DataContext = venda
                 };
 
-                // Exiba a tela de detalhes usando o ContentControl
                 var contentControl = (Parent as ContentControl);
                 if (contentControl != null)
                 {
@@ -238,7 +268,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 }
                 else
                 {
-                    // Fallback caso não consiga encontrar o ContentControl
                     string detalhes = $"Detalhes da venda:\n\n" +
                                      $"Cliente: {venda.Cliente}\n" +
                                      $"Pedido: {venda.Pedido}\n" +
@@ -255,9 +284,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void NovaTransacaoButton_Click(object sender, RoutedEventArgs e)
         {
-            // Abrir a janela de cadastro de vendas
             CadastroVendasWindow cadastroVendasWindow = new CadastroVendasWindow();
-            cadastroVendasWindow.ShowDialog(); // Usar ShowDialog para modal
+            cadastroVendasWindow.ShowDialog();
         }
     }
 }
