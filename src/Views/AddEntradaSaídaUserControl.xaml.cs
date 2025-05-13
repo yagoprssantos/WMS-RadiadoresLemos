@@ -35,10 +35,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Vincular a coleção listaMovimentacoes ao ItemsControl na interface do usuário
             ListaItemsControl.ItemsSource = listaMovimentacoes;
 
-
-
             ProdutoComboBox.Focus();
-
         }
 
         private void Setup()
@@ -258,13 +255,25 @@ namespace WMS_RadiadoresLemos_WPF
                 ? (Brush)FindResource("AccentBrush")
                 : (Brush)FindResource("TextBrush");
 
-            QuantidadeDepoisDadoTextBlock.Foreground = QuantidadeDepoisDadoTextBlock.Text != QuantidadeAntesDadoTextBlock.Text
-                ? (Brush)FindResource("AccentBrush")
-                : (Brush)FindResource("TextBrush");
+            QuantidadeDepoisDadoTextBlock.Foreground =
+                int.TryParse(QuantidadeDepoisDadoTextBlock.Text, out int qtdDepois) &&
+                int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes)
+                    ? qtdDepois > qtdAntes
+                        ? (Brush)FindResource("AccentBrush")
+                        : qtdDepois < qtdAntes
+                            ? (Brush)FindResource("CancelButtonHoverBrush")
+                            : (Brush)FindResource("TextBrush")
+                    : (Brush)FindResource("TextBrush");
 
-            PrecoDepoisDadoTextBlock.Foreground = PrecoDepoisDadoTextBlock.Text != PrecoAntesDadoTextBlock.Text
-                ? (Brush)FindResource("AccentBrush")
-                : (Brush)FindResource("TextBrush");
+            PrecoDepoisDadoTextBlock.Foreground =
+                double.TryParse(PrecoDepoisDadoTextBlock.Text.Replace("R$", "").Trim(), out double precoDepois) &&
+                double.TryParse(PrecoAntesDadoTextBlock.Text.Replace("R$", "").Trim(), out double precoAntes)
+                    ? precoDepois > precoAntes
+                        ? (Brush)FindResource("AccentBrush")
+                        : precoDepois < precoAntes
+                            ? (Brush)FindResource("CancelButtonHoverBrush")
+                            : (Brush)FindResource("TextBrush")
+                    : (Brush)FindResource("TextBrush");
         }
 
         // Método para atualizar os detalhes do produto selecionado
@@ -292,27 +301,54 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
+            bool isEntrada = usePositiveNumber;
+
+            if (!ValidarMovimentacao(produtoSelecionado, isEntrada, quantidade, preco))
+                return;
+
             var movimentacao = new MovimentacaoData
             {
-                Id = 0, // O LiteDB irá gerar o ID automaticamente
-                Tipo = usePositiveNumber ? "Entrada" : "Saída",
+                Id = 0,
+                Tipo = isEntrada ? "Entrada" : "Saída",
                 Quantidade = quantidade,
                 Preco = preco,
-                ProdutoId = produtoSelecionado.Nome, // Exibe o nome do produto na lista
+                ProdutoId = produtoSelecionado.Nome,
                 Data = DateTime.UtcNow,
             };
 
             listaMovimentacoes.Add(movimentacao);
 
-            // Atualizar a interface do usuário
             ListaItemsControl.ItemsSource = null;
             ListaItemsControl.ItemsSource = listaMovimentacoes;
 
-            // Adiciona animação ao ToggleListaCompras
             AnimateToggleListaCompras();
-
             LimparCampos();
         }
+        private bool ValidarMovimentacao(ProdutoData produto, bool isEntrada, int quantidade, double preco)
+        {
+            if (produto == null)
+            {
+                MessageBox.Show("Produto não selecionado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            if (quantidade <= 0)
+            {
+                MessageBox.Show("A quantidade deve ser maior que zero.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            if (preco < 0)
+            {
+                MessageBox.Show("O preço não pode ser negativo.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            if (!isEntrada && quantidade > produto.Quantidade)
+            {
+                MessageBox.Show("Quantidade insuficiente em estoque para saída.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            return true;
+        }
+
         private void AnimateToggleListaCompras()
         {
             // Cria uma animação de cor piscando usando o AccentBrush
@@ -382,7 +418,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 var movimentacao = new MovimentacaoData
                 {
-                    Id = 0, // O LiteDB irá gerar o ID automaticamente
+                    Id = 0,
                     Data = DateTime.Now,
                     Tipo = isEntrada ? "Entrada" : "Saída",
                     Quantidade = quantidadeMovimentacao,
@@ -396,12 +432,9 @@ namespace WMS_RadiadoresLemos_WPF
                 var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
                 collection.Insert(movimentacao);
 
-                // Atualiza a quantidade do produto no banco de dados
-                produtoSelecionado.Quantidade += isEntrada ? quantidadeMovimentacao : -quantidadeMovimentacao;
-                var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
-                produtoCollection.Update(produtoSelecionado);
+                // Atualiza o produto no banco de dados usando a função dedicada
+                AtualizarProdutoNoBanco(produtoSelecionado, isEntrada, quantidadeMovimentacao, precoMovimentacao);
 
-                // Limpa os campos e atualiza a interface
                 LimparCampos();
                 await CarregarProdutos();
             }
@@ -410,6 +443,33 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        // Método para atualizar o produto no banco de dados
+        private void AtualizarProdutoNoBanco(ProdutoData produto, bool isEntrada, int quantidade, double preco)
+        {
+            if (produto == null) return;
+
+            // Se for entrada,
+            if (isEntrada)
+            {
+                // Atualiza quantidade e calcula novo preço médio ponderado
+                double precoTotal = (produto.Preco * produto.Quantidade) + (preco * quantidade);
+                int novaQuantidade = produto.Quantidade + quantidade;
+                produto.Preco = novaQuantidade > 0 ? precoTotal / novaQuantidade : 0;
+                produto.Quantidade = novaQuantidade;
+            }
+            // Se for saída,
+            else
+            {
+                // Apenas reduz a quantidade, preço permanece
+                produto.Quantidade -= quantidade;
+                if (produto.Quantidade < 0) produto.Quantidade = 0;
+            }
+
+            var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
+            produtoCollection.Update(produto);
+        }
+
 
         // Método para limpar os campos de entrada
         private void LimparCampos()
