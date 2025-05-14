@@ -4,8 +4,11 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
+using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.Views;
 
-namespace WMS_RadiadoresLemos_WPF.src.Views
+namespace WMS_RadiadoresLemos_WPF.Views
 {
     public partial class ConfiguracaoUserControl : UserControl
     {

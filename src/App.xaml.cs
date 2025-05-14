@@ -4,6 +4,7 @@ using System.Windows;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -11,14 +12,16 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private const string ThemeFilePath = "theme.txt";
         private const string DefaultTheme = "LightTheme";
+        private TaskCompletionSource<bool> _exitTaskSource = new TaskCompletionSource<bool>();
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            
             LoadTheme();
             
             try
             {
+                Console.WriteLine("🔄 Iniciando backup automático ao abrir o programa...");
+                
                 // Fazer backup automático ao abrir
                 string diretorioBanco = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath());
                 if (!string.IsNullOrEmpty(diretorioBanco) && Directory.Exists(diretorioBanco))
@@ -27,21 +30,38 @@ namespace WMS_RadiadoresLemos_WPF
                     if (arquivos.Length > 0)
                     {
                         string arquivoMaisRecente = arquivos.OrderByDescending(f => File.GetLastWriteTime(f)).First();
-                        string dataHoraFormatada = DateTime.Now.ToString("ddMMyyyy_HHmmss");
-                        string novoNome = $"Database_{dataHoraFormatada}{Path.GetExtension(arquivoMaisRecente)}";
-                        string caminhoTemp = Path.Combine(Path.GetTempPath(), novoNome);
+                        Console.WriteLine($"📦 Encontrado banco de dados: {Path.GetFileName(arquivoMaisRecente)}");
 
-                        // Copia o arquivo para uma pasta temporária
-                        File.Copy(arquivoMaisRecente, caminhoTemp, true);
+                        // Desconecta do banco de dados antes de fazer o backup
+                        Console.WriteLine("🔌 Desconectando do banco de dados...");
+                        DatabaseConnect.Disconnect();
+                        Console.WriteLine("✅ Banco de dados desconectado");
 
-                        // Faz o upload para o Supabase
-                        await SupabaseUploader.UploadFileAsync(caminhoTemp);
-                        Console.WriteLine($"✅ Backup automático realizado com sucesso: {Path.GetFileName(arquivoMaisRecente)}");
+                        // Aguarda um momento para garantir que todas as conexões sejam fechadas
+                        Console.WriteLine("⏳ Aguardando conexões serem fechadas...");
+                        await Task.Delay(2000);
 
-                        // Limpa o arquivo temporário
-                        if (File.Exists(caminhoTemp))
+                        // Cria o backup local
+                        Console.WriteLine("📦 Criando backup local...");
+                        DatabaseBackup.CreateBackup(arquivoMaisRecente);
+                        Console.WriteLine("✅ Backup local criado com sucesso");
+
+                        // Faz o upload para o Azure
+                        Console.WriteLine("☁️ Enviando para Azure...");
+                        var backupService = new BackupService();
+                        var backupFileName = await backupService.CriarBackupAsync(arquivoMaisRecente);
+                        Console.WriteLine($"✅ Backup enviado para Azure: {backupFileName}");
+
+                        // Verifica se o backup foi realmente enviado
+                        Console.WriteLine("🔍 Verificando backup no Azure...");
+                        var backups = await backupService.ListarBackupsAsync();
+                        if (backups.Contains(backupFileName))
                         {
-                            File.Delete(caminhoTemp);
+                            Console.WriteLine("✅ Backup confirmado no Azure");
+                        }
+                        else
+                        {
+                            throw new Exception("O backup foi criado localmente, mas falhou ao ser enviado para o Azure");
                         }
                     }
                 }
@@ -49,6 +69,10 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Erro ao fazer backup automático: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Detalhes do erro: {ex.InnerException.Message}");
+                }
             }
 
             // Adiciona o usuário administrador antes de qualquer outra operação
@@ -58,10 +82,29 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Metodo para quando aplicação for fechada
-        protected override void OnExit(ExitEventArgs e)
+        protected override async void OnExit(ExitEventArgs e)
         {
-            DatabaseConnect.Disconnect();
-            base.OnExit(e);
+            try
+            {
+                Console.WriteLine("🔄 Iniciando processo de fechamento...");
+                DatabaseConnect.Disconnect();
+                Console.WriteLine("✅ Banco de dados desconectado");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erro ao desconectar banco de dados: {ex.Message}");
+            }
+            finally
+            {
+                Console.WriteLine("✅ Processos finalizados, encerrando programa...");
+                base.OnExit(e);
+            }
+        }
+
+        // Método para aguardar o fechamento completo
+        public async Task WaitForExitAsync()
+        {
+            await _exitTaskSource.Task;
         }
 
         private void LoadTheme()

@@ -12,9 +12,8 @@ using System.Windows.Threading;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
-using WMS_RadiadoresLemos_WPF;
 
-namespace WMS_RadiadoresLemos_WPF
+namespace WMS_RadiadoresLemos_WPF.Views
 {
     public partial class MainWindow : Window
     {
@@ -559,19 +558,17 @@ namespace WMS_RadiadoresLemos_WPF
                 await LogHistorico.SalvarLog(log);
 
                 UsuarioLogado = null;
-
-
             }
             catch (Exception ex)
             {
                 Alerta.AdicionarAlerta("Erro",
-                                            ex.Message.ToString(),
-                                            "Não foi possível registrar a saída do usuário no log. Possíveis motivos:\n" +
-                                            "- Problemas de conexão com o sistema;\n" +
-                                            "- Configurações incorretas do sistema;\n" +
-                                            "- Serviço do sistema indisponível.",
-                                            "- Tente novamente;\n" +
-                                            "- Feche a aplicação e abra novamente.");
+                    ex.Message.ToString(),
+                    "Não foi possível registrar a saída do usuário no log. Possíveis motivos:\n" +
+                    "- Problemas de conexão com o sistema;\n" +
+                    "- Configurações incorretas do sistema;\n" +
+                    "- Serviço do sistema indisponível.",
+                    "- Tente novamente;\n" +
+                    "- Feche a aplicação e abra novamente.");
             }
         }
 

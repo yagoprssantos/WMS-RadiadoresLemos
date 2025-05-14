@@ -3,7 +3,7 @@ using System.Windows;
 using System.IO;
 using System.Diagnostics;
 
-namespace WMS_RadiadoresLemos_WPF.src.Views
+namespace WMS_RadiadoresLemos_WPF.Views
 {
     public partial class ImportSuccessWindow : Window
     {
@@ -12,44 +12,20 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         public bool Confirmado { get; private set; }
 
-        public ImportSuccessWindow(string nomeBackup, DateTime dataBackup, string caminhoTemp, string bancoAtual)
+        public ImportSuccessWindow(string fileName, DateTime date, string source, string destination)
         {
             InitializeComponent();
-            _caminhoTemp = caminhoTemp;
-            _bancoAtual = bancoAtual;
 
-            NomeBackupText.Text = $"📄 {nomeBackup}";
-            DataBackupText.Text = $"⏰ {dataBackup:dd/MM/yyyy HH:mm:ss}";
+            FileNameText.Text = $"Arquivo: {fileName}";
+            DateText.Text = $"Data: {date:dd/MM/yyyy HH:mm}";
+            SourceText.Text = $"Origem: {source}";
+            DestinationText.Text = $"Destino: {destination}";
         }
 
-        private void CancelarButton_Click(object sender, RoutedEventArgs e)
-        {
-            Confirmado = false;
-            Close();
-        }
-
-        private void ConfirmarButton_Click(object sender, RoutedEventArgs e)
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Confirmado = true;
-
-            // Limpa o arquivo temporário
-            if (File.Exists(_caminhoTemp))
-            {
-                try
-                {
-                    File.Delete(_caminhoTemp);
-                }
-                catch { /* Ignora erro ao deletar arquivo temporário */ }
-            }
-
-            // Reinicia o aplicativo
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = Process.GetCurrentProcess().MainModule.FileName,
-                UseShellExecute = true
-            };
-            Process.Start(startInfo);
-            Application.Current.Shutdown();
+            DialogResult = true;
         }
     }
 } 

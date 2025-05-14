@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.Views;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {

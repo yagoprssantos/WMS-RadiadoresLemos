@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.Views;
 using WMS_RadiadoresLemos_WPF.src.Views;
 
 namespace WMS_RadiadoresLemos_WPF
