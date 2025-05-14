@@ -80,7 +80,7 @@
 
   <ItemGroup>
     <Folder Include="assets\" />
-    <Folder Include="src\Resources\Banco de dados\" />
+    <Folder Include="src\Default\" />
   </ItemGroup>
 
   <ItemGroup>

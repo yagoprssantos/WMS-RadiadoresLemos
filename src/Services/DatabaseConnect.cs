@@ -12,8 +12,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "WMS-RadiadoresLemos",
             "src",
-            "Resources",
-            "bancodedados",
+            "Database",
             "Database.db"
         );
         public static LiteDatabase? Database { get; private set; }
