@@ -5,6 +5,7 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using System.Linq;
 using System.Threading.Tasks;
+using WMS_RadiadoresLemos_WPF.src.Config;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -16,53 +17,65 @@ namespace WMS_RadiadoresLemos_WPF
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            try
+            {
+                // Inicializa a configuração do Azure Storage primeiro
+                AzureConfig.Initialize("https://boletwash.blob.core.windows.net/wms-backups?sp=racwdli&st=2025-05-15T00:37:27Z&se=2028-05-15T08:37:27Z&spr=https&sv=2024-11-04&sr=c&sig=eMvfkgQqNCIFbk2MF0eV66x28gKXXQr3BVpQhhqMpbs%3D");
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(
+                    $"Erro ao inicializar configurações do Azure:\n{ex.Message}\n\n" +
+                    "Por favor, verifique se a string de conexão está correta.",
+                    "Erro de Configuração",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return; // Encerra a aplicação se não conseguir inicializar o Azure
+            }
+
             LoadTheme();
             
             try
             {
                 Console.WriteLine("🔄 Iniciando backup automático ao abrir o programa...");
-                
+
                 // Fazer backup automático ao abrir
-                string diretorioBanco = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath());
-                if (!string.IsNullOrEmpty(diretorioBanco) && Directory.Exists(diretorioBanco))
+                string pastaLocal = Path.Combine(Path.GetDirectoryName(DatabaseConnect.GetDatabasePath()), "local");
+                var backups = Directory.GetFiles(pastaLocal, "Database_v*_*.db")
+                    .Where(f => Path.GetFileName(f).StartsWith("Database_v") && !Path.GetFileName(f).Contains("-log"))
+                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                    .ToList();
+
+                if (!backups.Any())
                 {
-                    var arquivos = Directory.GetFiles(diretorioBanco, "*.db");
-                    if (arquivos.Length > 0)
+                    Console.WriteLine("Nenhum backup local encontrado para exportar automaticamente.");
+                }
+                else
+                {
+                    string arquivoBackup = backups.First();
+                    string nomeAzure = $"DatabaseBackup_{DateTime.Now:yyyyMMdd_HHmmss}.db";
+                    string tempFile = Path.Combine(Path.GetTempPath(), nomeAzure);
+                    File.Copy(arquivoBackup, tempFile, true);
+
+                    Console.WriteLine($"📦 Backup automático enviado para o Azure: {tempFile}");
+                    var backupService = new BackupService();
+                    var backupFileName = await backupService.CriarBackupAsync(tempFile);
+                    Console.WriteLine($"✅ Backup enviado para Azure: {backupFileName}");
+
+                    // Apaga o arquivo temporário após o upload
+                    if (File.Exists(tempFile))
+                        File.Delete(tempFile);
+
+                    // Verifica se o backup foi realmente enviado
+                    Console.WriteLine("🔍 Verificando backup no Azure...");
+                    var backupsAzure = await backupService.ListarBackupsAsync();
+                    if (backupsAzure.Contains(backupFileName))
                     {
-                        string arquivoMaisRecente = arquivos.OrderByDescending(f => File.GetLastWriteTime(f)).First();
-                        Console.WriteLine($"📦 Encontrado banco de dados: {Path.GetFileName(arquivoMaisRecente)}");
-
-                        // Desconecta do banco de dados antes de fazer o backup
-                        Console.WriteLine("🔌 Desconectando do banco de dados...");
-                        DatabaseConnect.Disconnect();
-                        Console.WriteLine("✅ Banco de dados desconectado");
-
-                        // Aguarda um momento para garantir que todas as conexões sejam fechadas
-                        Console.WriteLine("⏳ Aguardando conexões serem fechadas...");
-                        await Task.Delay(2000);
-
-                        // Cria o backup local
-                        Console.WriteLine("📦 Criando backup local...");
-                        DatabaseBackup.CreateBackup(arquivoMaisRecente);
-                        Console.WriteLine("✅ Backup local criado com sucesso");
-
-                        // Faz o upload para o Azure
-                        Console.WriteLine("☁️ Enviando para Azure...");
-                        var backupService = new BackupService();
-                        var backupFileName = await backupService.CriarBackupAsync(arquivoMaisRecente);
-                        Console.WriteLine($"✅ Backup enviado para Azure: {backupFileName}");
-
-                        // Verifica se o backup foi realmente enviado
-                        Console.WriteLine("🔍 Verificando backup no Azure...");
-                        var backups = await backupService.ListarBackupsAsync();
-                        if (backups.Contains(backupFileName))
-                        {
-                            Console.WriteLine("✅ Backup confirmado no Azure");
-                        }
-                        else
-                        {
-                            throw new Exception("O backup foi criado localmente, mas falhou ao ser enviado para o Azure");
-                        }
+                        Console.WriteLine("✅ Backup confirmado no Azure");
+                    }
+                    else
+                    {
+                        throw new Exception("O backup foi criado localmente, mas falhou ao ser enviado para o Azure");
                     }
                 }
             }
@@ -87,7 +100,7 @@ namespace WMS_RadiadoresLemos_WPF
             try
             {
                 Console.WriteLine("🔄 Iniciando processo de fechamento...");
-                DatabaseConnect.Disconnect();
+            DatabaseConnect.Disconnect();
                 Console.WriteLine("✅ Banco de dados desconectado");
             }
             catch (Exception ex)
@@ -97,7 +110,7 @@ namespace WMS_RadiadoresLemos_WPF
             finally
             {
                 Console.WriteLine("✅ Processos finalizados, encerrando programa...");
-                base.OnExit(e);
+            base.OnExit(e);
             }
         }
 

@@ -12,17 +12,17 @@ namespace WMS_RadiadoresLemos_WPF.Views
 
         public bool Confirmado { get; private set; }
 
-        public ImportSuccessWindow(string fileName, DateTime date, string source, string destination)
+        public ImportSuccessWindow(string backupFileName, DateTime backupDate, string sourcePath, string destinationPath)
         {
             InitializeComponent();
 
-            FileNameText.Text = $"Arquivo: {fileName}";
-            DateText.Text = $"Data: {date:dd/MM/yyyy HH:mm}";
-            SourceText.Text = $"Origem: {source}";
-            DestinationText.Text = $"Destino: {destination}";
+            BackupInfoText.Text = $"Arquivo importado: {backupFileName}\n" +
+                                $"Data do backup: {backupDate:dd/MM/yyyy HH:mm:ss}\n" +
+                                $"Origem: {sourcePath}\n" +
+                                $"Destino: {destinationPath}";
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
             Confirmado = true;
             DialogResult = true;

@@ -22,7 +22,11 @@ namespace WMS_RadiadoresLemos_WPF.Views
             }
             else
             {
-                MessageBox.Show("Por favor, selecione um arquivo.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(
+                    "Por favor, selecione um arquivo para importar.",
+                    "Aviso",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
         }
 

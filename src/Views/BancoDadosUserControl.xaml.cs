@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
@@ -15,8 +16,12 @@ using WMS_RadiadoresLemos_WPF.Views;
 using System.Windows.Media;
 using System.Diagnostics;
 using LiteDB;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using WMS_RadiadoresLemos_WPF.src.Config;
+using WMS_RadiadoresLemos.Services;
 
-namespace WMS_RadiadoresLemos_WPF.Views
+namespace WMS_RadiadoresLemos_WPF.src.Views
 {
     public partial class BancoDadosUserControl : UserControl, INotifyPropertyChanged
     {
@@ -27,17 +32,128 @@ namespace WMS_RadiadoresLemos_WPF.Views
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        private readonly AzureStorageService _azureService;
         private List<object> dadosFiltrados = new List<object>();
         private bool dadosCarregados = false;
         private List<string> tabelasSelecionadas = new List<string>();
         private static readonly string[] TabelasDisponiveis = { "usuarios", "produtos", "historico", "movimentacoes" };
 
+        private ObservableCollection<BackupFile> backupFiles;
+        private BackupFile selectedFile;
+        private bool isImporting;
+        private string statusMessage;
+        private Brush statusColor;
+        private long totalSpaceUsed;
+        private string formattedSpaceUsed;
+
+        private readonly BackupService _backupService;
+
+        public static int UploadCount = 0;
+        public static int DownloadCount = 0;
+        public static int DeleteCount = 0;
+
+        public ObservableCollection<BackupFile> BackupFiles
+        {
+            get => backupFiles;
+            set
+            {
+                backupFiles = value;
+                OnPropertyChanged(nameof(BackupFiles));
+            }
+        }
+
+        public BackupFile SelectedFile
+        {
+            get => selectedFile;
+            set
+            {
+                selectedFile = value;
+                OnPropertyChanged(nameof(SelectedFile));
+            }
+        }
+
+        public bool IsImporting
+        {
+            get => isImporting;
+            set
+            {
+                isImporting = value;
+                OnPropertyChanged(nameof(IsImporting));
+            }
+        }
+
+        public string StatusMessage
+        {
+            get => statusMessage;
+            set
+            {
+                statusMessage = value;
+                OnPropertyChanged(nameof(StatusMessage));
+            }
+        }
+
+        public Brush StatusColor
+        {
+            get => statusColor;
+            set
+            {
+                statusColor = value;
+                OnPropertyChanged(nameof(StatusColor));
+            }
+        }
+
+        public long TotalSpaceUsed
+        {
+            get => totalSpaceUsed;
+            set
+            {
+                totalSpaceUsed = value;
+                OnPropertyChanged(nameof(TotalSpaceUsed));
+                FormattedSpaceUsed = FormatFileSize(value);
+            }
+        }
+
+        public string FormattedSpaceUsed
+        {
+            get => formattedSpaceUsed;
+            set
+            {
+                formattedSpaceUsed = value;
+                OnPropertyChanged(nameof(FormattedSpaceUsed));
+            }
+        }
+
         public BancoDadosUserControl()
         {
             InitializeComponent();
             DataContext = this;
+            _azureService = new AzureStorageService();
             SetupLinks();
             AtualizarInformacoes();
+            BackupFiles = new ObservableCollection<BackupFile>();
+            StatusColor = Brushes.Black;
+            LoadBackupFiles();
+            _backupService = new BackupService();
+            CarregarContadoresAzure();
+        }
+
+        private void CarregarContadoresAzure()
+        {
+            try
+            {
+                var stats = AzureUsageStats.LoadAllStats();
+                if (stats.Any())
+                {
+                    var ultimaStats = stats.OrderByDescending(s => s.Data).First();
+                    UploadCount = ultimaStats.Uploads;
+                    DownloadCount = ultimaStats.Downloads;
+                    DeleteCount = ultimaStats.Deletes;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao carregar contadores do Azure: {ex.Message}");
+            }
         }
 
         // Método para configurar botões de links (arquivos locais e banco de dados)
@@ -125,9 +241,9 @@ namespace WMS_RadiadoresLemos_WPF.Views
 
                 if (confirmacao == MessageBoxResult.Yes)
                 {
-                    try
-                    {
-                        ShowProgressBar.Visibility = Visibility.Visible;
+            try
+            {
+                ShowProgressBar.Visibility = Visibility.Visible;
                         ProgressBarMessage.Text = "🔄 Importando banco de dados...";
 
                         // Fecha todas as conexões com o banco atual
@@ -138,13 +254,13 @@ namespace WMS_RadiadoresLemos_WPF.Views
 
                         // Faz backup do banco atual antes de substituir
                         if (File.Exists(bancoAtual))
-                        {
+                {
                             DatabaseBackup.CreateBackup(bancoAtual);
                         }
 
                         // Tenta substituir o banco de dados
                         try
-                        {
+                    {
                             // Se o arquivo existir, tenta deletá-lo primeiro
                             if (File.Exists(bancoAtual))
                             {
@@ -161,7 +277,7 @@ namespace WMS_RadiadoresLemos_WPF.Views
                                 {
                                     // Se chegou aqui, o banco está íntegro
                                     testDb.Dispose();
-                                }
+                        }
 
                                 ProgressBarMessage.Text = "✅ Banco de dados importado com sucesso!";
 
@@ -172,14 +288,14 @@ namespace WMS_RadiadoresLemos_WPF.Views
                                     .ToList();
 
                                 if (!backups.Any())
-                                {
+            {
                                     MessageBox.Show(
                                         "❌ Erro: Nenhum backup encontrado na pasta local.",
                                         "Erro",
                                         MessageBoxButton.OK,
                                         MessageBoxImage.Error);
                                     return;
-                                }
+            }
 
                                 var successWindow = new ImportSuccessWindow(
                                     Path.GetFileName(backups.First()),
@@ -190,13 +306,13 @@ namespace WMS_RadiadoresLemos_WPF.Views
                                 successWindow.ShowDialog();
 
                                 if (!successWindow.Confirmado)
-                                {
+                {
                                     // Se o usuário cancelou, restaura o backup
                                     var backupMaisRecente = backups.First();
                                     File.Copy(backupMaisRecente, bancoAtual, true);
-                                    return;
-                                }
-                            }
+                            return;
+                        }
+                    }
                             catch (Exception ex)
                             {
                                 // Se o banco estiver corrompido, restaura o backup mais recente
@@ -216,7 +332,7 @@ namespace WMS_RadiadoresLemos_WPF.Views
                                     "Erro",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
-                            }
+                }
                         }
                         catch (Exception ex)
                         {
@@ -226,21 +342,21 @@ namespace WMS_RadiadoresLemos_WPF.Views
                                 "Erro",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
+                }
+            }
+            catch (Exception ex)
+            {
                         MessageBox.Show(
                             $"❌ Erro ao importar banco de dados:\n{ex.Message}",
                             "Erro",
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
-                    }
-                    finally
-                    {
-                        ShowProgressBar.Visibility = Visibility.Collapsed;
-                    }
-                }
+            }
+            finally
+            {
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
+        }
             }
         }
 
@@ -250,7 +366,7 @@ namespace WMS_RadiadoresLemos_WPF.Views
             {
                 string bancoAtual = DatabaseConnect.GetDatabasePath();
                 if (!File.Exists(bancoAtual))
-                {
+                    {
                     MessageBox.Show("❌ Banco de dados atual não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
@@ -281,24 +397,24 @@ namespace WMS_RadiadoresLemos_WPF.Views
                             "Sucesso",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
-                    }
-                    catch (Exception ex)
-                    {
+                }
+                catch (Exception ex)
+                {
                         ProgressBarMessage.Text = "❌ Erro ao exportar banco de dados!";
                         MessageBox.Show(
                             $"❌ Erro ao exportar banco de dados:\n{ex.Message}",
                             "Erro",
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
-                    }
-                    finally
-                    {
-                        ShowProgressBar.Visibility = Visibility.Collapsed;
+                }
+                finally
+                {
+                    ShowProgressBar.Visibility = Visibility.Collapsed;
                     }
                 }
             }
             catch (Exception ex)
-            {
+                    {
                 MessageBox.Show(
                     $"❌ Erro ao exportar banco de dados:\n{ex.Message}",
                     "Erro",
@@ -334,7 +450,7 @@ namespace WMS_RadiadoresLemos_WPF.Views
                     foreach (var backup in backups.Take(5))
                     {
                         mensagem += $"- {backup}\n";
-                    }
+                }
                 }
                 
                 MessageBox.Show(mensagem, "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -365,62 +481,41 @@ namespace WMS_RadiadoresLemos_WPF.Views
             try
             {
                 ShowProgressBar.Visibility = Visibility.Visible;
-                ProgressBarMessage.Text = "🔄 Iniciando exportação para Azure...";
+                ProgressBarMessage.Text = "Buscando backup local mais recente...";
+                ProgressBar.Value = 0;
 
-                string arquivoMaisRecente = EncontrarBancoMaisRecente();
-                if (string.IsNullOrEmpty(arquivoMaisRecente))
+                string pastaLocal = Path.Combine(Path.GetDirectoryName(DatabaseConfig.DatabasePath), "local");
+                var backups = Directory.GetFiles(pastaLocal, "Database_v*_*.db")
+                    .Where(f => Path.GetFileName(f).StartsWith("Database_v") && !Path.GetFileName(f).Contains("-log"))
+                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                    .ToList();
+
+                if (!backups.Any())
                 {
-                    MessageBox.Show("❌ Nenhum arquivo de banco de dados encontrado para backup.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Nenhum backup local encontrado para exportar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowProgressBar.Visibility = Visibility.Collapsed;
                     return;
                 }
 
-                ProgressBarMessage.Text = "🔄 Desconectando do banco de dados...";
-                DatabaseConnect.Disconnect();
-                
-                // Aguarda um momento para garantir que todas as conexões foram fechadas
+                string arquivoBackup = backups.First();
+                Console.WriteLine($"Arquivo enviado para o Azure: {arquivoBackup}");
+
+                ProgressBarMessage.Text = "Exportando backup para o Azure...";
+                ProgressBar.Value = 50;
+
+                await _backupService.CriarBackupAsync(arquivoBackup);
+
+                ProgressBar.Value = 100;
+                ProgressBarMessage.Text = "Backup exportado com sucesso!";
                 await Task.Delay(1000);
 
-                ProgressBarMessage.Text = "📦 Criando backup local...";
-                DatabaseBackup.CreateBackup(arquivoMaisRecente);
-                
-                ProgressBarMessage.Text = "☁️ Enviando para Azure...";
-                var backupService = new BackupService();
-                string backupFileName = await backupService.CriarBackupAsync(arquivoMaisRecente);
+                ShowProgressBar.Visibility = Visibility.Collapsed;
 
-                // Verifica se o backup foi realmente enviado
-                var backups = await backupService.ListarBackupsAsync();
-                if (backups.Contains(backupFileName))
-                {
-                    ProgressBarMessage.Text = "✅ Backup enviado com sucesso!";
-                    MessageBox.Show(
-                        $"✅ Backup enviado com sucesso para o Azure!\n\n" +
-                        $"Nome do arquivo: {backupFileName}\n" +
-                        $"Data: {DateTime.Now:dd/MM/yyyy HH:mm:ss}",
-                        "Sucesso",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                }
-                else
-                {
-                    throw new Exception("O backup foi criado localmente, mas não foi encontrado no Azure após o upload");
-                }
-
-                // Atualiza as informações na tela
-                await AtualizarInformacoes();
+                MessageBox.Show("Backup exportado com sucesso para o Azure!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                ProgressBarMessage.Text = "❌ Erro ao exportar para Azure!";
-                MessageBox.Show(
-                    $"❌ Erro ao exportar para Azure:\n{ex.Message}\n\n" +
-                    "Detalhes do erro:\n" +
-                    $"{ex.InnerException?.Message ?? "Nenhum detalhe adicional disponível"}",
-                    "Erro",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-            finally
-            {
+                MessageBox.Show($"Erro ao exportar backup: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
         }
@@ -561,7 +656,9 @@ namespace WMS_RadiadoresLemos_WPF.Views
 
                                 if (!successWindow.Confirmado)
                                 {
-                                    // Se o usuário cancelou, não faz nada
+                                    // Se o usuário cancelou, restaura o backup
+                                    var backupMaisRecente = backupsLocais.First();
+                                    File.Copy(backupMaisRecente, bancoAtual, true);
                                     return;
                                 }
                             }
@@ -675,7 +772,7 @@ namespace WMS_RadiadoresLemos_WPF.Views
                 {
                     var ultimoBackup = backups.OrderByDescending(b => b).First();
                     var dataBackup = DateTime.ParseExact(
-                        ultimoBackup.Replace("backup_", "").Replace(".db", ""),
+                        ultimoBackup.Replace("DatabaseBackup_", "").Replace(".db", ""),
                         "yyyyMMdd_HHmmss",
                         null
                     );
@@ -783,6 +880,290 @@ namespace WMS_RadiadoresLemos_WPF.Views
         private async void AtualizarButton_Click(object sender, RoutedEventArgs e)
         {
             await AtualizarInformacoes();
+        }
+
+        private async void LoadBackupFiles()
+        {
+            try
+            {
+                StatusMessage = "Carregando arquivos...";
+                StatusColor = Brushes.Black;
+
+                var files = await _azureService.ListBackupFilesAsync();
+                BackupFiles.Clear();
+                foreach (var file in files)
+                {
+                    BackupFiles.Add(file);
+                }
+
+                // Calcula o espaço total usado
+                await CalculateTotalSpaceUsed();
+
+                StatusMessage = "Arquivos carregados com sucesso!";
+                StatusColor = Brushes.Green;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Erro ao carregar arquivos: {ex.Message}";
+                StatusColor = Brushes.Red;
+            }
+        }
+
+        private async Task CalculateTotalSpaceUsed()
+        {
+            try
+            {
+                long totalSize = 0;
+                var files = await _azureService.ListBackupFilesAsync();
+                
+                foreach (var file in files)
+                {
+                    var size = ParseFileSize(file.Size);
+                    totalSize += size;
+                }
+
+                TotalSpaceUsed = totalSize;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Erro ao calcular espaço usado: {ex.Message}";
+                StatusColor = Brushes.Red;
+            }
+        }
+
+        private long ParseFileSize(string size)
+        {
+            var parts = size.Split(' ');
+            if (parts.Length != 2) return 0;
+
+            double value = double.Parse(parts[0]);
+            string unit = parts[1].ToUpper();
+
+            switch (unit)
+            {
+                case "B": return (long)value;
+                case "KB": return (long)(value * 1024);
+                case "MB": return (long)(value * 1024 * 1024);
+                case "GB": return (long)(value * 1024 * 1024 * 1024);
+                case "TB": return (long)(value * 1024 * 1024 * 1024 * 1024);
+                default: return 0;
+            }
+        }
+
+        private void ShowAzureStorageInfo_Click(object sender, RoutedEventArgs e)
+        {
+            var infoWindow = new AzureStorageInfoWindow();
+            infoWindow.ShowDialog();
+        }
+
+        private string FormatFileSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            double size = bytes;
+            
+            while (size >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                size /= 1024;
+            }
+
+            return $"{size:0.##} {sizes[order]}";
+        }
+
+        private async void ImportarArquivosAzure_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ShowProgressBar.Visibility = Visibility.Visible;
+                ProgressBarMessage.Text = "🔍 Listando arquivos no Azure...";
+
+                var backupService = new BackupService();
+                var arquivosAzure = await backupService.ListarBackupsAsync();
+
+                if (arquivosAzure.Count == 0)
+                {
+                    MessageBox.Show("Nenhum arquivo encontrado no Azure.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Abre a janela para o usuário escolher o arquivo
+                var pickerWindow = new AzureFilePickerWindow(arquivosAzure);
+                var resultado = pickerWindow.ShowDialog();
+
+                if (resultado != true || pickerWindow.ArquivoSelecionado == null)
+                    return;
+
+                var arquivo = pickerWindow.ArquivoSelecionado;
+
+                // Abre o diálogo para escolher onde salvar o arquivo
+                var saveFileDialog = new SaveFileDialog
+                {
+                    FileName = arquivo,
+                    Filter = "Arquivos de Banco de Dados (*.db)|*.db|Todos os arquivos (*.*)|*.*",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    Title = "Salvar arquivo como"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    ProgressBarMessage.Text = $"⬇️ Baixando {arquivo}...";
+
+                    try
+                    {
+                        // Cria um arquivo temporário para o download
+                        string caminhoTemp = Path.Combine(Path.GetTempPath(), arquivo);
+                        await backupService.RestaurarBackupAsync(arquivo, caminhoTemp);
+
+                        // Copia o arquivo para o local escolhido
+                        File.Copy(caminhoTemp, saveFileDialog.FileName, true);
+
+                        // Deleta o arquivo temporário
+                        if (File.Exists(caminhoTemp))
+                        {
+                            File.Delete(caminhoTemp);
+                        }
+
+                        ProgressBarMessage.Text = "✅ Arquivo importado com sucesso!";
+                        MessageBox.Show(
+                            $"✅ Arquivo importado com sucesso!\n\n" +
+                            $"Arquivo: {arquivo}\n" +
+                            $"Destino: {saveFileDialog.FileName}",
+                            "Sucesso",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+
+                        // Abre o explorador de arquivos na pasta onde o arquivo foi salvo
+                        Process.Start("explorer.exe", $"/select,\"{saveFileDialog.FileName}\"");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"❌ Erro ao importar arquivo:\n{ex.Message}",
+                            "Erro",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"❌ Erro ao importar arquivo:\n{ex.Message}",
+                    "Erro",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        public async Task FazerBackupAutomaticoParaAzure()
+        {
+            try
+            {
+                string pastaLocal = Path.Combine(Path.GetDirectoryName(DatabaseConfig.DatabasePath), "local");
+                var backups = Directory.GetFiles(pastaLocal, "Database_v*_*.db")
+                    .Where(f => Path.GetFileName(f).StartsWith("Database_v") && !Path.GetFileName(f).Contains("-log"))
+                    .OrderByDescending(f => File.GetLastWriteTime(f))
+                    .ToList();
+
+                if (!backups.Any())
+                {
+                    Console.WriteLine("Nenhum backup local encontrado para exportar automaticamente.");
+                    return;
+                }
+
+                string arquivoBackup = backups.First();
+                Console.WriteLine($"[AUTO] Arquivo enviado para o Azure: {arquivoBackup}");
+
+                await _backupService.CriarBackupAsync(arquivoBackup);
+
+                Console.WriteLine("[AUTO] Backup exportado com sucesso para o Azure!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AUTO] Erro ao exportar backup automático: {ex.Message}");
+            }
+        }
+
+        private void BtnOperacoesAzure_Click(object sender, RoutedEventArgs e)
+        {
+            // Soma o total de operações em todas as sessões
+            int totalUploads = 0;
+            int totalDownloads = 0;
+            int totalDeletes = 0;
+            try
+            {
+                var stats = AzureUsageStats.LoadAllStats();
+                if (stats.Any())
+                {
+                    totalUploads = stats.Sum(s => s.Uploads);
+                    totalDownloads = stats.Sum(s => s.Downloads);
+                    totalDeletes = stats.Sum(s => s.Deletes);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao somar operações Azure: {ex.Message}");
+            }
+
+            MessageBox.Show($"Operações Azure acumuladas:\n\nUploads: {totalUploads}\nDownloads: {totalDownloads}\nExclusões: {totalDeletes}",
+                "Operações Azure", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private async void BtnMetricasAzure_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ShowProgressBar.Visibility = Visibility.Visible;
+                ProgressBarMessage.Text = "Obtendo métricas do banco de dados...";
+
+                var config = ConfigManager.LoadConfig();
+                var metricsService = new AzureMetricsService(
+                    config.AzureSubscriptionId,
+                    config.AzureResourceId,
+                    config.AzureWorkspaceId,
+                    config.AzureApiKey
+                );
+
+                var metrics = await metricsService.GetDatabaseMetricsAsync();
+
+                var resultWindow = new Window
+                {
+                    Title = "Métricas do Banco de Dados",
+                    Width = 600,
+                    Height = 400,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    Background = (Brush)FindResource("BackgroundBrush")
+                };
+
+                var textBox = new TextBox
+                {
+                    Text = metrics,
+                    IsReadOnly = true,
+                    TextWrapping = TextWrapping.Wrap,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    Margin = new Thickness(10),
+                    Background = (Brush)FindResource("PanelBackgroundBrush"),
+                    Foreground = (Brush)FindResource("TextBrush"),
+                    FontFamily = new FontFamily("Consolas"),
+                    FontSize = 12
+                };
+
+                resultWindow.Content = textBox;
+                resultWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao obter métricas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ShowProgressBar.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }

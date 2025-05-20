@@ -562,13 +562,13 @@ namespace WMS_RadiadoresLemos_WPF.Views
             catch (Exception ex)
             {
                 Alerta.AdicionarAlerta("Erro",
-                    ex.Message.ToString(),
-                    "Não foi possível registrar a saída do usuário no log. Possíveis motivos:\n" +
-                    "- Problemas de conexão com o sistema;\n" +
-                    "- Configurações incorretas do sistema;\n" +
-                    "- Serviço do sistema indisponível.",
-                    "- Tente novamente;\n" +
-                    "- Feche a aplicação e abra novamente.");
+                                            ex.Message.ToString(),
+                                            "Não foi possível registrar a saída do usuário no log. Possíveis motivos:\n" +
+                                            "- Problemas de conexão com o sistema;\n" +
+                                            "- Configurações incorretas do sistema;\n" +
+                                            "- Serviço do sistema indisponível.",
+                                            "- Tente novamente;\n" +
+                                            "- Feche a aplicação e abra novamente.");
             }
         }
 

@@ -67,7 +67,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        public static void CreateBackup(string dbPath)
+        public static string CreateBackup(string dbPath)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     if (!DatabaseWasModified(dbPath))
                     {
                         Console.WriteLine("Banco de dados não foi modificado desde o último backup. Pulando criação de backup.");
-                        return;
+                        return null;
                     }
                     
                     // Lista todos os backups existentes para determinar a próxima versão
@@ -157,6 +157,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     {
                         File.Copy(dbPath, novoBackup, true);
                         Console.WriteLine($"Backup criado com sucesso: {novoBackup}");
+                        return novoBackup;
                     }
                     catch (Exception ex)
                     {
@@ -166,10 +167,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                         throw;
                     }
                 }
+                return null;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro ao criar backup: {ex.Message}");
+                return null;
             }
         }
     }
