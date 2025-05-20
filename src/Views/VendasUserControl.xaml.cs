@@ -251,7 +251,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        // 6. Botões de ação
+        // 6. Registrar Venda
+        private void RegistrarVendaButton_Click(object sender, RoutedEventArgs e)
+        {
+            var compras = new AddEntradaSaídaWindow(isEntrada: false);
+            compras.ShowDialog();
+        }
+
+        // 7. Botões de ação
         private void DetalhesButton_Click(object sender, RoutedEventArgs e)
         {
             var venda = (sender as Button)?.DataContext as Venda;
