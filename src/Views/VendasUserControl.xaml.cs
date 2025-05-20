@@ -284,11 +284,5 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 }
             }
         }
-
-        private void NovaTransacaoButton_Click(object sender, RoutedEventArgs e)
-        {
-            CadastroVendasWindow cadastroVendasWindow = new CadastroVendasWindow();
-            cadastroVendasWindow.ShowDialog();
-        }
     }
 }

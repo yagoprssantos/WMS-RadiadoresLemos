@@ -41,7 +41,7 @@
                     <Button Grid.Column="1" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
                     
                     <!-- ComboBox para seleção de tabela -->
-                    <ComboBox Grid.Column="2" x:Name="TabelasComboBox" ToolTip="Categorias" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged"/>
+                    <ComboBox Grid.Column="2" x:Name="TabelasComboBox" Text="Selecionar tabela" ToolTip="Categorias" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged"/>
                 </Grid>
 
                 <!-- Exibição de dados -->
@@ -103,6 +103,8 @@
                         <ComboBox x:Name="ClienteComboBox" HorizontalAlignment="Stretch" Margin="15, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
                         <TextBlock Text="Filtrar por Estado" FontWeight="Bold" Margin="10, 10, 0, 5" Foreground="{StaticResource TextBrush}"/>
                         <ComboBox x:Name="EstadoComboBox" HorizontalAlignment="Stretch" Margin="15, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
+                        <TextBlock Text="Filtrar por Venda (NF)" FontWeight="Bold" Margin="10, 10, 0, 5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="VendaComboBox" HorizontalAlignment="Stretch" Margin="15, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="15, 10">
                             <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
                             <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
@@ -121,6 +123,8 @@
                         <ComboBox x:Name="FornecedorComboBox" HorizontalAlignment="Stretch" Margin="15, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
                         <TextBlock Text="Filtrar por Estado" FontWeight="Bold" Margin="10, 10, 0, 5" Foreground="{StaticResource TextBrush}"/>
                         <ComboBox x:Name="EstadoFornecedorComboBox" HorizontalAlignment="Stretch" Margin="15, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
+                        <TextBlock Text="Filtrar por Compra (NF)" FontWeight="Bold" Margin="10, 10, 0, 5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="CompraComboBox" HorizontalAlignment="Stretch" Margin="15, 0" Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="15, 10">
                             <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
                             <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>

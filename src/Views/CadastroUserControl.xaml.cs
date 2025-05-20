@@ -57,20 +57,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
 
                 case "clientes":
-                    // TODO: Implementar carregamento de dados de clientes
-
-                    // CarregarDadosGenerico<ClienteData>("clientes");
-
-                    MessageBox.Show("Funcionalidade de clientes não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                    CarregarDadosGenerico<ClienteData>("clientes");
                     break;
 
                 case "fornecedores":
-                    // TODO: Implementar carregamento de dados de fornecedores
-                    // CarregarDadosGenerico<FornecedorData>("fornecedores");
-
-                    MessageBox.Show("Funcionalidade de fornecedores não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                    CarregarDadosGenerico<FornecedorData>("fornecedores");
                     break;
 
                 case "usuários":
@@ -102,6 +93,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             foreach (var propriedade in tipoModelo.GetProperties())
             {
+                if (propriedade.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                    continue; // Ignora a coluna Id
+
                 CadastroDataGrid.Columns.Add(new DataGridTextColumn
                 {
                     Header = propriedade.Name,
@@ -140,19 +134,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
 
                 case "clientes":
-                    // TODO: Implementar funcionalidade de filtro para clientes
                     ClientesPopup.IsOpen = true;
-                    // PreencherFiltrosClientes();
+                    PreencherFiltrosClientes();
 
-                    MessageBox.Show("Funcionalidade de filtro para clientes não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
                     break;
 
                 case "fornecedores":
-                    // TODO: Implementar funcionalidade de filtro para fornecedores
                     FornecedoresPopup.IsOpen = true;
-                    // PreencherFiltrosFornecedores();
-
-                    MessageBox.Show("Funcionalidade de filtro para fornecedores não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                    PreencherFiltrosFornecedores();
                     break;
 
                 case "usuários":
@@ -189,6 +178,48 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        private void PreencherFiltrosClientes()
+        {
+            try
+            {
+                var collection = _database.GetCollection<ClienteData>("clientes");
+                var clientes = collection.FindAll().ToList();
+
+                var estados = clientes.Select(c => c.Estado).Where(e => !string.IsNullOrEmpty(e)).Distinct().ToList();
+                var cnpj = clientes.Select(c => c.CNPJ).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+                var vendasNF = clientes.Select(c => c.VendasRelacionadas).Where(v => v != null && v.Count > 0).ToList();
+
+                EstadoComboBox.ItemsSource = estados;
+                ClienteComboBox.ItemsSource = cnpj;
+                // VendasNFComboBox.ItemsSource = vendasNF; // Se necessário, implementar lógica para preencher vendas relacionadas
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao preencher filtros de clientes: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void PreencherFiltrosFornecedores()
+        {
+            try
+            {
+                var collection = _database.GetCollection<FornecedorData>("fornecedores");
+                var fornecedores = collection.FindAll().ToList();
+
+                var estados = fornecedores.Select(f => f.Estado).Where(e => !string.IsNullOrEmpty(e)).Distinct().ToList();
+                var cnpj = fornecedores.Select(f => f.CNPJ).Where(c => !string.IsNullOrEmpty(c)).Distinct().ToList();
+                var comprasNF = fornecedores.Select(f => f.ComprasRelacionadas).Where(c => c != null && c.Count > 0).ToList();
+
+                EstadoComboBox.ItemsSource = estados;
+                FornecedorComboBox.ItemsSource = cnpj;
+                // ComprasNFComboBox.ItemsSource = comprasNF; // Se necessário, implementar lógica para preencher compras relacionadas
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao preencher filtros de fornecedores: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void PreencherFiltrosUsuarios()
         {
             try
@@ -221,14 +252,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
 
                 case "clientes":
-                    // TODO: Implementar funcionalidade de filtro para clientes
-                    // AplicarFiltroClientes();
+                    AplicarFiltroClientes();
                     ClientesPopup.IsOpen = false;
                     break;
 
                 case "fornecedores":
-                    // TODO: Implementar funcionalidade de filtro para fornecedores
-                    // AplicarFiltroFornecedores();
+                    AplicarFiltroFornecedores();
                     FornecedoresPopup.IsOpen = false;
                     break;
 
@@ -271,6 +300,47 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        private void AplicarFiltroClientes()
+        {
+            try
+            {
+                var cliente = ClienteComboBox.SelectedItem?.ToString();
+                var estado = EstadoComboBox.SelectedItem?.ToString();
+
+                var collection = _database.GetCollection<ClienteData>("clientes");
+                var clientes = collection.FindAll().ToList();
+
+                var clientesFiltrados = clientes.Where(c =>
+                    (string.IsNullOrEmpty(cliente) || c.CNPJ.Contains(cliente, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(estado) || c.Estado == estado)).ToList();
+                CadastroDataGrid.ItemsSource = clientesFiltrados;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao aplicar filtro de clientes: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AplicarFiltroFornecedores()
+        {
+            try
+            {
+                var fornecedor = FornecedorComboBox.SelectedItem?.ToString();
+                var estado = EstadoComboBox.SelectedItem?.ToString();
+
+                var collection = _database.GetCollection<FornecedorData>("fornecedores");
+                var fornecedores = collection.FindAll().ToList();
+
+                var fornecedoresFiltrados = fornecedores.Where(f =>
+                    (string.IsNullOrEmpty(fornecedor) || f.CNPJ.Contains(fornecedor, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(estado) || f.Estado == estado)).ToList();
+                CadastroDataGrid.ItemsSource = fornecedoresFiltrados;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao aplicar filtro de fornecedores: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private void AplicarFiltroUsuarios()
         {
             try
@@ -312,19 +382,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
 
                 case "clientes":
-                    // TODO: Implementar funcionalidade de limpar filtro para clientes
                     ClienteComboBox.SelectedItem = null;
                     EstadoComboBox.SelectedItem = null;
-
                     CarregarDadosTabela(_tabelaAtual);
                     ClientesPopup.IsOpen = false;
                     break;
 
                 case "fornecedores":
-                    // TODO: Implementar funcionalidade de limpar filtro para fornecedores
                     FornecedorComboBox.SelectedItem = null;
                     EstadoComboBox.SelectedItem = null;
-
                     CarregarDadosTabela(_tabelaAtual);
                     FornecedoresPopup.IsOpen = false;
                     break;
@@ -364,31 +430,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
 
                 case "clientes":
-                    // TODO: Implementar janela de cadastro de clientes
-
-                    // var cadastroCliente = new EditarClienteWindow(null);
-                    // if (cadastroCliente.ShowDialog() == true)
-                    // {
-                    //     // Se o cadastro foi bem-sucedido, atualiza o DataGrid
-                    //     CarregarDadosTabela(_tabelaAtual);
-                    // }
-
-                    MessageBox.Show("Funcionalidade de cadastro de clientes não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                    var cadastroCliente = new EditarClienteWindow(null);
+                    if (cadastroCliente.ShowDialog() == true)
+                    {
+                        // Se o cadastro foi bem-sucedido, atualiza o DataGrid
+                        CarregarDadosTabela(_tabelaAtual);
+                    }
                     break;
 
                 case "fornecedores":
-                    // TODO: Implementar janela de cadastro de fornecedores
-
-                    // var cadastroFornecedor = new EditarFornecedorWindow(null);
-                    // if (cadastroFornecedor.ShowDialog() == true)
-                    // {
-                    //     // Se o cadastro foi bem-sucedido, atualiza o DataGrid
-                    //     CarregarDadosTabela(_tabelaAtual);
-                    // }
-
-                    MessageBox.Show("Funcionalidade de cadastro de fornecedores não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                    var cadastroFornecedor = new EditarFornecedorWindow(null);
+                    if (cadastroFornecedor.ShowDialog() == true)
+                    {
+                        // Se o cadastro foi bem-sucedido, atualiza o DataGrid
+                        CarregarDadosTabela(_tabelaAtual);
+                    }
                     break;
 
 
@@ -408,7 +464,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
 
         }
-
 
         private void EditarButton_Click(object sender, RoutedEventArgs e)
         {
@@ -441,37 +496,27 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
 
                 case "clientes":
-                    // TODO: Implementar janela de edição de clientes
-
-                    // if (CadastroDataGrid.SelectedItem is ClienteData clienteSelecionado)
-                    // {
-                    //     var editarCliente = new EditarClienteWindow(clienteSelecionado);
-                    //     if (editarCliente.ShowDialog() == true)
-                    //     {
-                    //         // Se a edição foi bem-sucedida, atualiza o DataGrid
-                    //         CarregarDadosTabela(_tabelaAtual);
-                    //     }
-                    // }
-
-                    MessageBox.Show("Funcionalidade de edição de clientes não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                    if (CadastroDataGrid.SelectedItem is ClienteData clienteSelecionado)
+                    {
+                        var editarCliente = new EditarClienteWindow(clienteSelecionado);
+                        if (editarCliente.ShowDialog() == true)
+                        {
+                            // Se a edição foi bem-sucedida, atualiza o DataGrid
+                            CarregarDadosTabela(_tabelaAtual);
+                        }
+                    }
                     break;
 
                 case "fornecedores":
-                    // TODO: Implementar janela de edição de fornecedores
-
-                    // if (CadastroDataGrid.SelectedItem is FornecedorData fornecedorSelecionado)
-                    // {
-                    //     var editarFornecedor = new EditarFornecedorWindow(fornecedorSelecionado);
-                    //     if (editarFornecedor.ShowDialog() == true)
-                    //     {
-                    //         // Se a edição foi bem-sucedida, atualiza o DataGrid
-                    //         CarregarDadosTabela(_tabelaAtual);
-                    //     }
-                    // }
-
-                    MessageBox.Show("Funcionalidade de edição de fornecedores não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                    if (CadastroDataGrid.SelectedItem is FornecedorData fornecedorSelecionado)
+                    {
+                        var editarFornecedor = new EditarFornecedorWindow(fornecedorSelecionado);
+                        if (editarFornecedor.ShowDialog() == true)
+                        {
+                            // Se a edição foi bem-sucedida, atualiza o DataGrid
+                            CarregarDadosTabela(_tabelaAtual);
+                        }
+                    }
                     break;
 
                 case "usuários":
@@ -491,7 +536,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
             }
         }
-
 
         private void DeletarButton_Click(object sender, RoutedEventArgs e)
         {
@@ -529,17 +573,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
 
                 case "clientes":
-                    // TODO: Implementar exclusão de clientes
+                    if (CadastroDataGrid.SelectedItem is ClienteData clienteSelecionado)
+                    {
+                        var collectionClientes = _database.GetCollection<ClienteData>("clientes");
+                        collectionClientes.Delete(clienteSelecionado.Id); // Assume que o modelo possui uma propriedade "Id"
+                        MessageBox.Show("Cliente deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    break;
 
-                    //if (CadastroDataGrid.SelectedItem is ClienteData clienteSelecionado)
-                    //{
-                    //    var collectionClientes = _database.GetCollection<ClienteData>("clientes");
-                    //    collectionClientes.Delete(clienteSelecionado.Id); // Assume que o modelo possui uma propriedade "Id"
-                    //    MessageBox.Show("Cliente deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-                    //}
-
-                    MessageBox.Show("Funcionalidade de exclusão de clientes não implementada.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                case "fornecedores":
+                    if (CadastroDataGrid.SelectedItem is FornecedorData fornecedorSelecionado)
+                    {
+                        var collectionFornecedores = _database.GetCollection<FornecedorData>("fornecedores");
+                        collectionFornecedores.Delete(fornecedorSelecionado.Id); // Assume que o modelo possui uma propriedade "Id"
+                        MessageBox.Show("Fornecedor deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                     break;
 
                 case "usuários":

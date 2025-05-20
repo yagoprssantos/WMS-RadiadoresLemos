@@ -100,6 +100,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 var produtos = Database.GetCollection<ProdutoData>("produtos");
                 var movimentacoes = Database.GetCollection<MovimentacaoData>("movimentacoes");
                 var historico = Database.GetCollection<LogData>("historico");
+                var clientes = Database.GetCollection<ClienteData>("clientes");
+                var fornecedores = Database.GetCollection<FornecedorData>("fornecedores");
 
                 // Cria índices para melhor performance
                 Console.WriteLine("Criando índices...");
