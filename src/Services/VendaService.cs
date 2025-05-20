@@ -12,7 +12,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
     {
         private static string _dataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
         private static string _vendasFilePath = Path.Combine(_dataPath, "vendas.json");
-        private static List<Venda> _vendas = new List<Venda>();
+        private static List<VendaData> _vendas = new List<VendaData>();
 
         static VendaService()
         {
@@ -28,16 +28,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 try
                 {
                     var json = File.ReadAllText(_vendasFilePath);
-                    _vendas = JsonSerializer.Deserialize<List<Venda>>(json) ?? new List<Venda>();
+                    _vendas = JsonSerializer.Deserialize<List<VendaData>>(json) ?? new List<VendaData>();
                 }
                 catch
                 {
-                    _vendas = new List<Venda>();
+                    _vendas = new List<VendaData>();
                 }
             }
         }
 
-        public static async Task<bool> SalvarVenda(Venda venda)
+        public static async Task<bool> SalvarVenda(VendaData venda)
         {
             try
             {
@@ -55,13 +55,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        public static List<Venda> ObterVendas()
+        public static List<VendaData> ObterVendas()
         {
             // Retornar a lista de vendas ordenada por data de cadastro (mais recentes primeiro)
             return _vendas.OrderByDescending(v => v.DataCadastro).ToList();
         }
 
-        public static Venda ObterVendaPorId(Guid id)
+        public static VendaData ObterVendaPorId(Guid id)
         {
             return _vendas.FirstOrDefault(v => v.Id == id);
         }

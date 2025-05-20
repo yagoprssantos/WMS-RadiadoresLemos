@@ -11,8 +11,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 {
     public partial class VendasUserControl : UserControl
     {
-        private List<Venda> _todasVendas;      // Lista completa de vendas
-        private List<Venda> _vendasFiltradas;  // Lista filtrada e ordenada
+        private List<VendaData> _todasVendas;      // Lista completa de vendas
+        private List<VendaData> _vendasFiltradas;  // Lista filtrada e ordenada
         private string _ordenacaoAtual = "recente";
         private string _filtroTexto = "Ordenar por";
 
@@ -20,7 +20,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             InitializeComponent();
 
-            CadastroVendasWindow.VendaAdicionada += CadastroVendasWindow_VendaAdicionada;
             Loaded += VendasUserControl_Loaded;
         }
 
@@ -30,17 +29,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CarregarVendas();
         }
 
-        private void CadastroVendasWindow_VendaAdicionada(object sender, Venda e)
-        {
-            CarregarVendas();
-        }
-
         private void CarregarVendas()
         {
             try
             {
                 _todasVendas = VendaService.ObterVendas();
-                _vendasFiltradas = new List<Venda>(_todasVendas);
+                _vendasFiltradas = new List<VendaData>(_todasVendas);
                 AplicarOrdenacao();
                 AtualizarInterfaceVendas();
             }
@@ -92,7 +86,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // TODO: Limpar filtro Ordenar
 
             FiltroPopup.IsOpen = false;
-            _vendasFiltradas = new List<Venda>(_todasVendas);
+            _vendasFiltradas = new List<VendaData>(_todasVendas);
             AplicarOrdenacao();
             AtualizarInterfaceVendas();
         }
@@ -251,7 +245,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        // 6. Registrar Venda
+        // 6. Registrar VendaData
         private void RegistrarVendaButton_Click(object sender, RoutedEventArgs e)
         {
             var compras = new AddEntradaSaídaWindow(isEntrada: false);
@@ -261,7 +255,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         // 7. Botões de ação
         private void DetalhesButton_Click(object sender, RoutedEventArgs e)
         {
-            var venda = (sender as Button)?.DataContext as Venda;
+            var venda = (sender as Button)?.DataContext as VendaData;
 
             if (venda != null)
             {
@@ -286,7 +280,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                                      $"Data do Pagamento: {venda.DataPagamento:dd/MM/yyyy}\n" +
                                      $"Data de Cadastro: {venda.DataCadastro:dd/MM/yyyy HH:mm}";
 
-                    MessageBox.Show(detalhes, "Detalhes da Venda", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(detalhes, "Detalhes da VendaData", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }

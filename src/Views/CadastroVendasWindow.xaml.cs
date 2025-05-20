@@ -65,7 +65,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 string numeroPedido = $"PED-{DateTime.Now:yyyyMMddHHmmss}";
 
                 // Criar objeto de venda
-                Venda novaVenda = new Venda
+                VendaData novaVenda = new VendaData
                 {
                     Produto = txtProduto.Text,
                     Cliente = txtCliente.Text,
@@ -80,7 +80,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 if (sucesso)
                 {
-                    MessageBox.Show("Venda cadastrada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("VendaData cadastrada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
 
                     // Notificar que uma venda foi adicionada (para atualizar a interface)
                     if (VendaAdicionada != null)
@@ -100,6 +100,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         }
 
         // Evento para notificar quando uma venda for adicionada
-        public static event EventHandler<Venda> VendaAdicionada;
+        public static event EventHandler<VendaData> VendaAdicionada;
     }
 }

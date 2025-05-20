@@ -45,11 +45,11 @@
 
                 </Grid>
 
-                <!-- Conteúdo Principal: Itens de Venda -->
+                <!-- Conteúdo Principal: Itens de Compra -->
                 <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,0">
                     <ScrollViewer>
-                        <WrapPanel x:Name="vendasContainer" Margin="10">
-                            <!-- Os itens de venda serão adicionados aqui dinamicamente -->
+                        <WrapPanel x:Name="ComprasContainer" Margin="10">
+                            <!-- Os itens de compra serão adicionados aqui dinamicamente -->
                         </WrapPanel>
                     </ScrollViewer>
                 </Border>
@@ -62,7 +62,7 @@
                 <Border Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">
                     <StackPanel Background="Transparent" Margin="0">
                         <Button x:Name="OrderButton" Content="Ordenar por" ToolTip="Ordenar" Style="{StaticResource OrderButtonStyle}" Click="OrdenarButton_Click" Margin="0,0,10,0"/>
-                        <!-- Adicione aqui os controles de filtro específicos para vendas -->
+                        <!-- Adicione aqui os controles de filtro específicos para compras -->
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="15, 10">
                             <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>

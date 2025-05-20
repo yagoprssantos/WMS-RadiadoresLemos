@@ -2,7 +2,7 @@
 
 namespace WMS_RadiadoresLemos_WPF.src.Models
 {
-    public class Venda
+    public class VendaData
     {
         public Guid Id { get; set; }
         public string Cliente { get; set; }
@@ -18,7 +18,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         public string Movimentacao { get; set; } // Exemplo: link ou identificador (?)
         public string NotaFiscal { get; set; } // Exemplo: link ou identificador (?)
 
-        public Venda()
+        public VendaData()
         {
             Id = Guid.NewGuid();
             DataCadastro = DateTime.Now;
