@@ -61,7 +61,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             _userControls = new List<UserControl>
                     {
-                        new AddEntradaSaídaUserControl(),
+                        new ComprasUserControl(),
                         new VendasUserControl(),
                         new RegistroUserControl(),
                         new ControleEstoqueUserControl(),
@@ -177,7 +177,7 @@ namespace WMS_RadiadoresLemos_WPF
                     ? $"Notificações ({totalNovasNotificacoes})"
                     : "Notificações";
 
-                notificacoesIcon.Source = new BitmapImage(new Uri("/src/Resources/Icons/NotSelected/SinoNotNS.png", UriKind.Relative));
+                notificacoesIcon.Source = new BitmapImage(new Uri("/assets/Icons/NotSelected/SinoNotNS.png", UriKind.Relative));
             }
         }
 
@@ -212,15 +212,15 @@ namespace WMS_RadiadoresLemos_WPF
                                 // Mantém o ícone de notificações se houver notificações não lidas
                                 image.Source = new BitmapImage(new Uri(
                                     _notificationCount > 0
-                                        ? "/src/Resources/Icons/NotSelected/SinoNotNS.png"
-                                        : "/src/Resources/Icons/NotSelected/SinoNS.png",
+                                        ? "/assets/Icons/NotSelected/SinoNotNS.png"
+                                        : "/assets/Icons/NotSelected/SinoNS.png",
                                     UriKind.Relative));
                             }
                             else
                             {
                                 // Define a imagem não selecionada para os outros botões
                                 string imageName = GetImageName(image.Name, "NotSelected");
-                                image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{imageName}.png", UriKind.Relative));
+                                image.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{imageName}.png", UriKind.Relative));
                             }
                         }
                     }
@@ -244,7 +244,7 @@ namespace WMS_RadiadoresLemos_WPF
                         {
                             // Define a imagem não selecionada
                             string imageName = GetImageName(image.Name, "NotSelected");
-                            image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{imageName}.png", UriKind.Relative));
+                            image.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{imageName}.png", UriKind.Relative));
                         }
                     }
                 }
@@ -259,9 +259,8 @@ namespace WMS_RadiadoresLemos_WPF
                 // Define a aba correspondente
                 switch (clickedButton.Name)
                 {
-                    case "BtnMovimentacao":
-                        ContentArea.Content = new AddEntradaSaídaUserControl();
-                        Alerta.AdicionarAlerta("Importante", "Teste", "Teste", "Teste");
+                    case "BtnCompras":
+                        ContentArea.Content = new ComprasUserControl();
                         break;
                     case "BtnVendas":
                         ContentArea.Content = new VendasUserControl();
@@ -302,7 +301,7 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         // Define a imagem selecionada
                         string imageName = GetImageName(image.Name, "Selected");
-                        image.Source = new BitmapImage(new Uri($"/src/Resources/Icons/Selected/{imageName}.png", UriKind.Relative));
+                        image.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{imageName}.png", UriKind.Relative));
                     }
                 }
             }
@@ -413,7 +412,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             return iconName switch
             {
-                "IconMovimentacao" => state == "Selected" ? "SwapS" : "SwapNS",
+                "IconCompras" => state == "Selected" ? "ComprarS" : "ComprarNS",
                 "IconVendas" => state == "Selected" ? "PranchetaS" : "PranchetaNS",
                 "IconRegistro" => state == "Selected" ? "historicos" : "HistoricoNS",
                 "IconEstoque" => state == "Selected" ? "CaixaS" : "CaixaNS",
@@ -429,9 +428,9 @@ namespace WMS_RadiadoresLemos_WPF
         // Métodos para atualizar o título da janela e o ícone do botão
         private void UpdateTitle()
         {
-            if (ContentArea.Content is AddEntradaSaídaUserControl)
+            if (ContentArea.Content is ComprasUserControl)
             {
-                TitleTextBlock.Text = "Movimentação";
+                TitleTextBlock.Text = "Compras";
             }
             else if (ContentArea.Content is VendasUserControl)
             {
@@ -466,37 +465,37 @@ namespace WMS_RadiadoresLemos_WPF
         {
             Uri? iconUri = null; 
 
-            if (ContentArea.Content is AddEntradaSaídaUserControl)
+            if (ContentArea.Content is ComprasUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/SwapS.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/ComprarS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is VendasUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/PranchetaS.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/PranchetaS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is RegistroUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/historicos.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/historicos.png", UriKind.Relative);
             }
             else if (ContentArea.Content is ControleEstoqueUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/CaixaS.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/CaixaS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is CadastroUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/CadastroS.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is DashboardUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/GraficoS.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/GraficoS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is NotificacoesUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/SinoS.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/SinoS.png", UriKind.Relative);
             }
             else if (ContentArea.Content is ConfiguracaoUserControl)
             {
-                iconUri = new Uri("/src/Resources/Icons/Selected/EngrenagemS.png", UriKind.Relative);
+                iconUri = new Uri("/assets/Icons/Selected/EngrenagemS.png", UriKind.Relative);
             }
 
             if (iconUri != null)

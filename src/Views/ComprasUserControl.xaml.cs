@@ -9,14 +9,14 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
-    public partial class VendasUserControl : UserControl
+    public partial class ComprasUserControl : UserControl
     {
         private List<Venda> _todasVendas;      // Lista completa de vendas
         private List<Venda> _vendasFiltradas;  // Lista filtrada e ordenada
         private string _ordenacaoAtual = "recente";
         private string _filtroTexto = "Ordenar por";
 
-        public VendasUserControl()
+        public ComprasUserControl()
         {
             InitializeComponent();
 
