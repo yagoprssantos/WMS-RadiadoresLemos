@@ -1,7 +1,7 @@
 ﻿<Window x:Class="WMS_RadiadoresLemos_WPF.src.Views.EditarFornecedorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Editar Fornecedor" Height="500" Width="600" FontSize="18"
+        Title="Editar Fornecedor" Height="400" Width="600" FontSize="18" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource PanelBackgroundBrush}">
     <ScrollViewer VerticalScrollBarVisibility="Auto"

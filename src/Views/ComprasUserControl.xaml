@@ -39,9 +39,9 @@
                         </Grid>
                     </Border>
                     <!-- Botão de Filtro -->
-                    <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click" Margin="0,0,10,0"/>
+                    <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
                     <!-- Botão de Ordenar -->
-                    <Button Grid.Column="3" Content="Registrar Compra" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarCompraButton_Click" Margin="0,0,0,0"/>
+                    <Button Grid.Column="3" Content="Registrar Compra" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarCompraButton_Click"/>
 
                 </Grid>
 

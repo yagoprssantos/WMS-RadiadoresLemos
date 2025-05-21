@@ -1,31 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WMS_RadiadoresLemos_WPF.src.Models
 {
     public class CompraData
     {
-        public Guid Id { get; set; }
-        public string Fornecedor { get; set; }
-        public string Produto { get; set; }
-        public DateTime DataCompra { get; set; }
-        public DateTime DataPagamento { get; set; }
-        public decimal ValorTotal { get; set; }
-        public DateTime DataCadastro { get; set; }
-        public string TipoPagamento { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string FornecedorId { get; set; } = string.Empty; // Referência ao Fornecedor
+        public string FornecedorNome { get; set; } = string.Empty; // Nome para exibição rápida
+        public DateTime DataCompra { get; set; } = DateTime.Now;
+        public DateTime? DataPagamento { get; set; }
+        public string TipoPagamento { get; set; } = string.Empty; // "À vista" ou "Parcelado"
         public int Parcelas { get; set; }
-        public string Boletos { get; set; }
-        public string Movimentacao { get; set; }
-        public string NotaFiscal { get; set; }
-
-        public CompraData()
-        {
-            Id = Guid.NewGuid();
-            DataCadastro = DateTime.Now;
-        }
+        public List<string>? Boletos { get; set; }
+        public string? NotaFiscal { get; set; }
+        public List<MovimentacaoData> Itens { get; set; } = new();
+        public decimal ValorTotal { get; set; }
+        public DateTime DataCadastro { get; set; } = DateTime.Now;
+        public string? Detalhes { get; set; }
     }
 }
 

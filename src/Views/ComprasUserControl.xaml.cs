@@ -52,8 +52,8 @@
                 string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
                 _comprasFiltradas = _todasCompras
                     .Where(v =>
-                        (v.Fornecedor?.ToLower().Contains(textoBusca) ?? false) ||
-                        (v.Produto?.ToLower().Contains(textoBusca) ?? false) ||
+                        (v.FornecedorNome?.ToLower().Contains(textoBusca) ?? false) ||
+                        (v.Itens.Any(i => i.ProdutoNome.ToLower().Contains(textoBusca))) ||
                         (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
                     )
                     .ToList();
@@ -130,10 +130,10 @@
                         _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
                         break;
                     case "produto":
-                        _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Produto).ToList();
+                        _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Itens.FirstOrDefault()?.ProdutoNome ?? "").ToList();
                         break;
                     case "fornecedor":
-                        _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Fornecedor).ToList();
+                        _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.FornecedorNome).ToList();
                         break;
                     case "recente":
                         _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
@@ -196,7 +196,7 @@
 
                     TextBlock fornecedorTextBlock = new TextBlock
                     {
-                        Text = $"Fornecedor: {compra.Fornecedor}",
+                        Text = $"Fornecedor: {compra.FornecedorNome}",
                         Style = (Style)FindResource("ComprasTextBox"),
                         FontSize = 14
                     };

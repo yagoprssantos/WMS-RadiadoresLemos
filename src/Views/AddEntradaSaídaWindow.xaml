@@ -5,8 +5,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         mc:Ignorable="d" 
         Title="Adicionar Entrada/Saída"
-        MinHeight="650" MinWidth="800"
-        Height="650" Width="800"
+        MinHeight="660" MinWidth="800"
+        Height="660" Width="800"
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
@@ -14,18 +14,18 @@
         <Grid.Resources>
             <Style TargetType="ColumnDefinition" x:Key="DynamicColumnStyle">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ElementName=ListaCompras, Path=Visibility}" Value="Collapsed">
+                    <DataTrigger Binding="{Binding ElementName=Lista, Path=Visibility}" Value="Collapsed">
                         <Setter Property="Width" Value="*" />
                     </DataTrigger>
-                    <DataTrigger Binding="{Binding ElementName=ListaCompras, Path=Visibility}" Value="Visible">
+                    <DataTrigger Binding="{Binding ElementName=Lista, Path=Visibility}" Value="Visible">
                         <Setter Property="Width" Value="3*" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-            <Style TargetType="ColumnDefinition" x:Key="ListaComprasColumnStyle">
+            <Style TargetType="ColumnDefinition" x:Key="ListaColumnStyle">
                 <Setter Property="Width" Value="2*" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ElementName=ListaCompras, Path=Visibility}" Value="Collapsed">
+                    <DataTrigger Binding="{Binding ElementName=Lista, Path=Visibility}" Value="Collapsed">
                         <Setter Property="Width" Value="0" />
                     </DataTrigger>
                 </Style.Triggers>
@@ -38,7 +38,7 @@
                 <!-- Layout Principal -->
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Style="{StaticResource DynamicColumnStyle}" />
-                    <ColumnDefinition Style="{StaticResource ListaComprasColumnStyle}" />
+                    <ColumnDefinition Style="{StaticResource ListaColumnStyle}" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Primeira Border (Conteúdo Principal) -->
@@ -209,17 +209,17 @@
                         <!-- Botão Adicionar -->
                         <Button Content="Adicionar na Lista" Style="{StaticResource EmphasisButtonStyle}" Width="200" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,10,0,0" Click="AdicionarNaLista_Click" />
 
-                        <!-- Botão para alternar a visibilidade da ListaCompras -->
+                        <!-- Botão para alternar a visibilidade da Lista -->
                         <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0" Visibility="Visible"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
-                                x:Name="ToggleListaCompras" Click="ToggleListaCompras_Click">
+                                x:Name="ToggleLista" Click="ToggleLista_Click">
                             <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="28" Width="25"/>
                         </Button>
                     </Grid>
                 </Border>
 
                 <!-- Segunda Border (Lista Retrátil) -->
-                <Border x:Name="ListaCompras" Grid.Column="1" CornerRadius="15" Padding="15" Margin="20,0,0,0" Visibility="Collapsed"
+                <Border x:Name="Lista" Grid.Column="1" CornerRadius="15" Padding="15" Margin="20,0,0,0" Visibility="Collapsed"
                         Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
                     <Grid>
                         <!-- Definição das linhas da Grid -->
@@ -243,13 +243,13 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Lista de Compras" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
+                            <TextBlock Grid.Row="0" Text="Lista" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
 
                             <Button Grid.Row="0" Content="✖" FontSize="15" Style="{StaticResource DeleteButtonStyle}" Width="20" Height="20"
                                     HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Column="1"
                                     Foreground="{StaticResource TextBrush}" Background="Transparent"
-                                    Click="FecharListaCompras_Click" />
+                                    Click="FecharLista_Click" />
 
                             <Separator Grid.Row="1" Margin="5, 15" />
                         </Grid>
@@ -269,27 +269,49 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                
-                                                <!-- TODO: Melhorar como apresentar isso -->
 
-                                                <!-- StackPanel para os outros elementos -->
+                                                <!-- StackPanel para os elementos -->
                                                 <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
                                                     <!-- Produto -->
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Produto:" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                        <TextBlock Text="{Binding ProdutoId}" Foreground="{StaticResource TextBrush}" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                        <TextBlock Text="Produto: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding ProdutoNome}" Foreground="{StaticResource TextBrush}" />
+                                                    </StackPanel>
+
+                                                    <!-- Fornecedor -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding FornecedorId}">
+                                                        <TextBlock Text="Fornecedor: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding FornecedorId}" Foreground="{StaticResource TextBrush}" />
+                                                    </StackPanel>
+
+                                                    <!-- Cliente -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding ClienteId}">
+                                                        <TextBlock Text="Cliente: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding ClienteId}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
 
                                                     <!-- Quantidade -->
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Quantidade:" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                        <TextBlock Text="{Binding Quantidade}" Foreground="{StaticResource TextBrush}" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                        <TextBlock Text="Quantidade: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding Quantidade}" Foreground="{StaticResource TextBrush}" Margin="0,0,15,0"/>
+                                                    </StackPanel>
+                                                    
+                                                    <!-- Preço -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                        <TextBlock Text="Preço: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding Preco, StringFormat=C}" Foreground="{StaticResource TextBrush}" />
+                                                    </StackPanel>
+                                                    
+                                                    <!-- Forma de Pagamento -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                        <TextBlock Text="Pagamento: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding FormaPagamento}" Foreground="{StaticResource TextBrush}" Margin="0,0,15,0"/>
                                                     </StackPanel>
 
-                                                    <!-- Preço -->
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Preço:" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                        <TextBlock Text="{Binding Preco, StringFormat=C}" Foreground="{StaticResource TextBrush}" />
+                                                    <!-- Parcelas -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                                        <TextBlock Text="Parcelas: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding Parcelas}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
                                                 </StackPanel>
 
@@ -306,7 +328,7 @@
 
                         <!-- Botão Confirmar -->
                         <Button Grid.Row="2" Content="Confirmar" Style="{StaticResource EmphasisButtonStyle}" Width="200" 
-                                HorizontalAlignment="Center" Margin="0,10,0,0" Click="ConfimarPedido_Click" />
+                                HorizontalAlignment="Center" Margin="0,10,0,0" Click="ConfirmarPedido_Click" />
                     </Grid>
                 </Border>
             </Grid>

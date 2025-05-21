@@ -20,17 +20,22 @@ namespace WMS_RadiadoresLemos_WPF
     {
         // Dados de produtos
         private List<ProdutoData> produtos = new List<ProdutoData>();
+
         // Dados de movimentações
-        private ObservableCollection<MovimentacaoData> listaMovimentacoes = new ObservableCollection<MovimentacaoData>();
+        private ObservableCollection<MovimentacaoData> movimentacoes = new ObservableCollection<MovimentacaoData>();
+        private List<MovimentacaoListItem> listaMovimentacoes = new();
+
         private ProdutoData? produtoSelecionado;
+
         // Configurações e constantes
         private bool usePositiveNumber = true;
-        private static readonly string CollectionName = "produtos";
+
         // Dados de fornecedores e clientes
-        private List<string> fornecedores = new List<string>();
-        private List<string> clientes = new List<string>();
+        private List<ClienteData> clientes = new List<ClienteData>();
+        private List<FornecedorData> fornecedores = new List<FornecedorData>();
         private string? fornecedorSelecionado;
         private string? clienteSelecionado;
+
         // Dados de pagamento
         private string? formaPagamentoSelecionada;
         private readonly List<string> opcoesFormaPagamento = new()
@@ -48,9 +53,7 @@ namespace WMS_RadiadoresLemos_WPF
             InitializeComponent();
             Setup();
 
-            ListaItemsControl.ItemsSource = listaMovimentacoes;
-
-            ProdutoComboBox.Focus();
+            ListaItemsControl.ItemsSource = movimentacoes;
         }
 
         public AddEntradaSaídaWindow(bool isEntrada) : this()
@@ -58,11 +61,13 @@ namespace WMS_RadiadoresLemos_WPF
             usePositiveNumber = isEntrada;
             if (isEntrada)
             {
+                // ComboBox
                 Fornecedor.Visibility= Visibility.Visible;
                 Cliente.Visibility= Visibility.Collapsed;
             }
             else
             {
+                // ComboBox
                 Fornecedor.Visibility = Visibility.Collapsed;
                 Cliente.Visibility = Visibility.Visible;
             }
@@ -73,11 +78,31 @@ namespace WMS_RadiadoresLemos_WPF
             produtoSelecionado = null;
             usePositiveNumber = true;
 
-            CarregarProdutos().Wait();
+            CarregarDados();
             ToggleVisibility(false);
         }
 
-        // Método para carregar produtos do cache
+        // Método para carregar os dados
+        private async Task CarregarDados()
+        {
+            CarregarProdutos().Wait();
+
+            // Carrega fornecedor/cliente dependendo da Entrada
+            if (usePositiveNumber)
+            {
+                CarregarFornecedores().Wait();
+            }
+            else if (!usePositiveNumber)
+            {
+                CarregarClientes().Wait();
+            }
+            else
+            {
+                CarregarFornecedores().Wait();
+                CarregarClientes().Wait();
+            }
+        }
+
         private async Task CarregarProdutos()
         {
             try
@@ -90,6 +115,44 @@ namespace WMS_RadiadoresLemos_WPF
 
                     // Adiciona os produtos ao ComboBox
                     ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async Task CarregarFornecedores()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<FornecedorData>("fornecedores");
+                    fornecedores = collection.FindAll().ToList();
+
+                    // Adiciona os fornecedores ao ComboBox
+                    FornecedorComboBox.ItemsSource = fornecedores.Select(p => p.Nome).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async Task CarregarClientes()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<ClienteData>("clientes");
+                    clientes = collection.FindAll().ToList();
+
+                    // Adiciona os fornecedores ao ComboBox
+                    FornecedorComboBox.ItemsSource = clientes.Select(p => p.CNPJ).ToList();
                 }
             }
             catch (Exception ex)
@@ -157,6 +220,11 @@ namespace WMS_RadiadoresLemos_WPF
             if (!string.IsNullOrEmpty(inputText) && produtos.Any(p => p.Nome == inputText))
             {
                 produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == inputText);
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                }
             }
             else
             {
@@ -191,7 +259,8 @@ namespace WMS_RadiadoresLemos_WPF
                 string searchText = textBox.Text;
 
                 var filteredFornecedores = fornecedores
-                    .Where(f => f.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .Where(f => f.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .Select(f => f.Nome)
                     .ToList();
 
                 comboBox.ItemsSource = null;
@@ -201,7 +270,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     comboBox.Items.Add(nome);
                 }
-                
+
                 textBox.Text = searchText;
                 textBox.CaretIndex = textBox.Text.Length;
                 comboBox.IsDropDownOpen = true;
@@ -215,9 +284,10 @@ namespace WMS_RadiadoresLemos_WPF
             if (FornecedorComboBox.SelectedItem is string selected)
                 inputText = selected;
 
-            if (!string.IsNullOrEmpty(inputText) && fornecedores.Contains(inputText))
+            var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == inputText);
+            if (!string.IsNullOrEmpty(inputText) && fornecedor != null)
             {
-                fornecedorSelecionado = inputText;
+                fornecedorSelecionado = fornecedor.Nome;
             }
             else
             {
@@ -243,7 +313,8 @@ namespace WMS_RadiadoresLemos_WPF
                 string searchText = textBox.Text;
 
                 var filteredClientes = clientes
-                    .Where(c => c.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .Where(c => c.CNPJ.Contains(searchText, StringComparison.OrdinalIgnoreCase) || c.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .Select(c => c.CNPJ) // ou c.Email, dependendo do que você quer mostrar
                     .ToList();
 
                 comboBox.ItemsSource = null;
@@ -253,7 +324,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     comboBox.Items.Add(nome);
                 }
-                
+
                 textBox.Text = searchText;
                 textBox.CaretIndex = textBox.Text.Length;
                 comboBox.IsDropDownOpen = true;
@@ -267,9 +338,10 @@ namespace WMS_RadiadoresLemos_WPF
             if (ClienteComboBox.SelectedItem is string selected)
                 inputText = selected;
 
-            if (!string.IsNullOrEmpty(inputText) && clientes.Contains(inputText))
+            var cliente = clientes.FirstOrDefault(c => c.CNPJ == inputText || c.Email == inputText);
+            if (!string.IsNullOrEmpty(inputText) && cliente != null)
             {
-                clienteSelecionado = inputText;
+                clienteSelecionado = cliente.CNPJ; // ou cliente.Email
             }
             else
             {
@@ -344,59 +416,59 @@ namespace WMS_RadiadoresLemos_WPF
                 // Se os campos estiverem vazios, apenas inicializa os valores "Depois" com os valores "Antes"
                 QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
                 PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
-                return true;
-            }
-
-            // Realizar cálculos com os valores inseridos
-            if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
-            {
-                int quantidadeFinal = usePositiveNumber
-                    ? produto.Quantidade + quantidadeAlterada // Entrada
-                    : produto.Quantidade - quantidadeAlterada; // Saída
-
-                if (quantidadeFinal < 0)
-                {
-                    // Quantidade final não pode ser negativa
-                    Alerta.AdicionarAlerta("Erro",
-                                           "Quantidade insuficiente",
-                                           "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
-                                           "- Quantidade insuficiente no estoque.",
-                                           "- Verifique a quantidade disponível no estoque.\n" +
-                                           "- Verifique se a quantidade inserida é válida.\n" +
-                                           "- Atualize a quantidade de produtos no estoque.");
-                    return false;
-                }
-
-                QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
-
-                if (usePositiveNumber)
-                {
-                    // Calcular o preço médio ponderado para entrada
-                    double precoAtual = produto.Preco;
-                    int quantidadeAtual = produto.Quantidade;
-                    int quantidadeNova = quantidadeAlterada;
-                    int quantidadeTotal = quantidadeAtual + quantidadeNova;
-
-                    double precoPonderado = ((precoAtual * quantidadeAtual) + (precoAlterado * quantidadeNova)) / quantidadeTotal;
-                    PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
-                }
-                else
-                {
-                    // Para saída, mantém o preço atual
-                    PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
-                }
             }
             else
             {
-                MessageBox.Show("Por favor, insira valores válidos para quantidade e preço.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
+                // Realizar cálculos com os valores inseridos
+                if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
+                {
+                    int quantidadeFinal = usePositiveNumber
+                        ? produto.Quantidade + quantidadeAlterada // Entrada
+                        : produto.Quantidade - quantidadeAlterada; // Saída
+
+                    if (quantidadeFinal < 0)
+                    {
+                        Alerta.AdicionarAlerta("Erro",
+                                               "Quantidade insuficiente",
+                                               "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
+                                               "- Quantidade insuficiente no estoque.",
+                                               "- Verifique a quantidade disponível no estoque.\n" +
+                                               "- Verifique se a quantidade inserida é válida.\n" +
+                                               "- Atualize a quantidade de produtos no estoque.");
+                        return false;
+                    }
+
+                    QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
+
+                    if (usePositiveNumber)
+                    {
+                        double precoAtual = produto.Preco;
+                        int quantidadeAtual = produto.Quantidade;
+                        int quantidadeNova = quantidadeAlterada;
+                        int quantidadeTotal = quantidadeAtual + quantidadeNova;
+
+                        double precoPonderado = ((precoAtual * quantidadeAtual) + (precoAlterado * quantidadeNova)) / quantidadeTotal;
+                        PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
+                    }
+                    else
+                    {
+                        PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                    }
+                }
+                else
+                {
+                    // Se não conseguir converter, apenas mostra os valores atuais
+                    QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
+                    PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                }
             }
 
-            // Atualizar visibilidade do painel de detalhes
+            // Sempre mostrar o painel de detalhes
             ProdutoAntesDepois.Visibility = Visibility.Visible;
 
             return true;
         }
+
         private void DestacarMudancas()
         {
             // Comparar e destacar mudanças
@@ -434,14 +506,14 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
 
-        // Métodos para Lista de Compras
-        private void ToggleListaCompras_Click(object sender, RoutedEventArgs e)
+        // Métodos para Lista de 
+        private void ToggleLista_Click(object sender, RoutedEventArgs e)
         {
             // Deixa lista visível
-            ListaCompras.Visibility = ListaCompras.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            Lista.Visibility = Lista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
             // Oculta botão
-            ToggleListaCompras.Visibility = ToggleListaCompras.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            ToggleLista.Visibility = ToggleLista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
         {
@@ -457,36 +529,88 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
-            bool isEntrada = usePositiveNumber;
+            if (!int.TryParse(ParcelasTextBox.Text, out int parcelas))
+            {
+                parcelas = 1;
+            }
 
-            if (!ValidarMovimentacao(produtoSelecionado, isEntrada, quantidade, preco))
+            // Validação completa antes de adicionar
+            if (!ValidarMovimentacao(produtoSelecionado, usePositiveNumber, quantidade, preco))
                 return;
 
+            // Criar MovimentacaoData
             var movimentacao = new MovimentacaoData
             {
-                Id = 0,
-                Tipo = isEntrada ? "Entrada" : "Saída",
-                Quantidade = quantidade,
-                Preco = preco,
                 ProdutoId = produtoSelecionado.Nome,
-                Data = DateTime.UtcNow,
+                ProdutoNome = produtoSelecionado.Nome,
+                Tipo = usePositiveNumber ? "Entrada" : "Saída",
+                Preco = preco,
+                Quantidade = quantidade,
+                Data = DateTime.Now,
+                Detalhes = DetalhesTextBox.Text
             };
 
-            listaMovimentacoes.Add(movimentacao);
+            // Criar item para lista com base na movimentação
+            var listItem = new MovimentacaoListItem{};
 
+            if (usePositiveNumber)
+            {
+                // Se for entrada, adiciona o fornecedor
+                listItem = new MovimentacaoListItem
+                {
+                    ProdutoId = produtoSelecionado.Nome,
+                    ProdutoNome = produtoSelecionado.Nome,
+                    FornecedorId = usePositiveNumber ? FornecedorComboBox.Text : null,
+                    Quantidade = quantidade,
+                    Preco = preco,
+                    FormaPagamento = FormaPagamentoComboBox.Text,
+                    Parcelas = parcelas,
+                    Detalhes = DetalhesTextBox.Text,
+                    Data = DateTime.Now,
+                    MovimentacaoData = movimentacao
+                };
+            }
+            else
+            {
+                // Se for saída, adiciona o cliente
+                listItem = new MovimentacaoListItem
+                {
+                    ProdutoId = produtoSelecionado.Nome,
+                    ProdutoNome = produtoSelecionado.Nome,
+                    ClienteId = usePositiveNumber ? ClienteComboBox.Text : null,
+                    Quantidade = quantidade,
+                    Preco = preco,
+                    FormaPagamento = FormaPagamentoComboBox.Text,
+                    Parcelas = parcelas,
+                    Detalhes = DetalhesTextBox.Text,
+                    Data = DateTime.Now,
+                    MovimentacaoData = movimentacao
+                };
+            }
+
+            // Adiciona à lista de movimentações
+            movimentacoes.Add(movimentacao);
+
+            // Adiciona um item semelhante na lista de itens
+            listaMovimentacoes.Add(listItem);
+
+            // Atualiza a lista de itens
             ListaItemsControl.ItemsSource = null;
             ListaItemsControl.ItemsSource = listaMovimentacoes;
 
-            AnimateToggleListaCompras();
+            AnimateToggleLista();
             LimparCampos();
         }
         private bool ValidarMovimentacao(ProdutoData produto, bool isEntrada, int quantidade, double preco)
         {
+            // Validação do Produto
             if (produto == null)
             {
                 MessageBox.Show("Produto não selecionado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+
+            // Validação de Quantidade e Preço
             if (quantidade <= 0)
             {
                 MessageBox.Show("A quantidade deve ser maior que zero.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -497,15 +621,53 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show("O preço não pode ser negativo.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+
+            // Validação de Estoque (para saídas)
             if (!isEntrada && quantidade > produto.Quantidade)
             {
                 MessageBox.Show("Quantidade insuficiente em estoque para saída.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+
+            // Validação de Cliente/Fornecedor
+            if (isEntrada)
+            {
+                if (string.IsNullOrWhiteSpace(fornecedorSelecionado))
+                {
+                    MessageBox.Show("Selecione um fornecedor.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(clienteSelecionado))
+                {
+                    MessageBox.Show("Selecione um cliente.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+            }
+
+            // Validação de Forma de Pagamento
+            if (string.IsNullOrWhiteSpace(formaPagamentoSelecionada))
+            {
+                MessageBox.Show("Selecione uma forma de pagamento.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            // Validação de Parcelas
+            if (formaPagamentoSelecionada == "Cartão de Crédito" || formaPagamentoSelecionada == "Boleto")
+            {
+                if (!int.TryParse(ParcelasTextBox.Text, out int parcelas) || parcelas <= 0)
+                {
+                    MessageBox.Show("Número de parcelas inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+            }
+
             return true;
         }
 
-        private void AnimateToggleListaCompras()
+        private void AnimateToggleLista()
         {
             // Cria uma animação de cor piscando usando o AccentBrush
             ColorAnimation colorAnimation = new ColorAnimation
@@ -518,7 +680,7 @@ namespace WMS_RadiadoresLemos_WPF
             };
 
             SolidColorBrush brush = new SolidColorBrush(((SolidColorBrush)FindResource("PanelBackgroundBrush")).Color);
-            ToggleListaCompras.Background = brush;
+            ToggleLista.Background = brush;
 
             brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation); // Inicia a animação
         }
@@ -526,61 +688,143 @@ namespace WMS_RadiadoresLemos_WPF
         private void ExcluirItem_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
-            var item = button?.DataContext;
-            if (item != null)
+            if (button?.DataContext is MovimentacaoListItem itemToRemove)
             {
-                var items = ListaItemsControl.ItemsSource as IList;
-                if (items != null)
+                // Remove da lista de movimentações
+                var movimentacaoToRemove = itemToRemove.MovimentacaoData;
+                if (movimentacaoToRemove != null)
                 {
-                    items.Remove(item);
+                    movimentacoes.Remove(movimentacaoToRemove);
                 }
+
+                // Remove da lista de items
+                listaMovimentacoes.Remove(itemToRemove);
+
+                // Atualiza o ItemsSource do ListaItemsControl
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
             }
         }
-        private async void ConfimarPedido_Click(object sender, RoutedEventArgs e)
+        private async void ConfirmarPedido_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var movimentacao in listaMovimentacoes)
+            if (movimentacoes.Count == 0)
             {
-                await RegistrarMovimentacaoAsync(movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
+                MessageBox.Show("Adicione pelo menos um item à lista.");
+                return;
             }
 
-            // Limpa a lista
-            listaMovimentacoes.Clear();
+            if (usePositiveNumber)
+            {
+                RegistrarCompra();
+            }
+            else
+            {
+                RegistrarVenda();
+            }
 
-            // Atualizar a interface do usuário
+            // (Opcional) Registrar cada movimentação individualmente no banco de movimentações
+            foreach (var mov in movimentacoes)
+            {
+                await RegistrarMovimentacaoAsync(mov);
+            }
+
+            // Limpa a lista e fecha a janela
+            movimentacoes.Clear();
+            listaMovimentacoes.Clear();
             ListaItemsControl.ItemsSource = null;
             ListaItemsControl.ItemsSource = listaMovimentacoes;
-
-            MessageBox.Show("Movimentações registradas com sucesso!");
+            this.Close();
         }
-        private void FecharListaCompras_Click(object sender, RoutedEventArgs e)
+
+        private void FecharLista_Click(object sender, RoutedEventArgs e)
         {
             // Deixa lista invisível
-            ListaCompras.Visibility = Visibility.Collapsed;
+            Lista.Visibility = Visibility.Collapsed;
 
             // Mostra botão
-            ToggleListaCompras.Visibility = Visibility.Visible;
+            ToggleLista.Visibility = Visibility.Visible;
+        }
+
+        private void RegistrarCompra()
+        {
+            var compra = new CompraData
+            {
+                FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado)?.Id ?? "",
+                FornecedorNome = fornecedorSelecionado,
+                DataCompra = DateTime.Now,
+                DataPagamento = null, 
+                TipoPagamento = formaPagamentoSelecionada ?? "",
+                Parcelas = int.TryParse(ParcelasTextBox.Text, out int parcelas) ? parcelas : 1,
+                NotaFiscal = null, 
+                Boletos = null,    
+                Detalhes = DetalhesTextBox.Text,
+                Itens = movimentacoes.ToList(),
+                ValorTotal = (decimal)movimentacoes.Sum(m => m.Preco * m.Quantidade),
+                DataCadastro = DateTime.Now
+            };
+
+            foreach (var mov in compra.Itens)
+            {
+                mov.Tipo = "Entrada";
+                mov.CompraId = compra.Id;
+                mov.ProdutoNome = produtos.FirstOrDefault(p => p.Nome == mov.ProdutoId)?.Nome ?? mov.ProdutoId;
+                mov.Data = DateTime.Now;
+            }
+
+            var db = DatabaseConnect.Database;
+            db?.GetCollection<CompraData>("compras").Insert(compra);
+
+            MessageBox.Show("Compra registrada com sucesso!");
+        }
+        private void RegistrarVenda()
+        {
+            if (string.IsNullOrWhiteSpace(clienteSelecionado))
+            {
+                MessageBox.Show("Selecione um cliente.");
+                return;
+            }
+
+            var venda = new VendaData
+            {
+                ClienteId = clientes.FirstOrDefault(c => c.CNPJ == clienteSelecionado)?.Id ?? "",
+                ClienteCNPJ = clienteSelecionado,
+                Pedido = "", 
+                DataCompra = DateTime.Now,
+                DataPagamento = null, 
+                TipoPagamento = formaPagamentoSelecionada ?? "",
+                Parcelas = int.TryParse(ParcelasTextBox.Text, out int parcelas) ? parcelas : 1,
+                NotaFiscal = null, 
+                Boletos = null,    
+                Detalhes = DetalhesTextBox.Text,
+                Itens = movimentacoes.ToList(),
+                ValorTotal = (decimal)movimentacoes.Sum(m => m.Preco * m.Quantidade),
+                DataCadastro = DateTime.Now
+            };
+
+            foreach (var mov in venda.Itens)
+            {
+                mov.Tipo = "Saída";
+                mov.VendaId = venda.Id;
+                mov.ProdutoNome = produtos.FirstOrDefault(p => p.Nome == mov.ProdutoId)?.Nome ?? mov.ProdutoId;
+                mov.Data = DateTime.Now;
+            }
+
+            var db = DatabaseConnect.Database;
+            db?.GetCollection<VendaData>("vendas").Insert(venda);
+
+            MessageBox.Show("Venda registrada com sucesso!");
         }
 
         // Método assíncrono para registrar a movimentação de produtos
-        private async Task RegistrarMovimentacaoAsync(bool isEntrada, int quantidadeMovimentacao, double precoMovimentacao)
+        private async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao)
         {
             try
             {
-                if (produtoSelecionado == null)
+                if (movimentacao == null)
                 {
-                    MessageBox.Show("Selecione um produto para registrar a movimentação.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Movimentação inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-
-                var movimentacao = new MovimentacaoData
-                {
-                    Id = 0,
-                    Data = DateTime.Now,
-                    Tipo = isEntrada ? "Entrada" : "Saída",
-                    Quantidade = quantidadeMovimentacao,
-                    Preco = precoMovimentacao,
-                    ProdutoId = produtoSelecionado.Id
-                };
 
                 if (DatabaseConnect.Database == null)
                     return;
@@ -589,10 +833,11 @@ namespace WMS_RadiadoresLemos_WPF
                 collection.Insert(movimentacao);
 
                 // Atualiza o produto no banco de dados usando a função dedicada
-                AtualizarProdutoNoBanco(produtoSelecionado, isEntrada, quantidadeMovimentacao, precoMovimentacao);
-
-                LimparCampos();
-                await CarregarProdutos();
+                var produto = produtos.FirstOrDefault(p => p.Nome == movimentacao.ProdutoId);
+                if (produto != null)
+                {
+                    AtualizarProdutoNoBanco(produto, movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
+                }
             }
             catch (Exception ex)
             {
@@ -622,7 +867,7 @@ namespace WMS_RadiadoresLemos_WPF
                 if (produto.Quantidade < 0) produto.Quantidade = 0;
             }
 
-            var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>(CollectionName);
+            var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos");
             produtoCollection.Update(produto);
         }
 
@@ -630,12 +875,53 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para limpar os campos de entrada
         private void LimparCampos()
         {
+            // Limpar campos de produto
+            ProdutoComboBox.SelectedItem = null;
+            ProdutoComboBox.Text = string.Empty;
+            produtoSelecionado = null;
+
+            // Limpar campos de fornecedor/cliente
+            if (usePositiveNumber)
+            {
+                FornecedorComboBox.SelectedItem = null;
+                FornecedorComboBox.Text = string.Empty;
+                fornecedorSelecionado = null;
+            }
+            else
+            {
+                ClienteComboBox.SelectedItem = null;
+                ClienteComboBox.Text = string.Empty;
+                clienteSelecionado = null;
+            }
+
+            // Limpar campos de quantidade e preço
             QuantidadeTextBox.Clear();
             PrecoTextBox.Clear();
+
+            // Limpar campos de pagamento
+            FormaPagamentoComboBox.SelectedItem = null;
+            formaPagamentoSelecionada = null;
+            ParcelasTextBox.Clear();
+
+            // Limpar detalhes
+            DetalhesTextBox.Clear();
+
+            // Limpar campos de exibição
+            TipoAntesDadoTextBlock.Text = string.Empty;
+            MarcaAntesDadoTextBlock.Text = string.Empty;
+            CodigoAntesDadoTextBlock.Text = string.Empty;
+            PrecoAntesDadoTextBlock.Text = string.Empty;
+            QuantidadeAntesDadoTextBlock.Text = string.Empty;
+
+            TipoDepoisDadoTextBlock.Text = string.Empty;
+            MarcaDepoisDadoTextBlock.Text = string.Empty;
+            CodigoDepoisDadoTextBlock.Text = string.Empty;
+            PrecoDepoisDadoTextBlock.Text = string.Empty;
+            QuantidadeDepoisDadoTextBlock.Text = string.Empty;
+
+            // Ocultar detalhes do produto
+            ProdutoAntesDepois.Visibility = Visibility.Collapsed;
         }
-
-
-
 
 
         // Todos os métodos de validação de entrada de texto

@@ -52,9 +52,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
             _vendasFiltradas = _todasVendas
                 .Where(v =>
-                    (v.Cliente?.ToLower().Contains(textoBusca) ?? false) ||
+                    (v.ClienteCNPJ?.ToLower().Contains(textoBusca) ?? false) ||
                     (v.Pedido?.ToLower().Contains(textoBusca) ?? false) ||
-                    (v.Produto?.ToLower().Contains(textoBusca) ?? false) ||
+                    (v.Itens.Any(i => i.ProdutoNome.ToLower().Contains(textoBusca))) ||
                     (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
                 )
                 .ToList();
@@ -131,10 +131,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
                     break;
                 case "produto":
-                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.Produto).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.Itens.FirstOrDefault()?.ProdutoNome ?? "").ToList();
                     break;
                 case "cliente":
-                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.Cliente).ToList();
+                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.ClienteCNPJ).ToList();
                     break;
                 case "recente":
                     _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
@@ -197,7 +197,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 TextBlock clienteTextBlock = new TextBlock
                 {
-                    Text = $"Cliente: {venda.Cliente}",
+                    Text = $"Cliente: {venda.ClienteCNPJ}",
                     Style = (Style)FindResource("VendasTextBox"),
                     FontSize = 14
                 };
@@ -272,9 +272,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 else
                 {
                     string detalhes = $"Detalhes da venda:\n\n" +
-                                     $"Cliente: {venda.Cliente}\n" +
+                                     $"Cliente: {venda.ClienteCNPJ}\n" +
                                      $"Pedido: {venda.Pedido}\n" +
-                                     $"Produto: {venda.Produto}\n" +
+                                     $"Produtos: {string.Join(", ", venda.Itens.Select(i => i.ProdutoNome))}\n" +
                                      $"Valor Total: R$ {venda.ValorTotal:N2}\n" +
                                      $"Data da Compra: {venda.DataCompra:dd/MM/yyyy}\n" +
                                      $"Data do Pagamento: {venda.DataPagamento:dd/MM/yyyy}\n" +
