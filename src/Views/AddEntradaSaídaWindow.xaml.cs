@@ -38,20 +38,16 @@ namespace WMS_RadiadoresLemos_WPF
 
         // Dados de pagamento
         private string? formaPagamentoSelecionada;
-        private readonly List<string> opcoesFormaPagamento = new()
-        {
-            "Dinheiro",
-            "Cartão de Crédito",
-            "Cartão de Débito",
-            "Transferência",
-            "Boleto",
-            "Pix"
-        };
+        private readonly List<string> opcoesFormaPagamento = new List<string>();
+
 
         public AddEntradaSaídaWindow()
         {
             InitializeComponent();
             Setup();
+            opcoesFormaPagamento = FormaPagamentoComboBox.Items.Cast<ComboBoxItem>()
+                        .Select(item => item.Content?.ToString() ?? "")
+                        .ToList();
 
             ListaItemsControl.ItemsSource = movimentacoes;
         }
@@ -749,6 +745,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var compra = new CompraData
             {
+                Id = Guid.NewGuid().ToString(),
                 FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado)?.Id ?? "",
                 FornecedorNome = fornecedorSelecionado,
                 DataCompra = DateTime.Now,
@@ -766,7 +763,8 @@ namespace WMS_RadiadoresLemos_WPF
             foreach (var mov in compra.Itens)
             {
                 mov.Tipo = "Entrada";
-                mov.CompraId = compra.Id;
+                // Update the following line to fix the CS0029 error
+                mov.CompraId = Guid.TryParse(compra.Id, out Guid parsedId) ? parsedId : null;
                 mov.ProdutoNome = produtos.FirstOrDefault(p => p.Nome == mov.ProdutoId)?.Nome ?? mov.ProdutoId;
                 mov.Data = DateTime.Now;
             }
@@ -808,7 +806,7 @@ namespace WMS_RadiadoresLemos_WPF
             foreach (var mov in venda.Itens)
             {
                 mov.Tipo = "Saída";
-                mov.VendaId = venda.Id;
+                mov.VendaId = Guid.TryParse(venda.Id, out Guid parsedId) ? parsedId : null;
                 mov.ProdutoNome = produtos.FirstOrDefault(p => p.Nome == mov.ProdutoId)?.Nome ?? mov.ProdutoId;
                 mov.Data = DateTime.Now;
             }
@@ -929,6 +927,9 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Ocultar detalhes do produto
             ProdutoAntesDepois.Visibility = Visibility.Collapsed;
+
+            // Foca no Produto novamente
+            ProdutoComboBox.Focus();
         }
 
 
@@ -936,13 +937,16 @@ namespace WMS_RadiadoresLemos_WPF
         // Quantidade
         private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !int.TryParse(e.Text, out _);
+            // Permite apenas dígitos
+            e.Handled = !e.Text.All(char.IsDigit);
         }
         private void QuantidadeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (e.DataObject.GetDataPresent(typeof(string)) && !int.TryParse((string)e.DataObject.GetData(typeof(string)), out _))
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                e.CancelCommand();
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
             }
             else
             {
@@ -953,24 +957,13 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
-                if (int.TryParse(textBox.Text, out int quantidade))
-                {
-                    textBox.Text = quantidade.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
-
-                    if (produtoSelecionado != null)
-                    {
-                        AtualizarCamposProduto(produtoSelecionado);
-                        DestacarMudancas();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Produto não encontrado.");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Quantidade inválida.");
+                if (!textBox.Text.All(char.IsDigit))
                     textBox.Clear();
+
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
                 }
             }
         }
@@ -985,22 +978,20 @@ namespace WMS_RadiadoresLemos_WPF
         // Preço
         private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (e.Text == ",")
-            {
-                if (((TextBox)sender).Text.Contains(","))
-                {
-                    e.Handled = true;
-                }
-                return;
-            }
+            // Permite apenas dígitos e uma vírgula (para decimal)
+            var textBox = (TextBox)sender;
+            string text = textBox.Text.Insert(textBox.SelectionStart, e.Text);
 
-            e.Handled = !double.TryParse(e.Text, out _);
+            // Só permite uma vírgula e pelo menos um dígito
+            e.Handled = !IsValidDecimalInput(text);
         }
         private void PrecoTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (e.DataObject.GetDataPresent(typeof(string)) && !double.TryParse((string)e.DataObject.GetData(typeof(string)), out _))
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                e.CancelCommand();
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsValidDecimalInput(text))
+                    e.CancelCommand();
             }
             else
             {
@@ -1011,26 +1002,24 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
-                if (double.TryParse(textBox.Text, out double preco))
-                {
-                    textBox.Text = preco.ToString("N2", new System.Globalization.CultureInfo("pt-BR"));
-
-                    if (produtoSelecionado != null)
-                    {
-                        AtualizarCamposProduto(produtoSelecionado);
-                        DestacarMudancas();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Produto não encontrado.");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Preço inválido.");
+                if (!IsValidDecimalInput(textBox.Text))
                     textBox.Clear();
+
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
                 }
             }
+        }
+        private bool IsValidDecimalInput(string text)
+        {
+            // Permite apenas dígitos e no máximo uma vírgula, e não pode começar por vírgula
+            if (string.IsNullOrEmpty(text)) return true;
+            int commaCount = text.Count(c => c == ',');
+            if (commaCount > 1) return false;
+            if (text.StartsWith(",")) return false;
+            return text.All(c => char.IsDigit(c) || c == ',');
         }
         private void PrecoTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -1043,13 +1032,15 @@ namespace WMS_RadiadoresLemos_WPF
         // Parcelas
         private void ParcelasTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !int.TryParse(e.Text, out _);
+            e.Handled = !e.Text.All(char.IsDigit);
         }
         private void ParcelasTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (e.DataObject.GetDataPresent(typeof(string)) && !int.TryParse((string)e.DataObject.GetData(typeof(string)), out _))
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                e.CancelCommand();
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
             }
             else
             {
@@ -1060,15 +1051,8 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
-                if (int.TryParse(textBox.Text, out int parcelas))
-                {
-                    textBox.Text = parcelas.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
-                }
-                else
-                {
-                    MessageBox.Show("Parcelas inválidas.");
+                if (!textBox.Text.All(char.IsDigit))
                     textBox.Clear();
-                }
             }
         }
         private void ParcelasTextBox_TextChanged(object sender, TextChangedEventArgs e)

@@ -23,11 +23,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [BsonField("vendas")]
         public List<string> VendasRelacionadas { get; set; } = new List<string>();
 
-        public ClienteData()
-        {
-            Id = string.Empty; // Inicialização temporária
-        }
-
         public void SetIdFromCNPJ()
         {
             Id = CNPJ;

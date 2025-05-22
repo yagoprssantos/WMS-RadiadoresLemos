@@ -102,6 +102,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 var historico = Database.GetCollection<LogData>("historico");
                 var clientes = Database.GetCollection<ClienteData>("clientes");
                 var fornecedores = Database.GetCollection<FornecedorData>("fornecedores");
+                var compras = Database.GetCollection<CompraData>("compras");
+                var vendas = Database.GetCollection<VendaData>("vendas");
 
                 // Cria índices para melhor performance
                 Console.WriteLine("Criando índices...");
@@ -109,6 +111,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 produtos.EnsureIndex(x => x.Codigo, unique: true);
                 movimentacoes.EnsureIndex(x => x.Data);
                 historico.EnsureIndex(x => x.Data);
+
 
                 Console.WriteLine("Coleções e índices criados com sucesso");
             }

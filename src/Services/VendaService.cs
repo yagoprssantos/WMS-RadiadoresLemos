@@ -61,7 +61,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             return _vendas.OrderByDescending(v => v.DataCadastro).ToList();
         }
 
-        public static VendaData ObterVendaPorId(Guid id)
+        public static VendaData ObterVendaPorId(string id)
         {
             return _vendas.FirstOrDefault(v => v.Id == id);
         }

@@ -391,6 +391,18 @@ namespace WMS_RadiadoresLemos_WPF
                 case "alertas":
                     CarregarDadosGenerico<AlertaData>("alertas");
                     break;
+                case "clientes":
+                    CarregarDadosGenerico<ClienteData>("clientes");
+                    break;
+                case "fornecedores":
+                    CarregarDadosGenerico<FornecedorData>("fornecedores");
+                    break;
+                case "compras":
+                    CarregarDadosGenerico<CompraData>("compras");
+                    break;
+                case "vendas":
+                    CarregarDadosGenerico<VendaData>("vendas");
+                    break;
                 default:
                     MessageBox.Show("Tabela desconhecida. Não foi possível carregar os dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     break;
@@ -494,7 +506,18 @@ namespace WMS_RadiadoresLemos_WPF
             foreach (var propriedade in propriedades)
             {
                 var valor = propriedade.GetValue(item);
-                bsonDocument[propriedade.Name] = valor != null ? new BsonValue(valor) : BsonValue.Null;
+                if (valor is IEnumerable<object> enumerable)
+                {
+                    bsonDocument[propriedade.Name] = new BsonArray(enumerable.Select(v => new BsonValue(v)).ToList());
+                }
+                else if (valor != null)
+                {
+                    bsonDocument[propriedade.Name] = new BsonValue(valor);
+                }
+                else
+                {
+                    bsonDocument[propriedade.Name] = BsonValue.Null;
+                }
             }
 
             return bsonDocument;

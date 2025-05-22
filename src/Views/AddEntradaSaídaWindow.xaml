@@ -6,7 +6,8 @@
         mc:Ignorable="d" 
         Title="Adicionar Entrada/Saída"
         MinHeight="660" MinWidth="800"
-        Height="Auto" Width="800"
+        Height="700
+        " Width="800"
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
@@ -91,15 +92,18 @@
                                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                         <TextBlock Text="Quantidade:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                         <TextBox Name="QuantidadeTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                                Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                LostFocus="QuantidadeTextBox_LostFocus" TextChanged="QuantidadeTextBox_TextChanged" Height="35" />
+                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                 LostFocus="QuantidadeTextBox_LostFocus" TextChanged="QuantidadeTextBox_TextChanged" Height="35"
+                                                 PreviewTextInput="QuantidadeTextBox_PreviewTextInput"
+                                                 DataObject.Pasting="QuantidadeTextBox_Pasting" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                         <TextBlock Text="Preço:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                         <TextBox Name="PrecoTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                                Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                LostFocus="PrecoTextBox_LostFocus" TextChanged="PrecoTextBox_TextChanged" Height="35" />
-                                    </StackPanel>
+                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                 LostFocus="PrecoTextBox_LostFocus" TextChanged="PrecoTextBox_TextChanged" Height="35"
+                                                 PreviewTextInput="PrecoTextBox_PreviewTextInput"
+                                                 DataObject.Pasting="PrecoTextBox_Pasting" />                                    </StackPanel>
                                 </Grid>
                                 
                                 <!-- Parcelas e Forma de Pagamento -->
@@ -114,19 +118,17 @@
                                                   Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}"
                                                   LostFocus="FormaPagamentoComboBox_LostFocus" SelectionChanged="FormaPagamentoComboBox_SelectionChanged">
                                             <!-- Formas de Pagamento -->
-                                            <ComboBoxItem Content="Dinheiro" />
-                                            <ComboBoxItem Content="Cartão de Crédito" />
-                                            <ComboBoxItem Content="Cartão de Débito" />
-                                            <ComboBoxItem Content="Transferência" />
-                                            <ComboBoxItem Content="Boleto" />
-                                            <ComboBoxItem Content="Pix" />
+                                            <ComboBoxItem Content="À vista" />
+                                            <ComboBoxItem Content="Parcelado" />
                                         </ComboBox>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="10,0,0,0" Visibility="Visible">
                                         <TextBlock Text="Parcelas:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                         <TextBox Name="ParcelasTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                                Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                LostFocus="ParcelasTextBox_LostFocus" TextChanged="ParcelasTextBox_TextChanged" Height="35" />
+                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                 LostFocus="ParcelasTextBox_LostFocus" TextChanged="ParcelasTextBox_TextChanged" Height="35"
+                                                 PreviewTextInput="ParcelasTextBox_PreviewTextInput"
+                                                 DataObject.Pasting="ParcelasTextBox_Pasting" />
                                     </StackPanel>
                                 </Grid>
                                 
@@ -279,13 +281,33 @@
                                                     </StackPanel>
 
                                                     <!-- Fornecedor -->
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding FornecedorId}">
+                                                    <StackPanel x:Name="ListFornecedor" Orientation="Horizontal" Margin="0,0,0,5">
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding FornecedorId}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
                                                         <TextBlock Text="Fornecedor: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding FornecedorId}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
 
                                                     <!-- Cliente -->
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding ClienteId}">
+                                                    <StackPanel x:Name="ListCliente" Orientation="Horizontal" Margin="0,0,0,5">
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ClienteId}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
                                                         <TextBlock Text="Cliente: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding ClienteId}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
