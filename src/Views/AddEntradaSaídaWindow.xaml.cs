@@ -745,7 +745,7 @@ namespace WMS_RadiadoresLemos_WPF
             ToggleLista.Visibility = Visibility.Visible;
         }
 
-        private void RegistrarCompra()
+        private async void RegistrarCompra()
         {
             var compra = new CompraData
             {
@@ -771,12 +771,16 @@ namespace WMS_RadiadoresLemos_WPF
                 mov.Data = DateTime.Now;
             }
 
+            // Adiciona na tabela de compras
             var db = DatabaseConnect.Database;
             db?.GetCollection<CompraData>("compras").Insert(compra);
 
+            // Salva também no arquivo JSON (TEMPORÁRIO)
+            await CompraService.SalvarCompra(compra);
+
             MessageBox.Show("Compra registrada com sucesso!");
         }
-        private void RegistrarVenda()
+        private async void RegistrarVenda()
         {
             if (string.IsNullOrWhiteSpace(clienteSelecionado))
             {
@@ -809,8 +813,12 @@ namespace WMS_RadiadoresLemos_WPF
                 mov.Data = DateTime.Now;
             }
 
+            // Adiciona na tabela de vendas
             var db = DatabaseConnect.Database;
             db?.GetCollection<VendaData>("vendas").Insert(venda);
+
+            // Salva também no arquivo JSON (TEMPORÁRIO)
+            await VendaService.SalvarVenda(venda);
 
             MessageBox.Show("Venda registrada com sucesso!");
         }

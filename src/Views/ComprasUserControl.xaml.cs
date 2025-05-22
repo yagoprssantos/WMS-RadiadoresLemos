@@ -147,96 +147,140 @@
                 }
             }
 
-            // 5. Atualização da interface
-            private void AtualizarInterfaceCompras()
+        // 5. Atualização da interface
+        // 5. Atualização da interface
+        private void AtualizarInterfaceCompras()
+        {
+            ComprasContainer.Children.Clear();
+
+            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
             {
-                ComprasContainer.Children.Clear();
-
-                if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
+                TextBlock mensagem = new TextBlock
                 {
-                    TextBlock mensagem = new TextBlock
-                    {
-                        Text = "Nenhuma compra cadastrada.",
-                        FontSize = 18,
-                        Foreground = (SolidColorBrush)FindResource("TextBrush"),
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Thickness(10)
-                    };
-                    ComprasContainer.Children.Add(mensagem);
-                    return;
-                }
-
-                foreach (var compra in _comprasFiltradas)
-                {
-                    Border border = new Border
-                    {
-                        Background = (SolidColorBrush)FindResource("PanelBackgroundBrush"),
-                        CornerRadius = new CornerRadius(15),
-                        Padding = new Thickness(15),
-                        Margin = new Thickness(5),
-                        Width = 240,
-                    };
-
-                    StackPanel stackPanel = new StackPanel();
-
-                    TextBlock titleTextBlock = new TextBlock
-                    {
-                        Text = "Nota Fiscal",
-                        Style = (Style)FindResource("ComprasTitleTextBox"),
-                        FontSize = 16
-                    };
-                    stackPanel.Children.Add(titleTextBlock);
-
-                    Separator separator = new Separator
-                    {
-                        Margin = new Thickness(10, 2, 10, 5)
-                    };
-                    stackPanel.Children.Add(separator);
-
-                    TextBlock fornecedorTextBlock = new TextBlock
-                    {
-                        Text = $"Fornecedor: {compra.FornecedorNome}",
-                        Style = (Style)FindResource("ComprasTextBox"),
-                        FontSize = 14
-                    };
-                    stackPanel.Children.Add(fornecedorTextBlock);
-
-                    TextBlock dataCompraTextBlock = new TextBlock
-                    {
-                        Text = $"Data da Compra: {compra.DataCompra:dd/MM/yyyy}",
-                        Style = (Style)FindResource("ComprasTextBox"),
-                        FontSize = 14
-                    };
-                    stackPanel.Children.Add(dataCompraTextBlock);
-
-                    TextBlock valorTextBlock = new TextBlock
-                    {
-                        Text = $"Valor Total: R$ {compra.ValorTotal:N2}",
-                        Style = (Style)FindResource("ComprasTextBox"),
-                        FontSize = 14
-                    };
-                    stackPanel.Children.Add(valorTextBlock);
-
-                    Button detalhesButton = new Button
-                    {
-                        Content = "Detalhes",
-                        Style = (Style)FindResource("EmphasisButtonStyle"),
-                        FontSize = 16,
-                        Width = 120,
-                        Margin = new Thickness(4),
-                        DataContext = compra
-                    };
-
-                    stackPanel.Children.Add(detalhesButton);
-
-                    border.Child = stackPanel;
-                    ComprasContainer.Children.Add(border);
-                }
+                    Text = "Nenhuma compra cadastrada.",
+                    FontSize = 18,
+                    Foreground = (SolidColorBrush)FindResource("TextBrush"),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(10)
+                };
+                ComprasContainer.Children.Add(mensagem);
+                return;
             }
 
-            // 6. Registrar Compra
-            private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
+            foreach (var compra in _comprasFiltradas)
+            {
+                // Container principal para o card de compra
+                Border border = new Border
+                {
+                    Background = (SolidColorBrush)FindResource("PanelBackgroundBrush"),
+                    CornerRadius = new CornerRadius(15),
+                    Padding = new Thickness(15),
+                    Margin = new Thickness(8),
+                    Width = 240,
+                    Effect = new System.Windows.Media.Effects.DropShadowEffect
+                    {
+                        BlurRadius = 5,
+                        ShadowDepth = 1,
+                        Opacity = 0.3,
+                        Color = Colors.Gray
+                    }
+                };
+
+                // Stack Panel principal
+                StackPanel stackPanel = new StackPanel();
+
+                // Cabeçalho do card
+                TextBlock titleTextBlock = new TextBlock
+                {
+                    Text = compra.NotaFiscal != null ? $"NF: {compra.NotaFiscal}" : "Compra",
+                    Style = (Style)FindResource("VendasTitleTextBox"),
+                    FontSize = 16,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                stackPanel.Children.Add(titleTextBlock);
+
+                // Separador
+                Separator separator = new Separator
+                {
+                    Margin = new Thickness(10, 5, 10, 10)
+                };
+                stackPanel.Children.Add(separator);
+
+                // Fornecedor
+                TextBlock fornecedorTextBlock = new TextBlock
+                {
+                    Text = $"Fornecedor: {compra.FornecedorNome}",
+                    Style = (Style)FindResource("VendasTextBox"),
+                    FontSize = 14,
+                    TextWrapping = TextWrapping.Wrap
+                };
+                stackPanel.Children.Add(fornecedorTextBlock);
+
+                // Data da Compra
+                TextBlock dataCompraTextBlock = new TextBlock
+                {
+                    Text = $"Data: {compra.DataCompra:dd/MM/yyyy}",
+                    Style = (Style)FindResource("VendasTextBox"),
+                    FontSize = 14
+                };
+                stackPanel.Children.Add(dataCompraTextBlock);
+
+                // Forma de Pagamento
+                TextBlock pagamentoTextBlock = new TextBlock
+                {
+                    Text = $"Pagamento: {compra.TipoPagamento}",
+                    Style = (Style)FindResource("VendasTextBox"),
+                    FontSize = 14
+                };
+                stackPanel.Children.Add(pagamentoTextBlock);
+
+                // Valor Total
+                TextBlock valorTextBlock = new TextBlock
+                {
+                    Text = $"Total: R$ {compra.ValorTotal:N2}",
+                    Style = (Style)FindResource("VendasTextBox"),
+                    FontSize = 14,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(5, 10, 5, 10)
+                };
+                stackPanel.Children.Add(valorTextBlock);
+
+                // Número de itens
+                TextBlock itensTextBlock = new TextBlock
+                {
+                    Text = $"Itens: {compra.Itens.Count}",
+                    Style = (Style)FindResource("VendasTextBox"),
+                    FontSize = 14,
+                    Margin = new Thickness(5, 0, 5, 10)
+                };
+                stackPanel.Children.Add(itensTextBlock);
+
+                // Botão de detalhes
+                Button detalhesButton = new Button
+                {
+                    Content = "Detalhes",
+                    Style = (Style)FindResource("EmphasisButtonStyle"),
+                    FontSize = 14,
+                    Width = 120,
+                    Margin = new Thickness(0, 5, 0, 0),
+                    DataContext = compra
+                };
+
+                // Adicione o evento de clique (que está comentado no código original)
+                // detalhesButton.Click += DetalhesButton_Click;
+
+                stackPanel.Children.Add(detalhesButton);
+
+                // Adiciona o conteúdo ao border e então ao container
+                border.Child = stackPanel;
+                ComprasContainer.Children.Add(border);
+            }
+        }
+
+
+        // 6. Registrar Compra
+        private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
             {
                 var compras = new AddEntradaSaídaWindow(isEntrada: true);
                 compras.ShowDialog();

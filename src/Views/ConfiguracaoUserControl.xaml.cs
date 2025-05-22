@@ -20,8 +20,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void BtnUsuarios_Click(object sender, RoutedEventArgs e)
         {
             // Atualiza os ícones usando GetImageName
-            IconUsuarios.Source = new BitmapImage(new Uri($"/src/Resources/Icons/Selected/{GetImageName("IconUsuarios", "Selected")}.png", UriKind.Relative));
-            IconBancoDados.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{GetImageName("IconBancoDados", "NotSelected")}.png", UriKind.Relative));
+            IconUsuarios.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{GetImageName("IconUsuarios", "Selected")}.png", UriKind.Relative));
+            IconBancoDados.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{GetImageName("IconBancoDados", "NotSelected")}.png", UriKind.Relative));
 
             // Atualiza o conteúdo
             ContentArea.Content = new UsuariosUserControl();
@@ -30,8 +30,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void BtnBancoDados_Click(object sender, RoutedEventArgs e)
         {
             // Atualiza os ícones usando GetImageName
-            IconBancoDados.Source = new BitmapImage(new Uri($"/src/Resources/Icons/Selected/{GetImageName("IconBancoDados", "Selected")}.png", UriKind.Relative));
-            IconUsuarios.Source = new BitmapImage(new Uri($"/src/Resources/Icons/NotSelected/{GetImageName("IconUsuarios", "NotSelected")}.png", UriKind.Relative));
+            IconBancoDados.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{GetImageName("IconBancoDados", "Selected")}.png", UriKind.Relative));
+            IconUsuarios.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{GetImageName("IconUsuarios", "NotSelected")}.png", UriKind.Relative));
 
             // Atualiza o conteúdo
             ContentArea.Content = new BancoDadosUserControl();
@@ -102,22 +102,22 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         }
         private void BtnUsuarios_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            IconUsuarios.Source = new BitmapImage(new Uri("/src/Resources/Icons/Selected/UsuárioS.png", UriKind.Relative));
+            IconUsuarios.Source = new BitmapImage(new Uri("/assets/Icons/Selected/UsuárioS.png", UriKind.Relative));
         }
 
         private void BtnUsuarios_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            IconUsuarios.Source = new BitmapImage(new Uri("/src/Resources/Icons/NotSelected/UsuárioNS.png", UriKind.Relative));
+            IconUsuarios.Source = new BitmapImage(new Uri("/assets/Icons/NotSelected/UsuárioNS.png", UriKind.Relative));
         }
 
         private void BtnBancoDados_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            IconBancoDados.Source = new BitmapImage(new Uri("/src/Resources/Icons/Selected/DataCenterS.png", UriKind.Relative));
+            IconBancoDados.Source = new BitmapImage(new Uri("/assets/Icons/Selected/DataCenterS.png", UriKind.Relative));
         }
 
         private void BtnBancoDados_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            IconBancoDados.Source = new BitmapImage(new Uri("/src/Resources/Icons/NotSelected/DataCenterNS.png", UriKind.Relative));
+            IconBancoDados.Source = new BitmapImage(new Uri("/assets/Icons/NotSelected/DataCenterNS.png", UriKind.Relative));
         }
     }
 }
