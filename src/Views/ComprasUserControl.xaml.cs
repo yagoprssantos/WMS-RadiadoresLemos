@@ -29,20 +29,30 @@
                 CarregarCompras();
             }
 
-            private void CarregarCompras()
+        private void CarregarCompras()
+        {
+            try
             {
-                try
+                // Obter compras diretamente do banco de dados em vez de usar CompraService
+                var db = DatabaseConnect.Database;
+                if (db != null)
                 {
-                    _todasCompras = CompraService.ObterCompras();
+                    var collection = db.GetCollection<CompraData>("compras");
+                    _todasCompras = collection.FindAll().ToList();
                     _comprasFiltradas = new List<CompraData>(_todasCompras);
                     AplicarOrdenacao();
                     AtualizarInterfaceCompras();
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show($"Erro ao carregar compras: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Não foi possível conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar compras: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
             // 2. Pesquisa
             private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -142,7 +152,7 @@
                         _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.DataCompra).ToList();
                         break;
                     default:
-                        _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCadastro).ToList();
+                        _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
                         break;
                 }
             }
@@ -153,32 +163,21 @@
                 if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
                 {
                     ComprasContainer.ItemsSource = null;
-                    TextBlock mensagem = new TextBlock
-                    {
-                        Text = "Nenhuma compra cadastrada.",
-                        FontSize = 18,
-                        Foreground = (SolidColorBrush)FindResource("TextBrush"),
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Thickness(10)
-                    };
-
-                    // Criamos um container temporário apenas para a mensagem
-                    var container = new WrapPanel();
-                    container.Children.Add(mensagem);
-                    ComprasContainer.ItemsSource = new[] { container };
+                    MensagemVazia.Visibility = Visibility.Visible;
                     return;
                 }
 
+                MensagemVazia.Visibility = Visibility.Collapsed;
                 ComprasContainer.ItemsSource = _comprasFiltradas;
             }
-
 
             // 6. Registrar Compra
             private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
             {
                 var compras = new AddEntradaSaídaWindow(isEntrada: true);
                 compras.ShowDialog();
+
+                AtualizarInterfaceCompras();
             }
 
             // 7. Botões de ação
@@ -206,7 +205,6 @@
             //                             $"Valor Total: R$ {compra.ValorTotal:N2}\n" +
             //                             $"Data da Compra: {compra.DataCompra:dd/MM/yyyy}\n" +
             //                             $"Data do Pagamento: {compra.DataPagamento:dd/MM/yyyy}\n" +
-            //                             $"Data de Cadastro: {compra.DataCadastro:dd/MM/yyyy HH:mm}";
 
             //            MessageBox.Show(detalhes, "Detalhes da Compra", MessageBoxButton.OK, MessageBoxImage.Information);
             //        }

@@ -743,27 +743,35 @@ namespace WMS_RadiadoresLemos_WPF
 
         private async void RegistrarCompra()
         {
+            // Gerar um ID único para a compra (pode ser um Guid como string)
+            string compraId = Guid.NewGuid().ToString();
+
             var compra = new CompraData
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = compraId, // Defina o ID explicitamente como string
                 FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado)?.Id ?? "",
                 FornecedorNome = fornecedorSelecionado,
                 DataCompra = DateTime.Now,
-                DataPagamento = null, 
+                DataPagamento = null,
                 TipoPagamento = formaPagamentoSelecionada ?? "",
                 Parcelas = int.TryParse(ParcelasTextBox.Text, out int parcelas) ? parcelas : 1,
-                NotaFiscal = null, 
-                Boletos = null,    
+                NotaFiscal = NotaFiscalTextBox.Text,
+                Boletos = null,
                 Detalhes = DetalhesTextBox.Text,
                 Itens = movimentacoes.ToList(),
                 ValorTotal = (decimal)movimentacoes.Sum(m => m.Preco * m.Quantidade),
-                DataCadastro = DateTime.Now
             };
+
+            // Se você tiver uma nota fiscal, use-a como ID
+            if (!string.IsNullOrEmpty(compra.NotaFiscal))
+            {
+                compra.SetIdFromNotaFiscal();
+            }
 
             foreach (var mov in compra.Itens)
             {
                 mov.Tipo = "Entrada";
-                // Update the following line to fix the CS0029 error
+                // Agora podemos usar o ID da compra diretamente
                 mov.CompraId = Guid.TryParse(compra.Id, out Guid parsedId) ? parsedId : null;
                 mov.ProdutoNome = produtos.FirstOrDefault(p => p.Nome == mov.ProdutoId)?.Nome ?? mov.ProdutoId;
                 mov.Data = DateTime.Now;
@@ -773,18 +781,10 @@ namespace WMS_RadiadoresLemos_WPF
             var db = DatabaseConnect.Database;
             db?.GetCollection<CompraData>("compras").Insert(compra);
 
-            // Salva também no arquivo JSON (TEMPORÁRIO)
-            await CompraService.SalvarCompra(compra);
-
             MessageBox.Show("Compra registrada com sucesso!");
         }
         private async void RegistrarVenda()
         {
-            if (string.IsNullOrWhiteSpace(clienteSelecionado))
-            {
-                MessageBox.Show("Selecione um cliente.");
-                return;
-            }
 
             var venda = new VendaData
             {
@@ -800,7 +800,6 @@ namespace WMS_RadiadoresLemos_WPF
                 Detalhes = DetalhesTextBox.Text,
                 Itens = movimentacoes.ToList(),
                 ValorTotal = (decimal)movimentacoes.Sum(m => m.Preco * m.Quantidade),
-                DataCadastro = DateTime.Now
             };
 
             foreach (var mov in venda.Itens)
@@ -814,9 +813,6 @@ namespace WMS_RadiadoresLemos_WPF
             // Adiciona na tabela de vendas
             var db = DatabaseConnect.Database;
             db?.GetCollection<VendaData>("vendas").Insert(venda);
-
-            // Salva também no arquivo JSON (TEMPORÁRIO)
-            await VendaService.SalvarVenda(venda);
 
             MessageBox.Show("Venda registrada com sucesso!");
         }

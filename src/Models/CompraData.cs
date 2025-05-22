@@ -39,9 +39,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [BsonField("valorTotal")]
         public decimal ValorTotal { get; set; }
 
-        [BsonField("dataCadastro")]
-        public DateTime DataCadastro { get; set; } = DateTime.Now;
-
         [BsonField("detalhes")]
         public string? Detalhes { get; set; }
 

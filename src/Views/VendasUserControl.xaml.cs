@@ -33,16 +33,27 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                _todasVendas = VendaService.ObterVendas();
-                _vendasFiltradas = new List<VendaData>(_todasVendas);
-                AplicarOrdenacao();
-                AtualizarInterfaceVendas();
+                // Obter vendas diretamente do banco de dados em vez de usar VendaService
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<VendaData>("vendas");
+                    _todasVendas = collection.FindAll().ToList();
+                    _vendasFiltradas = new List<VendaData>(_todasVendas);
+                    AplicarOrdenacao();
+                    AtualizarInterfaceVendas();
+                }
+                else
+                {
+                    MessageBox.Show("Não foi possível conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar vendas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         // 2. Pesquisa
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)

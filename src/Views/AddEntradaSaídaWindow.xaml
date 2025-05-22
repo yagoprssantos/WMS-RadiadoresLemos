@@ -5,9 +5,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         mc:Ignorable="d" 
         Title="Adicionar Entrada/Saída"
-        MinHeight="660" MinWidth="800"
-        Height="700
-        " Width="800"
+        MinHeight="600" MinWidth="800"
+        Height="600" Width="800"
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
@@ -63,7 +62,7 @@
                                                   LostFocus="ProdutoComboBox_LostFocus" TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
                                                   SelectionChanged="ProdutoComboBox_SelectionChanged" />
                                     </StackPanel>
-                                    
+
                                     <!-- Fornecedor -->
                                     <StackPanel x:Name="Fornecedor" Grid.Column="1" Margin="10,0,0,0" Visibility="Visible">
                                         <TextBlock Text="Fornecedor:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
@@ -72,7 +71,7 @@
                                                   LostFocus="FornecedorComboBox_LostFocus" TextBoxBase.TextChanged="FornecedorComboBox_TextChanged"
                                                   SelectionChanged="FornecedorComboBox_SelectionChanged" />
                                     </StackPanel>
-                                    
+
                                     <!-- Cliente -->
                                     <StackPanel x:Name="Cliente" Grid.Column="1" Margin="10,0,0,0" Visibility="Collapsed">
                                         <TextBlock Text="Cliente:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
@@ -90,7 +89,7 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                        <TextBlock Text="Quantidade:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="Quantidade:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                         <TextBox Name="QuantidadeTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                                  Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
                                                  LostFocus="QuantidadeTextBox_LostFocus" TextChanged="QuantidadeTextBox_TextChanged" Height="35"
@@ -98,48 +97,17 @@
                                                  DataObject.Pasting="QuantidadeTextBox_Pasting" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                        <TextBlock Text="Preço:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="Preço:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                         <TextBox Name="PrecoTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                                  Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
                                                  LostFocus="PrecoTextBox_LostFocus" TextChanged="PrecoTextBox_TextChanged" Height="35"
                                                  PreviewTextInput="PrecoTextBox_PreviewTextInput"
-                                                 DataObject.Pasting="PrecoTextBox_Pasting" />                                    </StackPanel>
-                                </Grid>
-                                
-                                <!-- Parcelas e Forma de Pagamento -->
-                                <Grid Margin="0, 0, 0, 5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                        <TextBlock Text="Forma de Pagamento:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                                        <ComboBox Name="FormaPagamentoComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
-                                                  Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                                  LostFocus="FormaPagamentoComboBox_LostFocus" SelectionChanged="FormaPagamentoComboBox_SelectionChanged">
-                                            <!-- Formas de Pagamento -->
-                                            <ComboBoxItem Content="À vista" />
-                                            <ComboBoxItem Content="Parcelado" />
-                                        </ComboBox>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Margin="10,0,0,0" Visibility="Visible">
-                                        <TextBlock Text="Parcelas:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                                        <TextBox Name="ParcelasTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 LostFocus="ParcelasTextBox_LostFocus" TextChanged="ParcelasTextBox_TextChanged" Height="35"
-                                                 PreviewTextInput="ParcelasTextBox_PreviewTextInput"
-                                                 DataObject.Pasting="ParcelasTextBox_Pasting" />
+                                                 DataObject.Pasting="PrecoTextBox_Pasting" />
                                     </StackPanel>
                                 </Grid>
-                                
-                                <!-- Detalhes -->
-                                <TextBlock Text="Detalhes:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                                <TextBox Name="DetalhesTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                          Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                          MinHeight="35" Height="Auto" Margin="0,0,0,15" AcceptsReturn="True" TextWrapping="Wrap"/>
 
                                 <!-- Antes e Depois -->
-                                <Grid x:Name="ProdutoAntesDepois" Margin="0,0,0,15" Visibility="Visible">
+                                <Grid x:Name="ProdutoAntesDepois" Margin="0,15" Visibility="Visible">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
@@ -205,6 +173,53 @@
                                         </Grid>
                                     </StackPanel>
                                 </Grid>
+
+                                <!-- Mensagem de Status -->
+                                <TextBlock x:Name="StatusMessage" Text="Movimentação INVÁLIDA" FontSize="18"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"  Margin="0,5,0,10"
+                                           Foreground="{StaticResource CancelButtonBrush}" Visibility="Visible" />
+
+                                <StackPanel x:Name="Financeiro" Visibility="Visible">
+                                    <!-- Parcelas e Forma de Pagamento -->
+                                    <Grid Margin="0, 0, 0, 5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <TextBlock Text="Forma de Pagamento:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                            <ComboBox Name="FormaPagamentoComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
+                                                  Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                                  LostFocus="FormaPagamentoComboBox_LostFocus" SelectionChanged="FormaPagamentoComboBox_SelectionChanged">
+                                                <!-- Formas de Pagamento -->
+                                                <ComboBoxItem Content="À vista" />
+                                                <ComboBoxItem Content="Parcelado" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="10,0,0,0" Visibility="Visible">
+                                            <TextBlock Text="Parcelas:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                            <TextBox Name="ParcelasTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
+                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                 LostFocus="ParcelasTextBox_LostFocus" TextChanged="ParcelasTextBox_TextChanged" Height="35"
+                                                 PreviewTextInput="ParcelasTextBox_PreviewTextInput"
+                                                 DataObject.Pasting="ParcelasTextBox_Pasting" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Data de Pagamento e Vencimento dos Boletos -->
+                                    
+                                    <!-- Nota Fiscal -->
+                                    <TextBlock Text="Nota Fiscal:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                    <TextBox Name="NotaFiscalTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
+                                         Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                         MinHeight="35" Height="Auto" Margin="0,0,0,5" AcceptsReturn="True" TextWrapping="Wrap"/>
+
+                                    <!-- Detalhes -->
+                                    <TextBlock Text="Detalhes:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                    <TextBox Name="DetalhesTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
+                                         Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                         MinHeight="35" Height="Auto" Margin="0,0,0,15" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
 

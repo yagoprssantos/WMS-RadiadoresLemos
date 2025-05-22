@@ -112,6 +112,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 movimentacoes.EnsureIndex(x => x.Data);
                 historico.EnsureIndex(x => x.Data);
 
+                // Exclui tabela "compras" e cria uma nova
+                compras.DeleteAll();
 
                 Console.WriteLine("Coleções e índices criados com sucesso");
             }
