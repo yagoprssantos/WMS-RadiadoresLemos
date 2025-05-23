@@ -46,7 +46,7 @@
                 <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,0">
                     <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                         <Grid>
-                            <ItemsControl x:Name="ComprasContainer" Margin="15">
+                            <ItemsControl x:Name="ComprasContainer" Margin="0">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel/>
@@ -54,33 +54,15 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="0" Width="230">
+                                        <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="15" Width="250">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding NotaFiscal, StringFormat='NF: {0}', TargetNullValue='Compra'}" Style="{StaticResource VendasTitleTextBox}" FontSize="16" HorizontalAlignment="Center"/>
                                                 <Separator Margin="10,5,10,10"/>
                                                 <TextBlock Text="{Binding FornecedorNome, StringFormat='Fornecedor: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14" TextWrapping="Wrap"/>
-                                                <TextBlock Text="{Binding FornecedorId, StringFormat='ID Fornecedor: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="12" TextWrapping="Wrap"/>
-                                                <TextBlock Text="{Binding Id, StringFormat='ID Compra: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="12" TextWrapping="Wrap"/>
-                                                <TextBlock Text="{Binding DataCompra, StringFormat='Data: {0:dd/MM/yyyy}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                                                <TextBlock Text="{Binding DataCompra, StringFormat='Data de Compra: {0:dd/MM/yyyy}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                 <TextBlock Text="{Binding DataPagamento, StringFormat='Pagamento em: {0:dd/MM/yyyy}', TargetNullValue='Pagamento em: -'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                                                <TextBlock Text="{Binding TipoPagamento, StringFormat='Pagamento: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                                                <TextBlock Text="{Binding Parcelas, StringFormat='Parcelas: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                                                <TextBlock Text="{Binding Boletos.Count, StringFormat='Qtd. Boletos: {0}', TargetNullValue='Qtd. Boletos: 0'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                                                <TextBlock Text="{Binding ValorTotal, StringFormat='Total: R$ {0:N2}'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold" Margin="5,0,5,10"/>
-                                                <TextBlock Text="{Binding Detalhes, StringFormat='Detalhes: {0}', TargetNullValue='Detalhes: -'}" Style="{StaticResource VendasTextBox}" FontSize="12" TextWrapping="Wrap"/>
-                                                <TextBlock Text="Itens:" Style="{StaticResource VendasTextBox}" FontSize="13" FontWeight="Bold" Margin="0,5,0,0"/>
-                                                <ItemsControl ItemsSource="{Binding Itens}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <StackPanel Orientation="Vertical" Margin="0,0,0,2">
-                                                                <TextBlock Text="{Binding ProdutoNome, StringFormat='- {0}'}" FontSize="12"/>
-                                                                <TextBlock Text="{Binding Quantidade, StringFormat='Qtd: {0}'}" FontSize="11" Margin="10,0,0,0"/>
-                                                                <TextBlock Text="{Binding Preco, StringFormat='Preço: R$ {0:N2}'}" FontSize="11" Margin="10,0,0,0"/>
-                                                            </StackPanel>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                                <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" Width="120" Margin="0,5,0,0"/>
+                                                <TextBlock Text="{Binding ValorTotal, StringFormat='Total: R$ {0:N2}'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold"/>
+                                                <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" Width="120" Margin="0,10,0,5"/>
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>
