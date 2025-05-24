@@ -1149,25 +1149,20 @@ namespace WMS_RadiadoresLemos_WPF
             // Se algum campo estiver vazio, retorna false
             if (string.IsNullOrEmpty(FormaPagamentoComboBox.Text) || string.IsNullOrEmpty(ParcelasTextBox.Text) || string.IsNullOrEmpty(NotaFiscalTextBox.Text))
             {
-                Invalida();
                 return false;
             }
             // Valida forma de pagamento
             if (formaPagamentoSelecionada == null)
             {
                 MessageBox.Show("Forma de pagamento inválida.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                Invalida();
                 return false;
             }
             // Valida parcelas
             if (!int.TryParse(ParcelasTextBox.Text, out int parcelas) || parcelas <= 0)
             {
                 MessageBox.Show("Parcelas inválidas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                Invalida();
                 return false;
             }
-            // Valida movimentação
-            Valida();
             return true;
         }
 

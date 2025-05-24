@@ -181,34 +181,18 @@
         }
 
         // 7. Botões de ação
-        //private void DetalhesButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    var compra = (sender as Button)?.DataContext as CompraData;
-        //
-        //    if (compra != null)
-        //    {
-        //        var detalhesCompraUserControl = new DetalhesCompraUserControl
-        //        {
-        //            DataContext = compra
-        //        };
-        //
-        //        var contentControl = (Parent as ContentControl);
-        //        if (contentControl != null)
-        //        {
-        //            contentControl.Content = detalhesCompraUserControl;
-        //        }
-        //        else
-        //        {
-        //            string detalhes = $"Detalhes da compra:\n\n" +
-        //                             $"Fornecedor: {compra.Fornecedor}\n" +
-        //                             $"Produto: {compra.Produto}\n" +
-        //                             $"Valor Total: R$ {compra.ValorTotal:N2}\n" +
-        //                             $"Data da Compra: {compra.DataCompra:dd/MM/yyyy}\n" +
-        //                             $"Data do Pagamento: {compra.DataPagamento:dd/MM/yyyy}\n" +
-        //
-        //            MessageBox.Show(detalhes, "Detalhes da Compra", MessageBoxButton.OK, MessageBoxImage.Information);
-        //        }
-        //    }
-        //}
+        private void DetalhesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var compra = (sender as Button)?.DataContext as CompraData;
+            if (compra != null)
+            {
+                var detalhesCompraUserControl = new DetalhesUserControl(compra);
+                var contentControl = (Parent as ContentControl);
+                if (contentControl != null)
+                {
+                    contentControl.Content = detalhesCompraUserControl;
+                }
+            }
+        }
     }
-    }
+}

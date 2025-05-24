@@ -1,0 +1,146 @@
+﻿<UserControl x:Class="WMS_RadiadoresLemos_WPF.src.Views.DetalhesUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource BackgroundBrush}">
+
+    <Grid Margin="15,15,15,0">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+            <StackPanel>
+                <!-- Título -->
+                <TextBlock Text="{Binding NotaFiscal, StringFormat='NF nº {0}', TargetNullValue='NF'}"
+                           FontSize="32" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"
+                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <Separator Margin="0,0,0,20" Background="{StaticResource HoverBackgroundBrush}" Height="1"/>
+
+                <!-- Card de Detalhes -->
+                <Border Background="{StaticResource BackgroundBrush}" CornerRadius="20" Padding="25" Margin="0,0,0,20">
+                    <StackPanel>
+                        <!-- Linha 1: Fornecedor e Produto -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Fornecedor:" FontSize="16" Foreground="{StaticResource TextBrush}"/>
+                                <TextBox x:Name="FornecedorTextBox"
+                                         Text="{Binding FornecedorNome}"
+                                         Style="{StaticResource {x:Type TextBox}}"
+                                         FontSize="14"
+                                         IsReadOnly="True"
+                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{StaticResource PanelBackgroundBrush}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Produto:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,2"/>
+                                <TextBox x:Name="ProdutoNomeTextBox"
+                                         Text="{Binding Itens[0].ProdutoNome}"
+                                         Style="{StaticResource {x:Type TextBox}}"
+                                         IsReadOnly="True"
+                                         FontSize="14"
+                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{StaticResource PanelBackgroundBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Linha 2: Descrição -->
+                        <TextBlock Text="Descrição da compra:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,2"/>
+                        <TextBox x:Name="DetalhesTextBox"
+                                 Text="{Binding Detalhes}"
+                                 Style="{StaticResource {x:Type TextBox}}"
+                                 FontSize="14"
+                                 IsReadOnly="True"
+                                 Foreground="{StaticResource TextBrush}"
+                                 Background="{StaticResource PanelBackgroundBrush}"
+                                 TextWrapping="Wrap"
+                                 Margin="0,0,0,10"
+                                 AcceptsReturn="True"/>
+
+                        <!-- Linha 3: Datas e Pagamento -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Data da compra:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,2"/>
+                                <TextBox x:Name="DataCompraTextBox"
+                                         Text="{Binding DataCompra, StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}"
+                                         Style="{StaticResource {x:Type TextBox}}"
+                                         IsReadOnly="True"
+                                         FontSize="14"
+                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{StaticResource PanelBackgroundBrush}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Data do pagamento:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,2"/>
+                                <TextBox x:Name="DataPagamentoTextBox"
+                                         Text="{Binding DataPagamento, StringFormat={}{0:dd/MM/yyyy HH:mm:ss}, TargetNullValue='Não definida'}"
+                                         Style="{StaticResource {x:Type TextBox}}"
+                                         IsReadOnly="True"
+                                         FontSize="14"
+                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{StaticResource PanelBackgroundBrush}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Parcelas:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,2"/>
+                                <TextBox x:Name="ParcelasTextBox"
+                                         Text="{Binding Parcelas}"
+                                         Style="{StaticResource {x:Type TextBox}}"
+                                         IsReadOnly="True"
+                                         FontSize="14"
+                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{StaticResource PanelBackgroundBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Linha 4: Quantidade e Preço -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Quantidade:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,2"/>
+                                <TextBox x:Name="QuantidadeTextBox"
+                                         Text="{Binding Itens[0].Quantidade}"
+                                         Style="{StaticResource {x:Type TextBox}}"
+                                         IsReadOnly="True"
+                                         FontSize="14"
+                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{StaticResource PanelBackgroundBrush}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Preço unitário:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,2"/>
+                                <TextBox x:Name="PrecoTextBox"
+                                         Text="{Binding Itens[0].Preco, StringFormat=R$ {0:N2}}"
+                                         Style="{StaticResource {x:Type TextBox}}"
+                                         IsReadOnly="True"
+                                         FontSize="14"
+                                         Foreground="{StaticResource TextBrush}"
+                                         Background="{StaticResource PanelBackgroundBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Separator Margin="0,10,0,10" Background="{StaticResource HoverBackgroundBrush}" Height="1"/>
+
+                        <!-- Total -->
+                        <TextBlock Text="{Binding ValorTotal, StringFormat=Total: R$ {0:N2}}" FontSize="22" Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" Margin="0,0,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Botões de ação -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,0">
+                    <Button Content="Imprimir PDF" Width="170" Height="40" Margin="10,0" Style="{StaticResource EmphasisButtonStyle}" Click="ImprimirPDF_Click"/>
+                    <Button Content="Editar" Width="120" Height="40" Margin="10,0" Style="{StaticResource EmphasisButtonStyle}" Click="Editar_Click"/>
+                    <Button Content="Gerar Nota Fiscal" Width="180" Height="40" Margin="10,0" Style="{StaticResource EmphasisButtonStyle}" Click="GerarNotaFiscal_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

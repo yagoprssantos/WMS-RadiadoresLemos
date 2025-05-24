@@ -266,34 +266,31 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         // 7. Botões de ação
         private void DetalhesButton_Click(object sender, RoutedEventArgs e)
         {
-            var venda = (sender as Button)?.DataContext as VendaData;
+            //var venda = (sender as Button)?.DataContext as VendaData;
 
-            if (venda != null)
-            {
-                var detalhesVendaUserControl = new DetalhesVendaUserControl
-                {
-                    DataContext = venda
-                };
+            //if (venda != null)
+            //{
+            //    var detalhesVendaUserControl = new DetalhesUserControl(venda);
 
-                var contentControl = (Parent as ContentControl);
-                if (contentControl != null)
-                {
-                    contentControl.Content = detalhesVendaUserControl;
-                }
-                else
-                {
-                    string detalhes = $"Detalhes da venda:\n\n" +
-                                     $"Cliente: {venda.ClienteCNPJ}\n" +
-                                     $"Pedido: {venda.Pedido}\n" +
-                                     $"Produtos: {string.Join(", ", venda.Itens.Select(i => i.ProdutoNome))}\n" +
-                                     $"Valor Total: R$ {venda.ValorTotal:N2}\n" +
-                                     $"Data da Compra: {venda.DataCompra:dd/MM/yyyy}\n" +
-                                     $"Data do Pagamento: {venda.DataPagamento:dd/MM/yyyy}\n" +
-                                     $"Data de Cadastro: {venda.DataCadastro:dd/MM/yyyy HH:mm}";
+            //    var contentControl = (Parent as ContentControl);
+            //    if (contentControl != null)
+            //    {
+            //        contentControl.Content = detalhesVendaUserControl;
+            //    }
+            //    else
+            //    {
+            //        string detalhes = $"Detalhes da venda:\n\n" +
+            //                         $"Cliente: {venda.ClienteCNPJ}\n" +
+            //                         $"Pedido: {venda.Pedido}\n" +
+            //                         $"Produtos: {string.Join(", ", venda.Itens.Select(i => i.ProdutoNome))}\n" +
+            //                         $"Valor Total: R$ {venda.ValorTotal:N2}\n" +
+            //                         $"Data da Compra: {venda.DataCompra:dd/MM/yyyy}\n" +
+            //                         $"Data do Pagamento: {venda.DataPagamento:dd/MM/yyyy}\n" +
+            //                         $"Data de Cadastro: {venda.DataCadastro:dd/MM/yyyy HH:mm}";
 
-                    MessageBox.Show(detalhes, "Detalhes da VendaData", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
+            //        MessageBox.Show(detalhes, "Detalhes da Venda", MessageBoxButton.OK, MessageBoxImage.Information);
+            //    }
+            //}
         }
     }
 }

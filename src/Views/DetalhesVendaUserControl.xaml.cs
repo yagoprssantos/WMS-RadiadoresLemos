@@ -15,9 +15,6 @@ using System.Windows.Shapes;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
-    /// <summary>
-    /// Interação lógica para DetalhesVendaUserControl.xam
-    /// </summary>
     public partial class DetalhesVendaUserControl : UserControl
     {
         public DetalhesVendaUserControl()
