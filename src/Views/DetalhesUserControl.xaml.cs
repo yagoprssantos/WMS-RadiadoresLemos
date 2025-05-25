@@ -7,7 +7,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 {
     public partial class DetalhesUserControl : UserControl
     {
-        private CompraData _compraAtual;
+        private CompraData? _compraAtual;
+        private VendaData? _vendaAtual;
+        private bool _isCompra;
 
         public DetalhesUserControl()
         {
@@ -18,7 +20,28 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             InitializeComponent();
             _compraAtual = compra;
+            _isCompra = true;
             DataContext = compra;
+            
+            // Configura a exibição para compras
+            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
+                fornecedorLabel.Text = "Fornecedor:";
+            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
+                fornecedorBox.Text = compra.FornecedorNome;
+        }
+
+        public DetalhesUserControl(VendaData venda)
+        {
+            InitializeComponent();
+            _vendaAtual = venda;
+            _isCompra = false;
+            DataContext = venda;
+
+            // Ajusta labels específicos para venda
+            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
+                fornecedorLabel.Text = "Cliente:";
+            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
+                fornecedorBox.Text = venda.ClienteCNPJ;
         }
 
         private void ImprimirPDF_Click(object sender, RoutedEventArgs e)
@@ -33,7 +56,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void GerarNotaFiscal_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Funcionalidade de geração de nota fiscal em desenvolvimento", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+            string tipo = _isCompra ? "compra" : "venda";
+            MessageBox.Show($"Funcionalidade de geração de nota fiscal de {tipo} em desenvolvimento", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }

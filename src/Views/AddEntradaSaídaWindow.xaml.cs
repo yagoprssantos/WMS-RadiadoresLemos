@@ -30,13 +30,13 @@ namespace WMS_RadiadoresLemos_WPF
         private ProdutoData? produtoSelecionado;
 
         // Configurações e constantes
-        private bool usePositiveNumber = true;
+        private bool usePositiveNumber;
 
         // Dados de fornecedores e clientes
         private List<ClienteData> clientes = new List<ClienteData>();
+        private string? clienteSelecionado;
         private List<FornecedorData> fornecedores = new List<FornecedorData>();
         private string? fornecedorSelecionado;
-        private string? clienteSelecionado;
 
         // Dados de pagamento
         private string? formaPagamentoSelecionada;
@@ -46,7 +46,6 @@ namespace WMS_RadiadoresLemos_WPF
         public AddEntradaSaídaWindow()
         {
             InitializeComponent();
-            Setup();
             opcoesFormaPagamento = FormaPagamentoComboBox.Items.Cast<ComboBoxItem>()
                         .Select(item => item.Content?.ToString() ?? "")
                         .ToList();
@@ -56,6 +55,8 @@ namespace WMS_RadiadoresLemos_WPF
 
         public AddEntradaSaídaWindow(bool isEntrada) : this()
         {
+            Setup(isEntrada); // Configura com o valor correto
+
             usePositiveNumber = isEntrada;
             if (isEntrada)
             {
@@ -71,10 +72,10 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void Setup()
+        private void Setup(bool isEntrada)
         {
             produtoSelecionado = null;
-            usePositiveNumber = true;
+            usePositiveNumber = isEntrada;
 
             CarregarDados();
             ToggleVisibility(false);
@@ -136,7 +137,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao carregar fornecedores: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private async Task CarregarClientes()
@@ -149,13 +150,13 @@ namespace WMS_RadiadoresLemos_WPF
                     var collection = db.GetCollection<ClienteData>("clientes");
                     clientes = collection.FindAll().ToList();
 
-                    // Adiciona os fornecedores ao ComboBox
-                    FornecedorComboBox.ItemsSource = clientes.Select(p => p.CNPJ).ToList();
+                    // Adiciona os clientes ao ComboBox
+                    ClienteComboBox.ItemsSource = clientes.Select(p => p.CNPJ).ToList();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao carregar clientes: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -310,7 +311,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 var filteredClientes = clientes
                     .Where(c => c.CNPJ.Contains(searchText, StringComparison.OrdinalIgnoreCase) || c.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-                    .Select(c => c.CNPJ) // ou c.Email, dependendo do que você quer mostrar
+                    .Select(c => c.CNPJ) 
                     .ToList();
 
                 comboBox.ItemsSource = null;
@@ -695,38 +696,43 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
-            if (usePositiveNumber)
+            try
             {
-                // Para cada movimentação, registra a compra
-                foreach (var compra in compras)
+                if (usePositiveNumber)
                 {
-                    try
+                    // Registra cada compra
+                    foreach (var compra in compras)
                     {
                         RegistrarCompra(compra);
                     }
-                    catch (Exception ex)
+                }
+                else
+                {
+                    // Registra cada venda
+                    foreach (var venda in vendas)
                     {
-                        MessageBox.Show($"Erro ao registrar compra: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        RegistrarVenda(venda);
                     }
                 }
-            }
-            else
-            {
-                //RegistrarVenda();
-            }
 
-            // (Opcional) Registrar cada movimentação individualmente no banco de movimentações
-            foreach (var mov in movimentacoes)
-            {
-                await RegistrarMovimentacaoAsync(mov);
-            }
+                // Registra cada movimentação individualmente
+                foreach (var mov in movimentacoes)
+                {
+                    await RegistrarMovimentacaoAsync(mov);
+                }
 
-            // Limpa a lista e fecha a janela
-            movimentacoes.Clear();
-            listaMovimentacoes.Clear();
-            ListaItemsControl.ItemsSource = null;
-            ListaItemsControl.ItemsSource = listaMovimentacoes;
-            this.Close();
+                // Limpa a lista e fecha a janela
+                movimentacoes.Clear();
+                listaMovimentacoes.Clear();
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar {(usePositiveNumber ? "compra" : "venda")}: {ex.Message}",
+                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void FecharLista_Click(object sender, RoutedEventArgs e)
@@ -737,7 +743,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Mostra botão
             ToggleLista.Visibility = Visibility.Visible;
         }
-        private async void RegistrarCompra(CompraData compra)
+        private void RegistrarCompra(CompraData compra)
         {
             try
             {
@@ -748,12 +754,65 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 if (DatabaseConnect.Database == null)
                     return;
-                var collection = DatabaseConnect.Database.GetCollection<CompraData>("compras");
-                collection.Insert(compra);
+
+                // Inserir a compra no banco de dados
+                var comprasCollection = DatabaseConnect.Database.GetCollection<CompraData>("compras");
+                comprasCollection.Insert(compra);
+
+                // Atualizar o relacionamento com o fornecedor
+                if (!string.IsNullOrEmpty(compra.FornecedorId))
+                {
+                    var fornecedoresCollection = DatabaseConnect.Database.GetCollection<FornecedorData>("fornecedores");
+                    var fornecedor = fornecedoresCollection.FindById(compra.FornecedorId);
+
+                    if (fornecedor != null)
+                    {
+                        // Adicionar o ID da compra à lista de compras relacionadas do fornecedor
+                        fornecedor.ComprasRelacionadas.Add(compra.Id);
+                        fornecedoresCollection.Update(fornecedor);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao registrar compra: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RegistrarVenda(VendaData venda)
+        {
+            try
+            {
+                if (venda == null)
+                {
+                    MessageBox.Show("Venda inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                // Inserir a venda no banco de dados
+                var vendasCollection = DatabaseConnect.Database.GetCollection<VendaData>("vendas");
+                vendasCollection.Insert(venda);
+
+                // Atualizar o relacionamento com o cliente
+                if (!string.IsNullOrEmpty(venda.ClienteId))
+                {
+                    var clientesCollection = DatabaseConnect.Database.GetCollection<ClienteData>("clientes");
+                    var cliente = clientesCollection.FindById(venda.ClienteId);
+
+                    if (cliente != null)
+                    {
+                        // Adicionar o ID da venda à lista de vendas relacionadas do cliente
+                        cliente.VendasRelacionadas.Add(venda.Id);
+                        clientesCollection.Update(cliente);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar venda: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw; // Re-throw para ser capturado pelo método chamador
             }
         }
 
@@ -792,19 +851,17 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (produto == null) return;
 
-            // Se for entrada,
             if (isEntrada)
             {
-                // Atualiza quantidade e calcula novo preço médio ponderado
+                // Para compra - calcula preço médio ponderado
                 double precoTotal = (produto.Preco * produto.Quantidade) + (preco * quantidade);
                 int novaQuantidade = produto.Quantidade + quantidade;
                 produto.Preco = novaQuantidade > 0 ? precoTotal / novaQuantidade : 0;
                 produto.Quantidade = novaQuantidade;
             }
-            // Se for saída,
             else
             {
-                // Apenas reduz a quantidade, preço permanece
+                // Para venda - apenas reduz a quantidade
                 produto.Quantidade -= quantidade;
                 if (produto.Quantidade < 0) produto.Quantidade = 0;
             }
@@ -896,7 +953,21 @@ namespace WMS_RadiadoresLemos_WPF
             if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
             {
                 if (!textBox.Text.All(char.IsDigit))
+                {
                     textBox.Clear();
+                    return;
+                }
+
+                // Verifica se vai faltar no estoque (apenas para saída)
+                if (!usePositiveNumber && int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes) && int.TryParse(textBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        textBox.Clear();
+                        return;
+                    }
+                }
 
                 if (produtoSelecionado != null)
                 {
@@ -910,6 +981,17 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (produtoSelecionado != null)
             {
+                // Verifica se vai faltar no estoque (apenas para saída)
+                if (!usePositiveNumber && int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes) && int.TryParse(QuantidadeTextBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        QuantidadeTextBox.Clear();
+                        return;
+                    }
+                }
+
                 AtualizarCamposProduto(produtoSelecionado);
                 DestacarMudancas();
                 ValidarMovimentacao();

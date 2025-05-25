@@ -33,7 +33,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                // Obter vendas diretamente do banco de dados em vez de usar VendaService
                 var db = DatabaseConnect.Database;
                 if (db != null)
                 {
@@ -162,98 +161,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         // 5. Atualização da interface
         private void AtualizarInterfaceVendas()
         {
-            vendasContainer.Children.Clear();
-
             if (_vendasFiltradas == null || _vendasFiltradas.Count == 0)
             {
-                TextBlock mensagem = new TextBlock
-                {
-                    Text = "Nenhuma venda cadastrada.",
-                    FontSize = 18,
-                    Foreground = (SolidColorBrush)FindResource("TextBrush"),
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(10)
-                };
-                vendasContainer.Children.Add(mensagem);
+                VendasContainer.ItemsSource = null;
+                MensagemVazia.Visibility = Visibility.Visible;
                 return;
             }
 
-            foreach (var venda in _vendasFiltradas)
-            {
-                Border border = new Border
-                {
-                    Background = (SolidColorBrush)FindResource("PanelBackgroundBrush"),
-                    CornerRadius = new CornerRadius(15),
-                    Padding = new Thickness(15),
-                    Margin = new Thickness(5),
-                    Width = 240,
-                };
-
-                StackPanel stackPanel = new StackPanel();
-
-                TextBlock titleTextBlock = new TextBlock
-                {
-                    Text = "Nota Fiscal",
-                    Style = (Style)FindResource("VendasTitleTextBox"),
-                    FontSize = 16
-                };
-                stackPanel.Children.Add(titleTextBlock);
-
-                Separator separator = new Separator
-                {
-                    Margin = new Thickness(10, 2, 10, 5)
-                };
-                stackPanel.Children.Add(separator);
-
-                TextBlock clienteTextBlock = new TextBlock
-                {
-                    Text = $"Cliente: {venda.ClienteCNPJ}",
-                    Style = (Style)FindResource("VendasTextBox"),
-                    FontSize = 14
-                };
-                stackPanel.Children.Add(clienteTextBlock);
-
-                TextBlock pedidoTextBlock = new TextBlock
-                {
-                    Text = $"Pedido: {venda.Pedido}",
-                    Style = (Style)FindResource("VendasTextBox"),
-                    FontSize = 14
-                };
-                stackPanel.Children.Add(pedidoTextBlock);
-
-                TextBlock dataCompraTextBlock = new TextBlock
-                {
-                    Text = $"Data da Compra: {venda.DataCompra:dd/MM/yyyy}",
-                    Style = (Style)FindResource("VendasTextBox"),
-                    FontSize = 14
-                };
-                stackPanel.Children.Add(dataCompraTextBlock);
-
-                TextBlock valorTextBlock = new TextBlock
-                {
-                    Text = $"Valor Total: R$ {venda.ValorTotal:N2}",
-                    Style = (Style)FindResource("VendasTextBox"),
-                    FontSize = 14
-                };
-                stackPanel.Children.Add(valorTextBlock);
-
-                Button detalhesButton = new Button
-                {
-                    Content = "Detalhes",
-                    Style = (Style)FindResource("EmphasisButtonStyle"),
-                    FontSize = 16,
-                    Width = 120,
-                    Margin = new Thickness(4),
-                    DataContext = venda
-                };
-
-                detalhesButton.Click += DetalhesButton_Click;
-                stackPanel.Children.Add(detalhesButton);
-
-                border.Child = stackPanel;
-                vendasContainer.Children.Add(border);
-            }
+            MensagemVazia.Visibility = Visibility.Collapsed;
+            VendasContainer.ItemsSource = _vendasFiltradas;
         }
 
         // 6. Registrar VendaData
@@ -261,36 +177,24 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             var compras = new AddEntradaSaídaWindow(isEntrada: false);
             compras.ShowDialog();
+
+            // Atualiza a lista de vendas após o registro
+            CarregarVendas();
         }
 
         // 7. Botões de ação
         private void DetalhesButton_Click(object sender, RoutedEventArgs e)
         {
-            //var venda = (sender as Button)?.DataContext as VendaData;
-
-            //if (venda != null)
-            //{
-            //    var detalhesVendaUserControl = new DetalhesUserControl(venda);
-
-            //    var contentControl = (Parent as ContentControl);
-            //    if (contentControl != null)
-            //    {
-            //        contentControl.Content = detalhesVendaUserControl;
-            //    }
-            //    else
-            //    {
-            //        string detalhes = $"Detalhes da venda:\n\n" +
-            //                         $"Cliente: {venda.ClienteCNPJ}\n" +
-            //                         $"Pedido: {venda.Pedido}\n" +
-            //                         $"Produtos: {string.Join(", ", venda.Itens.Select(i => i.ProdutoNome))}\n" +
-            //                         $"Valor Total: R$ {venda.ValorTotal:N2}\n" +
-            //                         $"Data da Compra: {venda.DataCompra:dd/MM/yyyy}\n" +
-            //                         $"Data do Pagamento: {venda.DataPagamento:dd/MM/yyyy}\n" +
-            //                         $"Data de Cadastro: {venda.DataCadastro:dd/MM/yyyy HH:mm}";
-
-            //        MessageBox.Show(detalhes, "Detalhes da Venda", MessageBoxButton.OK, MessageBoxImage.Information);
-            //    }
-            //}
+            var venda = (sender as Button)?.DataContext as VendaData;
+            if (venda != null)
+            {
+                var detalhesVendaUserControl = new DetalhesUserControl(venda);
+                var contentControl = (Parent as ContentControl);
+                if (contentControl != null)
+                {
+                    contentControl.Content = detalhesVendaUserControl;
+                }
+            }
         }
     }
 }
