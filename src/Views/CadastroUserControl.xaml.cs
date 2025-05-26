@@ -1,8 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using LiteDB;
 using System.Windows;
-using LiteDB;
-using WMS_RadiadoresLemos_WPF.src.Services;
+using System.Windows.Controls;
+using System.Windows.Data;
 using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -96,11 +97,48 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 if (propriedade.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
                     continue; // Ignora a coluna Id
 
-                CadastroDataGrid.Columns.Add(new DataGridTextColumn
+                // Verifica se a propriedade é uma lista de strings (VendasRelacionadas ou ComprasRelacionadas)
+                if ((propriedade.Name.Equals("VendasRelacionadas", StringComparison.OrdinalIgnoreCase) ||
+                     propriedade.Name.Equals("ComprasRelacionadas", StringComparison.OrdinalIgnoreCase)) &&
+                    propriedade.PropertyType == typeof(List<string>))
                 {
-                    Header = propriedade.Name,
-                    Binding = new System.Windows.Data.Binding(propriedade.Name)
-                });
+                    // Cria uma coluna para exibir a lista como texto separado por vírgulas
+                    var column = new DataGridTextColumn
+                    {
+                        Header = propriedade.Name,
+                        Binding = new System.Windows.Data.Binding(propriedade.Name)
+                        {
+                            Converter = new ListToStringConverter()
+                        }
+                    };
+                    CadastroDataGrid.Columns.Add(column);
+                }
+                else
+                {
+                    // Para outras propriedades, usa a abordagem padrão
+                    CadastroDataGrid.Columns.Add(new DataGridTextColumn
+                    {
+                        Header = propriedade.Name,
+                        Binding = new System.Windows.Data.Binding(propriedade.Name)
+                    });
+                }
+            }
+        }
+        // Conversor para transformar List<string> em string separada por vírgulas
+        public class ListToStringConverter : IValueConverter
+        {
+            public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+            {
+                if (value is List<string> lista && lista.Count > 0)
+                {
+                    return string.Join(", ", lista);
+                }
+                return string.Empty;
+            }
+
+            public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+            {
+                throw new NotImplementedException();
             }
         }
 
