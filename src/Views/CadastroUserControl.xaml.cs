@@ -592,8 +592,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
 
             // Confirmação do usuário
-            var resultado = MessageBox.Show("Tem certeza que deseja deletar o registro selecionado?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (resultado != MessageBoxResult.Yes)
+            var confirmacao = MessageBox.Show("Tem certeza que deseja deletar o registro selecionado?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (confirmacao != MessageBoxResult.Yes)
             {
                 return;
             }
@@ -614,8 +614,41 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     if (CadastroDataGrid.SelectedItem is ClienteData clienteSelecionado)
                     {
                         var collectionClientes = _database.GetCollection<ClienteData>("clientes");
-                        collectionClientes.Delete(clienteSelecionado.Id); // Assume que o modelo possui uma propriedade "Id"
-                        MessageBox.Show("Cliente deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                        var collectionVendas = _database.GetCollection<VendaData>("vendas");
+                        
+                        // Verifica se existem vendas relacionadas
+                        var vendasRelacionadas = collectionVendas.Find(v => v.ClienteId == clienteSelecionado.Id).ToList();
+                        
+                        if (vendasRelacionadas.Count > 0)
+                        {
+                            var confirmacaoCliente = MessageBox.Show(
+                                $"Existem {vendasRelacionadas.Count} vendas relacionadas a este cliente. " +
+                                "As vendas serão mantidas mas perderão a referência ao cliente. " +
+                                "Deseja continuar com a exclusão?",
+                                "Aviso",
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Warning);
+
+                            if (confirmacaoCliente == MessageBoxResult.Yes)
+                            {
+                                // Atualiza as vendas para remover a referência ao cliente
+                                foreach (var venda in vendasRelacionadas)
+                                {
+                                    venda.ClienteId = string.Empty;
+                                    venda.ClienteCNPJ = "Cliente Removido";
+                                    collectionVendas.Update(venda);
+                                }
+
+                                // Deleta o cliente
+                                collectionClientes.Delete(clienteSelecionado.Id);
+                                MessageBox.Show("Cliente deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                        }
+                        else
+                        {
+                            collectionClientes.Delete(clienteSelecionado.Id);
+                            MessageBox.Show("Cliente deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
                     }
                     break;
 
@@ -623,8 +656,41 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     if (CadastroDataGrid.SelectedItem is FornecedorData fornecedorSelecionado)
                     {
                         var collectionFornecedores = _database.GetCollection<FornecedorData>("fornecedores");
-                        collectionFornecedores.Delete(fornecedorSelecionado.Id); // Assume que o modelo possui uma propriedade "Id"
-                        MessageBox.Show("Fornecedor deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                        var collectionCompras = _database.GetCollection<CompraData>("compras");
+                        
+                        // Verifica se existem compras relacionadas
+                        var comprasRelacionadas = collectionCompras.Find(c => c.FornecedorId == fornecedorSelecionado.Id).ToList();
+                        
+                        if (comprasRelacionadas.Count > 0)
+                        {
+                            var confirmacaoFornecedor = MessageBox.Show(
+                                $"Existem {comprasRelacionadas.Count} compras relacionadas a este fornecedor. " +
+                                "As compras serão mantidas mas perderão a referência ao fornecedor. " +
+                                "Deseja continuar com a exclusão?",
+                                "Aviso",
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Warning);
+
+                            if (confirmacaoFornecedor == MessageBoxResult.Yes)
+                            {
+                                // Atualiza as compras para remover a referência ao fornecedor
+                                foreach (var compra in comprasRelacionadas)
+                                {
+                                    compra.FornecedorId = string.Empty;
+                                    compra.FornecedorNome = "Fornecedor Removido";
+                                    collectionCompras.Update(compra);
+                                }
+
+                                // Deleta o fornecedor
+                                collectionFornecedores.Delete(fornecedorSelecionado.Id);
+                                MessageBox.Show("Fornecedor deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                        }
+                        else
+                        {
+                            collectionFornecedores.Delete(fornecedorSelecionado.Id);
+                            MessageBox.Show("Fornecedor deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
                     }
                     break;
 
