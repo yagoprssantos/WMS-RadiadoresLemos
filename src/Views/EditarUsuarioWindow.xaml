@@ -47,7 +47,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <ComboBox FontSize="16" Height="35" x:Name="PermissaoComboBox" Grid.Column="0" SelectionChanged="PermissaoComboBox_SelectionChanged"
-                              Style="{StaticResource ComboBoxStyle}" Width="450">
+                              Style="{StaticResource ComboBoxSelectStyle}" Width="450">
                         <ComboBoxItem Content="Administrador" />
                         <ComboBoxItem Content="Gerente" />
                         <ComboBoxItem Content="Operador" />

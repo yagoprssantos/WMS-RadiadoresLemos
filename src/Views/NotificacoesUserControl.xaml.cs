@@ -24,13 +24,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para carregar todas as notificações
         private void CarregarNotificacoes()
         {
-            alertas = new List<AlertaData>();
-
-            // Para cada tipo de alerta, carregar os dados
-            foreach (var tipo in Alerta.Alertas.Keys)
-            {
-                alertas.AddRange(Alerta.ObterAlertas(tipo));
-            }
+            alertas = Alerta.Alertas.Values.SelectMany(lista => lista).ToList();
 
             if (AlertaDataGrid != null)
             {
@@ -48,48 +42,34 @@ namespace WMS_RadiadoresLemos_WPF
         private void CarregarDadosComboBoxes()
         {
             TipoComboBox.ItemsSource = alertas.Select(a => a.Tipo).Distinct().ToList();
-            DataComboBox.ItemsSource = alertas.Select(a => DateTime.Parse(a.Data).ToString("dd/MM/yyyy")).Distinct().ToList();
-        }
-
-        // Método para adicionar uma nova notificação
-        public void AdicionarNovaNotificacao(AlertaData alerta)
-        {
-            alertas.Add(alerta);
-
-            // Atualiza a tabela de notificações
-            if (AlertaDataGrid != null)
-            {
-                AlertaDataGrid.ItemsSource = null;
-                AlertaDataGrid.ItemsSource = alertas;
-            }
-
-            // Dispara o evento para notificar o MainWindow
-            NovaNotificacaoAdicionada?.Invoke(alerta);
         }
 
         // Método chamado ao clicar no botão de aplicar filtro
         private void AplicarFiltroButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             string tipo = TipoComboBox.SelectedItem?.ToString();
-            string data = DataComboBox.SelectedItem?.ToString();
+            DateTime? dataInicio = DataInicioHistoricoPicker.SelectedDate;
+            DateTime? dataFim = DataFimHistoricoPicker.SelectedDate;
 
-            AplicarFiltro(tipo, data);
+            AplicarFiltro(tipo, dataInicio, dataFim);
             FiltroPopup.IsOpen = false;
         }
 
         // Método para aplicar os filtros na tabela de notificações
-        private void AplicarFiltro(string tipo, string data)
+        private void AplicarFiltro(string tipo, DateTime? dataInicio, DateTime? dataFim)
         {
             try
             {
                 var alertasFiltrados = alertas.Where(a =>
-                    (string.IsNullOrEmpty(tipo) || a.Tipo == tipo) &&
-                    (string.IsNullOrEmpty(data) || DateTime.Parse(a.Data).ToString("dd/MM/yyyy") == data)).ToList();
+                    (string.IsNullOrEmpty(tipo) || a.Tipo.Equals(tipo, StringComparison.OrdinalIgnoreCase)) &&
+                    (!dataInicio.HasValue || DateTime.Parse(a.Data).Date >= dataInicio.Value.Date) &&
+                    (!dataFim.HasValue || DateTime.Parse(a.Data).Date <= dataFim.Value.Date)).ToList();
 
                 AlertaDataGrid.ItemsSource = alertasFiltrados;
             }
             catch (Exception ex)
             {
+                // Log ou mensagem de erro
                 //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -98,7 +78,8 @@ namespace WMS_RadiadoresLemos_WPF
         private void LimparFiltroButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             TipoComboBox.SelectedItem = null;
-            DataComboBox.SelectedItem = null;
+            DataInicioHistoricoPicker.SelectedDate = null;
+            DataFimHistoricoPicker.SelectedDate = null;
 
             // Recarregar todas as notificações
             AlertaDataGrid.ItemsSource = alertas;

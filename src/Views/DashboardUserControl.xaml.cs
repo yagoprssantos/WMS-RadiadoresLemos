@@ -422,7 +422,6 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         Series = MovimentacaoProdutosSeries,
                         LegendLocation = LegendLocation.Right,
-                        Height = 300,
                         Margin = new Thickness(20),
                         Foreground = (Brush)FindResource("TextBrush"),
                         DataTooltip = new DefaultTooltip
@@ -458,7 +457,6 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         Series = HistoricoMovimentacaoSeries,
                         LegendLocation = LegendLocation.Right,
-                        Height = 300,
                         Margin = new Thickness(20),
                         Foreground = (Brush)FindResource("TextBrush"),
                         DataTooltip = new DefaultTooltip
@@ -494,7 +492,6 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         Series = ProdutosMaiorMovimentacaoSeries,
                         LegendLocation = LegendLocation.Right,
-                        Height = 300,
                         Margin = new Thickness(20),
                         Foreground = (Brush)FindResource("TextBrush"),
                         DataTooltip = new DefaultTooltip
@@ -514,7 +511,6 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         Series = LucroMensalSeries,
                         LegendLocation = LegendLocation.Right,
-                        Height = 300,
                         Margin = new Thickness(20),
                         Foreground = (Brush)FindResource("TextBrush"),
                         DataTooltip = new DefaultTooltip
@@ -550,7 +546,6 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         Series = EstoqueMarcasSeries,
                         LegendLocation = LegendLocation.Right,
-                        Height = 300,
                         Margin = new Thickness(20),
                         Foreground = (Brush)FindResource("TextBrush"),
                         DataTooltip = new DefaultTooltip
@@ -586,7 +581,6 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         Series = ProdutosVendidosSeries,
                         LegendLocation = LegendLocation.Right,
-                        Height = 300,
                         Margin = new Thickness(20),
                         Foreground = (Brush)FindResource("TextBrush"),
                         DataTooltip = new DefaultTooltip

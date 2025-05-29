@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="WMS_RadiadoresLemos_WPF.src.Views.VendasUserControl" 
+﻿<UserControl x:Class="WMS_RadiadoresLemos_WPF.src.Views.ComprasUserControl" 
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,8 +7,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Background="{StaticResource BackgroundBrush}">
-
-
 
     <Grid Margin="15,15,15,0">
         <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
@@ -40,15 +38,15 @@
                     </Border>
                     <!-- Botão de Filtro -->
                     <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
-                    <!-- Botão de Registrar Venda -->
-                    <Button Grid.Column="3" Content="Registrar Venda" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarVendaButton_Click"/>
+                    <!-- Botão de Registrar Compra -->
+                    <Button Grid.Column="3" Content="Registrar Compra" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarCompraButton_Click"/>
                 </Grid>
 
-                <!-- Conteúdo Principal: Itens de Venda -->
+                <!-- Conteúdo Principal: Itens de Compra -->
                 <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,0">
-                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                         <Grid>
-                            <ItemsControl x:Name="VendasContainer" Margin="0">
+                            <ItemsControl x:Name="ComprasContainer" Margin="0">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel/>
@@ -58,10 +56,9 @@
                                     <DataTemplate>
                                         <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="15" Width="250">
                                             <StackPanel>
-                                                <TextBlock Text="{Binding NotaFiscal, StringFormat='NF: {0}', TargetNullValue='Venda'}" Style="{StaticResource VendasTitleTextBox}" FontSize="16" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="{Binding NotaFiscal, StringFormat='NF: {0}', TargetNullValue='Compra'}" Style="{StaticResource VendasTitleTextBox}" FontSize="16" HorizontalAlignment="Center"/>
                                                 <Separator Margin="10,5,10,10"/>
-                                                <TextBlock Text="{Binding ClienteCNPJ, StringFormat='Cliente: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14" TextWrapping="Wrap"/>
-                                                <TextBlock Text="{Binding Pedido, StringFormat='Pedido: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                                                <TextBlock Text="{Binding FornecedorNome, StringFormat='Fornecedor: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14" TextWrapping="Wrap"/>
                                                 <TextBlock Text="{Binding DataCompra, StringFormat='Data de Compra: {0:dd/MM/yyyy}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                 <TextBlock Text="{Binding DataPagamento, StringFormat='Pagamento em: {0:dd/MM/yyyy}', TargetNullValue='Pagamento em: -'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                 <TextBlock Text="{Binding ValorTotal, StringFormat='Total: R$ {0:N2}'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold"/>
@@ -72,23 +69,22 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                             <!-- Mensagem de vazio -->
-                            <TextBlock x:Name="MensagemVazia" Text="Nenhuma venda cadastrada."
-                                     FontSize="18" Foreground="{StaticResource TextBrush}"
-                                     HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            <TextBlock x:Name="MensagemVazia" Text="Nenhuma compra cadastrada."
+                                       FontSize="18" Foreground="{StaticResource TextBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
                         </Grid>
                     </ScrollViewer>
                 </Border>
             </Grid>
         </Border>
-        
+
         <!-- Popup de Filtro -->
         <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
             <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15">
                 <Border Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">
                     <StackPanel Background="Transparent" Margin="0">
                         <Button x:Name="OrderButton" Content="Ordenar por" ToolTip="Ordenar" Style="{StaticResource OrderButtonStyle}" Click="OrdenarButton_Click" Margin="0,0,10,0"/>
-                        <!-- Adicione aqui os controles de filtro específicos para vendas -->
-
+                        <!-- Adicione aqui os controles de filtro específicos para compras -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="15, 10">
                             <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
                             <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>

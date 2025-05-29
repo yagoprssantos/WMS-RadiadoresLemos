@@ -4,19 +4,16 @@ using System.Collections.Generic;
 
 namespace WMS_RadiadoresLemos_WPF.src.Models
 {
-    public class VendaData
+    public class CompraData
     {
         [BsonId]
         public string Id { get; set; } = string.Empty;
 
-        [BsonField("clienteId")]
-        public string ClienteId { get; set; } = string.Empty; // Referência ao Cliente
+        [BsonField("fornecedorId")]
+        public string FornecedorId { get; set; } = string.Empty; // Referência ao Fornecedor
 
-        [BsonField("clienteCNPJ")]
-        public string ClienteCNPJ { get; set; } = string.Empty; // CNPJ para exibição rápida
-
-        [BsonField("pedido")]
-        public string Pedido { get; set; } = string.Empty;
+        [BsonField("fornecedorNome")]
+        public string FornecedorNome { get; set; } = string.Empty; // Nome para exibição rápida
 
         [BsonField("dataCompra")]
         public DateTime DataCompra { get; set; } = DateTime.Now;
@@ -42,9 +39,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [BsonField("valorTotal")]
         public decimal ValorTotal { get; set; }
 
-        [BsonField("dataCadastro")]
-        public DateTime DataCadastro { get; set; } = DateTime.Now;
-
         [BsonField("detalhes")]
         public string? Detalhes { get; set; }
 
@@ -54,3 +48,5 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         }
     }
 }
+
+

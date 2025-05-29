@@ -46,45 +46,45 @@
                 <!-- Itens do Menu -->
                 <StackPanel Grid.Row="1" x:Name="MenuItemsPanel">
                     <Separator Margin="15"/>
-                    <Button x:Name="BtnMovimentacao" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
+                    <Button x:Name="BtnCompras" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconMovimentacao" Source="/src/Resources/Icons/NotSelected/SwapNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
-                            <TextBlock x:Name="TextMovimentacao" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Movimentação"/></TextBlock>
+                            <Image x:Name="IconCompras" Source="/assets/Icons/NotSelected/ComprarNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock x:Name="TextCompras" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Compras"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnVendas" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconVendas" Source="/src/Resources/Icons/NotSelected/PranchetaNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconVendas" Source="/assets/Icons/NotSelected/PranchetaNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextVendas" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Vendas"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnRegistro" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconRegistro" Source="/src/Resources/Icons/NotSelected/HistoricoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconRegistro" Source="/assets/Icons/NotSelected/HistoricoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextRegistro" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Registro"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnEstoque" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconEstoque" Source="/src/Resources/Icons/NotSelected/CaixaNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconEstoque" Source="/assets/Icons/NotSelected/CaixaNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextEstoque" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Estoque"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnCadastro" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconCadastro" Source="/src/Resources/Icons/NotSelected/CadastroNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconCadastro" Source="/assets/Icons/NotSelected/CadastroNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextCadastro" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Cadastrar"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnDashboard" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconDashboard" Source="/src/Resources/Icons/NotSelected/GraficoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconDashboard" Source="/assets/Icons/NotSelected/GraficoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextDashboard" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Relatório"/></TextBlock>
                         </StackPanel>
                     </Button>
                     <Button x:Name="BtnNotificacoes" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click" ToolTip="Clique para ver as notificações">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconNotificacoes" Source="/src/Resources/Icons/NotSelected/SinoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconNotificacoes" Source="/assets/Icons/NotSelected/SinoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextNotificacoes" Text="Notificações" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
@@ -95,14 +95,14 @@
                     <Separator Margin="15"/>
                     <Button x:Name="BtnConfiguracoes" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconConfiguracoes" Source="/src/Resources/Icons/NotSelected/EngrenagemNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconConfiguracoes" Source="/assets/Icons/NotSelected/EngrenagemNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextConfiguracoes" Text="Configurações" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
 
                     <Button x:Name="BtnSair" Style="{StaticResource MenuButtonStyle}" Click="LogoutButton_Click" Margin="0, 0, 0, 30">
                         <StackPanel Orientation="Horizontal">
-                            <Image x:Name="IconSair" Source="/src/Resources/Icons/NotSelected/SairNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image x:Name="IconSair" Source="/assets/Icons/NotSelected/SairNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock x:Name="TextSair" Text="Sair" Style="{StaticResource MenuItemTextStyle}"/>
                         </StackPanel>
                     </Button>
@@ -123,7 +123,7 @@
                 <Button Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0" Click="PreviousButton_Click">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
-                        <Image Source="/src/resources/icons/Genericos/Seta.png" Width="30" Height="30" Margin="40,10,-20,10" RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image Source="/assets/icons/Genericos/Seta.png" Width="30" Height="30" Margin="40,10,-20,10" RenderOptions.BitmapScalingMode="HighQuality">
                             <Image.RenderTransform>
                                 <ScaleTransform ScaleX="-1" />
                             </Image.RenderTransform>
@@ -133,23 +133,21 @@
                 <Button Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0" Click="NextButton_Click">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
-                        <Image Source="/src/resources/icons/Genericos/Seta.png" Width="30" Height="30" Margin="10,10,10,10" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image Source="/assets/icons/Genericos/Seta.png" Width="30" Height="30" Margin="10,10,10,10" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
                 </Button>
                 <Button Style="{StaticResource NavigationButtonStyle}" Click="RefreshButton_Click">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
-                        <Image Source="/src/resources/icons/Genericos/Recarregar.png" Width="30" Height="30" Margin="10,10,10,10" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image Source="/assets/icons/Genericos/Recarregar.png" Width="30" Height="30" Margin="10,10,10,10" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
-                </Button> 
-
+                </Button>
+                
             </StackPanel>
 
             <!-- Título e Ícone -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,15,0,0">
-                <!-- Remova Source="{Binding SelectedTabIcon}" se existir -->
                 <Image x:Name="IconImage" Width="30" Height="30" Margin="0,0,10,0"/>
-                <!-- Remova Text="{Binding SelectedTabTitle}" se existir -->
                 <TextBlock x:Name="TitleTextBlock" FontSize="32" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
             </StackPanel>
 

@@ -18,41 +18,44 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="src\resources\icons\CaixaS.png" />
-    <None Remove="src\resources\icons\EngrenagemS.png" />
-    <None Remove="src\resources\icons\Genericos\Carrinho.png" />
-    <None Remove="src\resources\icons\Genericos\DataCenter Config.png" />
-    <None Remove="src\resources\icons\Genericos\Expandir.png" />
-    <None Remove="src\resources\icons\Genericos\Fechar.png" />
-    <None Remove="src\resources\icons\Genericos\Pesquisa.png" />
-    <None Remove="src\resources\icons\Genericos\Recarregar.png" />
-    <None Remove="src\resources\icons\Genericos\Seta.png" />
-    <None Remove="src\resources\icons\Genericos\Sol Config.png" />
-    <None Remove="src\resources\icons\Genericos\Status Config.png" />
-    <None Remove="src\resources\icons\Genericos\User.png" />
-    <None Remove="src\resources\icons\Genericos\Usuário Config.png" />
-    <None Remove="src\resources\icons\GraficoS.png" />
-    <None Remove="src\resources\icons\historicos.png" />
-    <None Remove="src\Resources\icons\NotSelected\CadastroNS.png" />
-    <None Remove="src\resources\icons\NotSelected\CaixaNS.png" />
-    <None Remove="src\Resources\Icons\NotSelected\DataCenterNS.png" />
-    <None Remove="src\resources\icons\NotSelected\EngrenagemNS.png" />
-    <None Remove="src\resources\icons\NotSelected\GraficoNS.png" />
-    <None Remove="src\resources\icons\NotSelected\HistoricoNS.png" />
-    <None Remove="src\resources\icons\NotSelected\PlusNS.png" />
-    <None Remove="src\resources\icons\NotSelected\PranchetaNS.png" />
-    <None Remove="src\resources\icons\NotSelected\SairNS.png" />
-    <None Remove="src\resources\icons\NotSelected\SinoNS.png" />
-    <None Remove="src\Resources\icons\NotSelected\SwapNS.png" />
-    <None Remove="src\Resources\Icons\NotSelected\UsuárioNS.png" />
-    <None Remove="src\resources\icons\PlusS.png" />
-    <None Remove="src\resources\icons\PranchetaS.png" />
-    <None Remove="src\resources\icons\SairS.png" />
-    <None Remove="src\Resources\icons\Selected\CadastroS.png" />
-    <None Remove="src\Resources\Icons\Selected\DataCenterS.png" />
-    <None Remove="src\Resources\icons\Selected\SwapS.png" />
-    <None Remove="src\Resources\Icons\Selected\UsuárioS.png" />
-    <None Remove="src\resources\icons\SinoS.png" />
+    <None Remove="assets\Icons\CaixaS.png" />
+    <None Remove="assets\Icons\EngrenagemS.png" />
+    <None Remove="assets\Icons\Genericos\Carrinho.png" />
+    <None Remove="assets\Icons\Genericos\DataCenter Config.png" />
+    <None Remove="assets\Icons\Genericos\Expandir.png" />
+    <None Remove="assets\Icons\Genericos\Fechar.png" />
+    <None Remove="assets\Icons\Genericos\Pesquisa.png" />
+    <None Remove="assets\Icons\Genericos\Recarregar.png" />
+    <None Remove="assets\Icons\Genericos\Seta.png" />
+    <None Remove="assets\Icons\Genericos\Sol Config.png" />
+    <None Remove="assets\Icons\Genericos\Status Config.png" />
+    <None Remove="assets\Icons\Genericos\User.png" />
+    <None Remove="assets\Icons\Genericos\Usuário Config.png" />
+    <None Remove="assets\Icons\GraficoS.png" />
+    <None Remove="assets\Icons\historicos.png" />
+    <None Remove="assets\Icons\NotSelected\CadastroNS.png" />
+    <None Remove="assets\Icons\NotSelected\CaixaNS.png" />
+    <None Remove="assets\Icons\NotSelected\ComprarNS.png" />
+    <None Remove="assets\Icons\NotSelected\DataCenterNS.png" />
+    <None Remove="assets\Icons\NotSelected\EngrenagemNS.png" />
+    <None Remove="assets\Icons\NotSelected\GraficoNS.png" />
+    <None Remove="assets\Icons\NotSelected\HistoricoNS.png" />
+    <None Remove="assets\Icons\NotSelected\PlusNS.png" />
+    <None Remove="assets\Icons\NotSelected\PranchetaNS.png" />
+    <None Remove="assets\Icons\NotSelected\SairNS.png" />
+    <None Remove="assets\Icons\NotSelected\SinoNotNS.png" />
+    <None Remove="assets\Icons\NotSelected\SinoNS.png" />
+    <None Remove="assets\Icons\NotSelected\SwapNS.png" />
+    <None Remove="assets\Icons\NotSelected\UsuárioNS.png" />
+    <None Remove="assets\Icons\PlusS.png" />
+    <None Remove="assets\Icons\PranchetaS.png" />
+    <None Remove="assets\Icons\SairS.png" />
+    <None Remove="assets\Icons\Selected\CadastroS.png" />
+    <None Remove="assets\Icons\Selected\ComprarS.png" />
+    <None Remove="assets\Icons\Selected\DataCenterS.png" />
+    <None Remove="assets\Icons\Selected\SwapS.png" />
+    <None Remove="assets\Icons\Selected\UsuárioS.png" />
+    <None Remove="assets\Icons\SinoS.png" />
     <None Remove="src\Resources\Images\user.png" />
   </ItemGroup>
 
@@ -65,7 +68,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="src\resources\icons\Genericos\Carrinho.png">
+    <Resource Include="assets\Icons\Genericos\Carrinho.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -78,111 +81,119 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="assets\" />
-    <Folder Include="src\Resources\Banco de dados\" />
+    <Folder Include="src\Default\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="src\resources\icons\Genericos\DataCenter Config.png">
+    <Resource Include="assets\Icons\Genericos\DataCenter Config.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Expandir.png">
+    <Resource Include="assets\Icons\Genericos\Expandir.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Fechar.png">
+    <Resource Include="assets\Icons\Genericos\Fechar.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Pesquisa.png">
+    <Resource Include="assets\Icons\Genericos\Pesquisa.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Recarregar.png">
+    <Resource Include="assets\Icons\Genericos\Recarregar.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Seta.png">
+    <Resource Include="assets\Icons\Genericos\Seta.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Sol Config.png">
+    <Resource Include="assets\Icons\Genericos\Sol Config.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Status Config.png">
+    <Resource Include="assets\Icons\Genericos\Status Config.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\User.png">
+    <Resource Include="assets\Icons\Genericos\User.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\Genericos\Usuário Config.png">
+    <Resource Include="assets\Icons\Genericos\Usuário Config.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\icons\NotSelected\CadastroNS.png">
+    <Resource Include="assets\Icons\NotSelected\CadastroNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\CaixaNS.png">
+    <Resource Include="assets\Icons\NotSelected\CaixaNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\NotSelected\DataCenterNS.png">
+    <Resource Include="assets\Icons\NotSelected\ComprarNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\EngrenagemNS.png">
+    <Resource Include="assets\Icons\NotSelected\DataCenterNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\GraficoNS.png">
+    <Resource Include="assets\Icons\NotSelected\EngrenagemNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\HistoricoNS.png">
+    <Resource Include="assets\Icons\NotSelected\GraficoNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\PlusNS.png">
+    <Resource Include="assets\Icons\NotSelected\HistoricoNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\PranchetaNS.png">
+    <Resource Include="assets\Icons\NotSelected\PlusNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\SairNS.png">
+    <Resource Include="assets\Icons\NotSelected\PranchetaNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\resources\icons\NotSelected\SinoNS.png">
+    <Resource Include="assets\Icons\NotSelected\SairNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\icons\NotSelected\SwapNS.png">
+    <Resource Include="assets\Icons\NotSelected\SinoNotNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\NotSelected\UsuárioNS.png">
+    <Resource Include="assets\Icons\NotSelected\SinoNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\icons\Selected\CadastroS.png">
+    <Resource Include="assets\Icons\NotSelected\SwapNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\CaixaS.png">
+    <Resource Include="assets\Icons\NotSelected\UsuárioNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\DataCenterS.png">
+    <Resource Include="assets\Icons\Selected\CadastroS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\EngrenagemS.png">
+    <Resource Include="assets\Icons\Selected\CaixaS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\GraficoS.png">
+    <Resource Include="assets\Icons\Selected\ComprarS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\historicos.png">
+    <Resource Include="assets\Icons\Selected\DataCenterS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\PlusS.png">
+    <Resource Include="assets\Icons\Selected\EngrenagemS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\PranchetaS.png">
+    <Resource Include="assets\Icons\Selected\GraficoS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\SairS.png">
+    <Resource Include="assets\Icons\Selected\historicos.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\SinoS.png">
+    <Resource Include="assets\Icons\Selected\PlusS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\icons\Selected\SwapS.png">
+    <Resource Include="assets\Icons\Selected\PranchetaS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="src\Resources\Icons\Selected\UsuárioS.png">
+    <Resource Include="assets\Icons\Selected\SairS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\Icons\Selected\SinoS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\Icons\Selected\SwapS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\Icons\Selected\UsuárioS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="src\Resources\Images\user.png" />

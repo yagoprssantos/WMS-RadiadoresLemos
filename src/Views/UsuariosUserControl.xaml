@@ -22,7 +22,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="1" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="18" Padding="10" Margin="0,0,0,10">
+                    <Border Grid.Column="1" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="10" Margin="0,0,0,10">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Image Width="24" Height="24" Margin="0,0,10,0"/>
                             <TextBlock Text="Gerenciamento de Usuários" Foreground="{StaticResource TextBrush}" FontSize="18" VerticalAlignment="Center"/>

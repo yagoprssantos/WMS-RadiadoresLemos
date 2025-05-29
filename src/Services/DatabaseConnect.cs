@@ -12,8 +12,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "WMS-RadiadoresLemos",
             "src",
-            "Resources",
-            "bancodedados",
+            "Database",
             "Database.db"
         );
         public static LiteDatabase? Database { get; private set; }
@@ -101,6 +100,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 var produtos = Database.GetCollection<ProdutoData>("produtos");
                 var movimentacoes = Database.GetCollection<MovimentacaoData>("movimentacoes");
                 var historico = Database.GetCollection<LogData>("historico");
+                var clientes = Database.GetCollection<ClienteData>("clientes");
+                var fornecedores = Database.GetCollection<FornecedorData>("fornecedores");
+                var compras = Database.GetCollection<CompraData>("compras");
+                var vendas = Database.GetCollection<VendaData>("vendas");
 
                 // Cria índices para melhor performance
                 Console.WriteLine("Criando índices...");

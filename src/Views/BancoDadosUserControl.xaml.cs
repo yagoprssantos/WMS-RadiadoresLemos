@@ -24,11 +24,6 @@ namespace WMS_RadiadoresLemos_WPF
 {
     public partial class BancoDadosUserControl : UserControl
     {
-        private List<object> dadosFiltrados = new List<object>();
-        private bool dadosCarregados = false;
-        private List<string> tabelasSelecionadas = new List<string>();
-        private static readonly string[] TabelasDisponiveis = { "usuarios", "produtos", "historico", "movimentacoes" };
-
         public BancoDadosUserControl()
         {
             InitializeComponent();
@@ -155,7 +150,13 @@ namespace WMS_RadiadoresLemos_WPF
                                 ProgressBarMessage.Text = "Banco de dados importado com sucesso!";
 
                                 // Obtém informações do backup mais recente
-                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var bancoDir = Path.GetDirectoryName(bancoAtual);
+                                if (bancoDir == null)
+                                {
+                                    throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
+                                }
+                                var backupDir = Path.Combine(bancoDir, "local");
+
                                 var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
                                                        .OrderByDescending(f => File.GetLastWriteTime(f))
                                                        .ToList();
@@ -187,7 +188,13 @@ namespace WMS_RadiadoresLemos_WPF
                             catch (Exception ex)
                             {
                                 // Se o banco estiver corrompido, restaura o backup mais recente
-                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var bancoDir = Path.GetDirectoryName(bancoAtual);
+                                if (bancoDir == null)
+                                {
+                                    throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
+                                }
+                                var backupDir = Path.Combine(bancoDir, "local");
+
                                 var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
                                     .OrderByDescending(f => File.GetLastWriteTime(f))
                                     .ToList();
@@ -309,7 +316,13 @@ namespace WMS_RadiadoresLemos_WPF
                                 ProgressBarMessage.Text = "Banco de dados importado com sucesso!";
 
                                 // Obtém informações do backup mais recente
-                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var bancoDir = Path.GetDirectoryName(bancoAtual);
+                                if (bancoDir == null)
+                                {
+                                    throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
+                                }
+                                var backupDir = Path.Combine(bancoDir, "local");
+
                                 var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
                                     .OrderByDescending(f => File.GetLastWriteTime(f))
                                     .ToList();
@@ -343,7 +356,13 @@ namespace WMS_RadiadoresLemos_WPF
                             catch (Exception ex)
                             {
                                 // Se o banco estiver corrompido, restaura o backup mais recente
-                                var backupDir = Path.Combine(Path.GetDirectoryName(bancoAtual), "local");
+                                var bancoDir = Path.GetDirectoryName(bancoAtual);
+                                if (bancoDir == null)
+                                {
+                                    throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
+                                }
+                                var backupDir = Path.Combine(bancoDir, "local");
+
                                 var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
                                     .OrderByDescending(f => File.GetLastWriteTime(f))
                                     .ToList();
@@ -574,7 +593,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Último backup exportado (do Supabase)
                 var ultimoExportado = await ObterUltimoBackupExportado();
-                UltimoBackupExportadoText.Text = $"Último backup exportado: {ultimoExportado:dd/MM/yyyy HH:mm}";
+                UltimoBackupExportadoText.Text = $"Último backup exportado: {ultimoExportado.ToLocalTime():dd/MM/yyyy HH:mm}";
 
                 // Backup Atual
                 var backupAtual = VerificarBackupAtual();

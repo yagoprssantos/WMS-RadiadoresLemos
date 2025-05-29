@@ -1,46 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using WMS_RadiadoresLemos_WPF.src.Models;
-using WMS_RadiadoresLemos_WPF.src.Services;
+﻿    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Media;
+    using WMS_RadiadoresLemos_WPF.src.Models;
+    using WMS_RadiadoresLemos_WPF.src.Services;
 
-namespace WMS_RadiadoresLemos_WPF.src.Views
-{
-    public partial class VendasUserControl : UserControl
+    namespace WMS_RadiadoresLemos_WPF.src.Views
     {
-        private List<VendaData> _todasVendas;      // Lista completa de vendas
-        private List<VendaData> _vendasFiltradas;  // Lista filtrada e ordenada
+    public partial class ComprasUserControl : UserControl
+    {
+        private List<CompraData> _todasCompras;      // Lista completa de compras
+        private List<CompraData> _comprasFiltradas;  // Lista filtrada e ordenada
         private string _ordenacaoAtual = "recente";
         private string _filtroTexto = "Ordenar por";
 
-        public VendasUserControl()
+        public ComprasUserControl()
         {
             InitializeComponent();
-
-            Loaded += VendasUserControl_Loaded;
+            Loaded += ComprasUserControl_Loaded;
         }
 
         // 1. Carregamento inicial
-        private void VendasUserControl_Loaded(object sender, RoutedEventArgs e)
+        private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            CarregarVendas();
+            CarregarCompras();
         }
 
-        private void CarregarVendas()
+        private void CarregarCompras()
         {
             try
             {
+                // Obter compras diretamente do banco de dados em vez de usar CompraService
                 var db = DatabaseConnect.Database;
                 if (db != null)
                 {
-                    var collection = db.GetCollection<VendaData>("vendas");
-                    _todasVendas = collection.FindAll().ToList();
-                    _vendasFiltradas = new List<VendaData>(_todasVendas);
+                    var collection = db.GetCollection<CompraData>("compras");
+                    _todasCompras = collection.FindAll().ToList();
+                    _comprasFiltradas = new List<CompraData>(_todasCompras);
                     AplicarOrdenacao();
-                    AtualizarInterfaceVendas();
+                    AtualizarInterfaceCompras();
                 }
                 else
                 {
@@ -49,28 +49,26 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao carregar vendas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao carregar compras: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         // 2. Pesquisa
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_todasVendas == null) return;
+            if (_todasCompras == null) return;
 
             string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
-            _vendasFiltradas = _todasVendas
+            _comprasFiltradas = _todasCompras
                 .Where(v =>
-                    (v.ClienteCNPJ?.ToLower().Contains(textoBusca) ?? false) ||
-                    (v.Pedido?.ToLower().Contains(textoBusca) ?? false) ||
+                    (v.FornecedorNome?.ToLower().Contains(textoBusca) ?? false) ||
                     (v.Itens.Any(i => i.ProdutoNome.ToLower().Contains(textoBusca))) ||
                     (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
                 )
                 .ToList();
 
             AplicarOrdenacao();
-            AtualizarInterfaceVendas();
+            AtualizarInterfaceCompras();
         }
 
         // 3. Filtro
@@ -83,10 +81,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             // TODO: Adicionar lógica de filtro
             FiltroPopup.IsOpen = false;
-            // string clienteSelecionado = ClienteComboBox.SelectedItem?.ToString();
-            // _vendasFiltradas = _todasVendas.Where(v => v.Cliente == clienteSelecionado).ToList();
+            // string fornecedorSelecionado = FornecedorComboBox.SelectedItem?.ToString();
+            // _comprasFiltradas = _todasCompras.Where(v => v.Fornecedor == fornecedorSelecionado).ToList();
             AplicarOrdenacao();
-            AtualizarInterfaceVendas();
+            AtualizarInterfaceCompras();
         }
 
         private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
@@ -96,9 +94,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // TODO: Limpar filtro Ordenar
 
             FiltroPopup.IsOpen = false;
-            _vendasFiltradas = new List<VendaData>(_todasVendas);
+            _comprasFiltradas = new List<CompraData>(_todasCompras);
             AplicarOrdenacao();
-            AtualizarInterfaceVendas();
+            AtualizarInterfaceCompras();
         }
 
         // 4. Ordenação
@@ -126,73 +124,73 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 OrdenarPopup.IsOpen = false;
                 AplicarOrdenacao();
-                AtualizarInterfaceVendas();
+                AtualizarInterfaceCompras();
             }
         }
 
         private void AplicarOrdenacao()
         {
-            if (_vendasFiltradas == null || _vendasFiltradas.Count == 0)
+            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
                 return;
 
             switch (_ordenacaoAtual)
             {
                 case "preco":
-                    _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
+                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
                     break;
                 case "produto":
-                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.Itens.FirstOrDefault()?.ProdutoNome ?? "").ToList();
+                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Itens.FirstOrDefault()?.ProdutoNome ?? "").ToList();
                     break;
-                case "cliente":
-                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.ClienteCNPJ).ToList();
+                case "fornecedor":
+                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.FornecedorNome).ToList();
                     break;
                 case "recente":
-                    _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
+                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
                     break;
                 case "antigo":
-                    _vendasFiltradas = _vendasFiltradas.OrderBy(v => v.DataCompra).ToList();
+                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.DataCompra).ToList();
                     break;
                 default:
-                    _vendasFiltradas = _vendasFiltradas.OrderByDescending(v => v.DataCadastro).ToList();
+                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
                     break;
             }
         }
 
         // 5. Atualização da interface
-        private void AtualizarInterfaceVendas()
+        private void AtualizarInterfaceCompras()
         {
-            if (_vendasFiltradas == null || _vendasFiltradas.Count == 0)
+            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
             {
-                VendasContainer.ItemsSource = null;
+                ComprasContainer.ItemsSource = null;
                 MensagemVazia.Visibility = Visibility.Visible;
                 return;
             }
 
             MensagemVazia.Visibility = Visibility.Collapsed;
-            VendasContainer.ItemsSource = _vendasFiltradas;
+            ComprasContainer.ItemsSource = _comprasFiltradas;
         }
 
-        // 6. Registrar VendaData
-        private void RegistrarVendaButton_Click(object sender, RoutedEventArgs e)
+        // 6. Registrar Compra
+        private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
         {
-            var compras = new AddEntradaSaídaWindow(isEntrada: false);
+            var compras = new AddEntradaSaídaWindow(isEntrada: true);
             compras.ShowDialog();
 
-            // Atualiza a lista de vendas após o registro
-            CarregarVendas();
+            // Atualiza a lista de compras após o registro
+            CarregarCompras();
         }
 
         // 7. Botões de ação
         private void DetalhesButton_Click(object sender, RoutedEventArgs e)
         {
-            var venda = (sender as Button)?.DataContext as VendaData;
-            if (venda != null)
+            var compra = (sender as Button)?.DataContext as CompraData;
+            if (compra != null)
             {
-                var detalhesVendaUserControl = new DetalhesUserControl(venda);
+                var detalhesCompraUserControl = new DetalhesUserControl(compra);
                 var contentControl = (Parent as ContentControl);
                 if (contentControl != null)
                 {
-                    contentControl.Content = detalhesVendaUserControl;
+                    contentControl.Content = detalhesCompraUserControl;
                 }
             }
         }

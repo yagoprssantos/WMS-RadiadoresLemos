@@ -1,20 +1,24 @@
 ﻿using LiteDB;
+using System;
 
 namespace WMS_RadiadoresLemos_WPF.src.Models
 {
     public class MovimentacaoData
     {
+        [BsonId]
+        public int Id { get; set; }
+
         [BsonField("produtoId")]
         public required string ProdutoId { get; set; }
-        // Id do produto que foi movimentado
+
+        [BsonField("produtoNome")]
+        public string ProdutoNome { get; set; } = string.Empty;
 
         [BsonField("tipo")]
-        public required string Tipo { get; set; }
-        // Tipo da movimentação (Entrada ou Saída)
+        public required string Tipo { get; set; } // "Entrada" ou "Saída"
 
         [BsonField("preco")]
         public required double Preco { get; set; }
-        // Valor unitário do produto movimentado
 
         [BsonField("quantidade")]
         public required int Quantidade { get; set; }
@@ -22,10 +26,32 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [BsonField("data")]
         public required DateTime Data { get; set; }
 
-        [BsonId]
-        public int Id { get; set; }
+        [BsonField("detalhes")]
+        public string? Detalhes { get; set; }
+
+        // Relacionamento reverso (opcional, para facilitar consultas)
+        [BsonField("compraId")]
+        public Guid? CompraId { get; set; }
+
+        [BsonField("vendaId")]
+        public Guid? VendaId { get; set; }
 
         public string DataFormatadaSemAno => Data.ToString("dd/MM HH:mm:ss");
         public string DataFormatadaComAno => Data.ToString("dd/MM/yyyy HH:mm:ss");
+    }
+
+    public class MovimentacaoListItem
+    {
+        public string ProdutoId { get; set; } = string.Empty;
+        public string ProdutoNome { get; set; } = string.Empty;
+        public string? FornecedorId { get; set; }
+        public string? ClienteId { get; set; }
+        public int Quantidade { get; set; }
+        public double Preco { get; set; }
+        public string? FormaPagamento { get; set; }
+        public int Parcelas { get; set; }
+        public string Detalhes { get; set; } = string.Empty;
+        public DateTime Data { get; set; }
+        public MovimentacaoData MovimentacaoData { get; set; } = null!;
     }
 }

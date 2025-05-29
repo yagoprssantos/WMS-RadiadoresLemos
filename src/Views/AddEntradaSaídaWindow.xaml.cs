@@ -1,0 +1,1273 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Data;
+using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
+using LiteDB;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+
+namespace WMS_RadiadoresLemos_WPF
+{
+    public partial class AddEntradaSaídaWindow : Window
+    {
+        // Dados de produtos
+        private List<ProdutoData> produtos = new List<ProdutoData>();
+
+        // Dados de movimentações
+        private ObservableCollection<MovimentacaoData> movimentacoes = new ObservableCollection<MovimentacaoData>();
+        private List<MovimentacaoListItem> listaMovimentacoes = new();
+        private List<CompraData> compras = new();
+        private List<VendaData> vendas = new();
+
+        private ProdutoData? produtoSelecionado;
+
+        // Configurações e constantes
+        private bool usePositiveNumber;
+
+        // Dados de fornecedores e clientes
+        private List<ClienteData> clientes = new List<ClienteData>();
+        private string? clienteSelecionado;
+        private List<FornecedorData> fornecedores = new List<FornecedorData>();
+        private string? fornecedorSelecionado;
+
+        // Dados de pagamento
+        private string? formaPagamentoSelecionada;
+        private readonly List<string> opcoesFormaPagamento = new List<string>();
+
+
+        public AddEntradaSaídaWindow()
+        {
+            InitializeComponent();
+            opcoesFormaPagamento = FormaPagamentoComboBox.Items.Cast<ComboBoxItem>()
+                        .Select(item => item.Content?.ToString() ?? "")
+                        .ToList();
+
+            ListaItemsControl.ItemsSource = movimentacoes;
+        }
+
+        public AddEntradaSaídaWindow(bool isEntrada) : this()
+        {
+            Setup(isEntrada); // Configura com o valor correto
+
+            usePositiveNumber = isEntrada;
+            if (isEntrada)
+            {
+                // ComboBox
+                Fornecedor.Visibility= Visibility.Visible;
+                Cliente.Visibility= Visibility.Collapsed;
+            }
+            else
+            {
+                // ComboBox
+                Fornecedor.Visibility = Visibility.Collapsed;
+                Cliente.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void Setup(bool isEntrada)
+        {
+            produtoSelecionado = null;
+            usePositiveNumber = isEntrada;
+
+            CarregarDados();
+            ToggleVisibility(false);
+        }
+
+        // Método para carregar os dados
+        private async Task CarregarDados()
+        {
+            CarregarProdutos().Wait();
+
+            // Carrega fornecedor/cliente dependendo da Entrada
+            if (usePositiveNumber)
+            {
+                CarregarFornecedores().Wait();
+            }
+            else if (!usePositiveNumber)
+            {
+                CarregarClientes().Wait();
+            }
+            else
+            {
+                CarregarFornecedores().Wait();
+                CarregarClientes().Wait();
+            }
+        }
+
+        private async Task CarregarProdutos()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<ProdutoData>("produtos");
+                    produtos = collection.FindAll().ToList();
+
+                    // Adiciona os produtos ao ComboBox
+                    ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async Task CarregarFornecedores()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<FornecedorData>("fornecedores");
+                    fornecedores = collection.FindAll().ToList();
+
+                    // Adiciona os fornecedores ao ComboBox
+                    FornecedorComboBox.ItemsSource = fornecedores.Select(p => p.Nome).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar fornecedores: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async Task CarregarClientes()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<ClienteData>("clientes");
+                    clientes = collection.FindAll().ToList();
+
+                    // Adiciona os clientes ao ComboBox
+                    ClienteComboBox.ItemsSource = clientes.Select(p => p.CNPJ).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar clientes: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método para alternar a visibilidade dos detalhes do produto
+        private void ToggleVisibility(bool isVisible)
+        {
+            var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+
+            // Atualizar visibilidade dos elementos
+            ProdutoAntesDepois.Visibility = visibility;
+
+            // Desabilitar ou habilitar o ComboBox
+            ProdutoComboBox.IsHitTestVisible = !isVisible;
+            ProdutoComboBox.IsEnabled = !isVisible;
+        }
+
+
+        // Método que é chamado quando o texto da caixa de pesquisa é alterado
+        private void ProdutoComboBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
+            {
+                string searchText = textBox.Text;
+
+                // Filtrar os produtos com base no texto digitado (case-insensitive)
+                var filteredProducts = produtos
+                    .Where(p => p.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .Select(p => p.Nome)
+                    .ToList();
+
+                // Evita manipular Items quando ItemsSource está em uso
+                comboBox.ItemsSource = null;
+                comboBox.Items.Clear();
+
+                // Apresenta apenas os produtos filtrados (com o nome original)
+                foreach (var nome in filteredProducts)
+                {
+                    comboBox.Items.Add(nome);
+                }
+
+                // Atualiza o texto da caixa de pesquisa (mantém o texto original digitado)
+                textBox.Text = searchText;
+                textBox.CaretIndex = textBox.Text.Length;
+
+                // Abrir o dropdown para mostrar as opções filtradas
+                comboBox.IsDropDownOpen = true;
+            }
+        }
+
+        // Método para confirmar se o produto selecionado é válido
+        private void ProdutoComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string inputText = ProdutoComboBox.Text;
+
+            if (ProdutoComboBox.SelectedItem is string selectedProductName)
+            {
+                inputText = selectedProductName;
+            }
+
+            if (!string.IsNullOrEmpty(inputText) && produtos.Any(p => p.Nome == inputText))
+            {
+                produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == inputText);
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                }
+            }
+            else
+            {
+                ProdutoComboBox.Text = string.Empty;
+                ProdutoComboBox.SelectedItem = null;
+            }
+        }
+
+        // Método que é chamado quando a seleção do ComboBox é alterada
+        private void ProdutoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ProdutoComboBox.SelectedItem is string selectedProductName)
+            {
+                produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == selectedProductName);
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                }
+                else
+                {
+                    MessageBox.Show("Produto não encontrado no cache.");
+                }
+            }
+        }
+
+        // Método que é chamado quando o texto da caixa de pesquisa do fornecedor é alterado
+        private void FornecedorComboBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
+            {
+                string searchText = textBox.Text;
+
+                var filteredFornecedores = fornecedores
+                    .Where(f => f.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .Select(f => f.Nome)
+                    .ToList();
+
+                comboBox.ItemsSource = null;
+                comboBox.Items.Clear();
+
+                foreach (var nome in filteredFornecedores)
+                {
+                    comboBox.Items.Add(nome);
+                }
+
+                textBox.Text = searchText;
+                textBox.CaretIndex = textBox.Text.Length;
+                comboBox.IsDropDownOpen = true;
+            }
+        }
+        private void FornecedorComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string inputText = FornecedorComboBox.Text;
+
+            if (FornecedorComboBox.SelectedItem is string selected)
+                inputText = selected;
+
+            var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == inputText);
+            if (!string.IsNullOrEmpty(inputText) && fornecedor != null)
+            {
+                fornecedorSelecionado = fornecedor.Nome;
+            }
+            else
+            {
+                FornecedorComboBox.Text = string.Empty;
+                FornecedorComboBox.SelectedItem = null;
+                fornecedorSelecionado = null;
+            }
+        }
+        private void FornecedorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (FornecedorComboBox.SelectedItem is string selected)
+            {
+                fornecedorSelecionado = selected;
+            }
+        }
+
+        // Método que é chamado quando o texto da caixa de pesquisa do cliente é alterado
+        private void ClienteComboBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
+            {
+                string searchText = textBox.Text;
+
+                var filteredClientes = clientes
+                    .Where(c => c.CNPJ.Contains(searchText, StringComparison.OrdinalIgnoreCase) || c.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    .Select(c => c.CNPJ) 
+                    .ToList();
+
+                comboBox.ItemsSource = null;
+                comboBox.Items.Clear();
+
+                foreach (var nome in filteredClientes)
+                {
+                    comboBox.Items.Add(nome);
+                }
+
+                textBox.Text = searchText;
+                textBox.CaretIndex = textBox.Text.Length;
+                comboBox.IsDropDownOpen = true;
+            }
+        }
+        private void ClienteComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string inputText = ClienteComboBox.Text;
+
+            if (ClienteComboBox.SelectedItem is string selected)
+                inputText = selected;
+
+            var cliente = clientes.FirstOrDefault(c => c.CNPJ == inputText || c.Email == inputText);
+            if (!string.IsNullOrEmpty(inputText) && cliente != null)
+            {
+                clienteSelecionado = cliente.CNPJ; // ou cliente.Email
+            }
+            else
+            {
+                ClienteComboBox.Text = string.Empty;
+                ClienteComboBox.SelectedItem = null;
+                clienteSelecionado = null;
+            }
+        }
+        private void ClienteComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ClienteComboBox.SelectedItem is string selected)
+            {
+                clienteSelecionado = selected;
+            }
+        }
+
+        // Forma de Pagamento ComboBox
+        private void FormaPagamentoComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string inputText = FormaPagamentoComboBox.Text;
+
+            // Seleciona o item se for válido
+            var match = opcoesFormaPagamento.FirstOrDefault(o => o.Equals(inputText, StringComparison.OrdinalIgnoreCase));
+            if (match != null)
+            {
+                FormaPagamentoComboBox.SelectedItem = FormaPagamentoComboBox.Items
+                    .OfType<ComboBoxItem>()
+                    .FirstOrDefault(i => (i.Content?.ToString() ?? "") == match);
+                formaPagamentoSelecionada = match;
+            }
+            else
+            {
+                FormaPagamentoComboBox.Text = string.Empty;
+                FormaPagamentoComboBox.SelectedItem = null;
+                formaPagamentoSelecionada = null;
+            }
+        }
+        private void FormaPagamentoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selected)
+            {
+                formaPagamentoSelecionada = selected.Content?.ToString();
+
+                // Verifica em relação às parcelas
+                if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selectedItem && (selectedItem.Content?.ToString() ?? "") == "À vista")
+                {
+                    // Altera parcela para 1 e desabilita editar
+                    ParcelasTextBox.Text = "1";
+                    ParcelasTextBox.IsEnabled = false;
+                }
+                else
+                {
+                    // Habilita editar parcelas
+                    ParcelasTextBox.Text = "";
+                    ParcelasTextBox.IsEnabled = true;
+                }
+            }
+        }
+        
+        // Método chamado quando um produto é selecionado, altera as informações apresentadas na tela
+        private bool AtualizarCamposProduto(ProdutoData produto)
+        {
+            if (produto == null)
+            {
+                MessageBox.Show("Produto inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            // Atualizar os campos "Antes" com os dados do produto
+            TipoAntesDadoTextBlock.Text = produto.Tipo;
+            MarcaAntesDadoTextBlock.Text = produto.Marca;
+            CodigoAntesDadoTextBlock.Text = produto.Codigo;
+            QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString();
+            PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C");
+
+            // Atualizar os campos "Depois" com os mesmos valores inicialmente
+            TipoDepoisDadoTextBlock.Text = produto.Tipo;
+            MarcaDepoisDadoTextBlock.Text = produto.Marca;
+            CodigoDepoisDadoTextBlock.Text = produto.Codigo;
+
+            // Validar os campos de entrada (Quantidade e Preço)
+            if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
+            {
+                // Se os campos estiverem vazios, apenas inicializa os valores "Depois" com os valores "Antes"
+                QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
+                PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+            }
+            else
+            {
+                // Realizar cálculos com os valores inseridos
+                if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
+                {
+                    int quantidadeFinal = usePositiveNumber
+                        ? produto.Quantidade + quantidadeAlterada // Entrada
+                        : produto.Quantidade - quantidadeAlterada; // Saída
+
+                    if (quantidadeFinal < 0)
+                    {
+                        Alerta.AdicionarAlerta("Erro",
+                                               "Quantidade insuficiente",
+                                               "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
+                                               "- Quantidade insuficiente no estoque.",
+                                               "- Verifique a quantidade disponível no estoque.\n" +
+                                               "- Verifique se a quantidade inserida é válida.\n" +
+                                               "- Atualize a quantidade de produtos no estoque.");
+                        return false;
+                    }
+
+                    QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
+
+                    if (usePositiveNumber)
+                    {
+                        double precoAtual = produto.Preco;
+                        int quantidadeAtual = produto.Quantidade;
+                        int quantidadeNova = quantidadeAlterada;
+                        int quantidadeTotal = quantidadeAtual + quantidadeNova;
+
+                        double precoPonderado = ((precoAtual * quantidadeAtual) + (precoAlterado * quantidadeNova)) / quantidadeTotal;
+                        PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
+                    }
+                    else
+                    {
+                        PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                    }
+                }
+                else
+                {
+                    // Se não conseguir converter, apenas mostra os valores atuais
+                    QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
+                    PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                }
+            }
+
+            // Sempre mostrar o painel de detalhes
+            ProdutoAntesDepois.Visibility = Visibility.Visible;
+
+            return true;
+        }
+        private void DestacarMudancas()
+        {
+            // Comparar e destacar mudanças
+            TipoDepoisDadoTextBlock.Foreground = TipoDepoisDadoTextBlock.Text != TipoAntesDadoTextBlock.Text
+                ? (Brush)FindResource("AccentBrush")
+                : (Brush)FindResource("TextBrush");
+
+            MarcaDepoisDadoTextBlock.Foreground = MarcaDepoisDadoTextBlock.Text != MarcaAntesDadoTextBlock.Text
+                ? (Brush)FindResource("AccentBrush")
+                : (Brush)FindResource("TextBrush");
+
+            CodigoDepoisDadoTextBlock.Foreground = CodigoDepoisDadoTextBlock.Text != CodigoAntesDadoTextBlock.Text
+                ? (Brush)FindResource("AccentBrush")
+                : (Brush)FindResource("TextBrush");
+
+            QuantidadeDepoisDadoTextBlock.Foreground =
+                int.TryParse(QuantidadeDepoisDadoTextBlock.Text, out int qtdDepois) &&
+                int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes)
+                    ? qtdDepois > qtdAntes
+                        ? (Brush)FindResource("AccentBrush")
+                        : qtdDepois < qtdAntes
+                            ? (Brush)FindResource("CancelButtonHoverBrush")
+                            : (Brush)FindResource("TextBrush")
+                    : (Brush)FindResource("TextBrush");
+
+            PrecoDepoisDadoTextBlock.Foreground =
+                double.TryParse(PrecoDepoisDadoTextBlock.Text.Replace("R$", "").Trim(), out double precoDepois) &&
+                double.TryParse(PrecoAntesDadoTextBlock.Text.Replace("R$", "").Trim(), out double precoAntes)
+                    ? precoDepois > precoAntes
+                        ? (Brush)FindResource("AccentBrush")
+                        : precoDepois < precoAntes
+                            ? (Brush)FindResource("CancelButtonHoverBrush")
+                            : (Brush)FindResource("TextBrush")
+                    : (Brush)FindResource("TextBrush");
+        }
+
+        // Métodos para Lista
+        private void ToggleLista_Click(object sender, RoutedEventArgs e)
+        {
+            // Deixa lista visível
+            Lista.Visibility = Lista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+
+            // Oculta botão
+            ToggleLista.Visibility = ToggleLista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+        private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
+        {
+            // Garante validação correta
+            if (!ValidarMovimentacao() || !ValidarFinanceiro())
+            {
+                MessageBox.Show("Preencha todos os campos corretamente.");
+                return;
+            }
+
+            // Extrai os valores dos campos
+            int quantidade = int.TryParse(QuantidadeTextBox.Text, out var qtd) ? qtd : 0;
+            double preco = double.TryParse(PrecoTextBox.Text, out var prc) ? prc : 0;
+            int parcelas = int.TryParse(ParcelasTextBox.Text, out var parc) ? parc : 1;
+
+            // Cria MovimentacaoData
+            var movimentacao = CriarMovimentacaoData(produtoSelecionado, quantidade, preco, DetalhesTextBox.Text);
+
+            // Adiciona à lista de movimentações
+            movimentacoes.Add(movimentacao);
+
+            // Criar item para lista com base na movimentação
+            MovimentacaoListItem listItem;
+
+            if (usePositiveNumber)
+            {
+                // Se for entrada, cria item com fornecedor
+                listItem = CriarMovimentacaoListItem(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
+
+                // Cria CompraData
+                var compra = CriarCompraData(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
+                compras.Add(compra);
+            }
+            else
+            {
+                // Se for saída, adiciona o cliente
+                listItem = CriarMovimentacaoListItem(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
+
+                // Cria VendaData
+                var venda = CriarVendaData(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
+                vendas.Add(venda);
+            }
+
+            // Adiciona um item semelhante na lista de itens
+            listaMovimentacoes.Add(listItem);
+
+            // Atualiza a lista de itens
+            ListaItemsControl.ItemsSource = null;
+            ListaItemsControl.ItemsSource = listaMovimentacoes;
+
+            AnimateToggleLista();
+            LimparCampos();
+            Invalida();
+        }
+        private MovimentacaoData CriarMovimentacaoData(ProdutoData produto, int quantidade, double preco, string detalhes)
+        {
+            return new MovimentacaoData
+            {
+                ProdutoId = produto.Nome,
+                ProdutoNome = produto.Nome,
+                Tipo = usePositiveNumber ? "Entrada" : "Saída",
+                Preco = preco,
+                Quantidade = quantidade,
+                Data = DateTime.Now,
+                Detalhes = detalhes
+            };
+        }
+        private MovimentacaoListItem CriarMovimentacaoListItem(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
+        {
+            return new MovimentacaoListItem
+            {
+                ProdutoId = produto.Nome,
+                ProdutoNome = produto.Nome,
+                FornecedorId = usePositiveNumber ? FornecedorComboBox.Text : null,
+                ClienteId = !usePositiveNumber ? ClienteComboBox.Text : null,
+                Quantidade = quantidade,
+                Preco = preco,
+                FormaPagamento = FormaPagamentoComboBox.Text,
+                Parcelas = parcelas,
+                Detalhes = detalhes,
+                Data = DateTime.Now,
+                MovimentacaoData = movimentacao
+            };
+        }
+        private CompraData CriarCompraData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
+        {
+            var compra = new CompraData
+            {
+                FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado)?.Id ?? string.Empty,
+                FornecedorNome = fornecedorSelecionado ?? string.Empty,
+                DataCompra = DateTime.Now,
+                DataPagamento = formaPagamentoSelecionada == "À Vista" ? DateTime.Now : null,
+                TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
+                Parcelas = parcelas,
+                NotaFiscal = NotaFiscalTextBox.Text,
+                Itens = new List<MovimentacaoData> { movimentacao },
+                ValorTotal = (decimal)(preco * quantidade),
+                Detalhes = detalhes
+            };
+            if (!string.IsNullOrEmpty(compra.NotaFiscal))
+                compra.SetIdFromNotaFiscal();
+            else
+                compra.Id = Guid.NewGuid().ToString();
+            return compra;
+        }
+        private VendaData CriarVendaData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
+        {
+            var cliente = clientes.FirstOrDefault(c => c.CNPJ == clienteSelecionado || c.Email == clienteSelecionado);
+            var venda = new VendaData
+            {
+                ClienteId = cliente?.Id ?? string.Empty,
+                ClienteCNPJ = cliente?.CNPJ ?? string.Empty,
+                Pedido = NotaFiscalTextBox.Text, // ou outro campo de pedido se houver
+                DataCompra = DateTime.Now,
+                DataPagamento = formaPagamentoSelecionada == "À Vista" ? DateTime.Now : null,
+                TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
+                Parcelas = parcelas,
+                NotaFiscal = NotaFiscalTextBox.Text,
+                Itens = new List<MovimentacaoData> { movimentacao },
+                ValorTotal = (decimal)(preco * quantidade),
+                DataCadastro = DateTime.Now,
+                Detalhes = detalhes
+            };
+            if (!string.IsNullOrEmpty(venda.NotaFiscal))
+                venda.SetIdFromNotaFiscal();
+            else
+                venda.Id = Guid.NewGuid().ToString();
+            return venda;
+        }
+
+        private void AnimateToggleLista()
+        {
+            // Cria uma animação de cor piscando usando o AccentBrush
+            ColorAnimation colorAnimation = new ColorAnimation
+            {
+                From = ((SolidColorBrush)FindResource("PanelBackgroundBrush")).Color,
+                To = ((SolidColorBrush)FindResource("AccentBrush")).Color,
+                Duration = TimeSpan.FromSeconds(0.3),
+                AutoReverse = true,
+                RepeatBehavior = new RepeatBehavior(2)
+            };
+
+            SolidColorBrush brush = new SolidColorBrush(((SolidColorBrush)FindResource("PanelBackgroundBrush")).Color);
+            ToggleLista.Background = brush;
+
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation); // Inicia a animação
+        }
+
+        private void ExcluirItem_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.DataContext is MovimentacaoListItem itemToRemove)
+            {
+                // Remove da lista de movimentações
+                var movimentacaoToRemove = itemToRemove.MovimentacaoData;
+                if (movimentacaoToRemove != null)
+                {
+                    movimentacoes.Remove(movimentacaoToRemove);
+                }
+
+                // Remove da lista de items
+                listaMovimentacoes.Remove(itemToRemove);
+
+                // Atualiza o ItemsSource do ListaItemsControl
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
+            }
+        }
+        private async void ConfirmarPedido_Click(object sender, RoutedEventArgs e)
+        {
+            if (movimentacoes.Count == 0)
+            {
+                MessageBox.Show("Adicione pelo menos um item à lista.");
+                return;
+            }
+
+            try
+            {
+                if (usePositiveNumber)
+                {
+                    // Registra cada compra
+                    foreach (var compra in compras)
+                    {
+                        RegistrarCompra(compra);
+                    }
+                }
+                else
+                {
+                    // Registra cada venda
+                    foreach (var venda in vendas)
+                    {
+                        RegistrarVenda(venda);
+                    }
+                }
+
+                // Registra cada movimentação individualmente
+                foreach (var mov in movimentacoes)
+                {
+                    await RegistrarMovimentacaoAsync(mov);
+                }
+
+                // Limpa a lista e fecha a janela
+                movimentacoes.Clear();
+                listaMovimentacoes.Clear();
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar {(usePositiveNumber ? "compra" : "venda")}: {ex.Message}",
+                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void FecharLista_Click(object sender, RoutedEventArgs e)
+        {
+            // Deixa lista invisível
+            Lista.Visibility = Visibility.Collapsed;
+
+            // Mostra botão
+            ToggleLista.Visibility = Visibility.Visible;
+        }
+        private void RegistrarCompra(CompraData compra)
+        {
+            try
+            {
+                if (compra == null)
+                {
+                    MessageBox.Show("Compra inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                // Inserir a compra no banco de dados
+                var comprasCollection = DatabaseConnect.Database.GetCollection<CompraData>("compras");
+                comprasCollection.Insert(compra);
+
+                // Atualizar o relacionamento com o fornecedor
+                if (!string.IsNullOrEmpty(compra.FornecedorId))
+                {
+                    var fornecedoresCollection = DatabaseConnect.Database.GetCollection<FornecedorData>("fornecedores");
+                    var fornecedor = fornecedoresCollection.FindById(compra.FornecedorId);
+
+                    if (fornecedor != null)
+                    {
+                        // Adicionar o ID da compra à lista de compras relacionadas do fornecedor
+                        fornecedor.ComprasRelacionadas.Add(compra.Id);
+                        fornecedoresCollection.Update(fornecedor);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar compra: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RegistrarVenda(VendaData venda)
+        {
+            try
+            {
+                if (venda == null)
+                {
+                    MessageBox.Show("Venda inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                // Inserir a venda no banco de dados
+                var vendasCollection = DatabaseConnect.Database.GetCollection<VendaData>("vendas");
+                vendasCollection.Insert(venda);
+
+                // Atualizar o relacionamento com o cliente
+                if (!string.IsNullOrEmpty(venda.ClienteId))
+                {
+                    var clientesCollection = DatabaseConnect.Database.GetCollection<ClienteData>("clientes");
+                    var cliente = clientesCollection.FindById(venda.ClienteId);
+
+                    if (cliente != null)
+                    {
+                        // Adicionar o ID da venda à lista de vendas relacionadas do cliente
+                        cliente.VendasRelacionadas.Add(venda.Id);
+                        clientesCollection.Update(cliente);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar venda: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw; // Re-throw para ser capturado pelo método chamador
+            }
+        }
+
+        // Método assíncrono para registrar a movimentação de produtos
+        private async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao)
+        {
+            try
+            {
+                if (movimentacao == null)
+                {
+                    MessageBox.Show("Movimentação inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                collection.Insert(movimentacao);
+
+                // Atualiza o produto no banco de dados usando a função dedicada
+                var produto = produtos.FirstOrDefault(p => p.Nome == movimentacao.ProdutoId);
+                if (produto != null)
+                {
+                    AtualizarProdutoNoBanco(produto, movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método para atualizar o produto no banco de dados
+        private void AtualizarProdutoNoBanco(ProdutoData produto, bool isEntrada, int quantidade, double preco)
+        {
+            if (produto == null) return;
+
+            if (isEntrada)
+            {
+                // Para compra - calcula preço médio ponderado
+                double precoTotal = (produto.Preco * produto.Quantidade) + (preco * quantidade);
+                int novaQuantidade = produto.Quantidade + quantidade;
+                produto.Preco = novaQuantidade > 0 ? precoTotal / novaQuantidade : 0;
+                produto.Quantidade = novaQuantidade;
+            }
+            else
+            {
+                // Para venda - apenas reduz a quantidade
+                produto.Quantidade -= quantidade;
+                if (produto.Quantidade < 0) produto.Quantidade = 0;
+            }
+
+            var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos");
+            produtoCollection.Update(produto);
+        }
+
+
+        // Método para limpar os campos de entrada
+        private void LimparCampos()
+        {
+            // Limpar campos de produto
+            ProdutoComboBox.SelectedItem = null;
+            ProdutoComboBox.Text = string.Empty;
+            produtoSelecionado = null;
+
+            // Limpar campos de fornecedor/cliente
+            if (usePositiveNumber)
+            {
+                LimparComboBox(FornecedorComboBox, out fornecedorSelecionado);
+            }
+            else
+            {
+                LimparComboBox(ClienteComboBox, out clienteSelecionado);
+            }
+
+            // Limpar campos de quantidade, preço, pagamento e detalhes
+            LimparTextBox(QuantidadeTextBox, PrecoTextBox, ParcelasTextBox, DetalhesTextBox, NotaFiscalTextBox);
+
+            FormaPagamentoComboBox.SelectedItem = null;
+            formaPagamentoSelecionada = null;
+
+            // Limpar campos de exibição
+            LimparTextBlock(
+                TipoAntesDadoTextBlock, MarcaAntesDadoTextBlock, CodigoAntesDadoTextBlock, PrecoAntesDadoTextBlock, QuantidadeAntesDadoTextBlock,
+                TipoDepoisDadoTextBlock, MarcaDepoisDadoTextBlock, CodigoDepoisDadoTextBlock, PrecoDepoisDadoTextBlock, QuantidadeDepoisDadoTextBlock
+            );
+
+            // Ocultar detalhes do produto
+            ProdutoAntesDepois.Visibility = Visibility.Collapsed;
+
+            // Foca no Produto novamente
+            ProdutoComboBox.Focus();
+        }
+
+        private void LimparComboBox(ComboBox comboBox, out string? selecionado)
+        {
+            comboBox.SelectedItem = null;
+            comboBox.Text = string.Empty;
+            selecionado = null;
+        }
+
+        private void LimparTextBox(params TextBox[] textBoxes)
+        {
+            foreach (var tb in textBoxes)
+                tb.Clear();
+        }
+
+        private void LimparTextBlock(params TextBlock[] textBlocks)
+        {
+            foreach (var tb in textBlocks)
+                tb.Text = string.Empty;
+        }
+
+
+        // Todos os métodos de validação de entrada de texto
+        // Quantidade
+        private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+        private void QuantidadeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (!textBox.Text.All(char.IsDigit))
+                {
+                    textBox.Clear();
+                    return;
+                }
+
+                // Verifica se vai faltar no estoque (apenas para saída)
+                if (!usePositiveNumber && int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes) && int.TryParse(textBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        textBox.Clear();
+                        return;
+                    }
+                }
+
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+                }
+            }
+        }
+        private void QuantidadeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                // Verifica se vai faltar no estoque (apenas para saída)
+                if (!usePositiveNumber && int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes) && int.TryParse(QuantidadeTextBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        QuantidadeTextBox.Clear();
+                        return;
+                    }
+                }
+
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+                ValidarMovimentacao();
+            }
+        }
+        // Preço
+        private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos e uma vírgula (para decimal)
+            var textBox = (TextBox)sender;
+            string text = textBox.Text.Insert(textBox.SelectionStart, e.Text);
+
+            // Só permite uma vírgula e pelo menos um dígito
+            e.Handled = !IsValidDecimalInput(text);
+        }
+        private void PrecoTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsValidDecimalInput(text))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (!IsValidDecimalInput(textBox.Text))
+                    textBox.Clear();
+
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+                }
+            }
+        }
+        private bool IsValidDecimalInput(string text)
+        {
+            // Permite apenas dígitos e no máximo uma vírgula, e não pode começar por vírgula
+            if (string.IsNullOrEmpty(text)) return true;
+            int commaCount = text.Count(c => c == ',');
+            if (commaCount > 1) return false;
+            if (text.StartsWith(",")) return false;
+            return text.All(c => char.IsDigit(c) || c == ',');
+        }
+        private void PrecoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+                ValidarMovimentacao();
+            }
+        }
+        // Parcelas
+        private void ParcelasTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos e impede valor maior que 6
+            if (!e.Text.All(char.IsDigit))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var textBox = sender as TextBox;
+            string novoTexto = textBox != null
+                ? textBox.Text.Insert(textBox.SelectionStart, e.Text)
+                : e.Text;
+
+            if (int.TryParse(novoTexto, out int valor))
+            {
+                e.Handled = valor > 6 || valor < 1;
+            }
+            else
+            {
+                e.Handled = true;
+            }
+        }
+        private void ParcelasTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void ParcelasTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (!textBox.Text.All(char.IsDigit))
+                    textBox.Clear();
+            }
+        }
+        private void ParcelasTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (int.TryParse(textBox.Text, out int parcelas))
+                {
+                    textBox.Text = parcelas.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
+                }
+                else
+                {
+                    MessageBox.Show("Parcelas inválidas.");
+                    textBox.Clear();
+                }
+            }
+        }
+        // Nota Fiscal - NÃO UTILIZADO ATÉ O MOMENTO
+        private void NotaFiscalTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                // Verifica se o texto é um número válido
+                if (!textBox.Text.All(char.IsDigit))
+                {
+                    MessageBox.Show("Nota fiscal inválida.");
+                    textBox.Clear();
+                }
+            }
+        }
+        private void NotaFiscalTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                // Verifica se o texto é um número válido
+                if (!textBox.Text.All(char.IsDigit))
+                {
+                    MessageBox.Show("Nota fiscal inválida.");
+                    textBox.Clear();
+                }
+            }
+        }
+        private void NotaFiscalTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+        private void NotaFiscalTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+
+        // Validações
+        // Método para validar Movimentação
+        private bool ValidarMovimentacao()
+        {
+            // Se algum campo estiver vazio, retorna false
+            if (string.IsNullOrEmpty(ProdutoComboBox.Text) || string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
+            {
+                Invalida();
+                return false;
+            }
+
+            // Verifica se já não está válida
+            if (StatusMessage.Text == "Movimentação VÁLIDA!")
+            {
+                return true;
+            }
+
+            // Valida produto selecionado
+            if (produtoSelecionado == null)
+            {
+                MessageBox.Show("Produto inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Valida fornecedor ou cliente selecionado
+            if (usePositiveNumber && string.IsNullOrEmpty(FornecedorComboBox.Text))
+            {
+                MessageBox.Show("Fornecedor inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+            else if (!usePositiveNumber && string.IsNullOrEmpty(ClienteComboBox.Text))
+            {
+                MessageBox.Show("Cliente inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Valida quantidade
+            if (!int.TryParse(QuantidadeTextBox.Text, out int quantidade) || quantidade <= 0)
+            {
+                // Verifica se existe quantidade suficiente no estoque
+                if (!usePositiveNumber && produtoSelecionado.Quantidade < quantidade)
+                {
+                    MessageBox.Show("Quantidade insuficiente no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Invalida();
+                    return false;
+                }
+                MessageBox.Show("Quantidade inválida.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Valida preço
+            if (!double.TryParse(PrecoTextBox.Text, out double preco) || preco <= 0)
+            {
+                MessageBox.Show("Preço inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Se todas as validações passarem, valida
+            Valida();
+
+            return true;
+        }
+        // Método para validar parte financeira
+        private bool ValidarFinanceiro()
+        {
+            // Se algum campo estiver vazio, retorna false
+            if (string.IsNullOrEmpty(FormaPagamentoComboBox.Text) || string.IsNullOrEmpty(ParcelasTextBox.Text) || string.IsNullOrEmpty(NotaFiscalTextBox.Text))
+            {
+                return false;
+            }
+            // Valida forma de pagamento
+            if (formaPagamentoSelecionada == null)
+            {
+                MessageBox.Show("Forma de pagamento inválida.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            // Valida parcelas
+            if (!int.TryParse(ParcelasTextBox.Text, out int parcelas) || parcelas <= 0)
+            {
+                MessageBox.Show("Parcelas inválidas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            return true;
+        }
+
+        private void Valida()
+        {
+            // Ao validar, altera mensagem status
+            StatusMessage.Text = "Movimentação VÁLIDA!";
+            StatusMessage.Foreground = (Brush)FindResource("AccentBrush");
+
+            // Altera visibilidade da parte financeira
+            Financeiro.Visibility = Visibility.Visible;
+        }
+
+        private void Invalida()
+        {
+            // Ao invalidar, altera mensagem status
+            StatusMessage.Text = "Movimentação INVÁLIDA!";
+            StatusMessage.Foreground = (Brush)FindResource("CancelButtonHoverBrush");
+
+            // Altera visibilidade da parte financeira
+            Financeiro.Visibility = Visibility.Collapsed;
+        }
+
+        // Método para validar parte financeira
+    }
+}

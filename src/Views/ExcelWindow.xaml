@@ -79,7 +79,7 @@
 
                     <!-- ComboBox para selecionar o modo de importação -->
                     <ComboBox Name="ImportModeComboBox" Grid.Row="0"
-                              Style="{StaticResource ComboBoxStyle}"
+                              Style="{StaticResource ComboBoxSelectStyle}"
                               Margin="0,0,0,15"
                               SelectedIndex="0">
                         <ComboBoxItem Content="Adicionar Dados" />
@@ -94,7 +94,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="18" Height="36" Margin="0,0,10,0">
+                        <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="15" Height="36" Margin="0,0,10,0">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -106,7 +106,7 @@
                             </Grid>
                         </Border>
                         <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
-                        <ComboBox Grid.Column="3" x:Name="TabelaComboBox" ToolTip="Selecionar Tabela" Style="{StaticResource ComboBoxStyle}" Margin="5,0,0,0" SelectionChanged="TabelaComboBox_SelectionChanged">
+                        <ComboBox Grid.Column="3" x:Name="TabelaComboBox" ToolTip="Selecionar Tabela" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="TabelaComboBox_SelectionChanged">
                         </ComboBox>
                     </Grid>
 
