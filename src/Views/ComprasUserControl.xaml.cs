@@ -1,20 +1,25 @@
-﻿    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Media;
-    using WMS_RadiadoresLemos_WPF.src.Models;
-    using WMS_RadiadoresLemos_WPF.src.Services;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Controls.Primitives;
+using System.ComponentModel;
+using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
-    namespace WMS_RadiadoresLemos_WPF.src.Views
-    {
+namespace WMS_RadiadoresLemos_WPF.src.Views
+{
     public partial class ComprasUserControl : UserControl
     {
         private List<CompraData> _todasCompras;      // Lista completa de compras
         private List<CompraData> _comprasFiltradas;  // Lista filtrada e ordenada
         private string _ordenacaoAtual = "recente";
         private string _filtroTexto = "Ordenar por";
+        private DateTime _currentCalendarMonth = DateTime.Today;
+        private CalendarDayViewModel _selectedDay; // Variável para armazenar o dia selecionado atualmente
 
         public ComprasUserControl()
         {
@@ -26,6 +31,7 @@
         private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarCompras();
+            CarregarCalendario();
         }
 
         private void CarregarCompras()
@@ -192,6 +198,238 @@
                 {
                     contentControl.Content = detalhesCompraUserControl;
                 }
+            }
+        }
+
+        // Navegação do calendário
+        private void PrevMonthButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Navegar para o mês anterior
+            MudarMesCalendario(-1);
+        }
+
+        private void NextMonthButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Navegar para o próximo mês
+            MudarMesCalendario(1);
+        }
+
+        private void MudarMesCalendario(int incrementoMes)
+        {
+            _currentCalendarMonth = _currentCalendarMonth.AddMonths(incrementoMes);
+            CarregarCalendario();
+        }
+
+        // Carrega os dias no calendário
+        private void CarregarCalendario()
+        {
+            CalendarMonthText.Text = _currentCalendarMonth.ToString("MMMM yyyy");
+
+            var days = new List<CalendarDayViewModel>();
+            DateTime firstDayOfMonth = new DateTime(_currentCalendarMonth.Year, _currentCalendarMonth.Month, 1);
+            int offset = ((int)firstDayOfMonth.DayOfWeek);
+
+            // Dias do mês anterior
+            DateTime previousMonth = firstDayOfMonth.AddDays(-offset);
+            for (int i = 0; i < offset; i++)
+            {
+                days.Add(new CalendarDayViewModel
+                {
+                    Day = previousMonth.AddDays(i).Day.ToString(),
+                    IsCurrentMonth = false,
+                    Date = previousMonth.AddDays(i)
+                });
+            }
+
+            // Dias do mês atual
+            int daysInMonth = DateTime.DaysInMonth(firstDayOfMonth.Year, firstDayOfMonth.Month);
+            for (int i = 1; i <= daysInMonth; i++)
+            {
+                var currentDate = new DateTime(firstDayOfMonth.Year, firstDayOfMonth.Month, i);
+                var day = new CalendarDayViewModel
+                {
+                    Day = i.ToString(),
+                    IsCurrentMonth = true,
+                    IsToday = currentDate.Date == DateTime.Today,
+                    Date = currentDate
+                };
+
+                // Verificar se há compras ou pagamentos neste dia
+                day.HasPayment = VerificarPagamentosNaData(currentDate);
+                days.Add(day);
+            }
+
+            // Completar o grid com dias do próximo mês
+            int remainingDays = 42 - days.Count; // 6 linhas x 7 colunas = 42 células
+            DateTime nextMonth = firstDayOfMonth.AddMonths(1);
+            for (int i = 1; i <= remainingDays; i++)
+            {
+                days.Add(new CalendarDayViewModel
+                {
+                    Day = i.ToString(),
+                    IsCurrentMonth = false,
+                    Date = new DateTime(nextMonth.Year, nextMonth.Month, i)
+                });
+            }
+
+            CalendarDaysControl.ItemsSource = days;
+        }
+
+        // Verifica se há pagamentos programados para uma data específica
+        private bool VerificarPagamentosNaData(DateTime data)
+        {
+            if (_todasCompras == null) return false;
+
+            return _todasCompras.Any(c =>
+                (c.DataCompra.Date == data.Date) ||
+                (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date)
+            );
+        }
+
+        private void CalendarDayButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is DateTime selectedDate)
+            {
+                // Encontra o objeto CalendarDayViewModel do dia clicado
+                var days = CalendarDaysControl.ItemsSource as List<CalendarDayViewModel>;
+                if (days != null)
+                {
+                    // Limpar a seleção anterior
+                    if (_selectedDay != null)
+                    {
+                        _selectedDay.IsSelected = false;
+                    }
+
+                    // Definir o novo dia selecionado
+                    var clickedDay = days.FirstOrDefault(d => d.Date.Date == selectedDate.Date);
+                    if (clickedDay != null)
+                    {
+                        clickedDay.IsSelected = true;
+                        _selectedDay = clickedDay;
+                    }
+                }
+
+                // Atualizar o texto da data selecionada
+                DataSelecionadaText.Text = selectedDate.ToString("dd 'de' MMMM 'de' yyyy");
+
+                // Buscar compras ou pagamentos para a data selecionada
+                var comprasNoDia = BuscarComprasNoDia(selectedDate);
+
+                if (comprasNoDia.Any())
+                {
+                    ComprasDoDiaList.ItemsSource = comprasNoDia;
+                    ComprasDoDiaList.Visibility = Visibility.Visible;
+                    SemComprasNoDiaText.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    ComprasDoDiaList.ItemsSource = null;
+                    ComprasDoDiaList.Visibility = Visibility.Collapsed;
+                    SemComprasNoDiaText.Visibility = Visibility.Visible;
+                }
+
+                // Mostrar o painel de detalhes
+                DiaDetalhesPanel.Visibility = Visibility.Visible;
+            }
+        }
+
+        private List<CompraData> BuscarComprasNoDia(DateTime data)
+        {
+            if (_comprasFiltradas == null)
+                return new List<CompraData>();
+
+            return _comprasFiltradas
+                .Where(c =>
+                    (c.DataCompra.Date == data.Date) ||
+                    (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date))
+                .ToList();
+        }
+
+        private void DetalhesCompraCalendarioButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is CompraData compra)
+            {
+                var detalhesCompraUserControl = new DetalhesUserControl(compra);
+                var contentControl = (Parent as ContentControl);
+                if (contentControl != null)
+                {
+                    contentControl.Content = detalhesCompraUserControl;
+                }
+            }
+        }
+
+        // Classe para representar um dia no calendário
+        public class CalendarDayViewModel : INotifyPropertyChanged
+        {
+            public string Day { get; set; }
+            public DateTime Date { get; set; }
+
+            private bool _isCurrentMonth;
+            public bool IsCurrentMonth
+            {
+                get => _isCurrentMonth;
+                set
+                {
+                    _isCurrentMonth = value;
+                    OnPropertyChanged(nameof(Foreground));
+                }
+            }
+
+            private bool _isToday;
+            public bool IsToday
+            {
+                get => _isToday;
+                set
+                {
+                    _isToday = value;
+                    OnPropertyChanged(nameof(TodayIndicatorVisibility));
+                }
+            }
+
+            private bool _hasPayment;
+            public bool HasPayment
+            {
+                get => _hasPayment;
+                set
+                {
+                    _hasPayment = value;
+                    OnPropertyChanged(nameof(PaymentVisibility));
+                }
+            }
+
+            private bool _isSelected;
+            public bool IsSelected
+            {
+                get => _isSelected;
+                set
+                {
+                    _isSelected = value;
+                    OnPropertyChanged(nameof(SelectedBorderThickness));
+                    OnPropertyChanged(nameof(FontWeight));
+                }
+            }
+
+            // Cor do texto do dia
+            public Brush Foreground => IsCurrentMonth ?
+                new SolidColorBrush(Colors.Black) :
+                new SolidColorBrush(Color.FromArgb(127, 0, 0, 0));
+
+            // Visibilidade do indicador de dia atual
+            public Visibility TodayIndicatorVisibility => IsToday ? Visibility.Visible : Visibility.Collapsed;
+
+            // Espessura da borda para dia selecionado
+            public Thickness SelectedBorderThickness => IsSelected ? new Thickness(3) : new Thickness(0);
+
+            // Estilo do texto
+            public FontWeight FontWeight => IsToday ? FontWeights.Bold : FontWeights.Normal;
+
+            // Visibilidade do indicador de pagamento
+            public Visibility PaymentVisibility => HasPayment ? Visibility.Visible : Visibility.Collapsed;
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected void OnPropertyChanged(string name)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             }
         }
     }
