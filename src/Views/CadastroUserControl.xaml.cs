@@ -4,6 +4,10 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using Microsoft.Win32;
+using System.Xml.Linq;
+using System.IO;
+using System.Linq;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -710,6 +714,74 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             // Atualiza o DataGrid após a exclusão
             CarregarDadosTabela(_tabelaAtual);
+        }
+
+        private void ImportarXMLButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecione o arquivo XML da nota fiscal",
+                Filter = "Arquivos XML (*.xml)|*.xml",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                RestoreDirectory = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var xmlDoc = XDocument.Load(dialog.FileName);
+                    XNamespace ns = "http://www.portalfiscal.inf.br/nfe";
+                    var infNFe = xmlDoc.Descendants(ns + "infNFe").FirstOrDefault();
+                    if (infNFe == null)
+                        throw new Exception("Estrutura de XML inválida para NF-e.");
+
+                    var nota = new NotaData();
+
+                    // Identificação
+                    nota.NumeroNota = infNFe.Element(ns + "ide")?.Element(ns + "nNF")?.Value ?? string.Empty;
+                    nota.Id = nota.NumeroNota; // O Id será o número da nota
+                    nota.DataEmissao = DateTime.TryParse(infNFe.Element(ns + "ide")?.Element(ns + "dhEmi")?.Value, out var dataEmissao) ? dataEmissao : DateTime.MinValue;
+                    nota.NaturezaOperacao = infNFe.Element(ns + "ide")?.Element(ns + "natOp")?.Value ?? string.Empty;
+
+                    // Emitente
+                    var emit = infNFe.Element(ns + "emit");
+                    nota.EmitenteCNPJ = emit?.Element(ns + "CNPJ")?.Value ?? string.Empty;
+                    nota.EmitenteNome = emit?.Element(ns + "xNome")?.Value ?? string.Empty;
+                    var enderEmit = emit?.Element(ns + "enderEmit");
+                    nota.EmitenteEndereco = enderEmit?.Element(ns + "xLgr")?.Value + ", " + enderEmit?.Element(ns + "nro")?.Value;
+                    nota.EmitenteBairro = enderEmit?.Element(ns + "xBairro")?.Value ?? string.Empty;
+                    nota.EmitenteMunicipio = enderEmit?.Element(ns + "xMun")?.Value ?? string.Empty;
+                    nota.EmitenteUF = enderEmit?.Element(ns + "UF")?.Value ?? string.Empty;
+                    nota.EmitenteCEP = enderEmit?.Element(ns + "CEP")?.Value ?? string.Empty;
+
+                    // Destinatário
+                    var dest = infNFe.Element(ns + "dest");
+                    nota.DestinatarioCNPJ = dest?.Element(ns + "CNPJ")?.Value ?? string.Empty;
+                    nota.DestinatarioNome = dest?.Element(ns + "xNome")?.Value ?? string.Empty;
+
+                    // Salva no banco de dados
+                    var collection = _database.GetCollection<NotaData>("notas");
+                    collection.Upsert(nota);
+
+                    MessageBox.Show(
+                        "Nota fiscal importada com sucesso!\n\n" +
+                        $"Número: {nota.NumeroNota}\n" +
+                        $"Emissão: {nota.DataEmissao:dd/MM/yyyy}\n" +
+                        $"Emitente: {nota.EmitenteNome}",
+                        "Sucesso",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Erro ao importar arquivo XML:\n{ex.Message}",
+                        "Erro",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
         }
     }
 }
