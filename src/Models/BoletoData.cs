@@ -18,7 +18,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
 
         // Referência ao fornecedor
         [BsonField("fornecedorId")]
-        public Guid FornecedorId { get; set; }
+        public string FornecedorId { get; set; } = string.Empty;
 
         // Data de vencimento do boleto
         [BsonField("vencimento")]

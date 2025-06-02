@@ -295,7 +295,7 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBox Name="NotaFiscalTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                                  Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap" Grid.Column="0"/>
+                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap" Grid.Column="0" TextChanged="NotaFiscalTextBox_TextChanged_1" Grid.ColumnSpan="2" Margin="5,0,157,0"/>
                                         <Button Content="Importar XML Nota Fiscal" Style="{StaticResource EmphasisButtonStyle}"
                                                 Click="ImportarXMLButton_Click" Grid.Column="1" Margin="10,0,0,0" FontSize="11"/>
                                     </Grid>
@@ -316,7 +316,8 @@
                         <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0" Visibility="Visible"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
                                 x:Name="ToggleLista" Click="ToggleLista_Click">
-                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="28" Width="25"/>
+                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="20
+                                   " Width="25"/>
                         </Button>
                     </Grid>
                 </Border>

@@ -15,6 +15,7 @@ using System.Windows.Media.Animation;
 using System.Xml.Linq;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using System.IO;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -44,7 +45,7 @@ namespace WMS_RadiadoresLemos_WPF
         private string? formaPagamentoSelecionada;
         private readonly List<string> opcoesFormaPagamento = new List<string>();
         private ObservableCollection<BoletoData> boletos = new();
-
+        private string? numeroNotaFiscalAtual;
 
         public AddEntradaSaídaWindow()
         {
@@ -81,7 +82,7 @@ namespace WMS_RadiadoresLemos_WPF
             produtoSelecionado = null;
             usePositiveNumber = isEntrada;
 
-            CarregarDados();
+            CarregarDados().Wait();
             ToggleVisibility(false);
         }
 
@@ -599,6 +600,9 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
+            // Armazena o número da nota fiscal atual
+            numeroNotaFiscalAtual = NotaFiscalTextBox.Text.Trim();
+
             // Extrai os valores dos campos
             int quantidade = int.TryParse(QuantidadeTextBox.Text, out var qtd) ? qtd : 0;
             double preco = double.TryParse(PrecoTextBox.Text, out var prc) ? prc : 0;
@@ -621,19 +625,45 @@ namespace WMS_RadiadoresLemos_WPF
                 // Cria CompraData
                 var compra = CriarCompraData(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
 
-                // Cria BoletoData se houver
+                // Cria e associa os boletos à compra
                 if (BoletosItemsControl.Items.Count > 0)
                 {
+                    compra.Boletos = new List<string>();
+                    var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado);
+                    if (fornecedor == null)
+                    {
+                        MessageBox.Show("Fornecedor não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
                     foreach (var boleto in BoletosItemsControl.Items.Cast<BoletoData>())
                     {
-                        //TODO: Implementar lógica de criação de boleto e associação com a compra
-                        return;
+                        // Cria uma cópia do boleto para a compra
+                        var boletoCompra = new BoletoData
+                        {
+                            Parcela = boleto.Parcela,
+                            Vencimento = boleto.Vencimento,
+                            CaminhoArquivo = boleto.CaminhoArquivo,
+                            NotaFiscal = numeroNotaFiscalAtual,
+                            FornecedorId = fornecedor.CNPJ
+                        };
+                        boletoCompra.SetIdFromNotaFiscal();
+                        
+                        // Gera o nome do boleto no formato BoletoNF{numeroNF}-Parcela{boleto.Parcela}
+                        var extensao = Path.GetExtension(boleto.CaminhoArquivo);
+                        var nomeBoleto = $"BoletoNF{numeroNotaFiscalAtual}-Parcela{boleto.Parcela}{extensao}";
+                        
+                        // Adiciona o nome do boleto à lista de boletos da compra
+                        compra.Boletos.Add(nomeBoleto);
+
+                        // Salva o boleto no banco de dados
+                        var boletosCollection = DatabaseConnect.Database.GetCollection<BoletoData>("boletos");
+                        boletosCollection.Upsert(boletoCompra);
                     }
                 }
 
                 // Adiciona a compra à lista de compras
                 compras.Add(compra);
-
             }
             else
             {
@@ -787,6 +817,16 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         RegistrarCompras(compra);
                     }
+
+                    // Organiza os boletos
+                    var organizadorBoleto = new OrganizarBoleto(numeroNotaFiscalAtual);
+                    foreach (var boleto in boletos)
+                    {
+                        if (!string.IsNullOrEmpty(boleto.CaminhoArquivo))
+                        {
+                            organizadorBoleto.Organizar(boleto);
+                        }
+                    }
                 }
                 else
                 {
@@ -817,14 +857,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void FecharLista_Click(object sender, RoutedEventArgs e)
-        {
-            // Deixa lista invisível
-            Lista.Visibility = Visibility.Collapsed;
-
-            // Mostra botão
-            ToggleLista.Visibility = Visibility.Visible;
-        }
         private void RegistrarCompras(CompraData compra)
         {
             try
@@ -1426,6 +1458,20 @@ namespace WMS_RadiadoresLemos_WPF
                         MessageBoxImage.Error);
                 }
             }
+        }
+
+        private void NotaFiscalTextBox_TextChanged_1(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void FecharLista_Click(object sender, RoutedEventArgs e)
+        {
+            // Deixa lista invisível
+            Lista.Visibility = Visibility.Collapsed;
+
+            // Mostra botão
+            ToggleLista.Visibility = Visibility.Visible;
         }
     }
 }
