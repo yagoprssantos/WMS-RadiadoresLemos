@@ -28,8 +28,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 string extensao = Path.GetExtension(boleto.CaminhoArquivo);
                 
                 // Cria o caminho base para os boletos
-                string caminhoBase = @"C:\Users\joevi\Documents\WMS-RadiadoresLemos\Boletos";
-                
+                string caminhoBase = Path.Combine(
+                                                   Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                                                   "WMS-RadiadoresLemos",
+                                                   "Boletos"
+                                                 );
+
                 // Cria as pastas do ano e mês
                 string pastaAno = Path.Combine(caminhoBase, boleto.Vencimento.Year.ToString());
                 string nomeMes = $"{boleto.Vencimento.Month} - {boleto.Vencimento.ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"))}";
