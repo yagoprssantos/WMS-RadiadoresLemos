@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LiteDB;
+using Microsoft.Win32;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,13 +8,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Data;
-using WMS_RadiadoresLemos_WPF.src.Models;
-using WMS_RadiadoresLemos_WPF.src.Services;
-using LiteDB;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Xml.Linq;
+using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -41,6 +43,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Dados de pagamento
         private string? formaPagamentoSelecionada;
         private readonly List<string> opcoesFormaPagamento = new List<string>();
+        private ObservableCollection<BoletoData> boletos = new();
 
 
         public AddEntradaSaídaWindow()
@@ -51,6 +54,7 @@ namespace WMS_RadiadoresLemos_WPF
                         .ToList();
 
             ListaItemsControl.ItemsSource = movimentacoes;
+            BoletosItemsControl.ItemsSource = boletos;
         }
 
         public AddEntradaSaídaWindow(bool isEntrada) : this()
@@ -396,7 +400,72 @@ namespace WMS_RadiadoresLemos_WPF
                 }
             }
         }
-        
+
+        // Métodos para boletos
+        // Adiciona um novo boleto à lista
+        private void AdicionarBoletoButton_Click(object sender, RoutedEventArgs e)
+        {
+            int proximaParcela = boletos.Count + 1;
+            int totalParcelas = 1;
+            int.TryParse(ParcelasTextBox.Text, out totalParcelas);
+            if (proximaParcela > totalParcelas)
+            {
+                MessageBox.Show("Todas as parcelas já foram adicionadas.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Cria um novo boleto com valores padrão
+            var novoBoleto = new BoletoData
+            {
+                Parcela = proximaParcela,
+                Vencimento = DateTime.Now.AddMonths(proximaParcela - 1),
+                CaminhoArquivo = string.Empty
+            };
+
+            boletos.Add(novoBoleto);
+        }
+
+        // Remove boleto da lista
+        private void RemoverBoletoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int parcela)
+            {
+                var boleto = boletos.FirstOrDefault(b => b.Parcela == parcela);
+                if (boleto != null)
+                {
+                    boletos.Remove(boleto);
+                    // Atualiza o ItemsControl
+                    BoletosItemsControl.Items.Refresh();
+                }
+            }
+        }
+
+        private void SelecionarBoletoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int parcela)
+            {
+                var boleto = boletos.FirstOrDefault(b => b.Parcela == parcela);
+                if (boleto != null)
+                {
+                    var dialog = new OpenFileDialog
+                    {
+                        Title = "Selecione o arquivo do boleto",
+                        Filter = "Arquivos PDF (*.pdf)|*.pdf|Todos os arquivos (*.*)|*.*",
+                        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        RestoreDirectory = true
+                    };
+
+                    if (dialog.ShowDialog() == true)
+                    {
+                        boleto.CaminhoArquivo = dialog.FileName;
+                        // Atualiza o ItemsControl
+                        BoletosItemsControl.Items.Refresh();
+                    }
+                }
+            }
+        }
+
+
         // Método chamado quando um produto é selecionado, altera as informações apresentadas na tela
         private bool AtualizarCamposProduto(ProdutoData produto)
         {
@@ -551,7 +620,20 @@ namespace WMS_RadiadoresLemos_WPF
 
                 // Cria CompraData
                 var compra = CriarCompraData(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
+
+                // Cria BoletoData se houver
+                if (BoletosItemsControl.Items.Count > 0)
+                {
+                    foreach (var boleto in BoletosItemsControl.Items.Cast<BoletoData>())
+                    {
+                        //TODO: Implementar lógica de criação de boleto e associação com a compra
+                        return;
+                    }
+                }
+
+                // Adiciona a compra à lista de compras
                 compras.Add(compra);
+
             }
             else
             {
@@ -703,7 +785,7 @@ namespace WMS_RadiadoresLemos_WPF
                     // Registra cada compra
                     foreach (var compra in compras)
                     {
-                        RegistrarCompra(compra);
+                        RegistrarCompras(compra);
                     }
                 }
                 else
@@ -711,7 +793,7 @@ namespace WMS_RadiadoresLemos_WPF
                     // Registra cada venda
                     foreach (var venda in vendas)
                     {
-                        RegistrarVenda(venda);
+                        RegistrarVendas(venda);
                     }
                 }
 
@@ -743,7 +825,7 @@ namespace WMS_RadiadoresLemos_WPF
             // Mostra botão
             ToggleLista.Visibility = Visibility.Visible;
         }
-        private void RegistrarCompra(CompraData compra)
+        private void RegistrarCompras(CompraData compra)
         {
             try
             {
@@ -779,7 +861,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        private void RegistrarVenda(VendaData venda)
+        private void RegistrarVendas(VendaData venda)
         {
             try
             {
@@ -907,20 +989,17 @@ namespace WMS_RadiadoresLemos_WPF
             // Foca no Produto novamente
             ProdutoComboBox.Focus();
         }
-
         private void LimparComboBox(ComboBox comboBox, out string? selecionado)
         {
             comboBox.SelectedItem = null;
             comboBox.Text = string.Empty;
             selecionado = null;
         }
-
         private void LimparTextBox(params TextBox[] textBoxes)
         {
             foreach (var tb in textBoxes)
                 tb.Clear();
         }
-
         private void LimparTextBlock(params TextBlock[] textBlocks)
         {
             foreach (var tb in textBlocks)
@@ -1056,7 +1135,7 @@ namespace WMS_RadiadoresLemos_WPF
         // Parcelas
         private void ParcelasTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            // Permite apenas dígitos e impede valor maior que 6
+            // Permite apenas dígitos e impede valor maior que 8
             if (!e.Text.All(char.IsDigit))
             {
                 e.Handled = true;
@@ -1070,7 +1149,7 @@ namespace WMS_RadiadoresLemos_WPF
 
             if (int.TryParse(novoTexto, out int valor))
             {
-                e.Handled = valor > 6 || valor < 1;
+                e.Handled = valor > 8 || valor < 1;
             }
             else
             {
@@ -1269,5 +1348,84 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para validar parte financeira
+
+
+
+
+
+
+
+
+
+
+        // TEMP
+
+        private void ImportarXMLButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecione o arquivo XML da nota fiscal",
+                Filter = "Arquivos XML (*.xml)|*.xml",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                RestoreDirectory = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var xmlDoc = XDocument.Load(dialog.FileName);
+                    XNamespace ns = "http://www.portalfiscal.inf.br/nfe";
+                    var infNFe = xmlDoc.Descendants(ns + "infNFe").FirstOrDefault();
+                    if (infNFe == null)
+                        throw new Exception("Estrutura de XML inválida para NF-e.");
+
+                    var nota = new NotaData();
+
+                    // Identificação
+                    nota.NumeroNota = infNFe.Element(ns + "ide")?.Element(ns + "nNF")?.Value ?? string.Empty;
+                    nota.Id = nota.NumeroNota; // O Id será o número da nota
+                    nota.DataEmissao = DateTime.TryParse(infNFe.Element(ns + "ide")?.Element(ns + "dhEmi")?.Value, out var dataEmissao) ? dataEmissao : DateTime.MinValue;
+                    nota.NaturezaOperacao = infNFe.Element(ns + "ide")?.Element(ns + "natOp")?.Value ?? string.Empty;
+
+                    // Emitente
+                    var emit = infNFe.Element(ns + "emit");
+                    nota.EmitenteCNPJ = emit?.Element(ns + "CNPJ")?.Value ?? string.Empty;
+                    nota.EmitenteNome = emit?.Element(ns + "xNome")?.Value ?? string.Empty;
+                    var enderEmit = emit?.Element(ns + "enderEmit");
+                    nota.EmitenteEndereco = enderEmit?.Element(ns + "xLgr")?.Value + ", " + enderEmit?.Element(ns + "nro")?.Value;
+                    nota.EmitenteBairro = enderEmit?.Element(ns + "xBairro")?.Value ?? string.Empty;
+                    nota.EmitenteMunicipio = enderEmit?.Element(ns + "xMun")?.Value ?? string.Empty;
+                    nota.EmitenteUF = enderEmit?.Element(ns + "UF")?.Value ?? string.Empty;
+                    nota.EmitenteCEP = enderEmit?.Element(ns + "CEP")?.Value ?? string.Empty;
+
+                    // Destinatário
+                    var dest = infNFe.Element(ns + "dest");
+                    nota.DestinatarioCNPJ = dest?.Element(ns + "CNPJ")?.Value ?? string.Empty;
+                    nota.DestinatarioNome = dest?.Element(ns + "xNome")?.Value ?? string.Empty;
+
+                    //// Salva no banco de dados
+                    //var collection = DatabaseConnect.Database.GetCollection<NotaData>("notas");
+                    //collection.Upsert(nota);
+
+                    MessageBox.Show(
+                        "Nota fiscal importada com sucesso!\n\n" +
+                        $"Número: {nota.NumeroNota}\n" +
+                        $"Emissão: {nota.DataEmissao:dd/MM/yyyy}\n" +
+                        $"Emitente: {nota.EmitenteNome}",
+                        "Sucesso",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Erro ao importar arquivo XML:\n{ex.Message}",
+                        "Erro",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+        }
     }
 }

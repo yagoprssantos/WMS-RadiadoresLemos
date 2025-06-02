@@ -63,7 +63,6 @@
                     <Button Content="Cadastrar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="0,10,0,0" Click="CadastrarButton_Click"/>
                     <Button Content="Editar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="15,10,0,0" Click="EditarButton_Click"/>
                     <Button Content="Deletar" Width="150" Style="{StaticResource CancelButtonStyle}" Margin="15,10,0,0" Click="DeletarButton_Click"/>
-                    <Button Content="Importar XML Nota Fiscal" Width="219" Style="{StaticResource EmphasisButtonStyle}" Margin="15,10,0,0" Click="ImportarXMLButton_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

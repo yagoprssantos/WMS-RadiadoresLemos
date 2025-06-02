@@ -14,7 +14,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
 
         // Nota Fiscal associada à compra/venda
         [BsonField("notaFiscal")]
-        public string NotaFiscal { get; set; }
+        public string? NotaFiscal { get; set; }
 
         // Referência ao fornecedor
         [BsonField("fornecedorId")]

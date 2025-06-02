@@ -185,21 +185,21 @@
                                                         <Grid>
                                                             <!-- Indicador de dia atual (círculo de fundo) -->
                                                             <Ellipse Width="32" Height="32" Fill="{StaticResource PanelBackgroundBrush}"
-                                                             Visibility="{Binding TodayIndicatorVisibility}"/>
+                                                                     Visibility="{Binding TodayIndicatorVisibility}"/>
 
                                                             <!-- Indicador de seleção (borda) -->
                                                             <Border Width="32" Height="32" CornerRadius="10" 
-                                                            BorderBrush="{StaticResource AccentBrush}" 
-                                                            BorderThickness="{Binding SelectedBorderThickness}"/>
+                                                                    BorderBrush="{StaticResource AccentBrush}" 
+                                                                    BorderThickness="{Binding SelectedBorderThickness}"/>
 
                                                             <!-- Número do dia -->
                                                             <TextBlock Text="{Binding Day}" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                               Foreground="{StaticResource TextBrush}" FontWeight="{Binding FontWeight}" FontSize="16"/>
+                                                                       Foreground="{StaticResource TextBrush}" FontWeight="{Binding FontWeight}" FontSize="16"/>
 
                                                             <!-- Indicador de pagamento (ponto na parte inferior) -->
                                                             <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" 
-                                                             Visibility="{Binding PaymentVisibility}" 
-                                                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0"/>
+                                                                     Visibility="{Binding PaymentVisibility}" 
+                                                                     HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0"/>
                                                         </Grid>
                                                     </Button>
                                                 </DataTemplate>
