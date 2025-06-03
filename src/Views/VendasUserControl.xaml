@@ -63,7 +63,6 @@
                                                 <TextBlock Text="{Binding ClienteCNPJ, StringFormat='Cliente: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14" TextWrapping="Wrap"/>
                                                 <TextBlock Text="{Binding Pedido, StringFormat='Pedido: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                 <TextBlock Text="{Binding DataCompra, StringFormat='Data de Compra: {0:dd/MM/yyyy}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                                                <TextBlock Text="{Binding DataPagamento, StringFormat='Pagamento em: {0:dd/MM/yyyy}', TargetNullValue='Pagamento em: -'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                 <TextBlock Text="{Binding ValorTotal, StringFormat='Total: R$ {0:N2}'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold"/>
                                                 <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" Width="120" Margin="0,10,0,5" Click="DetalhesButton_Click"/>
                                             </StackPanel>

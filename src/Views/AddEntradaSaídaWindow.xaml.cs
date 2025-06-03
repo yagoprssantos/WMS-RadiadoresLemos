@@ -386,16 +386,13 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 formaPagamentoSelecionada = selected.Content?.ToString();
 
-                // Verifica em relação às parcelas
-                if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selectedItem && (selectedItem.Content?.ToString() ?? "") == "À vista")
+                if (formaPagamentoSelecionada == "À vista")
                 {
-                    // Altera parcela para 1 e desabilita editar
                     ParcelasTextBox.Text = "1";
                     ParcelasTextBox.IsEnabled = false;
                 }
                 else
                 {
-                    // Habilita editar parcelas
                     ParcelasTextBox.Text = "";
                     ParcelasTextBox.IsEnabled = true;
                 }
@@ -643,6 +640,7 @@ namespace WMS_RadiadoresLemos_WPF
                         {
                             Parcela = boleto.Parcela,
                             Vencimento = boleto.Vencimento,
+                            Pagamento = boleto.Pagamento,
                             CaminhoArquivo = boleto.CaminhoArquivo,
                             NotaFiscal = numeroNotaFiscalAtual,
                             FornecedorId = fornecedor.CNPJ
@@ -723,7 +721,6 @@ namespace WMS_RadiadoresLemos_WPF
                 FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado)?.Id ?? string.Empty,
                 FornecedorNome = fornecedorSelecionado ?? string.Empty,
                 DataCompra = DateTime.Now,
-                DataPagamento = formaPagamentoSelecionada == "À Vista" ? DateTime.Now : null,
                 TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
                 Parcelas = parcelas,
                 NotaFiscal = NotaFiscalTextBox.Text,
@@ -746,7 +743,6 @@ namespace WMS_RadiadoresLemos_WPF
                 ClienteCNPJ = cliente?.CNPJ ?? string.Empty,
                 Pedido = NotaFiscalTextBox.Text, // ou outro campo de pedido se houver
                 DataCompra = DateTime.Now,
-                DataPagamento = formaPagamentoSelecionada == "À Vista" ? DateTime.Now : null,
                 TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
                 Parcelas = parcelas,
                 NotaFiscal = NotaFiscalTextBox.Text,
@@ -1211,18 +1207,61 @@ namespace WMS_RadiadoresLemos_WPF
         }
         private void ParcelasTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            if (sender is not TextBox textBox)
+                return;
+
+            // Remove handlers para evitar recursão infinita ao alterar o texto
+            textBox.TextChanged -= ParcelasTextBox_TextChanged;
+
+            string textoOriginal = textBox.Text;
+            if (!string.IsNullOrEmpty(textoOriginal))
             {
-                if (int.TryParse(textBox.Text, out int parcelas))
+                // Remove formatação e espaços
+                string textoLimpo = new string(textoOriginal.Where(char.IsDigit).ToArray());
+
+                if (int.TryParse(textoLimpo, out int parcelas))
                 {
+                    // Limita o valor entre 1 e 8
+                    if (parcelas < 1)
+                        parcelas = 1;
+                    else if (parcelas > 8)
+                        parcelas = 8;
+
                     textBox.Text = parcelas.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
+                    textBox.CaretIndex = textBox.Text.Length;
                 }
                 else
                 {
                     MessageBox.Show("Parcelas inválidas.");
                     textBox.Clear();
                 }
+
+                // Verifica a forma de pagamento para alterar o texto
+                if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selected)
+                {
+                    formaPagamentoSelecionada = selected.Content?.ToString();
+
+                    if (formaPagamentoSelecionada == "À vista")
+                    {
+                        textBox.Text = "1";
+                        textBox.IsEnabled = false;
+                    }
+                    else if (formaPagamentoSelecionada == "Parcelado")
+                    {
+                        // Se for parcelado, impede parcelas iguais a 1
+                        if (textBox.Text == "1")
+                            textBox.Text = "";
+                    }
+
+                    if (!textBox.IsEnabled && formaPagamentoSelecionada == "Parcelado")
+                    {
+                        textBox.IsEnabled = true;
+                    }
+                }
             }
+
+            // Reanexa o handler
+            textBox.TextChanged += ParcelasTextBox_TextChanged;
         }
         // Nota Fiscal - NÃO UTILIZADO ATÉ O MOMENTO
         private void NotaFiscalTextBox_LostFocus(object sender, RoutedEventArgs e)

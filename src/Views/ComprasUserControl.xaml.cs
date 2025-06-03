@@ -15,6 +15,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
     {
         private List<CompraData> _todasCompras;      // Lista completa de compras
         private List<CompraData> _comprasFiltradas;  // Lista filtrada e ordenada
+        private List<BoletoData> _todosBoletos;      // Lista completa de boletos
         private string _ordenacaoAtual = "recente";
         private string _filtroTexto = "Ordenar por";
         private DateTime _currentCalendarMonth = DateTime.Today;
@@ -30,6 +31,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarCompras();
+            CarregarBoletos();  // Adicione esta linha
             CarregarCalendario();
         }
 
@@ -55,6 +57,27 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar compras: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CarregarBoletos()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<BoletoData>("boletos");
+                    _todosBoletos = collection.FindAll().ToList();
+                }
+                else
+                {
+                    MessageBox.Show("Não foi possível conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar boletos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -253,8 +276,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     Date = currentDate
                 };
 
-                // Verificar se há compras ou pagamentos neste dia
-                day.HasPayment = VerificarPagamentosNaData(currentDate);
+                // Verificar se há compras neste dia
+                day.HasPayment = VerificarComprasNaData(currentDate);
+
+                // Verificar se há boletos com vencimento neste dia
+                day.HasBoletoVencimento = VerificarBoletosNaData(currentDate);
+
                 days.Add(day);
             }
 
@@ -274,15 +301,38 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CalendarDaysControl.ItemsSource = days;
         }
 
-        // Verifica se há pagamentos programados para uma data específica
-        private bool VerificarPagamentosNaData(DateTime data)
+        private bool VerificarComprasNaData(DateTime data)
         {
             if (_todasCompras == null) return false;
 
-            return _todasCompras.Any(c =>
-                (c.DataCompra.Date == data.Date) ||
-                (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date)
-            );
+            return _todasCompras.Any(c => c.DataCompra.Date == data.Date);
+        }
+
+        private bool VerificarBoletosNaData(DateTime data)
+        {
+            if (_todosBoletos == null) return false;
+
+            return _todosBoletos.Any(b => b.Vencimento.Date == data.Date && b.Pagamento == null);
+        }
+
+        private List<CompraData> BuscarComprasNoDia(DateTime data)
+        {
+            if (_comprasFiltradas == null)
+                return new List<CompraData>();
+
+            return _comprasFiltradas
+                .Where(c => c.DataCompra.Date == data.Date)
+                .ToList();
+        }
+
+        private List<BoletoData> BuscarBoletosNoDia(DateTime data)
+        {
+            if (_todosBoletos == null)
+                return new List<BoletoData>();
+
+            return _todosBoletos
+                .Where(b => b.Vencimento.Date == data.Date && b.Pagamento == null)
+                .ToList();
         }
 
         private void CalendarDayButton_Click(object sender, RoutedEventArgs e)
@@ -311,37 +361,51 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Atualizar o texto da data selecionada
                 DataSelecionadaText.Text = selectedDate.ToString("dd 'de' MMMM 'de' yyyy");
 
-                // Buscar compras ou pagamentos para a data selecionada
+                // Buscar compras para a data selecionada
                 var comprasNoDia = BuscarComprasNoDia(selectedDate);
 
+                // Buscar boletos para a data selecionada
+                var boletosNoDia = BuscarBoletosNoDia(selectedDate);
+
+                // Configurar visualização de compras
                 if (comprasNoDia.Any())
                 {
                     ComprasDoDiaList.ItemsSource = comprasNoDia;
                     ComprasDoDiaList.Visibility = Visibility.Visible;
                     SemComprasNoDiaText.Visibility = Visibility.Collapsed;
                 }
-                else
+                else if (boletosNoDia.Any())
                 {
+                    // Se não há compras, mas há boletos, mostrar mensagem personalizada
                     ComprasDoDiaList.ItemsSource = null;
                     ComprasDoDiaList.Visibility = Visibility.Collapsed;
+                    SemComprasNoDiaText.Text = "Não há compras nesta data.";
                     SemComprasNoDiaText.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    // Se não há compras nem boletos
+                    ComprasDoDiaList.ItemsSource = null;
+                    ComprasDoDiaList.Visibility = Visibility.Collapsed;
+                    SemComprasNoDiaText.Text = "Não há compras ou boletos nesta data.";
+                    SemComprasNoDiaText.Visibility = Visibility.Visible;
+                }
+
+                // Configurar visualização de boletos
+                if (boletosNoDia.Any())
+                {
+                    BoletosDoDiaList.ItemsSource = boletosNoDia;
+                    BoletosDoDiaList.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    BoletosDoDiaList.ItemsSource = null;
+                    BoletosDoDiaList.Visibility = Visibility.Collapsed;
                 }
 
                 // Mostrar o painel de detalhes
                 DiaDetalhesPanel.Visibility = Visibility.Visible;
             }
-        }
-
-        private List<CompraData> BuscarComprasNoDia(DateTime data)
-        {
-            if (_comprasFiltradas == null)
-                return new List<CompraData>();
-
-            return _comprasFiltradas
-                .Where(c =>
-                    (c.DataCompra.Date == data.Date) ||
-                    (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date))
-                .ToList();
         }
 
         private void DetalhesCompraCalendarioButton_Click(object sender, RoutedEventArgs e)

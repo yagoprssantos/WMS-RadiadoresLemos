@@ -57,21 +57,23 @@
                     <Border Grid.Column="0" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,5,0">
                         <ScrollViewer x:Name="CardViewContainer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                             <Grid>
+
                                 <ItemsControl x:Name="ComprasContainer" Margin="0">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <WrapPanel/>
+                                            <WrapPanel IsItemsHost="True" HorizontalAlignment="Stretch"/>
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="15" Width="250">
+                                            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="15" Width="260">
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding NotaFiscal, StringFormat='NF: {0}', TargetNullValue='Compra'}" Style="{StaticResource VendasTitleTextBox}" FontSize="16" HorizontalAlignment="Center"/>
                                                     <Separator Margin="10,5,10,10"/>
                                                     <TextBlock Text="{Binding FornecedorNome, StringFormat='Fornecedor: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14" TextWrapping="Wrap"/>
                                                     <TextBlock Text="{Binding DataCompra, StringFormat='Data de Compra: {0:dd/MM/yyyy}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                                                    <TextBlock Text="{Binding DataPagamento, StringFormat='Pagamento em: {0:dd/MM/yyyy}', TargetNullValue='Pagamento em: -'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
+                                                    <TextBlock Text="{Binding ProximoVencimento, StringFormat='Próximo Vencimento: {0:dd/MM/yyyy}', TargetNullValue='Não há vencimentos'}" 
+                                                               Style="{StaticResource VendasTextBox}" FontSize="14" Margin="0,5,0,0" Foreground="{StaticResource TextBrush}"/>
                                                     <TextBlock Text="{Binding ValorTotal, StringFormat='Total: R$ {0:N2}'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold"/>
                                                     <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" Width="120" Margin="0,10,0,5" Click="DetalhesButton_Click"/>
                                                 </StackPanel>
@@ -79,6 +81,7 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
+
                                 <!-- Mensagem de vazio -->
                                 <TextBlock x:Name="MensagemVazia" Text="Nenhuma compra cadastrada."
                                            FontSize="18" Foreground="{StaticResource TextBrush}"
@@ -197,10 +200,15 @@
                                                                 <TextBlock Text="{Binding Day}" HorizontalAlignment="Center" VerticalAlignment="Center" 
                                                                            Foreground="{StaticResource TextBrush}" FontWeight="{Binding FontWeight}" FontSize="16"/>
 
-                                                                <!-- Indicador de pagamento (ponto na parte inferior) -->
+                                                                <!-- Indicador de pagamento (ponto na parte superior direita) -->
                                                                 <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" 
                                                                          Visibility="{Binding PaymentVisibility}" 
                                                                          HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0"/>
+
+                                                                <!-- Indicador de boleto (ponto azul na parte superior esquerda) -->
+                                                                <Ellipse Width="8" Height="8" Fill="#3498db" 
+                                                                         Visibility="{Binding BoletoVisibility}" 
+                                                                         HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0"/>
                                                             </Grid>
                                                         </Button>
                                                     </DataTemplate>
@@ -213,6 +221,7 @@
                                 <!-- Legenda - Atualizada com todas as indicações -->
                                 <Grid Grid.Row="3" Margin="0,15,0,15" HorizontalAlignment="Center">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
@@ -230,6 +239,14 @@
                                         <Border Background="{StaticResource AccentBrush}" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="2"
                                                 Width="16" Height="16" CornerRadius="8" VerticalAlignment="Center"/>
                                         <TextBlock Text="Pagamentos" Margin="8,0,0,0" VerticalAlignment="Center" 
+                                                 Foreground="{StaticResource TextBrush}" FontSize="13"/>
+                                    </StackPanel>
+
+                                    <!-- Legenda para Boletos a Vencer -->
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,15,0">
+                                        <Border Background="#3498db" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="2"
+                                                Width="16" Height="16" CornerRadius="8" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Boletos a Vencer" Margin="8,0,0,0" VerticalAlignment="Center" 
                                                  Foreground="{StaticResource TextBrush}" FontSize="13"/>
                                     </StackPanel>
                                 </Grid>
@@ -263,6 +280,37 @@
                                                                               Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" FontSize="14"/>
                                                                 </StackPanel>
                                                                 <Button Grid.Column="1" Content="Detalhes" Click="DetalhesCompraCalendarioButton_Click" 
+                                                                       Style="{StaticResource EmphasisButtonStyle}" 
+                                                                       Width="80" Height="Auto" VerticalAlignment="Center" FontSize="13"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <!-- Boletos com Vencimento -->
+                                            <TextBlock Text="Boletos com Vencimento:" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" 
+                                                      Margin="0,15,0,5" Visibility="{Binding ElementName=BoletosDoDiaList, Path=Visibility}"/>
+
+                                            <ItemsControl x:Name="BoletosDoDiaList" Visibility="Collapsed">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#3498db" Opacity="0.8"
+                                                               CornerRadius="10" Padding="12" Margin="0,0,0,10">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <StackPanel Grid.Column="0">
+                                                                    <TextBlock Text="{Binding NotaFiscal, StringFormat='NF: {0}', TargetNullValue='Boleto'}" 
+                                                                              Foreground="White" FontWeight="SemiBold" FontSize="14"/>
+                                                                    <TextBlock Text="{Binding Vencimento, StringFormat='Vencimento: {0:dd/MM/yyyy}'}" 
+                                                                              Foreground="White" FontSize="13"/>
+                                                                    <TextBlock Text="{Binding Parcela, StringFormat='Parcela: {0}'}" 
+                                                                              Foreground="White" FontSize="13"/>
+                                                                </StackPanel>
+                                                                <Button Grid.Column="1" Content="Ver Boleto" 
                                                                        Style="{StaticResource EmphasisButtonStyle}" 
                                                                        Width="80" Height="Auto" VerticalAlignment="Center" FontSize="13"/>
                                                             </Grid>
@@ -309,9 +357,10 @@
                         <!-- Opções de Ordenação -->
                         <Button Content="Preço" Tag="preco" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                         <Button Content="Produto" Tag="produto" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
-                        <Button Content="Cliente" Tag="cliente" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
+                        <Button Content="Fornecedor" Tag="fornecedor" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                         <Button Content="Recente" Tag="recente" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                         <Button Content="Antigo" Tag="antigo" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
+                        <Button Content="Vencimento" Tag="vencimento" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Border>
             </Border>
