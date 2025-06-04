@@ -25,7 +25,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         public DateTime Vencimento { get; set; }
 
         [BsonField("pagamento")]
-        public DateTime? Pagamento { get; set; }
+        public DateTime? Pagamento { get; set; } = null;
 
         // Número da parcela
         [BsonField("parcela")]

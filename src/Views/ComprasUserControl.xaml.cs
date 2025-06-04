@@ -31,7 +31,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarCompras();
-            CarregarBoletos();  // Adicione esta linha
+            CarregarBoletos(); 
             CarregarCalendario();
         }
 
@@ -206,6 +206,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             // Atualiza a lista de compras após o registro
             CarregarCompras();
+            // Atualiza também os boletos e o calendário
+            CarregarBoletos();
+            CarregarCalendario();
         }
 
         // 7. Botões de ação
@@ -408,6 +411,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        // Apresenta os detalhes da compra ao clicar no botão de detalhes
         private void DetalhesCompraCalendarioButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is CompraData compra)
@@ -417,6 +421,46 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 if (contentControl != null)
                 {
                     contentControl.Content = detalhesCompraUserControl;
+                }
+            }
+        }
+
+        // Abre o boleto ao clicar no botão de detalhes do boleto
+        private void VerBoletoCalendarioButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.DataContext is BoletoData boleto)
+            {
+                // Captura o caminho do arquivo do boleto
+                string caminhoBoleto = boleto.CaminhoArquivo;
+                if (string.IsNullOrEmpty(caminhoBoleto))
+                {
+                    MessageBox.Show("Caminho do boleto não informado.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Verifica se o arquivo existe
+                if (!System.IO.File.Exists(caminhoBoleto))
+                {
+                    MessageBox.Show($"Arquivo do boleto não encontrado no caminho: {caminhoBoleto}", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Tenta abrir o arquivo usando o comando CMD do Windows
+                try
+                {
+                    var psi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/c start \"\" \"{caminhoBoleto}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    System.Diagnostics.Process.Start(psi);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Não foi possível abrir o arquivo PDF.\n\nDetalhes: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

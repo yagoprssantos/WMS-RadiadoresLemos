@@ -135,33 +135,33 @@
 
                                 <!-- Título -->
                                 <TextBlock Grid.Row="0" Text="Calendário de Compras" Style="{StaticResource VendasTitleTextBox}" FontSize="16" 
-                                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                           HorizontalAlignment="Center" Margin="0,0,0,5"/>
 
                                 <!-- Navegação do mês -->
-                                <Grid Grid.Row="1" Margin="0,0,0,15">
+                                <Grid Grid.Row="1" Margin="0,0,0,5">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Button Grid.Column="0" x:Name="PrevMonthButton" Style="{StaticResource NavigationButtonStyle}" Width="35" Height="20" Click="PrevMonthButton_Click">
+                                    <Button Grid.Column="0" x:Name="PrevMonthButton" Style="{StaticResource NavigationButtonStyle}" Width="36" Height="36" Click="PrevMonthButton_Click">
                                         <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" 
                                               Fill="{StaticResource TextBrush}" Width="20" Height="20"/>
                                     </Button>
 
-                                    <TextBlock Grid.Column="1" x:Name="CalendarMonthText" Text="Abril 2024" 
+                                    <TextBlock Grid.Column="1" x:Name="CalendarMonthText" Text="Mês ANO" 
                                                FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" 
                                                VerticalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
 
-                                    <Button Grid.Column="2" x:Name="NextMonthButton" Style="{StaticResource NavigationButtonStyle}" Width="35" Height="20" Click="NextMonthButton_Click">
+                                    <Button Grid.Column="2" x:Name="NextMonthButton" Style="{StaticResource NavigationButtonStyle}" Width="36" Height="36" Click="NextMonthButton_Click">
                                         <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" 
                                               Fill="{StaticResource TextBrush}" Width="20" Height="20"/>
                                     </Button>
                                 </Grid>
 
                                 <!-- Calendário - Com células maiores e indicadores reposicionados -->
-                                <Border Grid.Row="2" Background="{StaticResource SecondaryBrush}" CornerRadius="15" Padding="12,18">
+                                <Border Grid.Row="2" Background="{StaticResource SecondaryBrush}" CornerRadius="15" Padding="10">
                                     <Viewbox Stretch="Uniform" Margin="0">
                                         <Grid Width="350" Height="330">
                                             <!-- Cabeçalho dos dias -->
@@ -203,12 +203,12 @@
                                                                 <!-- Indicador de pagamento (ponto na parte superior direita) -->
                                                                 <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" 
                                                                          Visibility="{Binding PaymentVisibility}" 
-                                                                         HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0"/>
+                                                                         HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0"/>
 
                                                                 <!-- Indicador de boleto (ponto azul na parte superior esquerda) -->
-                                                                <Ellipse Width="8" Height="8" Fill="#3498db" 
+                                                                <Ellipse Width="8" Height="8" Fill="{StaticResource CancelButtonHoverBrush}" 
                                                                          Visibility="{Binding BoletoVisibility}" 
-                                                                         HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0"/>
+                                                                         HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0"/>
                                                             </Grid>
                                                         </Button>
                                                     </DataTemplate>
@@ -218,38 +218,32 @@
                                     </Viewbox>
                                 </Border>
 
-                                <!-- Legenda - Atualizada com todas as indicações -->
-                                <Grid Grid.Row="3" Margin="0,15,0,15" HorizontalAlignment="Center">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
+                                <!-- Legenda -->
+                                <WrapPanel Grid.Row="3" Margin="0,10,0,10" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <!-- Legenda para Dia Atual -->
-                                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,15,0">
-                                        <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="2"
-                                                Width="16" Height="16" CornerRadius="8" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Dia Atual" Margin="8,0,0,0" VerticalAlignment="Center" 
-                                                 Foreground="{StaticResource TextBrush}" FontSize="13"/>
+                                    <StackPanel Orientation="Horizontal" Margin="5,0,10,0">
+                                        <Border Background="{StaticResource PanelBackgroundBrush}" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1"
+                                                Width="12" Height="12" CornerRadius="6" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Hoje" Margin="4,0,0,0" VerticalAlignment="Center" 
+                                                 Foreground="{StaticResource TextBrush}" FontSize="12"/>
                                     </StackPanel>
 
                                     <!-- Legenda para Pagamentos -->
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,15,0">
-                                        <Border Background="{StaticResource AccentBrush}" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="2"
-                                                Width="16" Height="16" CornerRadius="8" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Pagamentos" Margin="8,0,0,0" VerticalAlignment="Center" 
-                                                 Foreground="{StaticResource TextBrush}" FontSize="13"/>
+                                    <StackPanel Orientation="Horizontal" Margin="5,0,10,0">
+                                        <Border Background="{StaticResource AccentBrush}" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1"
+                                                Width="12" Height="12" CornerRadius="6" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Compras" Margin="4,0,0,0" VerticalAlignment="Center" 
+                                                 Foreground="{StaticResource TextBrush}" FontSize="12"/>
                                     </StackPanel>
 
                                     <!-- Legenda para Boletos a Vencer -->
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,15,0">
-                                        <Border Background="#3498db" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="2"
-                                                Width="16" Height="16" CornerRadius="8" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Boletos a Vencer" Margin="8,0,0,0" VerticalAlignment="Center" 
-                                                 Foreground="{StaticResource TextBrush}" FontSize="13"/>
+                                    <StackPanel Orientation="Horizontal" Margin="5,0">
+                                        <Border Background="{StaticResource CancelButtonHoverBrush}" BorderBrush="{StaticResource SecondaryBrush}" BorderThickness="1"
+                                                Width="12" Height="12" CornerRadius="6" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Boletos" Margin="4,0,0,0" VerticalAlignment="Center" 
+                                                 Foreground="{StaticResource TextBrush}" FontSize="12"/>
                                     </StackPanel>
-                                </Grid>
+                                </WrapPanel>
 
                                 <!-- Detalhes do dia selecionado -->
                                 <Border Grid.Row="4" Background="{StaticResource SecondaryBrush}" CornerRadius="15" 
@@ -261,6 +255,9 @@
                                             <Separator Margin="0,0,0,12"/>
 
                                             <!-- Lista de compras do dia -->
+                                            <TextBlock Text="Compras do Dia:" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" 
+                                                      Margin="0,0,0,5" Visibility="{Binding ElementName=ComprasDoDiaList, Path=Visibility}"/>
+
                                             <ItemsControl x:Name="ComprasDoDiaList">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
@@ -281,7 +278,7 @@
                                                                 </StackPanel>
                                                                 <Button Grid.Column="1" Content="Detalhes" Click="DetalhesCompraCalendarioButton_Click" 
                                                                        Style="{StaticResource EmphasisButtonStyle}" 
-                                                                       Width="80" Height="Auto" VerticalAlignment="Center" FontSize="13"/>
+                                                                       Width="Auto" Height="Auto" VerticalAlignment="Center" FontSize="13"/>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>
@@ -295,7 +292,7 @@
                                             <ItemsControl x:Name="BoletosDoDiaList" Visibility="Collapsed">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Background="#3498db" Opacity="0.8"
+                                                        <Border Background="{StaticResource PanelBackgroundBrush}" Opacity="0.8"
                                                                CornerRadius="10" Padding="12" Margin="0,0,0,10">
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
@@ -310,9 +307,9 @@
                                                                     <TextBlock Text="{Binding Parcela, StringFormat='Parcela: {0}'}" 
                                                                               Foreground="White" FontSize="13"/>
                                                                 </StackPanel>
-                                                                <Button Grid.Column="1" Content="Ver Boleto" 
+                                                                <Button Grid.Column="1" Content="Ver Boleto" Click="VerBoletoCalendarioButton_Click"
                                                                        Style="{StaticResource EmphasisButtonStyle}" 
-                                                                       Width="80" Height="Auto" VerticalAlignment="Center" FontSize="13"/>
+                                                                       Width="Auto" Height="Auto" VerticalAlignment="Center" FontSize="13"/>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>

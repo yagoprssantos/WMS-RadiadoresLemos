@@ -437,7 +437,6 @@ namespace WMS_RadiadoresLemos_WPF
                 }
             }
         }
-
         private void SelecionarBoletoButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is int parcela)
@@ -626,6 +625,7 @@ namespace WMS_RadiadoresLemos_WPF
                 if (BoletosItemsControl.Items.Count > 0)
                 {
                     compra.Boletos = new List<string>();
+
                     var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado);
                     if (fornecedor == null)
                     {
@@ -633,31 +633,32 @@ namespace WMS_RadiadoresLemos_WPF
                         return;
                     }
 
-                    foreach (var boleto in BoletosItemsControl.Items.Cast<BoletoData>())
+                    // Criar uma cópia dos boletos atuais antes de iterar
+                    var boletosCopia = BoletosItemsControl.Items.Cast<BoletoData>().ToList();
+
+                    // Limpar a lista de boletos atual
+                    boletos.Clear();
+
+                    // Iterar sobre a cópia em vez do controle original
+                    foreach (var boleto in boletosCopia)
                     {
-                        // Cria uma cópia do boleto para a compra
-                        var boletoCompra = new BoletoData
-                        {
-                            Parcela = boleto.Parcela,
-                            Vencimento = boleto.Vencimento,
-                            Pagamento = boleto.Pagamento,
-                            CaminhoArquivo = boleto.CaminhoArquivo,
-                            NotaFiscal = numeroNotaFiscalAtual,
-                            FornecedorId = fornecedor.CNPJ
-                        };
-                        boletoCompra.SetIdFromNotaFiscal();
-                        
+                        // Usa o método CriarBoletoData para criar um novo boleto com os dados corretos
+                        var novoBoleto = CriarBoletoData(boleto, numeroNotaFiscalAtual, fornecedor);
+
+                        // Adiciona o novo boleto à lista de boletos
+                        boletos.Add(novoBoleto);
+
                         // Gera o nome do boleto no formato BoletoNF{numeroNF}-Parcela{boleto.Parcela}
                         var extensao = Path.GetExtension(boleto.CaminhoArquivo);
                         var nomeBoleto = $"BoletoNF{numeroNotaFiscalAtual}-Parcela{boleto.Parcela}{extensao}";
-                        
+
                         // Adiciona o nome do boleto à lista de boletos da compra
                         compra.Boletos.Add(nomeBoleto);
-
-                        // Salva o boleto no banco de dados
-                        var boletosCollection = DatabaseConnect.Database.GetCollection<BoletoData>("boletos");
-                        boletosCollection.Upsert(boletoCompra);
                     }
+
+                    // Atualiza o controle de UI com a nova lista de boletos
+                    BoletosItemsControl.ItemsSource = null;
+                    BoletosItemsControl.ItemsSource = boletos;
                 }
 
                 // Adiciona a compra à lista de compras
@@ -733,6 +734,21 @@ namespace WMS_RadiadoresLemos_WPF
             else
                 compra.Id = Guid.NewGuid().ToString();
             return compra;
+        }
+        private BoletoData CriarBoletoData(BoletoData boleto, string numeroNotaFiscal, FornecedorData fornecedor)
+        {
+            var novoBoleto = new BoletoData
+            {
+                Parcela = boleto.Parcela,
+                Vencimento = boleto.Vencimento,
+                Pagamento = boleto.Pagamento,
+                CaminhoArquivo = boleto.CaminhoArquivo,
+                NotaFiscal = numeroNotaFiscal,
+                FornecedorId = fornecedor.CNPJ
+            };
+
+            novoBoleto.SetIdFromNotaFiscal();
+            return novoBoleto;
         }
         private VendaData CriarVendaData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
         {
@@ -814,13 +830,22 @@ namespace WMS_RadiadoresLemos_WPF
                         RegistrarCompras(compra);
                     }
 
-                    // Organiza os boletos
+                    // Organiza os boletos (arquivos físicos)
                     var organizadorBoleto = new OrganizarBoleto(numeroNotaFiscalAtual);
                     foreach (var boleto in boletos)
                     {
                         if (!string.IsNullOrEmpty(boleto.CaminhoArquivo))
                         {
                             organizadorBoleto.Organizar(boleto);
+                        }
+                    }
+
+                    // Registra os boletos no banco de dados
+                    if (boletos.Count > 0)
+                    {
+                        foreach (var boleto in boletos)
+                        {
+                            RegistrarBoletos(boleto);
                         }
                     }
                 }
@@ -842,6 +867,7 @@ namespace WMS_RadiadoresLemos_WPF
                 // Limpa a lista e fecha a janela
                 movimentacoes.Clear();
                 listaMovimentacoes.Clear();
+                boletos.Clear();
                 ListaItemsControl.ItemsSource = null;
                 ListaItemsControl.ItemsSource = listaMovimentacoes;
                 this.Close();
@@ -886,6 +912,28 @@ namespace WMS_RadiadoresLemos_WPF
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao registrar compra: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RegistrarBoletos(BoletoData boleto)
+        {
+            try
+            {
+                if (boleto == null)
+                {
+                    MessageBox.Show("Boleto inválido.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                // Inserir o boleto no banco de dados
+                var boletosCollection = DatabaseConnect.Database.GetCollection<BoletoData>("boletos");
+                boletosCollection.Insert(boleto);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar boleto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1512,5 +1560,6 @@ namespace WMS_RadiadoresLemos_WPF
             // Mostra botão
             ToggleLista.Visibility = Visibility.Visible;
         }
+
     }
 }

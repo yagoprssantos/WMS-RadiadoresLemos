@@ -238,7 +238,7 @@
                                                                     <!-- Linha 2: Datas -->
                                                                 </Grid.RowDefinitions>
                                                                 <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="120"/>
+                                                                    <ColumnDefinition Width="Auto"/>
                                                                     <!-- Título da Parcela -->
                                                                     <ColumnDefinition Width="2*"/>
                                                                     <!-- Arquivo -->
@@ -257,7 +257,7 @@
                                                                                VerticalAlignment="Center" Margin="0,0,10,0"/>
 
                                                                 <!-- Arquivo -->
-                                                                <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,4,0" VerticalAlignment="Center">
+                                                                <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,5,0" VerticalAlignment="Center">
                                                                     <Grid.ColumnDefinitions>
                                                                         <ColumnDefinition Width="Auto"/>
                                                                         <ColumnDefinition Width="*"/>
@@ -265,10 +265,10 @@
                                                                     <TextBlock Grid.Column="0" Text="Arquivo:" FontSize="14" Foreground="{StaticResource TextBrush}"
                                                                                    VerticalAlignment="Center" Margin="0,0,5,0"/>
                                                                     <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="3" VerticalAlignment="Center" MinWidth="120">
-                                                                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto" Padding="5,0">
+                                                                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" Padding="1,0">
                                                                             <TextBox Text="{Binding CaminhoArquivo}" Background="Transparent"
                                                                                          Foreground="{StaticResource TextBrush}" FontSize="14" Height="25"
-                                                                                         IsReadOnly="True" BorderThickness="0" Padding="5,1"
+                                                                                         IsReadOnly="True" BorderThickness="0" Padding="0"
                                                                                          VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                                                                         </ScrollViewer>
                                                                     </Border>
@@ -299,7 +299,7 @@
                                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.ColumnSpan="2">
                                                                         <TextBlock Text="Pagamento:" FontSize="14" Foreground="{StaticResource TextBrush}"
                                                                                        VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                                                        <DatePicker SelectedDate="{Binding DataPagamento}" Style="{StaticResource DatePickerStyle}"
+                                                                        <DatePicker SelectedDate="{Binding Pagamento}" Style="{StaticResource DatePickerStyle}"
                                                                                         Height="28" FontSize="14" Width="Auto" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
                                                                 </StackPanel>

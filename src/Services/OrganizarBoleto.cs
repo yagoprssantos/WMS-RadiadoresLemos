@@ -65,5 +65,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 MessageBox.Show($"Erro ao organizar boleto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        // Método para retornar o caminho do boleto organizado
+        public string ObterCaminhoBoletoOrganizado(BoletoData boleto)
+        {
+            // Apresenta o caminhoArquivo do boleto
+            if (string.IsNullOrEmpty(boleto.CaminhoArquivo) || !File.Exists(boleto.CaminhoArquivo))
+            {
+                return "Caminho do boleto não encontrado ou inválido.";
+            }
+            return boleto.CaminhoArquivo;
+        }
     }
 } 
