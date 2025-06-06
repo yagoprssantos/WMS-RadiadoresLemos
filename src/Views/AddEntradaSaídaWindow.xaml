@@ -341,8 +341,7 @@
                         <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0" Visibility="Visible"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
                                 x:Name="ToggleLista" Click="ToggleLista_Click">
-                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="20
-                                   " Width="25"/>
+                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="20" Width="25"/>
                         </Button>
                     </Grid>
                 </Border>

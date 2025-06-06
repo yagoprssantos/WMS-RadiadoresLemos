@@ -81,6 +81,76 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        private void CarregarCalendario()
+        {
+            CalendarMonthText.Text = _currentCalendarMonth.ToString("MMMM yyyy");
+
+            var days = new List<CalendarDayViewModel>();
+            DateTime firstDayOfMonth = new DateTime(_currentCalendarMonth.Year, _currentCalendarMonth.Month, 1);
+            int offset = ((int)firstDayOfMonth.DayOfWeek);
+
+            // Dias do mês anterior
+            DateTime previousMonth = firstDayOfMonth.AddDays(-offset);
+            for (int i = 0; i < offset; i++)
+            {
+                days.Add(new CalendarDayViewModel
+                {
+                    Day = previousMonth.AddDays(i).Day.ToString(),
+                    IsCurrentMonth = false,
+                    Date = previousMonth.AddDays(i)
+                });
+            }
+
+            // Dias do mês atual
+            int daysInMonth = DateTime.DaysInMonth(firstDayOfMonth.Year, firstDayOfMonth.Month);
+            for (int i = 1; i <= daysInMonth; i++)
+            {
+                var currentDate = new DateTime(firstDayOfMonth.Year, firstDayOfMonth.Month, i);
+                var day = new CalendarDayViewModel
+                {
+                    Day = i.ToString(),
+                    IsCurrentMonth = true,
+                    IsToday = currentDate.Date == DateTime.Today,
+                    Date = currentDate
+                };
+
+                // Verificar se há compras neste dia
+                day.HasPayment = VerificarComprasNaData(currentDate);
+
+                // Verificar se há boletos com vencimento neste dia
+                day.HasBoletoVencimento = VerificarBoletosNaData(currentDate);
+
+                days.Add(day);
+            }
+
+            // Completar o grid com dias do próximo mês
+            int remainingDays = 42 - days.Count; // 6 linhas x 7 colunas = 42 células
+            DateTime nextMonth = firstDayOfMonth.AddMonths(1);
+            for (int i = 1; i <= remainingDays; i++)
+            {
+                days.Add(new CalendarDayViewModel
+                {
+                    Day = i.ToString(),
+                    IsCurrentMonth = false,
+                    Date = new DateTime(nextMonth.Year, nextMonth.Month, i)
+                });
+            }
+
+            CalendarDaysControl.ItemsSource = days;
+        }
+        private bool VerificarComprasNaData(DateTime data)
+        {
+            if (_todasCompras == null) return false;
+
+            return _todasCompras.Any(c => c.DataCompra.Date == data.Date);
+        }
+        private bool VerificarBoletosNaData(DateTime data)
+        {
+            if (_todosBoletos == null) return false;
+
+            return _todosBoletos.Any(b => b.Vencimento.Date == data.Date && b.Pagamento == null);
+        }
+
         // 2. Pesquisa
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -104,7 +174,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             FiltroPopup.IsOpen = true;
         }
-
         private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO: Adicionar lógica de filtro
@@ -114,7 +183,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             AplicarOrdenacao();
             AtualizarInterfaceCompras();
         }
-
         private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
         {
             // TODO: Limpar filtros
@@ -132,7 +200,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             OrdenarPopup.IsOpen = !OrdenarPopup.IsOpen;
         }
-
         private void OrdenacaoItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is string tipoOrdenacao)
@@ -155,7 +222,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 AtualizarInterfaceCompras();
             }
         }
-
         private void AplicarOrdenacao()
         {
             if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
@@ -226,118 +292,25 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+
         // Navegação do calendário
         private void PrevMonthButton_Click(object sender, RoutedEventArgs e)
         {
             // Navegar para o mês anterior
             MudarMesCalendario(-1);
         }
-
         private void NextMonthButton_Click(object sender, RoutedEventArgs e)
         {
             // Navegar para o próximo mês
             MudarMesCalendario(1);
         }
-
         private void MudarMesCalendario(int incrementoMes)
         {
             _currentCalendarMonth = _currentCalendarMonth.AddMonths(incrementoMes);
             CarregarCalendario();
         }
 
-        // Carrega os dias no calendário
-        private void CarregarCalendario()
-        {
-            CalendarMonthText.Text = _currentCalendarMonth.ToString("MMMM yyyy");
-
-            var days = new List<CalendarDayViewModel>();
-            DateTime firstDayOfMonth = new DateTime(_currentCalendarMonth.Year, _currentCalendarMonth.Month, 1);
-            int offset = ((int)firstDayOfMonth.DayOfWeek);
-
-            // Dias do mês anterior
-            DateTime previousMonth = firstDayOfMonth.AddDays(-offset);
-            for (int i = 0; i < offset; i++)
-            {
-                days.Add(new CalendarDayViewModel
-                {
-                    Day = previousMonth.AddDays(i).Day.ToString(),
-                    IsCurrentMonth = false,
-                    Date = previousMonth.AddDays(i)
-                });
-            }
-
-            // Dias do mês atual
-            int daysInMonth = DateTime.DaysInMonth(firstDayOfMonth.Year, firstDayOfMonth.Month);
-            for (int i = 1; i <= daysInMonth; i++)
-            {
-                var currentDate = new DateTime(firstDayOfMonth.Year, firstDayOfMonth.Month, i);
-                var day = new CalendarDayViewModel
-                {
-                    Day = i.ToString(),
-                    IsCurrentMonth = true,
-                    IsToday = currentDate.Date == DateTime.Today,
-                    Date = currentDate
-                };
-
-                // Verificar se há compras neste dia
-                day.HasPayment = VerificarComprasNaData(currentDate);
-
-                // Verificar se há boletos com vencimento neste dia
-                day.HasBoletoVencimento = VerificarBoletosNaData(currentDate);
-
-                days.Add(day);
-            }
-
-            // Completar o grid com dias do próximo mês
-            int remainingDays = 42 - days.Count; // 6 linhas x 7 colunas = 42 células
-            DateTime nextMonth = firstDayOfMonth.AddMonths(1);
-            for (int i = 1; i <= remainingDays; i++)
-            {
-                days.Add(new CalendarDayViewModel
-                {
-                    Day = i.ToString(),
-                    IsCurrentMonth = false,
-                    Date = new DateTime(nextMonth.Year, nextMonth.Month, i)
-                });
-            }
-
-            CalendarDaysControl.ItemsSource = days;
-        }
-
-        private bool VerificarComprasNaData(DateTime data)
-        {
-            if (_todasCompras == null) return false;
-
-            return _todasCompras.Any(c => c.DataCompra.Date == data.Date);
-        }
-
-        private bool VerificarBoletosNaData(DateTime data)
-        {
-            if (_todosBoletos == null) return false;
-
-            return _todosBoletos.Any(b => b.Vencimento.Date == data.Date && b.Pagamento == null);
-        }
-
-        private List<CompraData> BuscarComprasNoDia(DateTime data)
-        {
-            if (_comprasFiltradas == null)
-                return new List<CompraData>();
-
-            return _comprasFiltradas
-                .Where(c => c.DataCompra.Date == data.Date)
-                .ToList();
-        }
-
-        private List<BoletoData> BuscarBoletosNoDia(DateTime data)
-        {
-            if (_todosBoletos == null)
-                return new List<BoletoData>();
-
-            return _todosBoletos
-                .Where(b => b.Vencimento.Date == data.Date && b.Pagamento == null)
-                .ToList();
-        }
-
+        // Dia selecionada no calendário
         private void CalendarDayButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is DateTime selectedDate)
@@ -409,6 +382,24 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Mostrar o painel de detalhes
                 DiaDetalhesPanel.Visibility = Visibility.Visible;
             }
+        }
+        private List<CompraData> BuscarComprasNoDia(DateTime data)
+        {
+            if (_comprasFiltradas == null)
+                return new List<CompraData>();
+
+            return _comprasFiltradas
+                .Where(c => c.DataCompra.Date == data.Date)
+                .ToList();
+        }
+        private List<BoletoData> BuscarBoletosNoDia(DateTime data)
+        {
+            if (_todosBoletos == null)
+                return new List<BoletoData>();
+
+            return _todosBoletos
+                .Where(b => b.Vencimento.Date == data.Date && b.Pagamento == null)
+                .ToList();
         }
 
         // Apresenta os detalhes da compra ao clicar no botão de detalhes

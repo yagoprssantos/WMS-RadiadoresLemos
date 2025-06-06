@@ -74,6 +74,9 @@ namespace WMS_RadiadoresLemos_WPF
                 // ComboBox
                 Fornecedor.Visibility = Visibility.Collapsed;
                 Cliente.Visibility = Visibility.Visible;
+
+                // Boletos
+                CamposBoletos.Visibility = Visibility.Collapsed;
             }
         }
 

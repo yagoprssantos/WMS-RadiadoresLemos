@@ -19,7 +19,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         public VendasUserControl()
         {
             InitializeComponent();
-
             Loaded += VendasUserControl_Loaded;
         }
 

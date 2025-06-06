@@ -29,13 +29,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             InitializeComponent();
             _compraAtual = compra;
             _isCompra = true;
-            DataContext = compra;
-            FornecedorTextBox.Text = compra.FornecedorNome;
 
-            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
-                fornecedorLabel.Text = "Fornecedor:";
-            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
-                fornecedorBox.Text = compra.FornecedorNome;
+            if (FindName("FCLabel") is TextBlock FCLabel)
+                FCLabel.Text = "Fornecedor:";
+            if (FindName("FCTextBox") is TextBox FCTextBox)
+                FCTextBox.Text = compra.FornecedorNome;
+            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
+                ProdutoLabel.Text = "Produtos comprados:";
+
+            // Mostra campos de boletos
+            CampoBoletos.Visibility = Visibility.Visible;
+
+            DataContext = compra;
 
             CarregarItensProduto(compra);
             CarregarBoletos();
@@ -46,31 +51,46 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             InitializeComponent();
             _vendaAtual = venda;
             _isCompra = false;
-            _boletosList = new List<BoletoData>();
 
-            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
-                fornecedorLabel.Text = "Cliente:";
-            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
-                fornecedorBox.Text = venda.ClienteCNPJ;
+            // Altera textos para Venda
+            if (FindName("FCLabel") is TextBlock FCLabel)
+                FCLabel.Text = "Cliente:";
+            if (FindName("FCTextBox") is TextBox FCTextBox)
+                FCTextBox.Text = venda.ClienteCNPJ;
+            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
+                ProdutoLabel.Text = "Produtos vendidos:";
 
             // Não mostra campos de boletos
             CampoBoletos.Visibility = Visibility.Collapsed;
 
             DataContext = venda;
+
+            CarregarItensProduto(venda);
         }
 
 
         private void CarregarItensProduto(CompraData compra)
         {
             // Converter os itens da compra para o formato que o DataGrid espera
-            var produtosViewModel = compra.Itens.Select(item => new ProdutoCompraViewModel
+            var produtosViewModel = compra.Itens.Select(item => new ProdutoViewModel
             {
                 Nome = item.ProdutoNome,
                 Quantidade = item.Quantidade,
                 PrecoUnitario = item.Preco,
-                // O subtotal é calculado automaticamente na ViewModel
             }).ToList();
 
+            // Atribuir ao DataGrid
+            ProdutosDataGrid.ItemsSource = produtosViewModel;
+        }
+        private void CarregarItensProduto(VendaData venda)
+        {
+            // Converter os itens da venda para o formato que o DataGrid espera
+            var produtosViewModel = venda.Itens.Select(item => new ProdutoViewModel
+            {
+                Nome = item.ProdutoNome,
+                Quantidade = item.Quantidade,
+                PrecoUnitario = item.Preco,
+            }).ToList();
             // Atribuir ao DataGrid
             ProdutosDataGrid.ItemsSource = produtosViewModel;
         }
@@ -155,6 +175,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 MessageBox.Show($"Erro ao carregar boletos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void AbrirPDF_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.CommandParameter is string caminhoArquivo)

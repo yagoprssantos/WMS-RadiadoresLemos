@@ -27,7 +27,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         public BoletoData Original { get; set; }
     }
 
-    public class ProdutoCompraViewModel
+    public class ProdutoViewModel
     {
         public string Nome { get; set; }
         public int Quantidade { get; set; }

@@ -66,7 +66,7 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="15" Width="260">
+                                            <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="15" Width="250">
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding NotaFiscal, StringFormat='NF: {0}', TargetNullValue='Compra'}" Style="{StaticResource VendasTitleTextBox}" FontSize="16" HorizontalAlignment="Center"/>
                                                     <Separator Margin="10,5,10,10"/>
