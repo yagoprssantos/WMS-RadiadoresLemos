@@ -737,17 +737,23 @@ namespace WMS_RadiadoresLemos_WPF
         }
         private BoletoData CriarBoletoData(BoletoData boleto, string numeroNotaFiscal, FornecedorData fornecedor)
         {
+            // Criar nome do boleto padronizado
+            var extensao = Path.GetExtension(boleto.CaminhoArquivo);
+            string nomeBoleto = $"BoletoNF{numeroNotaFiscal}-Parcela{boleto.Parcela}{extensao}";
+
             var novoBoleto = new BoletoData
             {
                 Parcela = boleto.Parcela,
                 Vencimento = boleto.Vencimento,
                 Pagamento = boleto.Pagamento,
+                NomeArquivo = nomeBoleto, // Use o nome formatado
                 CaminhoArquivo = boleto.CaminhoArquivo,
                 NotaFiscal = numeroNotaFiscal,
                 FornecedorId = fornecedor.CNPJ
             };
 
-            novoBoleto.SetIdFromNotaFiscal();
+            // Agora o ID será definido com o nome formatado
+            novoBoleto.SetIdFromNome();
             return novoBoleto;
         }
         private VendaData CriarVendaData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)

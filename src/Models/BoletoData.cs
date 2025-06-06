@@ -12,6 +12,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [BsonField("caminhoArquivo")]
         public string CaminhoArquivo { get; set; }
 
+        // Nome do arquivo do boleto na pasta
+        [BsonField("nomeArquivo")]
+        public string? NomeArquivo { get; set; }
+
         // Nota Fiscal associada à compra/venda
         [BsonField("notaFiscal")]
         public string? NotaFiscal { get; set; }
@@ -32,9 +36,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         public int Parcela { get; set; }
 
 
-        public void SetIdFromNotaFiscal()
+        public void SetIdFromNome()
         {
-            Id = NotaFiscal;
+            Id = NomeArquivo;
         }
     }
 }

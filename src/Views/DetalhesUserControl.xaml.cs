@@ -5,7 +5,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.IO;
 using System.Diagnostics;
+using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -14,7 +16,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private CompraData? _compraAtual;
         private VendaData? _vendaAtual;
         private bool _isCompra;
-        private List<BoletoData> _boletosList;
+        private List<BoletoData> _boletosList = new List<BoletoData>();
 
         public DetalhesUserControl()
         {
@@ -27,21 +29,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             InitializeComponent();
             _compraAtual = compra;
             _isCompra = true;
-            _boletosList = new List<BoletoData>();
+            DataContext = compra;
+            FornecedorTextBox.Text = compra.FornecedorNome;
 
-            // Carregar dados de boletos relacionados (implementação real carregaria do banco)
-            CarregarBoletos();
-
-            // Calcular próximo vencimento
-            CalcularProximoVencimento();
-
-            // Configura a exibição para compras
             if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
                 fornecedorLabel.Text = "Fornecedor:";
             if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
                 fornecedorBox.Text = compra.FornecedorNome;
 
-            DataContext = compra;
+            CarregarItensProduto(compra);
+            CarregarBoletos();
         }
 
         public DetalhesUserControl(VendaData venda)
@@ -51,97 +48,172 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _isCompra = false;
             _boletosList = new List<BoletoData>();
 
-            // Carregar dados de boletos relacionados (implementação real carregaria do banco)
-            CarregarBoletos();
-
-            // Calcular próximo vencimento
-            CalcularProximoVencimento();
-
-            // Ajusta labels específicos para venda
             if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
                 fornecedorLabel.Text = "Cliente:";
             if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
                 fornecedorBox.Text = venda.ClienteCNPJ;
 
+            // Não mostra campos de boletos
+            CampoBoletos.Visibility = Visibility.Collapsed;
+
             DataContext = venda;
         }
 
+
+        private void CarregarItensProduto(CompraData compra)
+        {
+            // Converter os itens da compra para o formato que o DataGrid espera
+            var produtosViewModel = compra.Itens.Select(item => new ProdutoCompraViewModel
+            {
+                Nome = item.ProdutoNome,
+                Quantidade = item.Quantidade,
+                PrecoUnitario = item.Preco,
+                // O subtotal é calculado automaticamente na ViewModel
+            }).ToList();
+
+            // Atribuir ao DataGrid
+            ProdutosDataGrid.ItemsSource = produtosViewModel;
+        }
         private void CarregarBoletos()
         {
-            // Implementação fictícia para simular carregamento de boletos
-            // Em um cenário real, você buscaria esses dados do banco de dados
-            if (_compraAtual != null && _compraAtual.Boletos != null)
+            try
             {
-                foreach (var boletoId in _compraAtual.Boletos)
+                var db = DatabaseConnect.Database;
+                if (db != null && _compraAtual != null)
                 {
-                    _boletosList.Add(new BoletoData
+                    var collection = db.GetCollection<BoletoData>("boletos");
+                    _boletosList = collection.FindAll().ToList();
+
+                    // Filtra pela Nota Fiscal
+                    _boletosList = _boletosList.Where(b => b.NotaFiscal == _compraAtual.NotaFiscal).ToList();
+
+                    // Trata dados para apresentar corretamente
+                    var boletosTratados = _boletosList.Select(b => {
+                        // Verifica se o arquivo realmente existe
+                        bool arquivoExiste = !string.IsNullOrEmpty(b.CaminhoArquivo) && File.Exists(b.CaminhoArquivo);
+
+                        // Calcula status do boleto
+                        string status;
+                        if (b.Pagamento.HasValue)
+                            status = "Pago";
+                        else if (b.Vencimento.Date < DateTime.Now.Date)
+                            status = "Vencido";
+                        else
+                            status = "Pendente";
+
+                        // Calcula dias até vencimento ou dias de atraso
+                        int diasAteVencimento = (b.Vencimento.Date - DateTime.Now.Date).Days;
+                        string situacaoVencimento;
+
+                        if (b.Pagamento.HasValue)
+                            situacaoVencimento = "Pago em " + b.Pagamento.Value.ToString("dd/MM/yyyy");
+                        else if (diasAteVencimento > 0)
+                            situacaoVencimento = $"Vence em {diasAteVencimento} dia(s)";
+                        else if (diasAteVencimento < 0)
+                            situacaoVencimento = $"Vencido há {Math.Abs(diasAteVencimento)} dia(s)";
+                        else
+                            situacaoVencimento = "Vence hoje";
+
+                        // Informação de parcelamento
+                        string infoParcelamento = _compraAtual.Parcelas > 0
+                            ? $"Parcela {b.Parcela}/{_compraAtual.Parcelas}"
+                            : $"Parcela {b.Parcela}";
+
+                        // Criar o objeto ViewModel com todas as propriedades
+                        return new BoletoViewModel
+                        {
+                            Original = b,
+                            Id = b.Id,
+                            Parcela = infoParcelamento,
+                            Vencimento = b.Vencimento,
+                            VencimentoFormatado = b.Vencimento.ToString("dd/MM/yyyy"),
+                            Pagamento = b.Pagamento,
+                            PagamentoFormatado = b.Pagamento.HasValue ? b.Pagamento.Value.ToString("dd/MM/yyyy") : "Pendente",
+                            CaminhoArquivo = b.CaminhoArquivo,
+                            NotaFiscal = b.NotaFiscal,
+                            FornecedorId = b.FornecedorId,
+                            NomeArquivo = !string.IsNullOrEmpty(b.CaminhoArquivo) ? Path.GetFileName(b.CaminhoArquivo) : "Sem arquivo",
+                            ArquivoExiste = arquivoExiste,
+                            NomeFornecedor = _compraAtual.FornecedorNome,
+                            SituacaoVencimento = situacaoVencimento,
+                        };
+                    }).ToList();
+
+                    // Apresenta no DataGrid de boletos
+                    if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
                     {
-                        Id = boletoId,
-                        FornecedorId = _compraAtual.FornecedorId,
-                        NotaFiscal = _compraAtual.NotaFiscal,
-                        Vencimento = DateTime.Now.AddDays(30),
-                        Parcela = _boletosList.Count + 1,
-                        CaminhoArquivo = $"boletos/{boletoId}.pdf"
-                    });
+                        boletosDataGrid.ItemsSource = boletosTratados;
+                    }
+
+                    // Atualiza visibilidade da mensagem de "sem boletos"
+                    if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
+                        semBoletosMsg.Visibility = boletosTratados.Any() ? Visibility.Collapsed : Visibility.Visible;
                 }
             }
-            else if (_vendaAtual != null && _vendaAtual.Boletos != null)
+            catch (Exception ex)
             {
-                foreach (var boletoId in _vendaAtual.Boletos)
+                MessageBox.Show($"Erro ao carregar boletos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void AbrirPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is string caminhoArquivo)
+            {
+                try
                 {
-                    _boletosList.Add(new BoletoData
+                    if (File.Exists(caminhoArquivo))
                     {
-                        Id = boletoId,
-                        FornecedorId = _vendaAtual.ClienteId, // No caso de venda, usamos o clienteId
-                        NotaFiscal = _vendaAtual.NotaFiscal,
-                        Vencimento = DateTime.Now.AddDays(30),
-                        Parcela = _boletosList.Count + 1,
-                        CaminhoArquivo = $"boletos/{boletoId}.pdf"
-                    });
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = "cmd.exe",
+                            Arguments = $"/c start \"\" \"{caminhoArquivo}\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        Process.Start(psi);
+                    }
+                    else
+                    {
+                        MessageBox.Show("O arquivo PDF não foi encontrado.",
+                            "Arquivo não encontrado", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir o arquivo: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private void CalcularProximoVencimento()
+        private string GetIdentifier(string fornecedorId_clienteCNPJ)
         {
-            if (_boletosList.Count > 0)
+            if (_isCompra && _compraAtual != null)
             {
-                var boletosNaoPagos = _boletosList.Where(b => !b.Pagamento.HasValue)
-                    .OrderBy(b => b.Vencimento).ToList();
-
-                if (boletosNaoPagos.Any())
-                {
-                    if (_compraAtual != null)
-                        _compraAtual.ProximoVencimento = boletosNaoPagos.First().Vencimento;
-                }
+                return _compraAtual.FornecedorNome;
             }
-        }
-
-        private void ImprimirPDF_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Funcionalidade de impressão em desenvolvimento", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+            else if (!_isCompra && _vendaAtual != null)
+            {
+                // Se o parâmetro for igual ao ClienteCNPJ, retorna o CNPJ
+                if (!string.IsNullOrEmpty(fornecedorId_clienteCNPJ) &&
+                    fornecedorId_clienteCNPJ == _vendaAtual.ClienteCNPJ)
+                {
+                    return _vendaAtual.ClienteCNPJ;
+                }
+                // Se o parâmetro for igual ao ClienteId, retorna o CNPJ também
+                if (!string.IsNullOrEmpty(fornecedorId_clienteCNPJ) &&
+                    fornecedorId_clienteCNPJ == _vendaAtual.ClienteId)
+                {
+                    return _vendaAtual.ClienteCNPJ;
+                }
+                // Caso não bata, retorna o CNPJ padrão
+                return _vendaAtual.ClienteCNPJ;
+            }
+            return "Desconhecido";
         }
 
         private void Editar_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Funcionalidade de edição em desenvolvimento", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void GerarNotaFiscal_Click(object sender, RoutedEventArgs e)
-        {
-            string tipo = _isCompra ? "compra" : "venda";
-            string notaFiscal = _isCompra ? _compraAtual?.NotaFiscal : _vendaAtual?.NotaFiscal;
-
-            if (string.IsNullOrEmpty(notaFiscal))
-            {
-                MessageBox.Show($"Nota fiscal ainda não gerada para esta {tipo}. Deseja gerar uma nova?",
-                    "Nota Fiscal", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            }
-            else
-            {
-                MessageBox.Show($"Visualizando nota fiscal: {notaFiscal}",
-                    "Nota Fiscal", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
 
         private void VisualizarBoletos_Click(object sender, RoutedEventArgs e)
@@ -153,15 +225,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 return;
             }
 
-            // Obter o diretório de boletos (usando o caminho do primeiro boleto como referência)
             string diretorioBoletos = Path.GetDirectoryName(_boletosList.First().CaminhoArquivo);
 
-            // Verificar se o diretório existe
             if (!Directory.Exists(diretorioBoletos))
             {
                 try
                 {
-                    // Criar o diretório se não existir
                     Directory.CreateDirectory(diretorioBoletos);
                 }
                 catch (Exception ex)
@@ -172,37 +241,34 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 }
             }
 
-            // Abrir o diretório usando o explorador de arquivos
             try
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "explorer.exe",
-                    Arguments = diretorioBoletos,
-                    UseShellExecute = true
+                    FileName = "cmd.exe",
+                    Arguments = $"/c start \"\" \"{diretorioBoletos}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
                 };
                 Process.Start(psi);
             }
             catch (Exception ex)
             {
-                // Mostrar os boletos disponíveis caso não consiga abrir o diretório
                 string mensagem = "Não foi possível abrir a pasta de boletos.\n\nBoletos disponíveis:\n\n";
-
                 foreach (var boleto in _boletosList)
                 {
                     string status = boleto.Pagamento.HasValue ? "Pago" : "Pendente";
                     mensagem += $"• Parcela {boleto.Parcela} - Vencimento: {boleto.Vencimento:dd/MM/yyyy} - Status: {status}\n";
                 }
-
                 MessageBox.Show(mensagem, "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
         private void AdicionarBoleto_Click(object sender, RoutedEventArgs e)
         {
-            // Implementação básica para adicionar um novo boleto
-            // Em um cenário real, você abriria um diálogo para o usuário inserir informações do boleto
+            if (true) { return; }
 
+            // Código para testes futuros
             string idOperacao = _isCompra ? _compraAtual?.Id : _vendaAtual?.Id;
 
             if (string.IsNullOrEmpty(idOperacao))
@@ -212,7 +278,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 return;
             }
 
-            // Criar um novo boleto com dados fictícios
             string novoBoletoId = $"BOL-{DateTime.Now.Ticks.ToString().Substring(10)}";
 
             var novoBoleto = new BoletoData
@@ -227,31 +292,34 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             _boletosList.Add(novoBoleto);
 
-            // Adicionar o boleto à lista da operação
             if (_isCompra && _compraAtual != null)
             {
                 _compraAtual.Boletos ??= new List<string>();
                 _compraAtual.Boletos.Add(novoBoletoId);
 
-                // Atualizar a lista visual
-                BoletosListView.ItemsSource = null;
-                BoletosListView.ItemsSource = _compraAtual.Boletos;
+                if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
+                {
+                    boletosDataGrid.ItemsSource = null;
+                    boletosDataGrid.ItemsSource = _boletosList;
+                }
             }
             else if (!_isCompra && _vendaAtual != null)
             {
                 _vendaAtual.Boletos ??= new List<string>();
                 _vendaAtual.Boletos.Add(novoBoletoId);
 
-                // Atualizar a lista visual
-                BoletosListView.ItemsSource = null;
-                BoletosListView.ItemsSource = _vendaAtual.Boletos;
+                if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
+                {
+                    boletosDataGrid.ItemsSource = null;
+                    boletosDataGrid.ItemsSource = _boletosList;
+                }
             }
 
-            // Recalcular próximo vencimento
-            CalcularProximoVencimento();
 
             MessageBox.Show($"Boleto {novoBoletoId} adicionado com sucesso",
                 "Boleto Adicionado", MessageBoxButton.OK, MessageBoxImage.Information);
+
+
         }
     }
 }

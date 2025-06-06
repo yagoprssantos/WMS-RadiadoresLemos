@@ -58,6 +58,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 File.Copy(boleto.CaminhoArquivo, caminhoDestino, true);
                 
                 // Atualiza o caminho do arquivo no objeto boleto
+                boleto.NomeArquivo = novoNomeArquivo;
                 boleto.CaminhoArquivo = caminhoDestino;
             }
             catch (Exception ex)
