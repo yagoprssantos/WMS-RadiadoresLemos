@@ -108,7 +108,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     _boletosList = _boletosList.Where(b => b.NotaFiscal == _compraAtual.NotaFiscal).ToList();
 
                     // Trata dados para apresentar corretamente
-                    var boletosTratados = _boletosList.Select(b => {
+                    var boletosTratados = _boletosList.Select(b =>
+                    {
                         // Verifica se o arquivo realmente existe
                         bool arquivoExiste = !string.IsNullOrEmpty(b.CaminhoArquivo) && File.Exists(b.CaminhoArquivo);
 
@@ -232,9 +233,33 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
             return "Desconhecido";
         }
-
         private void Editar_Click(object sender, RoutedEventArgs e)
         {
+            // Abre a janela de edição passando a compra atual
+            var editarJanela = new EditarDetalhesWindow(_compraAtual);
+            bool? resultado = editarJanela.ShowDialog();
+
+            // Se a edição foi confirmada, recarrega os dados
+            if (resultado == true)
+            {
+                // Atualiza o datacontext para refletir as mudanças
+                DataContext = null;
+                DataContext = _compraAtual;
+
+                // Recarrega os boletos
+                CarregarBoletos();
+
+                // Atualiza a interface
+                AtualizarCampos();
+            }
+        }
+
+        private void AtualizarCampos()
+        {
+            // Atualiza os campos específicos que não são automaticamente atualizados pelo binding
+            FCTextBox.Text = _compraAtual.FornecedorNome;
+            ProdutosDataGrid.ItemsSource = null;
+            ProdutosDataGrid.ItemsSource = _compraAtual.Itens;
         }
 
         private void VisualizarBoletos_Click(object sender, RoutedEventArgs e)
@@ -284,63 +309,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 MessageBox.Show(mensagem, "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-
-        private void AdicionarBoleto_Click(object sender, RoutedEventArgs e)
+        private void AdicionarBoletos_Click(object sender, RoutedEventArgs e)
         {
-            if (true) { return; }
+            // Abre a janela apenas para adicionar boletos
+            var editarJanela = new EditarDetalhesWindow(_compraAtual, true);
+            bool? resultado = editarJanela.ShowDialog();
 
-            // Código para testes futuros
-            string idOperacao = _isCompra ? _compraAtual?.Id : _vendaAtual?.Id;
-
-            if (string.IsNullOrEmpty(idOperacao))
+            // Se a adição foi confirmada, recarrega os boletos
+            if (resultado == true)
             {
-                MessageBox.Show("Não é possível adicionar boletos sem um ID de operação válido",
-                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                CarregarBoletos();
             }
-
-            string novoBoletoId = $"BOL-{DateTime.Now.Ticks.ToString().Substring(10)}";
-
-            var novoBoleto = new BoletoData
-            {
-                Id = novoBoletoId,
-                FornecedorId = _isCompra ? _compraAtual?.FornecedorId ?? "" : _vendaAtual?.ClienteId ?? "",
-                NotaFiscal = _isCompra ? _compraAtual?.NotaFiscal : _vendaAtual?.NotaFiscal,
-                Vencimento = DateTime.Now.AddMonths(1),
-                Parcela = _boletosList.Count + 1,
-                CaminhoArquivo = $"boletos/{novoBoletoId}.pdf"
-            };
-
-            _boletosList.Add(novoBoleto);
-
-            if (_isCompra && _compraAtual != null)
-            {
-                _compraAtual.Boletos ??= new List<string>();
-                _compraAtual.Boletos.Add(novoBoletoId);
-
-                if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
-                {
-                    boletosDataGrid.ItemsSource = null;
-                    boletosDataGrid.ItemsSource = _boletosList;
-                }
-            }
-            else if (!_isCompra && _vendaAtual != null)
-            {
-                _vendaAtual.Boletos ??= new List<string>();
-                _vendaAtual.Boletos.Add(novoBoletoId);
-
-                if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
-                {
-                    boletosDataGrid.ItemsSource = null;
-                    boletosDataGrid.ItemsSource = _boletosList;
-                }
-            }
-
-
-            MessageBox.Show($"Boleto {novoBoletoId} adicionado com sucesso",
-                "Boleto Adicionado", MessageBoxButton.OK, MessageBoxImage.Information);
-
-
         }
     }
 }
