@@ -6,7 +6,7 @@
         mc:Ignorable="d" 
         Title="Adicionar Entrada/Saída"
         MinHeight="600" MinWidth="800"
-        Height="600" Width="800"
+        Height="Auto" Width="800"
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
@@ -291,14 +291,14 @@
                                                                     <!-- Vencimento -->
                                                                     <StackPanel Orientation="Horizontal" Margin="0,0,30,0" VerticalAlignment="Center" Grid.ColumnSpan="2">
                                                                         <TextBlock Text="Vencimento:" FontSize="14" Foreground="{StaticResource TextBrush}"
-                                                                                       VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
                                                                         <DatePicker SelectedDate="{Binding Vencimento}" Style="{StaticResource DatePickerStyle}"
                                                                                         Height="28" FontSize="14" Width="Auto" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
                                                                     <!-- Pagamento -->
                                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.ColumnSpan="2">
                                                                         <TextBlock Text="Pagamento:" FontSize="14" Foreground="{StaticResource TextBrush}"
-                                                                                       VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
                                                                         <DatePicker SelectedDate="{Binding Pagamento}" Style="{StaticResource DatePickerStyle}"
                                                                                         Height="28" FontSize="14" Width="Auto" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
@@ -462,6 +462,11 @@
                                                         <TextBlock Text="{Binding Parcelas}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
                                                 </StackPanel>
+
+                                                <!-- Botão de Editar -->
+                                                <Button Content="✎" Grid.Row="1" FontSize="7" Grid.Column="0" Style="{StaticResource EmphasisButtonStyle}" 
+                                                        Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                                                        Click="EditarItem_Click" Margin="0,0,5,0" />
 
                                                 <!-- Botão de Excluir -->
                                                 <Button Content="✖" Grid.Row="1" FontSize="7" Grid.Column="1" Style="{StaticResource DeleteButtonStyle}" 

@@ -29,6 +29,7 @@ namespace WMS_RadiadoresLemos_WPF
         private List<MovimentacaoListItem> listaMovimentacoes = new();
         private List<CompraData> compras = new();
         private List<VendaData> vendas = new();
+        private MovimentacaoData _itemEmEdicao = null;
 
         private ProdutoData? produtoSelecionado;
 
@@ -799,6 +800,103 @@ namespace WMS_RadiadoresLemos_WPF
             ToggleLista.Background = brush;
 
             brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation); // Inicia a animação
+        }
+
+        private void EditarItem_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.DataContext is MovimentacaoListItem itemToEdit)
+            {
+                // Salva referência ao item em edição
+                _itemEmEdicao = itemToEdit.MovimentacaoData;
+
+                // Preenche os campos com os dados do item
+                PreencherCamposComItem(itemToEdit);
+
+                // Remove da lista de movimentações
+                if (_itemEmEdicao != null)
+                {
+                    movimentacoes.Remove(_itemEmEdicao);
+                }
+
+                // Remove da lista de itens
+                listaMovimentacoes.Remove(itemToEdit);
+
+                // Remove da lista de compras ou vendas
+                if (usePositiveNumber)
+                {
+                    var compraRelacionada = compras.FirstOrDefault(c => c.Itens.Contains(_itemEmEdicao));
+                    if (compraRelacionada != null)
+                    {
+                        // Preserva a nota fiscal para reutilização
+                        NotaFiscalTextBox.Text = compraRelacionada.NotaFiscal;
+                        compras.Remove(compraRelacionada);
+                    }
+                }
+                else
+                {
+                    var vendaRelacionada = vendas.FirstOrDefault(v => v.Itens.Contains(_itemEmEdicao));
+                    if (vendaRelacionada != null)
+                    {
+                        // Preserva a nota fiscal para reutilização
+                        NotaFiscalTextBox.Text = vendaRelacionada.NotaFiscal;
+                        vendas.Remove(vendaRelacionada);
+                    }
+                }
+
+                // Atualiza o ItemsSource do ListaItemsControl
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
+
+                // Esconde a lista para focar na edição
+                Lista.Visibility = Visibility.Collapsed;
+                ToggleLista.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void PreencherCamposComItem(MovimentacaoListItem item)
+        {
+            // Preenche o campo de produto
+            ProdutoComboBox.Text = item.ProdutoNome;
+            produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == item.ProdutoNome);
+
+            // Preenche fornecedor ou cliente dependendo do tipo
+            if (usePositiveNumber)
+            {
+                FornecedorComboBox.Text = item.FornecedorId;
+                fornecedorSelecionado = item.FornecedorId;
+            }
+            else
+            {
+                ClienteComboBox.Text = item.ClienteId;
+                clienteSelecionado = item.ClienteId;
+            }
+
+            // Preenche quantidade e preço
+            QuantidadeTextBox.Text = item.Quantidade.ToString();
+            PrecoTextBox.Text = item.Preco.ToString();
+
+            // Preenche forma de pagamento
+            FormaPagamentoComboBox.SelectedItem = FormaPagamentoComboBox.Items
+                        .OfType<ComboBoxItem>()
+                        .FirstOrDefault(i => (i.Content?.ToString() ?? "") == item.FormaPagamento);
+            formaPagamentoSelecionada = item.FormaPagamento;
+
+            // Preenche parcelas
+            ParcelasTextBox.Text = item.Parcelas.ToString();
+
+            // Preenche detalhes
+            DetalhesTextBox.Text = item.Detalhes;
+
+            // Atualiza os campos de produto
+            if (produtoSelecionado != null)
+            {
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+            }
+
+            // Garante que a seção financeira esteja visível
+            Valida();
         }
 
         private void ExcluirItem_Click(object sender, RoutedEventArgs e)
