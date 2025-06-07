@@ -34,4 +34,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         public double PrecoUnitario { get; set; }
         public double Subtotal => Quantidade * PrecoUnitario;
     }
+
+    public class ItemEdicaoViewModel
+    {
+        private MovimentacaoData _item;
+
+        public ItemEdicaoViewModel(MovimentacaoData item)
+        {
+            _item = item;
+        }
+
+        public string ProdutoNome { get => _item.ProdutoNome; set => _item.ProdutoNome = value; }
+        public int Quantidade { get => _item.Quantidade; set => _item.Quantidade = value; }
+        public double Preco { get => _item.Preco; set => _item.Preco = value; }
+        public double Subtotal => Quantidade * Preco;
+
+        public MovimentacaoData ObterItem() => _item;
+    }
 }

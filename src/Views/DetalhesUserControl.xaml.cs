@@ -166,9 +166,25 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                         boletosDataGrid.ItemsSource = boletosTratados;
                     }
 
-                    // Atualiza visibilidade da mensagem de "sem boletos"
-                    if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
-                        semBoletosMsg.Visibility = boletosTratados.Any() ? Visibility.Collapsed : Visibility.Visible;
+                    // Atualiza visibilidade da mensagem de "sem boletos" se necessário
+                    if (boletosTratados.Count == 0)
+                    {
+                        if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
+                        {
+                            semBoletosMsg.Visibility = Visibility.Visible;
+                            BoletosDataGrid.Visibility = Visibility.Collapsed;
+                            semBoletosMsg.Text = "Nenhum boleto registrado para esta compra.";
+                        }
+                    }
+                    else
+                    {
+                        if (FindName("SemBoletosMessage") is TextBlock semBoletosLabel)
+                        {
+                            semBoletosLabel.Visibility = Visibility.Collapsed;
+                            BoletosDataGrid.Visibility = Visibility.Visible;
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -208,31 +224,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        private string GetIdentifier(string fornecedorId_clienteCNPJ)
-        {
-            if (_isCompra && _compraAtual != null)
-            {
-                return _compraAtual.FornecedorNome;
-            }
-            else if (!_isCompra && _vendaAtual != null)
-            {
-                // Se o parâmetro for igual ao ClienteCNPJ, retorna o CNPJ
-                if (!string.IsNullOrEmpty(fornecedorId_clienteCNPJ) &&
-                    fornecedorId_clienteCNPJ == _vendaAtual.ClienteCNPJ)
-                {
-                    return _vendaAtual.ClienteCNPJ;
-                }
-                // Se o parâmetro for igual ao ClienteId, retorna o CNPJ também
-                if (!string.IsNullOrEmpty(fornecedorId_clienteCNPJ) &&
-                    fornecedorId_clienteCNPJ == _vendaAtual.ClienteId)
-                {
-                    return _vendaAtual.ClienteCNPJ;
-                }
-                // Caso não bata, retorna o CNPJ padrão
-                return _vendaAtual.ClienteCNPJ;
-            }
-            return "Desconhecido";
-        }
         private void Editar_Click(object sender, RoutedEventArgs e)
         {
             // Abre a janela de edição passando a compra atual
@@ -242,24 +233,25 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Se a edição foi confirmada, recarrega os dados
             if (resultado == true)
             {
-                // Atualiza o datacontext para refletir as mudanças
-                DataContext = null;
-                DataContext = _compraAtual;
-
-                // Recarrega os boletos
-                CarregarBoletos();
-
-                // Atualiza a interface
-                AtualizarCampos();
+                // Recarrega toda a janela com os dados atualizados
+                _isCompra = true;
+                if (_compraAtual != null)
+                {
+                    DataContext = _compraAtual;
+                    CarregarItensProduto(_compraAtual);
+                    CarregarBoletos();
+                }
+                else if (_vendaAtual != null)
+                {
+                    DataContext = _vendaAtual;
+                    CarregarItensProduto(_vendaAtual);
+                }
+                else
+                {
+                    MessageBox.Show("Nenhuma compra ou venda selecionada para editar.",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-        }
-
-        private void AtualizarCampos()
-        {
-            // Atualiza os campos específicos que não são automaticamente atualizados pelo binding
-            FCTextBox.Text = _compraAtual.FornecedorNome;
-            ProdutosDataGrid.ItemsSource = null;
-            ProdutosDataGrid.ItemsSource = _compraAtual.Itens;
         }
 
         private void VisualizarBoletos_Click(object sender, RoutedEventArgs e)

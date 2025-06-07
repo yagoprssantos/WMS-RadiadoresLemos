@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Editar Detalhes da Compra"
-        Height="780" Width="1300"
+        Height="820" Width="1320"
         MinHeight="600" MinWidth="700"
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterScreen">
@@ -78,7 +78,6 @@
                                         <Grid Margin="0,10,0,5">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             
                                             <!-- Nota Fiscal -->
@@ -90,24 +89,14 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBox x:Name="NotaFiscalTextBox" FontSize="14"
-                                                            Style="{StaticResource {x:Type TextBox}}" 
-                                                            Background="{StaticResource PanelBackgroundBrush}"
-                                                            Foreground="{StaticResource TextBrush}"/>
+                                                             VerticalContentAlignment="Center"
+                                                             Style="{StaticResource {x:Type TextBox}}" 
+                                                             Background="{StaticResource PanelBackgroundBrush}"
+                                                             Foreground="{StaticResource TextBrush}"/>
                                                     <Button Grid.Column="1" Content="Importar XML" Style="{StaticResource EmphasisButtonStyle}"
-                                                           FontSize="12" Margin="5,0,0,0"
-                                                           Click="ImportarXML_Click"/>
+                                                            FontSize="12" Margin="10,0,0,0"
+                                                            Click="ImportarXML_Click"/>
                                                 </Grid>
-                                            </StackPanel>
-
-                                            <!-- Fornecedor -->
-                                            <StackPanel Grid.Column="1" Margin="5,0,0,0" >
-                                                <TextBlock Text="Fornecedor:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
-                                                <ComboBox x:Name="FornecedorComboBox" Style="{StaticResource ComboBoxSearchStyle}"
-                                                         FontSize="14" Margin="0" HorizontalAlignment="Stretch"
-                                                         Background="{StaticResource PanelBackgroundBrush}"
-                                                         IsEditable="True" StaysOpenOnEdit="True"
-                                                         LostFocus="FornecedorComboBox_LostFocus" 
-                                                         TextBoxBase.TextChanged="FornecedorComboBox_TextChanged"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -117,20 +106,22 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            
+
+                                            <!-- Fornecedor -->
+                                            <StackPanel Grid.Column="0" Margin="0,0,5,0" >
+                                                <TextBlock Text="Fornecedor:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
+                                                <ComboBox x:Name="FornecedorComboBox" Style="{StaticResource ComboBoxSearchStyle}"
+                                                         FontSize="14" Margin="0" HorizontalAlignment="Stretch"
+                                                         Background="{StaticResource PanelBackgroundBrush}"
+                                                         IsEditable="True" StaysOpenOnEdit="True"
+                                                         LostFocus="FornecedorComboBox_LostFocus" TextBoxBase.TextChanged="FornecedorComboBox_TextChanged"/>
+                                            </StackPanel>
+
                                             <!-- Data da Compra -->
-                                            <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                            <StackPanel Grid.Column="1" Margin="5,0,0,0">
                                                 <TextBlock Text="Data da Compra:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
                                                 <DatePicker x:Name="DataCompraDatePicker" Style="{StaticResource DatePickerStyle}"
                                                            FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-                                            </StackPanel>
-
-                                            <!-- Valor Total -->
-                                            <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                                <TextBlock Text="Valor Total:" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
-                                                <TextBox x:Name="ValorTotalTextBox" FontSize="16" FontWeight="Bold" Margin="0"
-                                                          Foreground="{StaticResource AccentBrush}" Background="{StaticResource PanelBackgroundBrush}"
-                                                          VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -226,8 +217,13 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Grid Grid.Column="0">
+                                        <Grid Grid.Column="0" Height="36" VerticalAlignment="Top">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
                                             <TextBlock Grid.Column="0"
                                                        Text="Itens da Compra"
                                                        FontSize="18"
@@ -235,6 +231,23 @@
                                                        VerticalAlignment="Center"
                                                        HorizontalAlignment="Left"
                                                        Foreground="{StaticResource TextBrush}"/>
+
+                                            <StackPanel Grid.Column="1" 
+                                                        Orientation="Horizontal"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="10,0,0,0">
+                                                <TextBlock Text="Total:" 
+                                                           Foreground="{StaticResource TextBrush}" 
+                                                           FontSize="16"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,5,0"/>
+                                                <TextBlock Text="{Binding ValorTotal, StringFormat='R$ {0:N2}'}" 
+                                                           Foreground="{StaticResource AccentBrush}" 
+                                                           FontSize="16"
+                                                           FontWeight="Bold"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
 
                                             <Button Grid.Column="1"
                                                     Content="Adicionar Item" 
@@ -246,7 +259,7 @@
                                                     Click="AdicionarItem_Click"/>
                                         </Grid>
 
-                                        <Button Grid.Column="2"
+                                        <Button Grid.Column="3"
                                                 x:Name="ExpandirItensButton"
                                                 Margin="0"
                                                 Foreground="{StaticResource TextBrush}"
@@ -259,42 +272,59 @@
                                                 Click="ExpandirItensButton_Click"/>
                                     </Grid>
 
-                                    <!-- Conteúdo expansível -->
-                                    <StackPanel x:Name="ItensConteudo" Visibility="Visible">
-                                        <!-- DataGrid de Itens -->
-                                        <DataGrid x:Name="ItensDataGrid" Style="{StaticResource CustomDataGridStyle}"
-                                                 Background="Transparent" BorderThickness="0"
-                                                 AutoGenerateColumns="False"
-                                                 Margin="0,10,0,0" VerticalScrollBarVisibility="Auto"
-                                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <!-- Conteúdo expansível usando Grid -->
+                                    <Grid x:Name="ItensConteudo" Visibility="Visible" Margin="0,10,0,0">
+                                        <DataGrid x:Name="ItensDataGrid" 
+                                                  FontSize="14"
+                                                  Style="{StaticResource CustomDataGridStyle}"
+                                                  Background="Transparent" 
+                                                  BorderBrush="Transparent" 
+                                                  BorderThickness="0"
+                                                  AutoGenerateColumns="False"
+                                                  VerticalScrollBarVisibility="Auto"
+                                                  CellEditEnding="ItensDataGrid_CellEditEnding"
+                                                  HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Stretch"
+                                                  HorizontalContentAlignment="Stretch"
+                                                  VerticalContentAlignment="Stretch">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Produto" Binding="{Binding ProdutoNome}" 
-                                                                   Width="*" IsReadOnly="True"/>
-                                                <DataGridTextColumn Header="Quantidade" Binding="{Binding Quantidade}" 
-                                                                   Width="Auto"/>
+                                                <DataGridTextColumn Header="Produto" 
+                                                                    Binding="{Binding ProdutoNome}" 
+                                                                    Width="Auto" 
+                                                                    FontSize="14"
+                                                                    IsReadOnly="True"/>
+                                                <DataGridTextColumn Header="Quantidade" 
+                                                                    Binding="{Binding Quantidade}" 
+                                                                    Width="Auto" 
+                                                                    MinWidth="90" 
+                                                                    FontSize="14"/>
                                                 <DataGridTextColumn Header="Preço" 
-                                                                   Binding="{Binding Preco, StringFormat=R$ {0:N2}}" 
-                                                                   Width="Auto"/>
-                                                <DataGridTemplateColumn Header="Subtotal" Width="Auto" IsReadOnly="True">
+                                                                    Binding="{Binding Preco, StringFormat=R$ {0:N2}}" 
+                                                                    Width="Auto" 
+                                                                    MinWidth="110" 
+                                                                    FontSize="14"/>
+                                                <DataGridTextColumn Header="Subtotal" 
+                                                                    Binding="{Binding Subtotal, StringFormat={}{0:C2}}" 
+                                                                    Width="Auto" 
+                                                                    MinWidth="110" 
+                                                                    FontSize="14"/>
+                                                <DataGridTemplateColumn Width="Auto" 
+                                                                       MinWidth="70" 
+                                                                       Header="Ações">
                                                     <DataGridTemplateColumn.CellTemplate>
                                                         <DataTemplate>
-                                                            <TextBlock Text="{Binding Preco}"
-                                                                      VerticalAlignment="Center" Margin="5,0"/>
-                                                        </DataTemplate>
-                                                    </DataGridTemplateColumn.CellTemplate>
-                                                </DataGridTemplateColumn>
-                                                <DataGridTemplateColumn Width="Auto">
-                                                    <DataGridTemplateColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <Button Content="Editar" Style="{StaticResource EmphasisButtonStyle}"
-                                                                   FontSize="11" Padding="5,2" Margin="2"
-                                                                   Click="EditarItem_Click"/>
+                                                            <Button Content="Editar" 
+                                                                    Style="{StaticResource EmphasisButtonStyle}"
+                                                                    FontSize="11" 
+                                                                    Padding="5,2" 
+                                                                    Margin="2"
+                                                                    Click="EditarItem_Click"/>
                                                         </DataTemplate>
                                                     </DataGridTemplateColumn.CellTemplate>
                                                 </DataGridTemplateColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
-                                    </StackPanel>
+                                    </Grid>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -350,88 +380,91 @@
                                                   HorizontalAlignment="Center" Margin="0,10,0,0"/>
 
                                         <!-- Lista de Boletos -->
-                                        <ItemsControl x:Name="BoletosItemsControl">
+                                        <ItemsControl x:Name="BoletosItemsControl" HorizontalAlignment="Stretch">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Margin="0,5" Background="{StaticResource PanelBackgroundBrush}" 
-                                                           CornerRadius="15" Padding="15">
-                                                        <Grid>
+                                                            CornerRadius="15" Padding="10" HorizontalAlignment="Stretch">
+                                                        <Grid HorizontalAlignment="Stretch">
                                                             <Grid.RowDefinitions>
                                                                 <RowDefinition Height="Auto"/>
                                                                 <RowDefinition Height="Auto"/>
                                                             </Grid.RowDefinitions>
 
-                                                            <!-- Cabeçalho do Boleto -->
-                                                            <Grid Grid.Row="0">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
+                                                            <!-- Cabeçalho do Boleto - mais compacto -->
+                                                            <DockPanel Grid.Row="0" LastChildFill="True">
+                                                                <TextBlock DockPanel.Dock="Left" 
+                                                                           Text="{Binding Parcela, StringFormat='Parcela {0}'}"
+                                                                           FontSize="16" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                                                                           VerticalAlignment="Center" Margin="0,0,10,0"/>
 
-                                                                <TextBlock Grid.Column="0" Text="{Binding Parcela, StringFormat='Parcela {0}'}"
-                                                                          FontSize="16" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
-                                                                          VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                                <Button DockPanel.Dock="Right" Content="✖" 
+                                                                        Style="{StaticResource DeleteButtonStyle}"
+                                                                        Width="24" Height="24" VerticalAlignment="Center"
+                                                                        Click="RemoverBoleto_Click" Tag="{Binding Parcela}"/>
 
-                                                                <TextBlock Grid.Column="1" Text="{Binding NomeArquivo}"
-                                                                          FontSize="14" Foreground="{StaticResource TextBrush}"
-                                                                          TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                                <TextBlock Text="{Binding NomeArquivo}"
+                                                                           FontSize="14" Foreground="{StaticResource TextBrush}"
+                                                                           TextTrimming="CharacterEllipsis" 
+                                                                           VerticalAlignment="Center"
+                                                                           ToolTip="{Binding NomeArquivo}"/>
+                                                            </DockPanel>
 
-                                                                <Button Grid.Column="2" Content="✖" Style="{StaticResource DeleteButtonStyle}"
-                                                                       Width="24" Height="24" VerticalAlignment="Center"
-                                                                       Click="RemoverBoleto_Click" Tag="{Binding Parcela}"/>
-                                                            </Grid>
+                                                            <!-- Detalhes do Boleto - layout melhorado -->
+                                                            <Grid Grid.Row="1" Margin="0,10,0,0">
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
 
-                                                            <!-- Detalhes do Boleto -->
-                                                            <StackPanel Grid.Row="1" Margin="0,10,0,0">
-                                                                <!-- Vencimento e Pagamento -->
-                                                                <Grid Margin="0,0,0,10">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                    </Grid.ColumnDefinitions>
-
+                                                                <!-- Vencimento e Pagamento - lado a lado -->
+                                                                <UniformGrid Grid.Row="0" Rows="1" Columns="2" Margin="0,0,0,10">
                                                                     <!-- Vencimento -->
-                                                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                                                    <StackPanel Margin="0,0,5,0">
                                                                         <TextBlock Text="Vencimento:" FontSize="14" 
-                                                                                  Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
+                                                                                   Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
                                                                         <DatePicker SelectedDate="{Binding Vencimento}" 
-                                                                                   Style="{StaticResource DatePickerStyle}"
-                                                                                   Height="30" FontSize="14" HorizontalAlignment="Stretch"/>
+                                                                                    Style="{StaticResource DatePickerStyle}"
+                                                                                    Height="30" FontSize="14" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
 
                                                                     <!-- Pagamento -->
-                                                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                                                    <StackPanel Margin="5,0,0,0">
                                                                         <TextBlock Text="Pagamento:" FontSize="14" 
-                                                                                  Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
+                                                                                   Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
                                                                         <DatePicker SelectedDate="{Binding Pagamento}" 
-                                                                                   Style="{StaticResource DatePickerStyle}"
-                                                                                   Height="30" FontSize="14" HorizontalAlignment="Stretch"/>
+                                                                                    Style="{StaticResource DatePickerStyle}"
+                                                                                    Height="30" FontSize="14" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
-                                                                </Grid>
+                                                                </UniformGrid>
 
-                                                                <!-- Arquivo -->
-                                                                <Grid>
+                                                                <!-- Arquivo - layout adaptativo -->
+                                                                <Grid Grid.Row="1" Margin="0,5,0,0">
                                                                     <Grid.ColumnDefinitions>
                                                                         <ColumnDefinition Width="*"/>
                                                                         <ColumnDefinition Width="Auto"/>
                                                                     </Grid.ColumnDefinitions>
 
+                                                                    <!-- Container do arquivo com tamanho adaptativo -->
                                                                     <Border Grid.Column="0" Background="{StaticResource SecondaryBrush}" 
-                                                                           CornerRadius="15" Padding="8,5" Margin="0,0,5,0">
+                                                                            CornerRadius="15" Padding="8,5" Margin="0,0,10,0"
+                                                                            HorizontalAlignment="Stretch">
                                                                         <TextBlock Text="{Binding CaminhoArquivo}" 
                                                                                    TextTrimming="CharacterEllipsis"
+                                                                                   HorizontalAlignment="Left"
                                                                                    VerticalAlignment="Center"
-                                                                                   FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                                                   MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=ActualWidth, ConverterParameter=16}"
+                                                                                   FontSize="12" Foreground="{StaticResource TextBrush}"
+                                                                                   ToolTip="{Binding CaminhoArquivo}"/>
                                                                     </Border>
 
                                                                     <!-- Botão Selecionar Arquivo -->
-                                                                    <Button Grid.Column="1" Content="Selecionar Arquivo" 
+                                                                    <Button Grid.Column="1" Content="Selecionar" 
                                                                             Style="{StaticResource EmphasisButtonStyle}"
-                                                                            FontSize="12" Height="Auto"
+                                                                            FontSize="12" Height="Auto" Margin="0" MinWidth="80"
                                                                             Click="SelecionarBoleto_Click" Tag="{Binding Parcela}"/>
                                                                 </Grid>
-                                                            </StackPanel>
+                                                            </Grid>
                                                         </Grid>
                                                     </Border>
                                                 </DataTemplate>
@@ -458,7 +491,7 @@
 
                     <!-- Botão Salvar -->
                     <Button Grid.Column="2" Content="Salvar Alterações" Style="{StaticResource EmphasisButtonStyle}"
-                           FontSize="14" Width="160" Height="40" Click="Salvar_Click"/>
+                           FontSize="14" Width="160" Height="40" Margin="0" Click="Salvar_Click"/>
                 </Grid>
             </Grid>
         </Border>

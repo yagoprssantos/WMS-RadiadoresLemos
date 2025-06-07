@@ -19,17 +19,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
     {
         private CompraData _compraOriginal;
         private CompraData _compraEditada;
-        private ObservableCollection<MovimentacaoData> _itensCompra;
-        private ObservableCollection<BoletoData> _boletos;
-        private List<FornecedorData> _fornecedores;
+        private ObservableCollection<ItemEdicaoViewModel> _itensCompra;
+        private ObservableCollection<BoletoData> _boletos = new ObservableCollection<BoletoData>();
+        private List<FornecedorData> _fornecedores = new List<FornecedorData>();
         private string _fornecedorSelecionado;
         private bool _apenasGerenciarBoletos;
         private string _diretorioBoletos;
-
-        public EditarDetalhesWindow()
-        {
-            InitializeComponent();
-        }
 
         public EditarDetalhesWindow(CompraData compra, bool apenasGerenciarBoletos = false)
         {
@@ -38,19 +33,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _compraOriginal = compra;
             _compraEditada = CloneCompra(compra);
             _apenasGerenciarBoletos = apenasGerenciarBoletos;
-            _itensCompra = new ObservableCollection<MovimentacaoData>(_compraEditada.Itens);
-            _boletos = new ObservableCollection<BoletoData>();
-            _fornecedores = new List<FornecedorData>();
+
+            // Converte os itens para usar o ViewModel
+            _itensCompra = new ObservableCollection<ItemEdicaoViewModel>(
+                _compraEditada.Itens.Select(item => new ItemEdicaoViewModel(item))
+            );
 
             // Configurar diretório de boletos
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             _diretorioBoletos = Path.Combine(appDataPath, "RadiadoresLemos", "Boletos");
-
-            // Garantir que o diretório existe
-            if (!Directory.Exists(_diretorioBoletos))
-            {
-                Directory.CreateDirectory(_diretorioBoletos);
-            }
 
             // Carrega dados e configura a interface
             CarregarFornecedores();
@@ -67,23 +58,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void ConfigurarModoGerenciarBoletos()
         {
-            Title = "Gerenciar Boletos";
 
-            // Oculta seções não relacionadas a boletos
-            ExpandirInfoCompraButton_Click(null, null);
-            ExpandirPagamentoButton_Click(null, null);
-            ExpandirItensButton_Click(null, null);
-
-            // Desabilita edição de outros campos
-            NotaFiscalTextBox.IsEnabled = false;
-            FornecedorComboBox.IsEnabled = false;
-            DataCompraDatePicker.IsEnabled = false;
-            DetalhesTextBox.IsEnabled = false;
-            TipoPagamentoComboBox.IsEnabled = false;
-            ParcelasTextBox.IsEnabled = false;
-
-            // Expande a seção de boletos
-            ExpandirBoletosButton_Click(null, null);
         }
 
         private CompraData CloneCompra(CompraData original)
@@ -141,23 +116,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                // Desativa temporariamente os eventos para evitar problemas de foco
-                FornecedorComboBox.LostFocus -= FornecedorComboBox_LostFocus;
-
                 // Preenche os campos da tela com os dados da compra
                 NotaFiscalTextBox.Text = _compraEditada.NotaFiscal;
-
-                // Primeiro define o texto, depois ajusta o item selecionado
                 FornecedorComboBox.Text = _compraEditada.FornecedorNome;
-                FornecedorComboBox.SelectedItem = _compraEditada.FornecedorNome;
-                _fornecedorSelecionado = _compraEditada.FornecedorNome;
 
                 DataCompraDatePicker.SelectedDate = _compraEditada.DataCompra;
                 DetalhesTextBox.Text = _compraEditada.Detalhes;
-
-                // Formata o valor total
-                decimal valorTotal = _compraEditada.ValorTotal;
-                ValorTotalTextBox.Text = valorTotal.ToString("C");
 
                 // Configura o tipo de pagamento
                 if (_compraEditada.TipoPagamento == "Parcelado")
@@ -173,11 +137,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     ParcelasTextBox.IsEnabled = false;
                 }
 
-                // Carrega os itens no DataGrid
+                // Carrega os itens no DataGrid usando o ViewModel
                 ItensDataGrid.ItemsSource = _itensCompra;
 
-                // Reativa os eventos
-                FornecedorComboBox.LostFocus += FornecedorComboBox_LostFocus;
+                // Define o DataContext para habilitar os bindings
+                DataContext = _compraEditada;
             }
             catch (Exception ex)
             {
@@ -216,17 +180,33 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void CalcularValorTotal()
         {
-            // Calcula o valor total com base nos itens da compra
+            // Calcula o valor total com base nos itens da compra usando o Subtotal do ViewModel
             decimal valorTotal = 0;
             foreach (var item in _itensCompra)
             {
-                valorTotal += (decimal)(item.Preco * item.Quantidade);
+                valorTotal += (decimal)item.Subtotal;
             }
 
             // Atualiza o valor total na compra e na interface
             _compraEditada.ValorTotal = valorTotal;
-            ValorTotalTextBox.Text = valorTotal.ToString("C");
+
+            // Atualiza o DataContext para refletir a mudança
+            DataContext = null;
+            DataContext = _compraEditada;
         }
+
+        private void ItensDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.EditAction == DataGridEditAction.Commit)
+            {
+                // Atualiza o DataGrid para mostrar o subtotal recalculado
+                ItensDataGrid.Items.Refresh();
+
+                // Recalcula o valor total após a edição
+                CalcularValorTotal();
+            }
+        }
+
         private void ExpandirInfoCompraButton_Click(object sender, RoutedEventArgs e)
         {
             TogglePanel(InfoCompraConteudo, ExpandirInfoCompraButton);
@@ -247,7 +227,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             TogglePanel(BoletosConteudo, ExpandirBoletosButton);
         }
 
-        private void TogglePanel(StackPanel panel, Button button)
+        private void TogglePanel(Panel panel, Button button)
         {
             if (panel.Visibility == Visibility.Visible)
             {
@@ -286,9 +266,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Atualiza o texto da caixa de pesquisa (mantém o texto original digitado)
                 textBox.Text = searchText;
                 textBox.CaretIndex = textBox.Text.Length;
-
-                // Abrir o dropdown para mostrar as opções filtradas
-                comboBox.IsDropDownOpen = true;
             }
         }
 
@@ -313,49 +290,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 _fornecedorSelecionado = null;
             }
         }
-        private void ValorTotalTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            // Permite apenas dígitos e uma vírgula (para decimal)
-            var textBox = (TextBox)sender;
-            string text = textBox.Text.Insert(textBox.SelectionStart, e.Text);
-
-            // Só permite uma vírgula e pelo menos um dígito
-            e.Handled = !IsValidDecimalInput(text);
-        }
-
-        private void ValorTotalTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-        {
-            if (e.DataObject.GetDataPresent(typeof(string)))
-            {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                if (!IsValidDecimalInput(text))
-                    e.CancelCommand();
-            }
-            else
-            {
-                e.CancelCommand();
-            }
-        }
-
-        private void ValorTotalTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
-            {
-                // Remove símbolos de moeda para processamento
-                string textoLimpo = textBox.Text.Replace("R$", "").Replace(".", "").Trim();
-
-                if (decimal.TryParse(textoLimpo, out decimal valor))
-                {
-                    _compraEditada.ValorTotal = valor;
-                    textBox.Text = valor.ToString("C");
-                }
-                else
-                {
-                    // Reverte para o valor calculado
-                    CalcularValorTotal();
-                }
-            }
-        }
 
         private bool IsValidDecimalInput(string text)
         {
@@ -378,22 +312,16 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             _compraEditada.TipoPagamento = tipoPagamento;
 
-            if (tipoPagamento == "Parcelado")
+            if (tipoPagamento == "À vista")
             {
-                ParcelasTextBox.IsEnabled = true;
-
-                // Se não houver parcelas definidas, inicia com 1
-                if (_compraEditada.Parcelas <= 0)
-                {
-                    _compraEditada.Parcelas = 1;
-                    ParcelasTextBox.Text = "1";
-                }
+                ParcelasTextBox.IsEnabled = false;
+                _compraEditada.Parcelas = 1;
+                ParcelasTextBox.Text = "1";
             }
             else
             {
-                ParcelasTextBox.IsEnabled = false;
-                ParcelasTextBox.Text = "1";
-                _compraEditada.Parcelas = 1;
+                ParcelasTextBox.Text = "";
+                ParcelasTextBox.IsEnabled = true;
             }
         }
 
@@ -443,15 +371,42 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     else if (parcelas > 8)
                         parcelas = 8;
 
-                    textBox.Text = parcelas.ToString();
+                    textBox.Text = parcelas.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
                     textBox.CaretIndex = textBox.Text.Length;
                     _compraEditada.Parcelas = parcelas;
                 }
-                else if (string.IsNullOrEmpty(textoLimpo))
+                else
                 {
-                    // Se o campo estiver vazio, define como 1
-                    textBox.Text = "1";
-                    _compraEditada.Parcelas = 1;
+                    MessageBox.Show("Parcelas inválidas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    textBox.Clear();
+                    _compraEditada.Parcelas = 0;
+                }
+
+                // Verifica a forma de pagamento para alterar o texto
+                if (TipoPagamentoComboBox.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    string tipoPagamentoSelecionado = selectedItem.Content?.ToString();
+
+                    if (tipoPagamentoSelecionado == "À vista")
+                    {
+                        textBox.Text = "1";
+                        textBox.IsEnabled = false;
+                        _compraEditada.Parcelas = 1;
+                    }
+                    else if (tipoPagamentoSelecionado == "Parcelado")
+                    {
+                        // Se for parcelado, impede parcelas iguais a 1
+                        if (textBox.Text == "1")
+                        {
+                            textBox.Text = "";
+                            _compraEditada.Parcelas = 0;
+                        }
+                    }
+
+                    if (!textBox.IsEnabled && tipoPagamentoSelecionado == "Parcelado")
+                    {
+                        textBox.IsEnabled = true;
+                    }
                 }
             }
 
@@ -464,11 +419,33 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Implementação básica para abrir uma janela de seleção de produto
             MessageBox.Show("Funcionalidade de adicionar itens será implementada posteriormente.",
                 "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Exemplo de como seria a implementação
+            /*
+            var novoItem = new MovimentacaoData
+            {
+                ProdutoId = "produto123",
+                ProdutoNome = "Novo Produto",
+                Quantidade = 1,
+                Preco = 100.0,
+                Tipo = "Entrada",
+                Data = DateTime.Now
+            };
+
+            // Criar o ViewModel para o novo item
+            var novoItemViewModel = new ItemEdicaoViewModel(novoItem);
+
+            // Adicionar à lista
+            _itensCompra.Add(novoItemViewModel);
+
+            // Recalcular total
+            CalcularValorTotal();
+            */
         }
 
         private void EditarItem_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is MovimentacaoData item)
+            if (sender is Button button && button.DataContext is ItemEdicaoViewModel item)
             {
                 // Implementação básica para editar um item
                 MessageBox.Show($"Editar item: {item.ProdutoNome}",
@@ -695,8 +672,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 _compraEditada.DataCompra = DataCompraDatePicker.SelectedDate ?? DateTime.Now;
                 _compraEditada.Detalhes = DetalhesTextBox.Text;
 
-                // Atualiza a lista de itens da compra
-                _compraEditada.Itens = _itensCompra.ToList();
+                // Atualiza a lista de itens da compra, convertendo de volta para MovimentacaoData
+                _compraEditada.Itens = _itensCompra.Select(vm => vm.ObterItem()).ToList();
 
                 // Recalcula o valor total antes de salvar
                 CalcularValorTotal();

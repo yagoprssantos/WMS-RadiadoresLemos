@@ -46,6 +46,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     var collection = db.GetCollection<CompraData>("compras");
                     _todasCompras = collection.FindAll().ToList();
                     _comprasFiltradas = new List<CompraData>(_todasCompras);
+                    
+                    // Calcular os próximos vencimentos depois de carregar boletos
+                    if (_todosBoletos != null)
+                    {
+                        CalcularProximosVencimentos();
+                    }
+                    
                     AplicarOrdenacao();
                     AtualizarInterfaceCompras();
                 }
@@ -69,6 +76,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 {
                     var collection = db.GetCollection<BoletoData>("boletos");
                     _todosBoletos = collection.FindAll().ToList();
+                    
+                    // Se as compras já foram carregadas, calcular os próximos vencimentos
+                    if (_todasCompras != null)
+                    {
+                        CalcularProximosVencimentos();
+                        AtualizarInterfaceCompras(); // Atualizar a interface para refletir os novos vencimentos
+                    }
                 }
                 else
                 {
@@ -78,6 +92,47 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar boletos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CalcularProximosVencimentos()
+        {
+            if (_todasCompras == null || _todosBoletos == null) return;
+
+            foreach (var compra in _todasCompras)
+            {
+                // Verificar se a compra tem boletos associados
+                if (compra.Boletos == null || !compra.Boletos.Any())
+                {
+                    compra.ProximoVencimento = null;
+                    continue;
+                }
+
+                // Filtrar boletos associados a esta compra que ainda não foram pagos
+                var boletosCompra = _todosBoletos
+                    .Where(b => compra.Boletos.Contains(b.Id) && b.Pagamento == null)
+                    .ToList();
+
+                if (!boletosCompra.Any())
+                {
+                    compra.ProximoVencimento = null;
+                    continue;
+                }
+
+                // Encontrar o boleto com a data de vencimento mais próxima da data atual
+                DateTime hoje = DateTime.Today;
+                var boletosNaoVencidos = boletosCompra.Where(b => b.Vencimento >= hoje).ToList();
+                
+                if (boletosNaoVencidos.Any())
+                {
+                    // Se há boletos não vencidos, pega o de vencimento mais próximo
+                    compra.ProximoVencimento = boletosNaoVencidos.OrderBy(b => b.Vencimento).First().Vencimento;
+                }
+                else
+                {
+                    // Se todos os boletos já venceram, pega o de vencimento mais recente
+                    compra.ProximoVencimento = boletosCompra.OrderByDescending(b => b.Vencimento).First().Vencimento;
+                }
             }
         }
 
@@ -243,6 +298,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     break;
                 case "antigo":
                     _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.DataCompra).ToList();
+                    break;
+                case "vencimento":
+                    // Ordenar por próximo vencimento, colocando compras sem vencimento no final
+                    _comprasFiltradas = _comprasFiltradas
+                        .OrderBy(v => v.ProximoVencimento == null) // Primeiro os que têm vencimento (false vem antes de true)
+                        .ThenBy(v => v.ProximoVencimento) // Depois ordenar pelos vencimentos mais próximos
+                        .ToList();
                     break;
                 default:
                     _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();

@@ -851,6 +851,9 @@ namespace WMS_RadiadoresLemos_WPF
                 // Esconde a lista para focar na edição
                 Lista.Visibility = Visibility.Collapsed;
                 ToggleLista.Visibility = Visibility.Visible;
+
+                // Foca no Produto novamente
+                ProdutoComboBox.Focus();
             }
         }
 
