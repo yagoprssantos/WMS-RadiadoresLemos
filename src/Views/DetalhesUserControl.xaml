@@ -120,15 +120,15 @@
                                         </Grid.RowDefinitions>
 
                                         <!-- Fornecedor/Cliente -->
-                                        <TextBlock x:Name="FornecedorLabel" 
+                                        <TextBlock x:Name="FCLabel" 
                                                    Grid.Row="0" Grid.Column="0"
                                                    Text="Fornecedor:" 
                                                    FontWeight="SemiBold"
                                                    VerticalAlignment="Center"
-                                                   FontSize="14"
+                                                   FontSize="16"
                                                    Foreground="{StaticResource TextBrush}" 
                                                    Margin="0,0,10,5"/>
-                                        <TextBox x:Name="FornecedorTextBox" 
+                                        <TextBox x:Name="FCTextBox" 
                                                  Grid.Row="0" Grid.Column="1"
                                                  IsReadOnly="True" 
                                                  FontSize="14"
@@ -140,7 +140,7 @@
                                         <TextBlock Grid.Row="1" Grid.Column="0" 
                                                    Text="Tipo de Pagamento:" 
                                                    FontWeight="SemiBold"
-                                                   FontSize="14"
+                                                   FontSize="16"
                                                    VerticalAlignment="Center"
                                                    Foreground="{StaticResource TextBrush}" 
                                                    Margin="0,0,10,5"/>
@@ -172,7 +172,7 @@
                                                    Text="Data:" 
                                                    FontWeight="SemiBold"
                                                    VerticalAlignment="Center"
-                                                   FontSize="14"
+                                                   FontSize="16"
                                                    Foreground="{StaticResource TextBrush}" 
                                                    Margin="0,0,10,5"/>
                                         <TextBox x:Name="DataCompraTextBox" 
@@ -189,7 +189,7 @@
                                                    Text="Parcelas:" 
                                                    FontWeight="SemiBold"
                                                    VerticalAlignment="Center"
-                                                   FontSize="14"
+                                                   FontSize="16"
                                                    Foreground="{StaticResource TextBrush}" 
                                                    Margin="0,0,10,5"/>
                                         <TextBox Grid.Row="1" Grid.Column="1" 
@@ -202,7 +202,7 @@
                                                  Margin="0,0,0,0"/>
                                     </Grid>
                                     
-                                    <!-- Lista de produtos da compra-->
+                                    <!-- Lista de produtos da compra/venda -->
                                     <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -212,9 +212,10 @@
                                             <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0"
+                                                   x:Name="ProdutosLabel"
                                                    Text="Produtos da Compra:" 
                                                    FontWeight="SemiBold"
-                                                   FontSize="14"
+                                                   FontSize="16"
                                                    Foreground="{StaticResource TextBrush}" 
                                                    Margin="0,0,0,5"/>
                                         <!-- DataGrid de produtos -->
@@ -252,7 +253,7 @@
                                         <TextBlock Grid.Row="0" 
                                                    Text="Detalhes:" 
                                                    FontWeight="SemiBold"
-                                                   FontSize="14"
+                                                   FontSize="16"
                                                    Foreground="{StaticResource TextBrush}" 
                                                    Margin="0,0,0,5" Grid.ColumnSpan="2"/>
                                         <TextBox Grid.Row="1" 
@@ -312,11 +313,17 @@
                                                FontWeight="SemiBold" 
                                                Foreground="{StaticResource TextBrush}"/>
 
-                                    <Button Grid.Column="2" Content="Visualizar Boletos" Margin="0" FontSize="14" Height="Auto" Width="150"
+                                    <Button Grid.Column="1" Content="Visualizar na pasta" Margin="0,0,10,0" FontSize="14" Height="Auto" Width="150"
                                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                                            ToolTip="Visualizar ou gerenciar boletos"
+                                            ToolTip="Visualizar pasta de todos os boletos"
                                             Style="{StaticResource EmphasisButtonStyle}" 
                                             Click="VisualizarBoletos_Click"/>
+
+                                    <Button Grid.Column="2" Content="Novo Boleto" Margin="0" FontSize="14" Height="Auto" Width="120"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            ToolTip="Adicionar um ou mais boletos"
+                                            Style="{StaticResource EmphasisButtonStyle}" 
+                                            Click="AdicionarBoletos_Click"/>
                                 </Grid>
 
                                 <!-- DataGrid de Boletos -->

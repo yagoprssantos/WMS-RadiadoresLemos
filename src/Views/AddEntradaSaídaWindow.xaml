@@ -291,14 +291,14 @@
                                                                     <!-- Vencimento -->
                                                                     <StackPanel Orientation="Horizontal" Margin="0,0,30,0" VerticalAlignment="Center" Grid.ColumnSpan="2">
                                                                         <TextBlock Text="Vencimento:" FontSize="14" Foreground="{StaticResource TextBrush}"
-                                                                                       VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
                                                                         <DatePicker SelectedDate="{Binding Vencimento}" Style="{StaticResource DatePickerStyle}"
                                                                                         Height="28" FontSize="14" Width="Auto" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
                                                                     <!-- Pagamento -->
                                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.ColumnSpan="2">
                                                                         <TextBlock Text="Pagamento:" FontSize="14" Foreground="{StaticResource TextBrush}"
-                                                                                       VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
                                                                         <DatePicker SelectedDate="{Binding Pagamento}" Style="{StaticResource DatePickerStyle}"
                                                                                         Height="28" FontSize="14" Width="Auto" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
@@ -341,8 +341,7 @@
                         <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0" Visibility="Visible"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
                                 x:Name="ToggleLista" Click="ToggleLista_Click">
-                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="20
-                                   " Width="25"/>
+                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="20" Width="25"/>
                         </Button>
                     </Grid>
                 </Border>
@@ -463,6 +462,11 @@
                                                         <TextBlock Text="{Binding Parcelas}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
                                                 </StackPanel>
+
+                                                <!-- Botão de Editar -->
+                                                <Button Content="✎" Grid.Row="1" FontSize="8" Grid.Column="1" Style="{StaticResource DeleteButtonStyle}" 
+                                                        Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{StaticResource AccentBrush}"
+                                                        Click="EditarItem_Click" Margin="0,0,25,0" />
 
                                                 <!-- Botão de Excluir -->
                                                 <Button Content="✖" Grid.Row="1" FontSize="7" Grid.Column="1" Style="{StaticResource DeleteButtonStyle}" 

@@ -29,13 +29,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             InitializeComponent();
             _compraAtual = compra;
             _isCompra = true;
-            DataContext = compra;
-            FornecedorTextBox.Text = compra.FornecedorNome;
 
-            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
-                fornecedorLabel.Text = "Fornecedor:";
-            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
-                fornecedorBox.Text = compra.FornecedorNome;
+            if (FindName("FCLabel") is TextBlock FCLabel)
+                FCLabel.Text = "Fornecedor:";
+            if (FindName("FCTextBox") is TextBox FCTextBox)
+                FCTextBox.Text = compra.FornecedorNome;
+            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
+                ProdutoLabel.Text = "Produtos comprados:";
+
+            // Mostra campos de boletos
+            CampoBoletos.Visibility = Visibility.Visible;
+
+            DataContext = compra;
 
             CarregarItensProduto(compra);
             CarregarBoletos();
@@ -46,31 +51,46 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             InitializeComponent();
             _vendaAtual = venda;
             _isCompra = false;
-            _boletosList = new List<BoletoData>();
 
-            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
-                fornecedorLabel.Text = "Cliente:";
-            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
-                fornecedorBox.Text = venda.ClienteCNPJ;
+            // Altera textos para Venda
+            if (FindName("FCLabel") is TextBlock FCLabel)
+                FCLabel.Text = "Cliente:";
+            if (FindName("FCTextBox") is TextBox FCTextBox)
+                FCTextBox.Text = venda.ClienteCNPJ;
+            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
+                ProdutoLabel.Text = "Produtos vendidos:";
 
             // Não mostra campos de boletos
             CampoBoletos.Visibility = Visibility.Collapsed;
 
             DataContext = venda;
+
+            CarregarItensProduto(venda);
         }
 
 
         private void CarregarItensProduto(CompraData compra)
         {
             // Converter os itens da compra para o formato que o DataGrid espera
-            var produtosViewModel = compra.Itens.Select(item => new ProdutoCompraViewModel
+            var produtosViewModel = compra.Itens.Select(item => new ProdutoViewModel
             {
                 Nome = item.ProdutoNome,
                 Quantidade = item.Quantidade,
                 PrecoUnitario = item.Preco,
-                // O subtotal é calculado automaticamente na ViewModel
             }).ToList();
 
+            // Atribuir ao DataGrid
+            ProdutosDataGrid.ItemsSource = produtosViewModel;
+        }
+        private void CarregarItensProduto(VendaData venda)
+        {
+            // Converter os itens da venda para o formato que o DataGrid espera
+            var produtosViewModel = venda.Itens.Select(item => new ProdutoViewModel
+            {
+                Nome = item.ProdutoNome,
+                Quantidade = item.Quantidade,
+                PrecoUnitario = item.Preco,
+            }).ToList();
             // Atribuir ao DataGrid
             ProdutosDataGrid.ItemsSource = produtosViewModel;
         }
@@ -88,7 +108,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     _boletosList = _boletosList.Where(b => b.NotaFiscal == _compraAtual.NotaFiscal).ToList();
 
                     // Trata dados para apresentar corretamente
-                    var boletosTratados = _boletosList.Select(b => {
+                    var boletosTratados = _boletosList.Select(b =>
+                    {
                         // Verifica se o arquivo realmente existe
                         bool arquivoExiste = !string.IsNullOrEmpty(b.CaminhoArquivo) && File.Exists(b.CaminhoArquivo);
 
@@ -145,9 +166,25 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                         boletosDataGrid.ItemsSource = boletosTratados;
                     }
 
-                    // Atualiza visibilidade da mensagem de "sem boletos"
-                    if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
-                        semBoletosMsg.Visibility = boletosTratados.Any() ? Visibility.Collapsed : Visibility.Visible;
+                    // Atualiza visibilidade da mensagem de "sem boletos" se necessário
+                    if (boletosTratados.Count == 0)
+                    {
+                        if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
+                        {
+                            semBoletosMsg.Visibility = Visibility.Visible;
+                            BoletosDataGrid.Visibility = Visibility.Collapsed;
+                            semBoletosMsg.Text = "Nenhum boleto registrado para esta compra.";
+                        }
+                    }
+                    else
+                    {
+                        if (FindName("SemBoletosMessage") is TextBlock semBoletosLabel)
+                        {
+                            semBoletosLabel.Visibility = Visibility.Collapsed;
+                            BoletosDataGrid.Visibility = Visibility.Visible;
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -155,6 +192,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 MessageBox.Show($"Erro ao carregar boletos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void AbrirPDF_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.CommandParameter is string caminhoArquivo)
@@ -186,34 +224,34 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        private string GetIdentifier(string fornecedorId_clienteCNPJ)
-        {
-            if (_isCompra && _compraAtual != null)
-            {
-                return _compraAtual.FornecedorNome;
-            }
-            else if (!_isCompra && _vendaAtual != null)
-            {
-                // Se o parâmetro for igual ao ClienteCNPJ, retorna o CNPJ
-                if (!string.IsNullOrEmpty(fornecedorId_clienteCNPJ) &&
-                    fornecedorId_clienteCNPJ == _vendaAtual.ClienteCNPJ)
-                {
-                    return _vendaAtual.ClienteCNPJ;
-                }
-                // Se o parâmetro for igual ao ClienteId, retorna o CNPJ também
-                if (!string.IsNullOrEmpty(fornecedorId_clienteCNPJ) &&
-                    fornecedorId_clienteCNPJ == _vendaAtual.ClienteId)
-                {
-                    return _vendaAtual.ClienteCNPJ;
-                }
-                // Caso não bata, retorna o CNPJ padrão
-                return _vendaAtual.ClienteCNPJ;
-            }
-            return "Desconhecido";
-        }
-
         private void Editar_Click(object sender, RoutedEventArgs e)
         {
+            // Abre a janela de edição passando a compra atual
+            var editarJanela = new EditarDetalhesWindow(_compraAtual);
+            bool? resultado = editarJanela.ShowDialog();
+
+            // Se a edição foi confirmada, recarrega os dados
+            if (resultado == true)
+            {
+                // Recarrega toda a janela com os dados atualizados
+                _isCompra = true;
+                if (_compraAtual != null)
+                {
+                    DataContext = _compraAtual;
+                    CarregarItensProduto(_compraAtual);
+                    CarregarBoletos();
+                }
+                else if (_vendaAtual != null)
+                {
+                    DataContext = _vendaAtual;
+                    CarregarItensProduto(_vendaAtual);
+                }
+                else
+                {
+                    MessageBox.Show("Nenhuma compra ou venda selecionada para editar.",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void VisualizarBoletos_Click(object sender, RoutedEventArgs e)
@@ -263,63 +301,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 MessageBox.Show(mensagem, "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-
-        private void AdicionarBoleto_Click(object sender, RoutedEventArgs e)
+        private void AdicionarBoletos_Click(object sender, RoutedEventArgs e)
         {
-            if (true) { return; }
+            // Abre a janela apenas para adicionar boletos
+            var editarJanela = new EditarDetalhesWindow(_compraAtual, true);
+            bool? resultado = editarJanela.ShowDialog();
 
-            // Código para testes futuros
-            string idOperacao = _isCompra ? _compraAtual?.Id : _vendaAtual?.Id;
-
-            if (string.IsNullOrEmpty(idOperacao))
+            // Se a adição foi confirmada, recarrega os boletos
+            if (resultado == true)
             {
-                MessageBox.Show("Não é possível adicionar boletos sem um ID de operação válido",
-                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                CarregarBoletos();
             }
-
-            string novoBoletoId = $"BOL-{DateTime.Now.Ticks.ToString().Substring(10)}";
-
-            var novoBoleto = new BoletoData
-            {
-                Id = novoBoletoId,
-                FornecedorId = _isCompra ? _compraAtual?.FornecedorId ?? "" : _vendaAtual?.ClienteId ?? "",
-                NotaFiscal = _isCompra ? _compraAtual?.NotaFiscal : _vendaAtual?.NotaFiscal,
-                Vencimento = DateTime.Now.AddMonths(1),
-                Parcela = _boletosList.Count + 1,
-                CaminhoArquivo = $"boletos/{novoBoletoId}.pdf"
-            };
-
-            _boletosList.Add(novoBoleto);
-
-            if (_isCompra && _compraAtual != null)
-            {
-                _compraAtual.Boletos ??= new List<string>();
-                _compraAtual.Boletos.Add(novoBoletoId);
-
-                if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
-                {
-                    boletosDataGrid.ItemsSource = null;
-                    boletosDataGrid.ItemsSource = _boletosList;
-                }
-            }
-            else if (!_isCompra && _vendaAtual != null)
-            {
-                _vendaAtual.Boletos ??= new List<string>();
-                _vendaAtual.Boletos.Add(novoBoletoId);
-
-                if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
-                {
-                    boletosDataGrid.ItemsSource = null;
-                    boletosDataGrid.ItemsSource = _boletosList;
-                }
-            }
-
-
-            MessageBox.Show($"Boleto {novoBoletoId} adicionado com sucesso",
-                "Boleto Adicionado", MessageBoxButton.OK, MessageBoxImage.Information);
-
-
         }
     }
 }

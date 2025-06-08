@@ -46,6 +46,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     var collection = db.GetCollection<CompraData>("compras");
                     _todasCompras = collection.FindAll().ToList();
                     _comprasFiltradas = new List<CompraData>(_todasCompras);
+                    
+                    // Calcular os próximos vencimentos depois de carregar boletos
+                    if (_todosBoletos != null)
+                    {
+                        CalcularProximosVencimentos();
+                    }
+                    
                     AplicarOrdenacao();
                     AtualizarInterfaceCompras();
                 }
@@ -69,6 +76,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 {
                     var collection = db.GetCollection<BoletoData>("boletos");
                     _todosBoletos = collection.FindAll().ToList();
+                    
+                    // Se as compras já foram carregadas, calcular os próximos vencimentos
+                    if (_todasCompras != null)
+                    {
+                        CalcularProximosVencimentos();
+                        AtualizarInterfaceCompras(); // Atualizar a interface para refletir os novos vencimentos
+                    }
                 }
                 else
                 {
@@ -81,171 +95,47 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        // 2. Pesquisa
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void CalcularProximosVencimentos()
         {
-            if (_todasCompras == null) return;
+            if (_todasCompras == null || _todosBoletos == null) return;
 
-            string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
-            _comprasFiltradas = _todasCompras
-                .Where(v =>
-                    (v.FornecedorNome?.ToLower().Contains(textoBusca) ?? false) ||
-                    (v.Itens.Any(i => i.ProdutoNome.ToLower().Contains(textoBusca))) ||
-                    (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
-                )
-                .ToList();
-
-            AplicarOrdenacao();
-            AtualizarInterfaceCompras();
-        }
-
-        // 3. Filtro
-        private void FiltrarButton_Click(object sender, RoutedEventArgs e)
-        {
-            FiltroPopup.IsOpen = true;
-        }
-
-        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Adicionar lógica de filtro
-            FiltroPopup.IsOpen = false;
-            // string fornecedorSelecionado = FornecedorComboBox.SelectedItem?.ToString();
-            // _comprasFiltradas = _todasCompras.Where(v => v.Fornecedor == fornecedorSelecionado).ToList();
-            AplicarOrdenacao();
-            AtualizarInterfaceCompras();
-        }
-
-        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Limpar filtros
-
-            // TODO: Limpar filtro Ordenar
-
-            FiltroPopup.IsOpen = false;
-            _comprasFiltradas = new List<CompraData>(_todasCompras);
-            AplicarOrdenacao();
-            AtualizarInterfaceCompras();
-        }
-
-        // 4. Ordenação
-        private void OrdenarButton_Click(object sender, RoutedEventArgs e)
-        {
-            OrdenarPopup.IsOpen = !OrdenarPopup.IsOpen;
-        }
-
-        private void OrdenacaoItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.Tag is string tipoOrdenacao)
+            foreach (var compra in _todasCompras)
             {
-                _ordenacaoAtual = tipoOrdenacao;
-                _filtroTexto = $"Ordenar por {button.Content}";
-
-                // Atualiza o texto do botão de ordenação, se houver TextBlock no template
-                if (OrderButton.Template.FindName("OrderButtonText", OrderButton) is TextBlock textBlock)
+                // Verificar se a compra tem boletos associados
+                if (compra.Boletos == null || !compra.Boletos.Any())
                 {
-                    textBlock.Text = _filtroTexto;
+                    compra.ProximoVencimento = null;
+                    continue;
+                }
+
+                // Filtrar boletos associados a esta compra que ainda não foram pagos
+                var boletosCompra = _todosBoletos
+                    .Where(b => compra.Boletos.Contains(b.Id) && b.Pagamento == null)
+                    .ToList();
+
+                if (!boletosCompra.Any())
+                {
+                    compra.ProximoVencimento = null;
+                    continue;
+                }
+
+                // Encontrar o boleto com a data de vencimento mais próxima da data atual
+                DateTime hoje = DateTime.Today;
+                var boletosNaoVencidos = boletosCompra.Where(b => b.Vencimento >= hoje).ToList();
+                
+                if (boletosNaoVencidos.Any())
+                {
+                    // Se há boletos não vencidos, pega o de vencimento mais próximo
+                    compra.ProximoVencimento = boletosNaoVencidos.OrderBy(b => b.Vencimento).First().Vencimento;
                 }
                 else
                 {
-                    OrderButton.Content = _filtroTexto;
-                }
-
-                OrdenarPopup.IsOpen = false;
-                AplicarOrdenacao();
-                AtualizarInterfaceCompras();
-            }
-        }
-
-        private void AplicarOrdenacao()
-        {
-            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
-                return;
-
-            switch (_ordenacaoAtual)
-            {
-                case "preco":
-                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
-                    break;
-                case "produto":
-                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Itens.FirstOrDefault()?.ProdutoNome ?? "").ToList();
-                    break;
-                case "fornecedor":
-                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.FornecedorNome).ToList();
-                    break;
-                case "recente":
-                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
-                    break;
-                case "antigo":
-                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.DataCompra).ToList();
-                    break;
-                default:
-                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
-                    break;
-            }
-        }
-
-        // 5. Atualização da interface
-        private void AtualizarInterfaceCompras()
-        {
-            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
-            {
-                ComprasContainer.ItemsSource = null;
-                MensagemVazia.Visibility = Visibility.Visible;
-                return;
-            }
-
-            MensagemVazia.Visibility = Visibility.Collapsed;
-            ComprasContainer.ItemsSource = _comprasFiltradas;
-        }
-
-        // 6. Registrar Compra
-        private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
-        {
-            var compras = new AddEntradaSaídaWindow(isEntrada: true);
-            compras.ShowDialog();
-
-            // Atualiza a lista de compras após o registro
-            CarregarCompras();
-            // Atualiza também os boletos e o calendário
-            CarregarBoletos();
-            CarregarCalendario();
-        }
-
-        // 7. Botões de ação
-        private void DetalhesButton_Click(object sender, RoutedEventArgs e)
-        {
-            var compra = (sender as Button)?.DataContext as CompraData;
-            if (compra != null)
-            {
-                var detalhesCompraUserControl = new DetalhesUserControl(compra);
-                var contentControl = (Parent as ContentControl);
-                if (contentControl != null)
-                {
-                    contentControl.Content = detalhesCompraUserControl;
+                    // Se todos os boletos já venceram, pega o de vencimento mais recente
+                    compra.ProximoVencimento = boletosCompra.OrderByDescending(b => b.Vencimento).First().Vencimento;
                 }
             }
         }
 
-        // Navegação do calendário
-        private void PrevMonthButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Navegar para o mês anterior
-            MudarMesCalendario(-1);
-        }
-
-        private void NextMonthButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Navegar para o próximo mês
-            MudarMesCalendario(1);
-        }
-
-        private void MudarMesCalendario(int incrementoMes)
-        {
-            _currentCalendarMonth = _currentCalendarMonth.AddMonths(incrementoMes);
-            CarregarCalendario();
-        }
-
-        // Carrega os dias no calendário
         private void CarregarCalendario()
         {
             CalendarMonthText.Text = _currentCalendarMonth.ToString("MMMM yyyy");
@@ -303,14 +193,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             CalendarDaysControl.ItemsSource = days;
         }
-
         private bool VerificarComprasNaData(DateTime data)
         {
             if (_todasCompras == null) return false;
 
             return _todasCompras.Any(c => c.DataCompra.Date == data.Date);
         }
-
         private bool VerificarBoletosNaData(DateTime data)
         {
             if (_todosBoletos == null) return false;
@@ -318,26 +206,173 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             return _todosBoletos.Any(b => b.Vencimento.Date == data.Date && b.Pagamento == null);
         }
 
-        private List<CompraData> BuscarComprasNoDia(DateTime data)
+        // 2. Pesquisa
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_comprasFiltradas == null)
-                return new List<CompraData>();
+            if (_todasCompras == null) return;
 
-            return _comprasFiltradas
-                .Where(c => c.DataCompra.Date == data.Date)
+            string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
+            _comprasFiltradas = _todasCompras
+                .Where(v =>
+                    (v.FornecedorNome?.ToLower().Contains(textoBusca) ?? false) ||
+                    (v.Itens.Any(i => i.ProdutoNome.ToLower().Contains(textoBusca))) ||
+                    (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
+                )
                 .ToList();
+
+            AplicarOrdenacao();
+            AtualizarInterfaceCompras();
         }
 
-        private List<BoletoData> BuscarBoletosNoDia(DateTime data)
+        // 3. Filtro
+        private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_todosBoletos == null)
-                return new List<BoletoData>();
+            FiltroPopup.IsOpen = true;
+        }
+        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Adicionar lógica de filtro
+            FiltroPopup.IsOpen = false;
+            // string fornecedorSelecionado = FornecedorComboBox.SelectedItem?.ToString();
+            // _comprasFiltradas = _todasCompras.Where(v => v.Fornecedor == fornecedorSelecionado).ToList();
+            AplicarOrdenacao();
+            AtualizarInterfaceCompras();
+        }
+        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Limpar filtros
 
-            return _todosBoletos
-                .Where(b => b.Vencimento.Date == data.Date && b.Pagamento == null)
-                .ToList();
+            // TODO: Limpar filtro Ordenar
+
+            FiltroPopup.IsOpen = false;
+            _comprasFiltradas = new List<CompraData>(_todasCompras);
+            AplicarOrdenacao();
+            AtualizarInterfaceCompras();
         }
 
+        // 4. Ordenação
+        private void OrdenarButton_Click(object sender, RoutedEventArgs e)
+        {
+            OrdenarPopup.IsOpen = !OrdenarPopup.IsOpen;
+        }
+        private void OrdenacaoItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string tipoOrdenacao)
+            {
+                _ordenacaoAtual = tipoOrdenacao;
+                _filtroTexto = $"Ordenar por {button.Content}";
+
+                // Atualiza o texto do botão de ordenação, se houver TextBlock no template
+                if (OrderButton.Template.FindName("OrderButtonText", OrderButton) is TextBlock textBlock)
+                {
+                    textBlock.Text = _filtroTexto;
+                }
+                else
+                {
+                    OrderButton.Content = _filtroTexto;
+                }
+
+                OrdenarPopup.IsOpen = false;
+                AplicarOrdenacao();
+                AtualizarInterfaceCompras();
+            }
+        }
+        private void AplicarOrdenacao()
+        {
+            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
+                return;
+
+            switch (_ordenacaoAtual)
+            {
+                case "preco":
+                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
+                    break;
+                case "produto":
+                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Itens.FirstOrDefault()?.ProdutoNome ?? "").ToList();
+                    break;
+                case "fornecedor":
+                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.FornecedorNome).ToList();
+                    break;
+                case "recente":
+                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
+                    break;
+                case "antigo":
+                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.DataCompra).ToList();
+                    break;
+                case "vencimento":
+                    // Ordenar por próximo vencimento, colocando compras sem vencimento no final
+                    _comprasFiltradas = _comprasFiltradas
+                        .OrderBy(v => v.ProximoVencimento == null) // Primeiro os que têm vencimento (false vem antes de true)
+                        .ThenBy(v => v.ProximoVencimento) // Depois ordenar pelos vencimentos mais próximos
+                        .ToList();
+                    break;
+                default:
+                    _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.DataCompra).ToList();
+                    break;
+            }
+        }
+
+        // 5. Atualização da interface
+        private void AtualizarInterfaceCompras()
+        {
+            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
+            {
+                ComprasContainer.ItemsSource = null;
+                MensagemVazia.Visibility = Visibility.Visible;
+                return;
+            }
+
+            MensagemVazia.Visibility = Visibility.Collapsed;
+            ComprasContainer.ItemsSource = _comprasFiltradas;
+        }
+
+        // 6. Registrar Compra
+        private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
+        {
+            var compras = new AddEntradaSaídaWindow(isEntrada: true);
+            compras.ShowDialog();
+
+            // Atualiza a lista de compras após o registro
+            CarregarCompras();
+            // Atualiza também os boletos e o calendário
+            CarregarBoletos();
+            CarregarCalendario();
+        }
+
+        // 7. Botões de ação
+        private void DetalhesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var compra = (sender as Button)?.DataContext as CompraData;
+            if (compra != null)
+            {
+                var detalhesCompraUserControl = new DetalhesUserControl(compra);
+                var contentControl = (Parent as ContentControl);
+                if (contentControl != null)
+                {
+                    contentControl.Content = detalhesCompraUserControl;
+                }
+            }
+        }
+
+
+        // Navegação do calendário
+        private void PrevMonthButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Navegar para o mês anterior
+            MudarMesCalendario(-1);
+        }
+        private void NextMonthButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Navegar para o próximo mês
+            MudarMesCalendario(1);
+        }
+        private void MudarMesCalendario(int incrementoMes)
+        {
+            _currentCalendarMonth = _currentCalendarMonth.AddMonths(incrementoMes);
+            CarregarCalendario();
+        }
+
+        // Dia selecionada no calendário
         private void CalendarDayButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is DateTime selectedDate)
@@ -409,6 +444,24 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Mostrar o painel de detalhes
                 DiaDetalhesPanel.Visibility = Visibility.Visible;
             }
+        }
+        private List<CompraData> BuscarComprasNoDia(DateTime data)
+        {
+            if (_comprasFiltradas == null)
+                return new List<CompraData>();
+
+            return _comprasFiltradas
+                .Where(c => c.DataCompra.Date == data.Date)
+                .ToList();
+        }
+        private List<BoletoData> BuscarBoletosNoDia(DateTime data)
+        {
+            if (_todosBoletos == null)
+                return new List<BoletoData>();
+
+            return _todosBoletos
+                .Where(b => b.Vencimento.Date == data.Date && b.Pagamento == null)
+                .ToList();
         }
 
         // Apresenta os detalhes da compra ao clicar no botão de detalhes
