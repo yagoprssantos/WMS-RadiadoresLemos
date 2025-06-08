@@ -34,6 +34,7 @@
                     SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nome" Binding="{Binding name}" Width="*" MinWidth="200"/>
+                    <DataGridTextColumn Header="Tamanho" Binding="{Binding size, StringFormat={}{0:N0} bytes}" Width="*" MinWidth="100" />
                     <DataGridTextColumn Header="Data de Criação" Binding="{Binding created_at, Converter={StaticResource DateTimeToLocalConverter}, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150"/>
                     <DataGridTextColumn Header="Última Atualização" Binding="{Binding updated_at, Converter={StaticResource DateTimeToLocalConverter}, StringFormat=dd/MM/yyyy HH:mm}" Width="*" MinWidth="150"/>
                 </DataGrid.Columns>
