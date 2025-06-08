@@ -553,7 +553,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                ShowProgressBar.Visibility = Visibility.Visible;
+                //ShowProgressBar.Visibility = Visibility.Visible;
                 ProgressBarMessage.Text = "Atualizando informações...";
 
                 // Banco de Dados: Local

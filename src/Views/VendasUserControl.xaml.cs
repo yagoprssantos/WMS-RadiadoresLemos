@@ -188,11 +188,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (venda != null)
             {
                 var detalhesVendaUserControl = new DetalhesUserControl(venda);
-                var contentControl = (Parent as ContentControl);
-                if (contentControl != null)
-                {
-                    contentControl.Content = detalhesVendaUserControl;
-                }
+                this.NavigateTo(
+                    detalhesVendaUserControl,
+                    "Detalhes da Venda",
+                    "/assets/Icons/Selected/PranchetaS.png"
+                );
             }
         }
     }

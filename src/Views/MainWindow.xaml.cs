@@ -38,6 +38,8 @@ namespace WMS_RadiadoresLemos_WPF
 
         private NavigationService _navigationService;
 
+        public NavigationService NavigationService => _navigationService;
+
         public MainWindow()
         {
             InitializeComponent();

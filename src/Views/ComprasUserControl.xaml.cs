@@ -346,14 +346,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (compra != null)
             {
                 var detalhesCompraUserControl = new DetalhesUserControl(compra);
-                var contentControl = (Parent as ContentControl);
-                if (contentControl != null)
-                {
-                    contentControl.Content = detalhesCompraUserControl;
-                }
+                this.NavigateTo(
+                    detalhesCompraUserControl,
+                    "Detalhes da Compra",
+                    "/assets/Icons/Selected/ComprarS.png"
+                );
             }
         }
-
 
         // Navegação do calendário
         private void PrevMonthButton_Click(object sender, RoutedEventArgs e)
@@ -470,11 +469,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (sender is Button button && button.DataContext is CompraData compra)
             {
                 var detalhesCompraUserControl = new DetalhesUserControl(compra);
-                var contentControl = (Parent as ContentControl);
-                if (contentControl != null)
-                {
-                    contentControl.Content = detalhesCompraUserControl;
-                }
+                this.NavigateTo(
+                    detalhesCompraUserControl,
+                    "Detalhes da Compra",
+                    "/assets/Icons/Selected/ComprarS.png"
+                );
             }
         }
 
