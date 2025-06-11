@@ -1,0 +1,171 @@
+﻿<UserControl x:Class="WMS_RadiadoresLemos_WPF.src.Views.BoletoTestUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="{StaticResource BackgroundBrush}">
+    <Grid Margin="15,15,15,0">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Título -->
+                <TextBlock Grid.Row="0" Text="💳 Sistema de Gestão de Boletos" 
+                           FontSize="24" FontWeight="Bold" 
+                           Foreground="{StaticResource AccentBrush}" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,0,0,20"/>
+
+                <!-- Seção de Extração -->
+                <GroupBox Grid.Row="1" Header="🔍 Testar Extração de Dados do Boleto" 
+                          Style="{StaticResource GroupBoxStyle}" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Faça upload de um boleto (PDF ou imagem) para testar a extração automática de dados:"
+                                   FontSize="14" Foreground="{StaticResource TextBrush}" 
+                                   Margin="0,0,0,15" TextWrapping="Wrap"/>
+
+                        <Button x:Name="BtnTestarExtracao" 
+                                Content="📁 Carregar e Extrair Dados do Boleto" 
+                                Style="{StaticResource EmphasisButtonStyle}" 
+                                Click="BtnTestarExtracao_Click" 
+                                HorizontalAlignment="Center"
+                                Margin="0,0,0,10" Padding="15,8" FontSize="16"/>
+
+                        <!-- Status da Extração -->
+                        <TextBlock x:Name="TxtStatusExtracao" Text="🌐 Aguardando extração..." 
+                                   FontSize="14" Foreground="{StaticResource TextBrush}"
+                                   HorizontalAlignment="Center" Margin="0,10,0,0"
+                                   Visibility="Collapsed"/>
+
+                        <ProgressBar x:Name="ProgressBarExtracao" Height="6" 
+                                     Margin="0,5,0,0" Visibility="Collapsed"
+                                     Foreground="{StaticResource AccentBrush}"/>
+
+                        <!-- Resultado da Extração -->
+                        <Border x:Name="ResultadoBorder" Background="{StaticResource SecondaryBrush}" 
+                                CornerRadius="15" Padding="20" Margin="0,20,0,0"
+                                Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="📋 Dados Extraídos:" FontWeight="Bold" 
+                                           FontSize="18" Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Center" Margin="0,0,0,15"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Beneficiário:" FontWeight="Bold" 
+                                               Margin="0,8,10,8" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtBeneficiario" Grid.Row="0" Grid.Column="1" Margin="0,5" 
+                                             IsReadOnly="True" Background="{StaticResource PanelBackgroundBrush}"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="CNPJ:" FontWeight="Bold" 
+                                               Margin="0,8,10,8" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtCNPJ" Grid.Row="1" Grid.Column="1" Margin="0,5" 
+                                             IsReadOnly="True" Background="{StaticResource PanelBackgroundBrush}"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Pagador:" FontWeight="Bold" 
+                                               Margin="0,8,10,8" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtPagador" Grid.Row="2" Grid.Column="1" Margin="0,5" 
+                                             IsReadOnly="True" Background="{StaticResource PanelBackgroundBrush}"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Valor:" FontWeight="Bold" 
+                                               Margin="0,8,10,8" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtValor" Grid.Row="3" Grid.Column="1" Margin="0,5" 
+                                             IsReadOnly="True" Background="{StaticResource PanelBackgroundBrush}"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Vencimento:" FontWeight="Bold" 
+                                               Margin="0,8,10,8" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtVencimento" Grid.Row="4" Grid.Column="1" Margin="0,5" 
+                                             IsReadOnly="True" Background="{StaticResource PanelBackgroundBrush}"/>
+
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Nosso Número:" FontWeight="Bold" 
+                                               Margin="0,8,10,8" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtNossoNumero" Grid.Row="5" Grid.Column="1" Margin="0,5" 
+                                             IsReadOnly="True" Background="{StaticResource PanelBackgroundBrush}"/>
+
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Linha Digitável:" FontWeight="Bold" 
+                                               Margin="0,8,10,8" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtLinhaDigitavel" Grid.Row="6" Grid.Column="1" Margin="0,5" 
+                                             IsReadOnly="True" Background="{StaticResource PanelBackgroundBrush}" 
+                                             TextWrapping="Wrap"/>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                                    <Button Content="💾 Salvar Boleto" Style="{StaticResource EmphasisButtonStyle}" 
+                                            Click="SalvarBoleto_Click" Margin="0,0,15,0" Padding="15,8" FontSize="16"/>
+                                    <Button Content="🗑️ Limpar" Style="{StaticResource HoverButtonStyle}" 
+                                            Click="LimparResultado_Click" Margin="15,0,0,0" Padding="15,8" FontSize="16"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Lista de Boletos Salvos -->
+                <Border Grid.Row="2" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="15">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                            <TextBlock Text="📊 Boletos Cadastrados" FontSize="18" FontWeight="Bold" 
+                                       Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                            <Button Content="🔄 Atualizar" Style="{StaticResource HoverButtonStyle}" 
+                                    Click="AtualizarLista_Click" Margin="20,0,0,0" 
+                                    Padding="10,5" FontSize="12"/>
+                        </StackPanel>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl x:Name="BoletosContainer">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource PanelBackgroundBrush}" 
+                                                CornerRadius="10" Padding="15" Margin="10" Width="300">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Beneficiario}" FontSize="16" FontWeight="Bold" 
+                                                           Foreground="{StaticResource AccentBrush}" Margin="0,0,0,5"/>
+                                                <TextBlock Text="{Binding Valor, StringFormat='Valor: R$ {0:N2}'}" 
+                                                           FontSize="14" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
+                                                <TextBlock Text="{Binding DataVencimento, StringFormat='Vencimento: {0:dd/MM/yyyy}'}" 
+                                                           FontSize="14" Foreground="{StaticResource TextBrush}" Margin="0,0,0,5"/>
+                                                <TextBlock Text="{Binding Status}" FontSize="12" 
+                                                           Foreground="{StaticResource TextBrush}" Margin="0,0,0,10"/>
+                                                <Button Content="Ver Detalhes" Style="{StaticResource EmphasisButtonStyle}" 
+                                                        FontSize="12" Click="VerDetalhes_Click"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

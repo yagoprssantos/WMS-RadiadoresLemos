@@ -78,7 +78,11 @@
     <PackageReference Include="itext7" Version="9.2.0" />
     <PackageReference Include="LiteDB" Version="5.0.17" />
     <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
+	<PackageReference Include="PdfiumViewer" Version="2.13.0" />
+    <PackageReference Include="PdfiumViewer.Native.x86.v8-xfa" Version="2018.4.8.256" />
+    <PackageReference Include="PdfiumViewer.Net.WPF" Version="3.0.4" />
     <PackageReference Include="Supabase" Version="0.12.0" />
+	<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3296.44" />
   </ItemGroup>
 
   <ItemGroup>
@@ -199,5 +203,11 @@
     </Resource>
     <Resource Include="src\Resources\Images\user.png" />
   </ItemGroup>
+
+	<ItemGroup>
+		<Content Include="src\Resources\BoletoExtractor.html">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
 </Project>

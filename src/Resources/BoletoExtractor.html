@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrator de Boletos - WPF Integration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .loader {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Upload do Boleto</h2>
+
+            <div class="mb-4">
+                <input type="file" id="boletoFile" accept="image/png, image/jpeg, application/pdf"
+                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+
+            <div id="loader" class="hidden loader"></div>
+            <div id="status" class="text-sm text-gray-600 mt-2">Selecione um arquivo de boleto...</div>
+
+            <canvas id="pdfCanvas" style="display: none;"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = "AIzaSyDE-arZPG2EgGJRGSZtz4-k0o7KF4bfNTw";
+        const OCR_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+        const JSON_STRUCTURE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+        document.getElementById('boletoFile').addEventListener('change', handleFileSelect);
+
+        function enviarStatus(message) {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(JSON.stringify({
+                    type: "status",
+                    message: message
+                }));
+            }
+            document.getElementById('status').textContent = message;
+        }
+
+        function enviarDados(dados) {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(JSON.stringify({
+                    type: "dadosExtraidos",
+                    dados: dados
+                }));
+            }
+        }
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('loader').classList.remove('hidden');
+            enviarStatus('Processando arquivo...');
+
+            let combinedExtractedText = "";
+
+            try {
+                if (file.type === 'application/pdf') {
+                    enviarStatus('Processando PDF...');
+                    combinedExtractedText = await processPdfPagesAsImages(file);
+                } else if (['image/png', 'image/jpeg'].includes(file.type)) {
+                    enviarStatus('Processando imagem...');
+                    const base64ImageData = await convertFileToBase64(file);
+                    combinedExtractedText = await extractTextFromImageAPI(base64ImageData);
+                }
+
+                if (!combinedExtractedText) {
+                    throw new Error("Não foi possível extrair texto do arquivo");
+                }
+
+                enviarStatus('Estruturando dados...');
+                const structuredJson = await structureTextToJson(combinedExtractedText);
+
+                if (structuredJson) {
+                    enviarDados(structuredJson);
+                    enviarStatus('Dados extraídos com sucesso!');
+                } else {
+                    throw new Error("Falha ao estruturar dados");
+                }
+
+            } catch (error) {
+                enviarStatus(`Erro: ${error.message}`);
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
+            }
+        }
+
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function processPdfPagesAsImages(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let allExtractedText = "";
+
+            const canvas = document.getElementById('pdfCanvas');
+            const context = canvas.getContext('2d');
+
+            for (let pageNum = 1; pageNum <= Math.min(pdf.numPages, 3); pageNum++) {
+                enviarStatus(`Processando página ${pageNum}...`);
+
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2.0 });
+
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                const imageData = canvas.toDataURL('image/png').split(',')[1];
+                const extractedText = await extractTextFromImageAPI(imageData);
+
+                if (extractedText) {
+                    allExtractedText += extractedText + " ";
+                }
+            }
+
+            return allExtractedText.trim();
+        }
+
+        async function extractTextFromImageAPI(base64ImageData) {
+            const prompt = `
+                Analise esta imagem de boleto bancário e extraia EXATAMENTE as seguintes informações:
+
+                - Beneficiário/Cedente (nome da empresa que irá receber)
+                - CNPJ do Beneficiário
+                - Pagador/Sacado (quem deve pagar)
+                - Valor do boleto
+                - Data de vencimento
+                - Linha digitável
+                - Nosso número
+                - Agência e código do beneficiário
+
+                Retorne apenas o texto extraído, sem explicações.
+                `;
+
+            const requestBody = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        {
+                            inline_data: {
+                                mime_type: "image/png",
+                                data: base64ImageData
+                            }
+                        }
+                    ]
+                }]
+            };
+
+            const response = await fetch(OCR_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro na API de OCR: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        }
+
+        async function structureTextToJson(extractedText) {
+            const prompt = `
+                Transforme o seguinte texto extraído de um boleto em um JSON estruturado.
+                Use EXATAMENTE estas chaves, mesmo que alguns valores sejam null:
+
+                {
+                    "beneficiario": "nome do beneficiário",
+                    "cnpjBeneficiario": "CNPJ formatado",
+                    "cepBeneficiario": "CEP",
+                    "estadoBeneficiario": "Estado",
+                    "pagador": "nome do pagador",
+                    "valor": "valor em formato brasileiro",
+                    "vencimento": "data no formato dd/MM/yyyy",
+                    "linhaDigitavel": "linha digitável completa",
+                    "nossoNumero": "nosso número",
+                    "agenciaCodigoBeneficiario": "agência e código"
+                }
+
+                Texto a processar:
+                ${extractedText}
+
+                Retorne APENAS o JSON, sem explicações ou formatação markdown.
+                `;
+
+            const requestBody = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            const response = await fetch(JSON_STRUCTURE_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro na API de estruturação: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+            try {
+                return JSON.parse(jsonText.replace(/```json\n?|\n?```/g, ''));
+            } catch {
+                throw new Error("Falha ao parsear JSON da resposta");
+            }
+        }
+
+        // Escuta comandos do WPF
+        if (window.chrome && window.chrome.webview) {
+            window.chrome.webview.addEventListener('message', function (e) {
+                const command = JSON.parse(e.data);
+                if (command.action === 'limpar') {
+                    document.getElementById('boletoFile').value = '';
+                    enviarStatus('Pronto para novo arquivo');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Controls.Primitives;
+using System.Windows.Media; // Adicionado para VisualTreeHelper
+// using System.Windows.Media.Imaging; // Não usado diretamente aqui
+// using System.Windows.Controls.Primitives; // Não usado diretamente aqui
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+// Removida a referência a WMS_RadiadoresLemos_WPF.src.Views.Windows pois CadastroBoletoCompraWindow não é mais usada aqui
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
     public partial class ComprasUserControl : UserControl
     {
-        private List<CompraData> _todasCompras;      // Lista completa de compras
-        private List<CompraData> _comprasFiltradas;  // Lista filtrada e ordenada
+        private List<CompraData> _todasCompras;
+        private List<CompraData> _comprasFiltradas;
         private string _ordenacaoAtual = "recente";
-        private string _filtroTexto = "Ordenar por";
+        private string _filtroTexto = "Ordenar por"; // Mantido para o botão de ordenação
         private DateTime _currentCalendarMonth = DateTime.Today;
-        private CalendarDayViewModel _selectedDay; // Variável para armazenar o dia selecionado atualmente
+        private CalendarDayViewModel _selectedDay;
 
         public ComprasUserControl()
         {
@@ -26,39 +27,44 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             Loaded += ComprasUserControl_Loaded;
         }
 
-        // 1. Carregamento inicial
         private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarCompras();
-            CarregarCalendario();
+            CarregarCalendario(); // Se o calendário ainda for parte desta tela
+            if (OrderButton != null) // Garante que o botão de ordenação tenha o texto inicial correto
+            {
+                OrderButton.Content = _filtroTexto;
+            }
         }
 
         private void CarregarCompras()
         {
             try
             {
-                // Obter compras diretamente do banco de dados em vez de usar CompraService
                 var db = DatabaseConnect.Database;
                 if (db != null)
                 {
                     var collection = db.GetCollection<CompraData>("compras");
                     _todasCompras = collection.FindAll().ToList();
                     _comprasFiltradas = new List<CompraData>(_todasCompras);
-                    AplicarOrdenacao();
+                    AplicarOrdenacao(); // Certifique-se que a ordenação é aplicada
                     AtualizarInterfaceCompras();
                 }
                 else
                 {
                     MessageBox.Show("Não foi possível conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _todasCompras = new List<CompraData>(); // Inicializa para evitar NullReferenceException
+                    _comprasFiltradas = new List<CompraData>();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar compras: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                _todasCompras = new List<CompraData>(); // Inicializa em caso de erro
+                _comprasFiltradas = new List<CompraData>();
             }
         }
 
-        // 2. Pesquisa
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (_todasCompras == null) return;
@@ -67,7 +73,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _comprasFiltradas = _todasCompras
                 .Where(v =>
                     (v.FornecedorNome?.ToLower().Contains(textoBusca) ?? false) ||
-                    (v.Itens.Any(i => i.ProdutoNome.ToLower().Contains(textoBusca))) ||
+                    (v.Itens != null && v.Itens.Any(i => i.ProdutoNome != null && i.ProdutoNome.ToLower().Contains(textoBusca))) ||
                     (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
                 )
                 .ToList();
@@ -76,7 +82,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             AtualizarInterfaceCompras();
         }
 
-        // 3. Filtro
         private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
             FiltroPopup.IsOpen = true;
@@ -84,27 +89,32 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Adicionar lógica de filtro
+            // TODO: Implementar lógica de filtro específica
             FiltroPopup.IsOpen = false;
-            // string fornecedorSelecionado = FornecedorComboBox.SelectedItem?.ToString();
-            // _comprasFiltradas = _todasCompras.Where(v => v.Fornecedor == fornecedorSelecionado).ToList();
             AplicarOrdenacao();
             AtualizarInterfaceCompras();
         }
 
         private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Limpar filtros
-
-            // TODO: Limpar filtro Ordenar
-
+            // TODO: Limpar controles de filtro
             FiltroPopup.IsOpen = false;
-            _comprasFiltradas = new List<CompraData>(_todasCompras);
+            if (_todasCompras != null) // Garante que _todasCompras não é nulo
+            {
+                _comprasFiltradas = new List<CompraData>(_todasCompras);
+            }
+            else
+            {
+                _comprasFiltradas = new List<CompraData>();
+            }
+            _ordenacaoAtual = "recente"; // Resetar ordenação
+            _filtroTexto = "Ordenar por";
+            if (OrderButton != null) OrderButton.Content = _filtroTexto;
+
             AplicarOrdenacao();
             AtualizarInterfaceCompras();
         }
 
-        // 4. Ordenação
         private void OrdenarButton_Click(object sender, RoutedEventArgs e)
         {
             OrdenarPopup.IsOpen = !OrdenarPopup.IsOpen;
@@ -115,15 +125,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (sender is Button button && button.Tag is string tipoOrdenacao)
             {
                 _ordenacaoAtual = tipoOrdenacao;
-                _filtroTexto = $"Ordenar por {button.Content}";
+                // O conteúdo do botão clicado (ex: "Preço", "Recente") será usado para o texto.
+                _filtroTexto = $"Ordenar por: {button.Content}";
 
-                // Atualiza o texto do botão de ordenação, se houver TextBlock no template
-                if (OrderButton.Template.FindName("OrderButtonText", OrderButton) is TextBlock textBlock)
+                if (OrderButton != null)
                 {
-                    textBlock.Text = _filtroTexto;
-                }
-                else
-                {
+                    // O estilo FilterButtonStyle usa ContentPresenter diretamente, então mudar Content é o correto.
                     OrderButton.Content = _filtroTexto;
                 }
 
@@ -135,8 +142,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void AplicarOrdenacao()
         {
-            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
-                return;
+            if (_comprasFiltradas == null || !_comprasFiltradas.Any()) return;
 
             switch (_ordenacaoAtual)
             {
@@ -144,7 +150,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     _comprasFiltradas = _comprasFiltradas.OrderByDescending(v => v.ValorTotal).ToList();
                     break;
                 case "produto":
-                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Itens.FirstOrDefault()?.ProdutoNome ?? "").ToList();
+                    _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.Itens?.FirstOrDefault()?.ProdutoNome ?? "").ToList();
                     break;
                 case "fornecedor":
                     _comprasFiltradas = _comprasFiltradas.OrderBy(v => v.FornecedorNome).ToList();
@@ -161,55 +167,72 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
-        // 5. Atualização da interface
         private void AtualizarInterfaceCompras()
         {
-            if (_comprasFiltradas == null || _comprasFiltradas.Count == 0)
+            if (_comprasFiltradas == null || !_comprasFiltradas.Any())
             {
                 ComprasContainer.ItemsSource = null;
                 MensagemVazia.Visibility = Visibility.Visible;
-                return;
             }
-
-            MensagemVazia.Visibility = Visibility.Collapsed;
-            ComprasContainer.ItemsSource = _comprasFiltradas;
+            else
+            {
+                MensagemVazia.Visibility = Visibility.Collapsed;
+                ComprasContainer.ItemsSource = _comprasFiltradas;
+            }
         }
 
-        // 6. Registrar Compra
         private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
         {
-            var compras = new AddEntradaSaídaWindow(isEntrada: true);
-            compras.ShowDialog();
-
-            // Atualiza a lista de compras após o registro
+            var comprasWindow = new AddEntradaSaídaWindow(isEntrada: true);
+            comprasWindow.ShowDialog();
             CarregarCompras();
         }
 
-        // 7. Botões de ação
         private void DetalhesButton_Click(object sender, RoutedEventArgs e)
         {
             var compra = (sender as Button)?.DataContext as CompraData;
             if (compra != null)
             {
                 var detalhesCompraUserControl = new DetalhesUserControl(compra);
-                var contentControl = (Parent as ContentControl);
-                if (contentControl != null)
+
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null && mainWindow.FindName("ContentArea") is ContentControl contentArea)
                 {
-                    contentControl.Content = detalhesCompraUserControl;
+                    contentArea.Content = detalhesCompraUserControl;
+                }
+                else
+                {
+                    var parentContentControl = FindVisualParent<ContentControl>(this);
+                    if (parentContentControl != null)
+                    {
+                        parentContentControl.Content = detalhesCompraUserControl;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Não foi possível encontrar a área de conteúdo para exibir os detalhes.", "Erro de Navegação", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
-        // Navegação do calendário
+        public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+            if (parentObject == null) return null;
+            T parent = parentObject as T;
+            if (parent != null)
+                return parent;
+            else
+                return FindVisualParent<T>(parentObject);
+        }
+
         private void PrevMonthButton_Click(object sender, RoutedEventArgs e)
         {
-            // Navegar para o mês anterior
             MudarMesCalendario(-1);
         }
 
         private void NextMonthButton_Click(object sender, RoutedEventArgs e)
         {
-            // Navegar para o próximo mês
             MudarMesCalendario(1);
         }
 
@@ -219,66 +242,35 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CarregarCalendario();
         }
 
-        // Carrega os dias no calendário
         private void CarregarCalendario()
         {
-            CalendarMonthText.Text = _currentCalendarMonth.ToString("MMMM yyyy");
+            CalendarMonthText.Text = _currentCalendarMonth.ToString("MMMM yyyy", new System.Globalization.CultureInfo("pt-BR")); // Formatado para Português
 
             var days = new List<CalendarDayViewModel>();
             DateTime firstDayOfMonth = new DateTime(_currentCalendarMonth.Year, _currentCalendarMonth.Month, 1);
             int offset = ((int)firstDayOfMonth.DayOfWeek);
 
-            // Dias do mês anterior
-            DateTime previousMonth = firstDayOfMonth.AddDays(-offset);
-            for (int i = 0; i < offset; i++)
-            {
-                days.Add(new CalendarDayViewModel
-                {
-                    Day = previousMonth.AddDays(i).Day.ToString(),
-                    IsCurrentMonth = false,
-                    Date = previousMonth.AddDays(i)
-                });
-            }
+            DateTime dayIterator = firstDayOfMonth.AddDays(-offset);
 
-            // Dias do mês atual
-            int daysInMonth = DateTime.DaysInMonth(firstDayOfMonth.Year, firstDayOfMonth.Month);
-            for (int i = 1; i <= daysInMonth; i++)
+            for (int i = 0; i < 42; i++)
             {
-                var currentDate = new DateTime(firstDayOfMonth.Year, firstDayOfMonth.Month, i);
-                var day = new CalendarDayViewModel
+                var dayVM = new CalendarDayViewModel
                 {
-                    Day = i.ToString(),
-                    IsCurrentMonth = true,
-                    IsToday = currentDate.Date == DateTime.Today,
-                    Date = currentDate
+                    Day = dayIterator.Day.ToString(),
+                    IsCurrentMonth = dayIterator.Month == _currentCalendarMonth.Month,
+                    IsToday = dayIterator.Date == DateTime.Today,
+                    Date = dayIterator.Date,
+                    HasPayment = VerificarPagamentosNaData(dayIterator.Date)
                 };
-
-                // Verificar se há compras ou pagamentos neste dia
-                day.HasPayment = VerificarPagamentosNaData(currentDate);
-                days.Add(day);
+                days.Add(dayVM);
+                dayIterator = dayIterator.AddDays(1);
             }
-
-            // Completar o grid com dias do próximo mês
-            int remainingDays = 42 - days.Count; // 6 linhas x 7 colunas = 42 células
-            DateTime nextMonth = firstDayOfMonth.AddMonths(1);
-            for (int i = 1; i <= remainingDays; i++)
-            {
-                days.Add(new CalendarDayViewModel
-                {
-                    Day = i.ToString(),
-                    IsCurrentMonth = false,
-                    Date = new DateTime(nextMonth.Year, nextMonth.Month, i)
-                });
-            }
-
             CalendarDaysControl.ItemsSource = days;
         }
 
-        // Verifica se há pagamentos programados para uma data específica
         private bool VerificarPagamentosNaData(DateTime data)
         {
             if (_todasCompras == null) return false;
-
             return _todasCompras.Any(c =>
                 (c.DataCompra.Date == data.Date) ||
                 (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date)
@@ -287,32 +279,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void CalendarDayButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is DateTime selectedDate)
+            if (sender is Button button && button.DataContext is CalendarDayViewModel dayVM)
             {
-                // Encontra o objeto CalendarDayViewModel do dia clicado
-                var days = CalendarDaysControl.ItemsSource as List<CalendarDayViewModel>;
-                if (days != null)
-                {
-                    // Limpar a seleção anterior
-                    if (_selectedDay != null)
-                    {
-                        _selectedDay.IsSelected = false;
-                    }
+                if (_selectedDay != null) _selectedDay.IsSelected = false;
+                dayVM.IsSelected = true;
+                _selectedDay = dayVM;
 
-                    // Definir o novo dia selecionado
-                    var clickedDay = days.FirstOrDefault(d => d.Date.Date == selectedDate.Date);
-                    if (clickedDay != null)
-                    {
-                        clickedDay.IsSelected = true;
-                        _selectedDay = clickedDay;
-                    }
-                }
-
-                // Atualizar o texto da data selecionada
-                DataSelecionadaText.Text = selectedDate.ToString("dd 'de' MMMM 'de' yyyy");
-
-                // Buscar compras ou pagamentos para a data selecionada
-                var comprasNoDia = BuscarComprasNoDia(selectedDate);
+                DataSelecionadaText.Text = dayVM.Date.ToString("dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("pt-BR"));
+                var comprasNoDia = BuscarComprasNoDia(dayVM.Date);
 
                 if (comprasNoDia.Any())
                 {
@@ -326,21 +300,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     ComprasDoDiaList.Visibility = Visibility.Collapsed;
                     SemComprasNoDiaText.Visibility = Visibility.Visible;
                 }
-
-                // Mostrar o painel de detalhes
                 DiaDetalhesPanel.Visibility = Visibility.Visible;
             }
         }
 
         private List<CompraData> BuscarComprasNoDia(DateTime data)
         {
-            if (_comprasFiltradas == null)
-                return new List<CompraData>();
-
-            return _comprasFiltradas
-                .Where(c =>
-                    (c.DataCompra.Date == data.Date) ||
-                    (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date))
+            if (_todasCompras == null) return new List<CompraData>();
+            return _todasCompras
+                .Where(c => (c.DataCompra.Date == data.Date) || (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date))
                 .ToList();
         }
 
@@ -349,12 +317,39 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (sender is Button button && button.DataContext is CompraData compra)
             {
                 var detalhesCompraUserControl = new DetalhesUserControl(compra);
-                var contentControl = (Parent as ContentControl);
-                if (contentControl != null)
+                var parentContentControl = FindVisualParent<ContentControl>(this);
+                if (parentContentControl != null)
                 {
-                    contentControl.Content = detalhesCompraUserControl;
+                    parentContentControl.Content = detalhesCompraUserControl;
                 }
             }
+        }
+    }
+
+    public class CalendarDayViewModel : System.ComponentModel.INotifyPropertyChanged
+    {
+        public string Day { get; set; }
+        public bool IsCurrentMonth { get; set; }
+        public bool IsToday { get; set; }
+        public DateTime Date { get; set; }
+        public bool HasPayment { get; set; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(nameof(IsSelected)); OnPropertyChanged(nameof(SelectedBorderThickness)); }
+        }
+
+        public Thickness SelectedBorderThickness => IsSelected ? new Thickness(2) : new Thickness(0);
+        public Visibility TodayIndicatorVisibility => IsToday ? Visibility.Visible : Visibility.Collapsed;
+        public FontWeight FontWeight => IsCurrentMonth ? FontWeights.SemiBold : FontWeights.Normal; // Ajustado para SemiBold
+        public Visibility PaymentVisibility => HasPayment ? Visibility.Visible : Visibility.Collapsed;
+
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
         }
     }
 }

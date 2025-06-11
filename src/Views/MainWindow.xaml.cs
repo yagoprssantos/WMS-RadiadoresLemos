@@ -14,6 +14,7 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using WMS_RadiadoresLemos_WPF;
 
+
 namespace WMS_RadiadoresLemos_WPF
 {
     public partial class MainWindow : Window
@@ -66,6 +67,7 @@ namespace WMS_RadiadoresLemos_WPF
                         new RegistroUserControl(),
                         new ControleEstoqueUserControl(),
                         new CadastroUserControl(),
+                        new BoletoTestUserControl(), // 👈 ADICIONE ESTA LINHA
                         new DashboardUserControl(),
                         new NotificacoesUserControl(),
                         new ConfiguracaoUserControl()
@@ -274,6 +276,9 @@ namespace WMS_RadiadoresLemos_WPF
                     case "BtnCadastro":
                         ContentArea.Content = new CadastroUserControl();
                         break;
+                    case "BtnBoletos": // 👈 ADICIONE ESTE CASE
+                        ContentArea.Content = new BoletoTestUserControl();
+                        break;
                     case "BtnDashboard":
                         ContentArea.Content = new DashboardUserControl();
                         break;
@@ -417,6 +422,7 @@ namespace WMS_RadiadoresLemos_WPF
                 "IconRegistro" => state == "Selected" ? "historicos" : "HistoricoNS",
                 "IconEstoque" => state == "Selected" ? "CaixaS" : "CaixaNS",
                 "IconCadastro" => state == "Selected" ? "CadastroS" : "CadastroNS",
+                "IconBoletos" => state == "Selected" ? "CadastroS" : "CadastroNS", // 👈 USA ÍCONE DE CADASTRO TEMPORARIAMENTE
                 "IconDashboard" => state == "Selected" ? "GraficoS" : "GraficoNS",
                 "IconNotificacoes" => state == "Selected" ? "SinoS" : "SinoNS",
                 "IconConfiguracoes" => state == "Selected" ? "EngrenagemS" : "EngrenagemNS",
@@ -426,6 +432,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Métodos para atualizar o título da janela e o ícone do botão
+        // No MainWindow.xaml.cs, SUBSTITUA completamente o método UpdateTitle():
         private void UpdateTitle()
         {
             if (ContentArea.Content is ComprasUserControl)
@@ -447,6 +454,10 @@ namespace WMS_RadiadoresLemos_WPF
             else if (ContentArea.Content is CadastroUserControl)
             {
                 TitleTextBlock.Text = "Cadastro";
+            }
+            else if (ContentArea.Content is BoletoTestUserControl) // 👈 ADICIONE ESTA LINHA
+            {
+                TitleTextBlock.Text = "Boletos (Teste)";
             }
             else if (ContentArea.Content is DashboardUserControl)
             {
@@ -484,6 +495,10 @@ namespace WMS_RadiadoresLemos_WPF
             else if (ContentArea.Content is CadastroUserControl)
             {
                 iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is BoletoTestUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative); // 👈 TEMPORÁRIO
             }
             else if (ContentArea.Content is DashboardUserControl)
             {

@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         mc:Ignorable="d" 
         Title="Adicionar Entrada/Saída"
-        MinHeight="600" MinWidth="800"
+        MinHeight="700" MinWidth="800"
         Height="900" Width="800"
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterScreen"
@@ -32,20 +32,16 @@
             </Style>
         </Grid.Resources>
 
-        <!-- Border Principal -->
         <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
             <Grid>
-                <!-- Layout Principal -->
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Style="{StaticResource DynamicColumnStyle}" />
                     <ColumnDefinition Style="{StaticResource ListaColumnStyle}" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Primeira Border (Conteúdo Principal) -->
                 <Border x:Name="Principal" Grid.Column="0" CornerRadius="15" Padding="25" Margin="0"
                         Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
                     <Grid>
-                        <!-- ScrollViewer para os elementos do StackPanel -->
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,55">
                             <StackPanel>
                                 <StackPanel x:Name="Estoque">
@@ -58,27 +54,23 @@
                                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                             <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                             <ComboBox Name="ProdutoComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
-                                                  Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                                  LostFocus="ProdutoComboBox_LostFocus" TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
-                                                  SelectionChanged="ProdutoComboBox_SelectionChanged" />
+                                                      Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                                      LostFocus="ProdutoComboBox_LostFocus" TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
+                                                      SelectionChanged="ProdutoComboBox_SelectionChanged" />
                                         </StackPanel>
-
-                                        <!-- Fornecedor -->
                                         <StackPanel x:Name="Fornecedor" Grid.Column="1" Margin="10,0,0,0" Visibility="Visible">
                                             <TextBlock Text="Fornecedor:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                             <ComboBox Name="FornecedorComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
-                                                  Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                                  LostFocus="FornecedorComboBox_LostFocus" TextBoxBase.TextChanged="FornecedorComboBox_TextChanged"
-                                                  SelectionChanged="FornecedorComboBox_SelectionChanged" />
+                                                      Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                                      LostFocus="FornecedorComboBox_LostFocus" TextBoxBase.TextChanged="FornecedorComboBox_TextChanged"
+                                                      SelectionChanged="FornecedorComboBox_SelectionChanged" />
                                         </StackPanel>
-
-                                        <!-- Cliente -->
                                         <StackPanel x:Name="Cliente" Grid.Column="1" Margin="10,0,0,0" Visibility="Collapsed">
                                             <TextBlock Text="Cliente:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                             <ComboBox Name="ClienteComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
-                                                  Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                                  LostFocus="ClienteComboBox_LostFocus" TextBoxBase.TextChanged="ClienteComboBox_TextChanged"
-                                                  SelectionChanged="ClienteComboBox_SelectionChanged" />
+                                                      Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                                      LostFocus="ClienteComboBox_LostFocus" TextBoxBase.TextChanged="ClienteComboBox_TextChanged"
+                                                      SelectionChanged="ClienteComboBox_SelectionChanged" />
                                         </StackPanel>
                                     </Grid>
 
@@ -91,23 +83,25 @@
                                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                             <TextBlock Text="Quantidade:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                             <TextBox Name="QuantidadeTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 LostFocus="QuantidadeTextBox_LostFocus" TextChanged="QuantidadeTextBox_TextChanged" Height="35"
-                                                 PreviewTextInput="QuantidadeTextBox_PreviewTextInput"
-                                                 DataObject.Pasting="QuantidadeTextBox_Pasting" />
+                                                     Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                     LostFocus="QuantidadeTextBox_LostFocus" TextChanged="QuantidadeTextBox_TextChanged" Height="35"
+                                                     PreviewTextInput="QuantidadeTextBox_PreviewTextInput"
+                                                     DataObject.Pasting="QuantidadeTextBox_Pasting" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                             <TextBlock Text="Preço:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                             <TextBox Name="PrecoTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 LostFocus="PrecoTextBox_LostFocus" TextChanged="PrecoTextBox_TextChanged" Height="35"
-                                                 PreviewTextInput="PrecoTextBox_PreviewTextInput"
-                                                 DataObject.Pasting="PrecoTextBox_Pasting" />
+                                                     Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                     LostFocus="PrecoTextBox_LostFocus" TextChanged="PrecoTextBox_TextChanged" Height="35"
+                                                     PreviewTextInput="PrecoTextBox_PreviewTextInput"
+                                                     DataObject.Pasting="PrecoTextBox_Pasting" />
                                         </StackPanel>
                                     </Grid>
 
-                                    <!-- Antes e Depois -->
-                                    <Grid x:Name="ProdutoAntesDepois" Margin="0,15" Visibility="Visible">
+                                    <!-- Antes e Depois - ADICIONADO x:Name AOS TEXTBLOCKS -->
+                                    <!-- Dentro de AddEntradaSaídaWindow.xaml -->
+                                    <Grid x:Name="ProdutoAntesDepois" Margin="0,15" Visibility="Collapsed">
+                                        <!-- Certifique-se que Visibility="Collapsed" é o estado inicial se preferir -->
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
@@ -142,7 +136,6 @@
                                             </Grid>
                                         </StackPanel>
 
-                                        <!-- Separador -->
                                         <Border Grid.Column="1" Width="1" Background="{StaticResource HoverBackgroundBrush}" Margin="5,0" />
 
                                         <!-- Depois -->
@@ -167,21 +160,20 @@
                                                 <TextBlock Text="Código:" Grid.Row="2" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
                                                 <TextBlock x:Name="CodigoDepoisDadoTextBlock" Grid.Row="2" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
                                                 <TextBlock Text="Preço:" Grid.Row="3" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,0" />
-                                                <TextBlock x:Name="PrecoDepoisDadoTextBlock" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" Height="16" Grid.RowSpan="2" VerticalAlignment="Top" />
+                                                <TextBlock x:Name="PrecoDepoisDadoTextBlock" Grid.Row="3" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,0" />
                                                 <TextBlock Text="Quantidade:" Grid.Row="4" Grid.Column="0" Foreground="{StaticResource TextBrush}" Margin="0,5,10,5" />
                                                 <TextBlock x:Name="QuantidadeDepoisDadoTextBlock" Grid.Row="4" Grid.Column="1" Foreground="{StaticResource TextBrush}" Background="{StaticResource PanelBackgroundBrush}" TextAlignment="Left" Margin="0,5,0,5" />
                                             </Grid>
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>
-                                
-                                <!-- Mensagem de Status -->
+
                                 <TextBlock x:Name="StatusMessage" Text="Movimentação INVÁLIDA" FontSize="18"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"  Margin="0,10"
-                                           Foreground="{StaticResource CancelButtonBrush}" Visibility="Visible" />
+                                           Foreground="{StaticResource CancelButtonHoverBrush}" Visibility="Visible" />
 
-                                <StackPanel x:Name="Financeiro" Visibility="Visible">
-                                    <!-- Parcelas e Forma de Pagamento -->
+                                <StackPanel x:Name="Financeiro" Visibility="Collapsed">
+                                    <!-- Mudado para Collapsed por defeito -->
                                     <Grid Margin="0, 0, 0, 5">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -190,9 +182,8 @@
                                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                             <TextBlock Text="Forma de Pagamento:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                             <ComboBox Name="FormaPagamentoComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
-                                                  Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}"
-                                                  LostFocus="FormaPagamentoComboBox_LostFocus" SelectionChanged="FormaPagamentoComboBox_SelectionChanged">
-                                                <!-- Formas de Pagamento -->
+                                                      Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}"
+                                                      LostFocus="FormaPagamentoComboBox_LostFocus" SelectionChanged="FormaPagamentoComboBox_SelectionChanged">
                                                 <ComboBoxItem Content="À vista" />
                                                 <ComboBoxItem Content="Parcelado" />
                                             </ComboBox>
@@ -200,14 +191,28 @@
                                         <StackPanel Grid.Column="1" Margin="10,0,0,0" Visibility="Visible">
                                             <TextBlock Text="Parcelas:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                             <TextBox Name="ParcelasTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 LostFocus="ParcelasTextBox_LostFocus" TextChanged="ParcelasTextBox_TextChanged" Height="35"
-                                                 PreviewTextInput="ParcelasTextBox_PreviewTextInput"
-                                                 DataObject.Pasting="ParcelasTextBox_Pasting" />
+                                                     Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                     LostFocus="ParcelasTextBox_LostFocus" TextChanged="ParcelasTextBox_TextChanged" Height="35"
+                                                     PreviewTextInput="ParcelasTextBox_PreviewTextInput"
+                                                     DataObject.Pasting="ParcelasTextBox_Pasting" />
                                         </StackPanel>
                                     </Grid>
-                                    
-                                    <!-- Data de Pagamento e Vencimento dos Boletos -->
+
+                                    <!-- SEÇÃO DE EXTRAÇÃO DE BOLETO -->
+                                    <GroupBox x:Name="ExtrairBoletoGroupBox" Header="Extração Automática de Dados do Boleto" Style="{StaticResource GroupBoxStyle}" Margin="0,15,0,5" Padding="10"
+                                              Visibility="{Binding ElementName=Fornecedor, Path=Visibility}">
+                                        <!-- Visível se Fornecedor estiver visível (Compra) -->
+                                        <StackPanel>
+                                            <Button x:Name="BtnExtrairDeArquivo" Content="Carregar e Extrair Dados de Boleto (PDF/Imagem)..." 
+                                                    Style="{StaticResource EmphasisButtonStyle}" Click="BtnExtrairDeArquivo_Click" 
+                                                    Margin="5" Padding="8"/>
+                                            <ProgressBar x:Name="ProgressBarExtracao" Height="8" Margin="5,8,5,2" IsIndeterminate="False" Visibility="Collapsed"/>
+                                            <TextBlock x:Name="TxtStatusExtracao" TextWrapping="Wrap" Margin="5,2,5,5" FontSize="12"
+                                                       Foreground="{StaticResource TextBrush}" Visibility="Collapsed"/>
+                                        </StackPanel>
+                                    </GroupBox>
+                                    <!-- FIM DA SEÇÃO DE EXTRAÇÃO -->
+
                                     <StackPanel x:Name="CamposBoletos" Visibility="Visible">
                                         <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                                             <Grid.ColumnDefinitions>
@@ -215,11 +220,10 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Boletos:" FontSize="16" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                            <Button Grid.Column="1" x:Name="AdicionarBoletoButton" Visibility="Visible" Content="Adicionar Boleto" Style="{StaticResource EmphasisButtonStyle}"
+                                            <Button Grid.Column="1" x:Name="AdicionarBoletoButton" Visibility="Visible" Content="Adicionar Boleto Manualmente" Style="{StaticResource EmphasisButtonStyle}"
                                                     HorizontalAlignment="Left" FontSize="12" Padding="10,5" Click="AdicionarBoletoButton_Click"/>
                                         </Grid>
 
-                                        <!-- Lista de boletos -->
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="150">
                                             <ItemsControl x:Name="BoletosItemsControl">
                                                 <ItemsControl.ItemsPanel>
@@ -239,28 +243,18 @@
                                                                     <ColumnDefinition Width="*"/>
                                                                     <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
-
-                                                                <!-- Título da Parcela -->
                                                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                                                            Text="{Binding Parcela, StringFormat='Parcela {0}'}" FontWeight="Bold" FontSize="16"
                                                                            Foreground="{StaticResource AccentBrush}" Margin="0,0,0,5" VerticalAlignment="Center"/>
-
-                                                                <!-- Botão de remover (exceto para primeira parcela) -->
                                                                 <Button Grid.Row="0" Grid.Column="1"
                                                                         Content="✖" FontSize="8" Style="{StaticResource DeleteButtonStyle}" Width="20" Height="20"
                                                                         Margin="5,0,0,0" VerticalAlignment="Top" Click="RemoverBoletoButton_Click" Tag="{Binding Parcela}"/>
-
-                                                                <!-- Data de Vencimento e Arquivo do Boleto lado a lado -->
                                                                 <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                                                                             Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-
-                                                                    <!-- Data de Vencimento -->
                                                                     <StackPanel Orientation="Vertical" VerticalAlignment="Center" Width="Auto" Margin="0,0,10,0" MinWidth="120" MaxWidth="220">
                                                                         <TextBlock Text="Vencimento:" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="0"/>
                                                                         <DatePicker SelectedDate="{Binding Vencimento}" Style="{StaticResource DatePickerStyle}" Height="30" FontSize="14" MinWidth="120" MaxWidth="200"/>
                                                                     </StackPanel>
-
-                                                                    <!-- Arquivo do Boleto -->
                                                                     <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Stretch" Width="Auto" MinWidth="0" Margin="0">
                                                                         <TextBlock Text="Arquivo:" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="0"/>
                                                                         <Grid>
@@ -286,8 +280,7 @@
                                         </ScrollViewer>
                                     </StackPanel>
 
-                                    <!-- Nota Fiscal -->
-                                    <TextBlock Text="Nota Fiscal:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                    <TextBlock Text="Nota Fiscal:" Margin="0,10,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                     <Grid Margin="0,0,0,5">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -295,48 +288,39 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBox Name="NotaFiscalTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
                                                  Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap" Grid.Column="0" TextChanged="NotaFiscalTextBox_TextChanged_1" Grid.ColumnSpan="2" Margin="5,0,157,0"/>
+                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap" Grid.Column="0" 
+                                                 TextChanged="NotaFiscalTextBox_TextChanged_1" LostFocus="NotaFiscalTextBox_LostFocus" 
+                                                 PreviewTextInput="NotaFiscalTextBox_PreviewTextInput" DataObject.Pasting="NotaFiscalTextBox_Pasting" />
                                         <Button Content="Importar XML Nota Fiscal" Style="{StaticResource EmphasisButtonStyle}"
-                                                Click="ImportarXMLButton_Click" Grid.Column="1" Margin="10,0,0,0" FontSize="11"/>
+                                                Click="ImportarXMLButton_Click" Grid.Column="1" Margin="10,0,0,0" FontSize="11" Padding="8,5"/>
                                     </Grid>
 
-                                    <!-- Detalhes -->
                                     <TextBlock Text="Detalhes:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                     <TextBox Name="DetalhesTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
-                                         Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                         MinHeight="35" Height="Auto" Margin="0,0,0,15" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                             Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                             MinHeight="35" Height="Auto" Margin="0,0,0,15" AcceptsReturn="True" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
 
-                        <!-- Botão Adicionar -->
                         <Button Content="Adicionar na Lista" Style="{StaticResource EmphasisButtonStyle}" Width="200" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,10,0,0" Click="AdicionarNaLista_Click" />
 
-                        <!-- Botão para alternar a visibilidade da Lista -->
                         <Button Style="{StaticResource EmphasisButtonStyle}" Width="40" Height="40" Margin="0,10,0,0" Visibility="Visible"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="{StaticResource PanelBackgroundBrush}"
                                 x:Name="ToggleLista" Click="ToggleLista_Click">
-                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="20
-                                   " Width="25"/>
+                            <Image Source="/assets/Icons/Genericos/Carrinho.png" Stretch="Uniform" Height="20" Width="25"/>
                         </Button>
                     </Grid>
                 </Border>
 
-                <!-- Segunda Border (Lista Retrátil) -->
                 <Border x:Name="Lista" Grid.Column="1" CornerRadius="15" Padding="15" Margin="20,0,0,0" Visibility="Collapsed"
                         Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
                     <Grid>
-                        <!-- Definição das linhas da Grid -->
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
-                            <!-- Título e botão fechar -->
                             <RowDefinition Height="*" />
-                            <!-- ScrollViewer -->
                             <RowDefinition Height="Auto" />
-                            <!-- Botão Confirmar -->
                         </Grid.RowDefinitions>
-
-                        <!-- Cabeçalho: Título e botão fechar -->
                         <Grid Grid.Row="0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -346,19 +330,14 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-
                             <TextBlock Grid.Row="0" Text="Lista" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" />
-
                             <Button Grid.Row="0" Content="✖" FontSize="15" Style="{StaticResource DeleteButtonStyle}" Width="20" Height="20"
                                     HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Column="1"
                                     Foreground="{StaticResource TextBrush}" Background="Transparent"
                                     Click="FecharLista_Click" />
-
-                            <Separator Grid.Row="1" Margin="5, 15" />
+                            <Separator Grid.Row="1" Margin="5, 15" Grid.ColumnSpan="2"/>
                         </Grid>
-
-                        <!-- ScrollViewer para a lista -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <ItemsControl x:Name="ListaItemsControl">
                                 <ItemsControl.ItemTemplate>
@@ -373,16 +352,11 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-
-                                                <!-- StackPanel para os elementos -->
                                                 <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                                    <!-- Produto -->
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                                         <TextBlock Text="Produto: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding ProdutoNome}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
-
-                                                    <!-- Fornecedor -->
                                                     <StackPanel x:Name="ListFornecedor" Orientation="Horizontal" Margin="0,0,0,5">
                                                         <StackPanel.Style>
                                                             <Style TargetType="StackPanel">
@@ -391,14 +365,15 @@
                                                                     <DataTrigger Binding="{Binding FornecedorId}" Value="{x:Null}">
                                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                                     </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FornecedorId}" Value="">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
                                                         <TextBlock Text="Fornecedor: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding FornecedorId}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
-
-                                                    <!-- Cliente -->
                                                     <StackPanel x:Name="ListCliente" Orientation="Horizontal" Margin="0,0,0,5">
                                                         <StackPanel.Style>
                                                             <Style TargetType="StackPanel">
@@ -407,39 +382,32 @@
                                                                     <DataTrigger Binding="{Binding ClienteId}" Value="{x:Null}">
                                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                                     </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding ClienteId}" Value="">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </StackPanel.Style>
                                                         <TextBlock Text="Cliente: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding ClienteId}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
-
-                                                    <!-- Quantidade -->
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                                         <TextBlock Text="Quantidade: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding Quantidade}" Foreground="{StaticResource TextBrush}" Margin="0,0,15,0"/>
                                                     </StackPanel>
-                                                    
-                                                    <!-- Preço -->
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                                         <TextBlock Text="Preço: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                        <TextBlock Text="{Binding Preco, StringFormat=C}" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding Preco, StringFormat=C, ConverterCulture='pt-BR'}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
-                                                    
-                                                    <!-- Forma de Pagamento -->
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                                         <TextBlock Text="Pagamento: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding FormaPagamento}" Foreground="{StaticResource TextBrush}" Margin="0,0,15,0"/>
                                                     </StackPanel>
-
-                                                    <!-- Parcelas -->
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                                         <TextBlock Text="Parcelas: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
                                                         <TextBlock Text="{Binding Parcelas}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
                                                 </StackPanel>
-
-                                                <!-- Botão de Excluir -->
                                                 <Button Content="✖" Grid.Row="1" FontSize="7" Grid.Column="1" Style="{StaticResource DeleteButtonStyle}" 
                                                         Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" 
                                                         Click="ExcluirItem_Click" />
@@ -449,8 +417,6 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-
-                        <!-- Botão Confirmar -->
                         <Button Grid.Row="2" Content="Confirmar" Style="{StaticResource EmphasisButtonStyle}" Width="200" 
                                 HorizontalAlignment="Center" Margin="0,10,0,0" Click="ConfirmarPedido_Click" />
                     </Grid>
