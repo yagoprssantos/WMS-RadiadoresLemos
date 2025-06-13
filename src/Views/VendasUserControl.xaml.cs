@@ -26,6 +26,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void VendasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarVendas();
+            CarregarClientes();
+            CarregarProdutos();
+            CarregarNotasFiscais();
         }
 
         private void CarregarVendas()
@@ -52,6 +55,93 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        // Método para carregar os dados dos clientes no ComboBox
+        private void CarregarClientes()
+        {
+            try
+            {
+                if (_todasVendas == null || !_todasVendas.Any()) return;
+
+                // Extrai os clientes das vendas
+                var clientesDasVendas = _todasVendas
+                    .Select(v => new { Id = v.ClienteId, Nome = v.ClienteCNPJ })
+                    .Where(c => !string.IsNullOrEmpty(c.Id) && !string.IsNullOrEmpty(c.Nome))
+                    .Distinct()
+                    .OrderBy(c => c.Nome)
+                    .ToList();
+
+                // Adicionar item vazio no início
+                var listaClientes = new List<dynamic>();
+                listaClientes.Add(new { Id = "", Nome = "Todos os clientes" });
+                listaClientes.AddRange(clientesDasVendas);
+
+                ClienteComboBox.ItemsSource = listaClientes;
+                ClienteComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar clientes: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método para carregar os produtos que foram vendidos
+        private void CarregarProdutos()
+        {
+            try
+            {
+                if (_todasVendas == null) return;
+
+                // Extrair IDs de produtos únicos de todas as vendas
+                var produtosIds = _todasVendas
+                    .SelectMany(v => v.Itens)
+                    .Select(i => new { Id = i.ProdutoId, Nome = i.ProdutoNome })
+                    .GroupBy(p => p.Id)  // Agrupar para eliminar duplicados
+                    .Select(g => g.First())  // Pegar o primeiro item de cada grupo
+                    .OrderBy(p => p.Nome)
+                    .ToList();
+
+                // Adicionar item vazio no início
+                var listaProdutos = new List<dynamic>();
+                listaProdutos.Add(new { Id = "", Nome = "Todos os produtos" });
+                listaProdutos.AddRange(produtosIds);
+
+                ProdutosVendidosComboBox.ItemsSource = listaProdutos;
+                ProdutosVendidosComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método para carregar as notas fiscais das vendas
+        private void CarregarNotasFiscais()
+        {
+            try
+            {
+                if (_todasVendas == null || !_todasVendas.Any()) return;
+
+                // Extrair notas fiscais das vendas
+                var notasFiscais = _todasVendas
+                    .Where(v => !string.IsNullOrEmpty(v.NotaFiscal))
+                    .Select(v => new { Id = v.Id, NotaFiscal = v.NotaFiscal })
+                    .Distinct()
+                    .OrderBy(nf => nf.NotaFiscal)
+                    .ToList();
+
+                // Adicionar item vazio no início
+                var listaNotasFiscais = new List<dynamic>();
+                listaNotasFiscais.Add(new { Id = "", NotaFiscal = "Todas as notas fiscais" });
+                listaNotasFiscais.AddRange(notasFiscais);
+
+                NotaFiscalComboBox.ItemsSource = listaNotasFiscais;
+                NotaFiscalComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar notas fiscais: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         // 2. Pesquisa
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -80,20 +170,91 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Adicionar lógica de filtro
+            if (_todasVendas == null) return;
+
+            // Criar uma nova lista baseada em todas as vendas
+            _vendasFiltradas = new List<VendaData>(_todasVendas);
+
+            // 1. Filtrar por cliente
+            string clienteSelecionadoId = ClienteComboBox.SelectedValue as string;
+            if (!string.IsNullOrEmpty(clienteSelecionadoId))
+            {
+                _vendasFiltradas = _vendasFiltradas.Where(v => v.ClienteId == clienteSelecionadoId).ToList();
+            }
+
+            // 2. Filtrar por produto
+            string produtoSelecionadoId = ProdutosVendidosComboBox.SelectedValue as string;
+            if (!string.IsNullOrEmpty(produtoSelecionadoId))
+            {
+                _vendasFiltradas = _vendasFiltradas.Where(v => v.Itens.Any(i => i.ProdutoId == produtoSelecionadoId)).ToList();
+            }
+
+            // 3. Filtrar por nota fiscal
+            string notaFiscalSelecionadaId = NotaFiscalComboBox.SelectedValue as string;
+            if (!string.IsNullOrEmpty(notaFiscalSelecionadaId))
+            {
+                _vendasFiltradas = _vendasFiltradas.Where(v => v.Id == notaFiscalSelecionadaId).ToList();
+            }
+
+            // 4. Filtrar por período
+            DateTime? dataInicio = DataInicioPicker.SelectedDate;
+            DateTime? dataFim = DataFimPicker.SelectedDate;
+
+            if (dataInicio.HasValue)
+            {
+                _vendasFiltradas = _vendasFiltradas.Where(v => v.DataCompra.Date >= dataInicio.Value.Date).ToList();
+            }
+
+            if (dataFim.HasValue)
+            {
+                _vendasFiltradas = _vendasFiltradas.Where(v => v.DataCompra.Date <= dataFim.Value.Date).ToList();
+            }
+
+            // 5. Filtrar por tipo de pagamento
+            if (TipoPagamentoComboBox.SelectedIndex > 0)  // Se não for "Todos"
+            {
+                string tipoPagamento = (TipoPagamentoComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+                if (!string.IsNullOrEmpty(tipoPagamento))
+                {
+                    _vendasFiltradas = _vendasFiltradas.Where(v => v.TipoPagamento == tipoPagamento).ToList();
+                }
+            }
+
+            // Aplicar direção de ordenação
+            var direcaoOrdenacao = (OrdemComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            if (direcaoOrdenacao == "desc" && _ordenacaoAtual != "recente" && _ordenacaoAtual != "preco")
+            {
+                // Inverter a ordenação atual para ordem decrescente
+                _vendasFiltradas.Reverse();
+            }
+
             FiltroPopup.IsOpen = false;
-            // string clienteSelecionado = ClienteComboBox.SelectedItem?.ToString();
-            // _vendasFiltradas = _todasVendas.Where(v => v.Cliente == clienteSelecionado).ToList();
             AplicarOrdenacao();
             AtualizarInterfaceVendas();
         }
 
         private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Limpar filtros
+            // Limpar ComboBoxes
+            if (ClienteComboBox.Items.Count > 0) ClienteComboBox.SelectedIndex = 0;
+            if (ProdutosVendidosComboBox.Items.Count > 0) ProdutosVendidosComboBox.SelectedIndex = 0;
+            if (NotaFiscalComboBox.Items.Count > 0) NotaFiscalComboBox.SelectedIndex = 0;
 
-            // TODO: Limpar filtro Ordenar
+            // Limpar datas
+            DataInicioPicker.SelectedDate = null;
+            DataFimPicker.SelectedDate = null;
+            
+            // Limpar tipo de pagamento
+            TipoPagamentoComboBox.SelectedIndex = 0;
+            
+            // Ordenação
+            _ordenacaoAtual = "recente";
+            _filtroTexto = "Ordenar por";
+            
+            // Corrigir a referência para OrdemComboBox
+            if (OrdemComboBox.Items.Count > 0) OrdemComboBox.SelectedIndex = 0;
 
+            // Fechar popup e restaurar lista completa
             FiltroPopup.IsOpen = false;
             _vendasFiltradas = new List<VendaData>(_todasVendas);
             AplicarOrdenacao();
@@ -179,6 +340,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             // Atualiza a lista de vendas após o registro
             CarregarVendas();
+            // Recarregar os ComboBoxes com os novos dados
+            CarregarClientes();
+            CarregarProdutos();
         }
 
         // 7. Botões de ação

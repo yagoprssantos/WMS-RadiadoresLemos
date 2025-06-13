@@ -39,7 +39,7 @@
                     <!-- Botão de Filtro -->
                     <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
                     <!-- Botão de Registrar Compra -->
-                    <Button Grid.Column="3" Content="Registrar Compra" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarCompraButton_Click"/>
+                    <Button Grid.Column="3" Content="Registrar Compra" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarCompraButton_Click"/>
                 </Grid>
 
                 <!-- Conteúdo Principal: Layout com Compras e Calendário lado a lado -->
@@ -334,12 +334,80 @@
         <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
             <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15">
                 <Border Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">
-                    <StackPanel Background="Transparent" Margin="0">
-                        <Button x:Name="OrderButton" Content="Ordenar por" ToolTip="Ordenar" Style="{StaticResource OrderButtonStyle}" Click="OrdenarButton_Click" Margin="0,0,10,0"/>
-                        <!-- Adicione aqui os controles de filtro específicos para compras -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="15, 10">
-                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
-                            <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
+                    <StackPanel Background="Transparent" Margin="5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Botão de Ordenar -->
+                            <Button Grid.Column="0" x:Name="OrdenarButton" Content="Ordenar por" FontSize="14"
+                                    ToolTip="Escolha um critério de ordenação"
+                                    Click="OrdenarButton_Click"
+                                    Style="{StaticResource OrderButtonStyle}"
+                                    HorizontalAlignment="Left"/>
+
+                            <!-- Combobox com direção da ordenação -->
+                            <ComboBox Grid.Column="1" x:Name="OrdemComboBox" SelectedIndex="0" FontSize="14"
+                                        Style="{StaticResource ComboBoxSearchStyle}" HorizontalAlignment="Right" >
+                                <ComboBoxItem Content="Crescente" Tag="asc"/>
+                                <ComboBoxItem Content="Decrescente" Tag="desc"/>
+                            </ComboBox>
+                        </Grid>
+                            
+                        <!-- Filtro por status de pagamento -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,5, 0, 5">
+                            <CheckBox x:Name="BoletosPagarCheckBox" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock Text="Ver apenas boletos pendentes" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16"/>
+                        </StackPanel>
+                        
+
+                        <!-- Filtro por Fornecedor -->
+                        <TextBlock Text="Filtrar por Fornecedor" FontWeight="Bold" Margin="10,10,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="FornecedorComboBox" 
+                                    Style="{StaticResource ComboBoxSearchStyle}" 
+                                    Background="{StaticResource PanelBackgroundBrush}"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="10,0"
+                                    ItemsSource="{Binding Fornecedores}" 
+                                    DisplayMemberPath="Nome" 
+                                    SelectedValuePath="Id" 
+                                    SelectedValue="{Binding FiltroFornecedor}"/>
+
+                        <!-- Filtro por Produto -->
+                        <TextBlock Text="Filtrar por Produto" FontWeight="Bold" Margin="10,10,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="ProdutosCompradosComboBox" 
+                                    Style="{StaticResource ComboBoxSearchStyle}" 
+                                    Background="{StaticResource PanelBackgroundBrush}"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="10,0"
+                                    ItemsSource="{Binding ProdutosComprados}" 
+                                    DisplayMemberPath="Nome" 
+                                    SelectedValuePath="Id" 
+                                    SelectedValue="{Binding FiltroProduto}"/>
+
+                        <!-- Filtro por Período -->
+                        <TextBlock Text="Filtrar por Período" FontWeight="Bold" Margin="10,10,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,10,10">
+                            <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="0,0,10,0" Width="140" BorderThickness="5" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
+                                <DatePicker x:Name="DataInicioPicker" SelectedDate="{Binding FiltroDataInicio}" Style="{StaticResource DatePickerStyle}"/>
+                            </Border>
+                            <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="0,0,0,0" Width="140" BorderThickness="5" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
+                                <DatePicker x:Name="DataFimPicker" SelectedDate="{Binding FiltroDataFim}" Style="{StaticResource DatePickerStyle}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Botões de Ação -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" 
+                                    Style="{StaticResource EmphasisButtonStyle}" 
+                                    Width="140" FontSize="14" />
+
+                            <Button Content="Limpar" Click="LimparFiltroButton_Click" 
+                                    Style="{StaticResource EmphasisButtonStyle}" 
+                                    Background="{StaticResource HoverBackgroundBrush}"
+                                    Width="100" FontSize="14"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -347,14 +415,14 @@
         </Popup>
 
         <!-- Popup de Ordenar -->
-        <Popup x:Name="OrdenarPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=OrderButton}">
-            <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15">
+        <Popup x:Name="OrdenarPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=OrdenarButton}">
+            <Border Background="{StaticResource PanelBackgroundBrush}" Padding="10" CornerRadius="15">
                 <Border Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">
-                    <StackPanel Background="Transparent" Margin="0">
+                    <StackPanel Background="Transparent" Margin="8">
                         <!-- Opções de Ordenação -->
                         <Button Content="Preço" Tag="preco" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                         <Button Content="Produto" Tag="produto" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
-                        <Button Content="Fornecedor" Tag="fornecedor" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
+                        <Button Content="Cliente" Tag="cliente" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                         <Button Content="Recente" Tag="recente" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                         <Button Content="Antigo" Tag="antigo" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>
                         <Button Content="Vencimento" Tag="vencimento" Click="OrdenacaoItem_Click" Style="{StaticResource FilterItemStyle}" Margin="0,5,0,0"/>

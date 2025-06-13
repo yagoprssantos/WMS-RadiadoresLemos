@@ -320,7 +320,7 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBox Grid.Column="0" Name="NotaFiscalTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" Margin="0,0,0,0"
                                                  Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap" TextChanged="NotaFiscalTextBox_TextChanged_1"/>
+                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap" TextChanged="NotaFiscalTextBox_TextChanged"/>
                                         <Button Grid.Column="1" Content="Importar XML Nota Fiscal" Style="{StaticResource EmphasisButtonStyle}"
                                                 Click="ImportarXMLButton_Click"  Margin="10,0,0,0" FontSize="12"/>
                                     </Grid>

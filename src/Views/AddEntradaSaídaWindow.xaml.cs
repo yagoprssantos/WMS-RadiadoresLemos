@@ -232,6 +232,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     AtualizarCamposProduto(produtoSelecionado);
                     DestacarMudancas();
+                    ValidarMovimentacao();
                 }
             }
             else
@@ -251,6 +252,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     AtualizarCamposProduto(produtoSelecionado);
                     DestacarMudancas();
+                    ValidarMovimentacao();
                 }
                 else
                 {
@@ -302,12 +304,15 @@ namespace WMS_RadiadoresLemos_WPF
                 FornecedorComboBox.SelectedItem = null;
                 fornecedorSelecionado = null;
             }
+
+            ValidarMovimentacao();
         }
         private void FornecedorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (FornecedorComboBox.SelectedItem is string selected)
             {
                 fornecedorSelecionado = selected;
+                ValidarMovimentacao();
             }
         }
 
@@ -320,7 +325,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                 var filteredClientes = clientes
                     .Where(c => c.CNPJ.Contains(searchText, StringComparison.OrdinalIgnoreCase) || c.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-                    .Select(c => c.CNPJ) 
+                    .Select(c => c.CNPJ)
                     .ToList();
 
                 comboBox.ItemsSource = null;
@@ -354,12 +359,15 @@ namespace WMS_RadiadoresLemos_WPF
                 ClienteComboBox.SelectedItem = null;
                 clienteSelecionado = null;
             }
+
+            ValidarMovimentacao();
         }
         private void ClienteComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ClienteComboBox.SelectedItem is string selected)
             {
                 clienteSelecionado = selected;
+                ValidarMovimentacao();
             }
         }
 
@@ -1655,11 +1663,6 @@ namespace WMS_RadiadoresLemos_WPF
                         MessageBoxImage.Error);
                 }
             }
-        }
-
-        private void NotaFiscalTextBox_TextChanged_1(object sender, TextChangedEventArgs e)
-        {
-
         }
 
         private void FecharLista_Click(object sender, RoutedEventArgs e)

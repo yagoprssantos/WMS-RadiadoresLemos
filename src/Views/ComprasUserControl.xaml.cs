@@ -31,8 +31,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarCompras();
-            CarregarBoletos(); 
+            CarregarBoletos();
             CarregarCalendario();
+            CarregarFornecedores();
+            CarregarProdutos();
         }
 
         private void CarregarCompras()
@@ -46,13 +48,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     var collection = db.GetCollection<CompraData>("compras");
                     _todasCompras = collection.FindAll().ToList();
                     _comprasFiltradas = new List<CompraData>(_todasCompras);
-                    
+
                     // Calcular os próximos vencimentos depois de carregar boletos
                     if (_todosBoletos != null)
                     {
                         CalcularProximosVencimentos();
                     }
-                    
+
                     AplicarOrdenacao();
                     AtualizarInterfaceCompras();
                 }
@@ -76,7 +78,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 {
                     var collection = db.GetCollection<BoletoData>("boletos");
                     _todosBoletos = collection.FindAll().ToList();
-                    
+
                     // Se as compras já foram carregadas, calcular os próximos vencimentos
                     if (_todasCompras != null)
                     {
@@ -92,6 +94,89 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar boletos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método para carregar os dados dos fornecedores no ComboBox
+        private void CarregarFornecedores()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    // Usar a classe FornecedorData em vez de dynamic para garantir o tipo correto
+                    var collection = db.GetCollection<FornecedorData>("fornecedores");
+                    var fornecedores = collection.FindAll()
+                        .Select(f => new { Id = f.Id, Nome = f.Nome })
+                        .OrderBy(f => f.Nome)
+                        .ToList();
+
+                    // Adicionar item vazio no início
+                    var listaFornecedores = new List<dynamic>();
+                    listaFornecedores.AddRange(fornecedores);
+
+                    // Verificar se há fornecedores nas compras que não constam na lista de fornecedores
+                    if (_todasCompras != null && _todasCompras.Any())
+                    {
+                        var fornecedoresCompras = _todasCompras
+                            .Where(c => !string.IsNullOrEmpty(c.FornecedorId))
+                            .Select(c => new { Id = c.FornecedorId, Nome = c.FornecedorNome })
+                            .GroupBy(f => f.Id)
+                            .Select(g => g.First())
+                            .ToList();
+
+                        // Adicionar apenas fornecedores que não estão na lista original
+                        foreach (var fornecedor in fornecedoresCompras)
+                        {
+                            if (!fornecedores.Any(f => f.Id == fornecedor.Id))
+                            {
+                                listaFornecedores.Add(fornecedor);
+                            }
+                        }
+                    }
+
+                    FornecedorComboBox.ItemsSource = listaFornecedores;
+                    FornecedorComboBox.DisplayMemberPath = "Nome";
+                    FornecedorComboBox.SelectedValuePath = "Id";
+                    FornecedorComboBox.SelectedIndex = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar fornecedores: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método para carregar os produtos que foram comprados
+        private void CarregarProdutos()
+        {
+            try
+            {
+                if (_todasCompras == null) return;
+
+                // Extrair IDs de produtos únicos de todas as compras
+                var produtosIds = _todasCompras
+                    .SelectMany(c => c.Itens)
+                    .Select(i => new { Id = i.ProdutoId, Nome = i.ProdutoNome })
+                    .GroupBy(p => p.Id)  // Agrupar para eliminar duplicados
+                    .Select(g => g.First())  // Pegar o primeiro item de cada grupo
+                    .OrderBy(p => p.Nome)
+                    .ToList();
+
+                // Adicionar item vazio no início
+                var listaProdutos = new List<dynamic>();
+                listaProdutos.Add(new { Id = "", Nome = "Todos os produtos" });
+                listaProdutos.AddRange(produtosIds);
+
+                ProdutosCompradosComboBox.ItemsSource = listaProdutos;
+                ProdutosCompradosComboBox.DisplayMemberPath = "Nome";
+                ProdutosCompradosComboBox.SelectedValuePath = "Id";
+                ProdutosCompradosComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -122,7 +207,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Encontrar o boleto com a data de vencimento mais próxima da data atual
                 DateTime hoje = DateTime.Today;
                 var boletosNaoVencidos = boletosCompra.Where(b => b.Vencimento >= hoje).ToList();
-                
+
                 if (boletosNaoVencidos.Any())
                 {
                     // Se há boletos não vencidos, pega o de vencimento mais próximo
@@ -229,21 +314,84 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             FiltroPopup.IsOpen = true;
         }
+
         private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Adicionar lógica de filtro
+            if (_todasCompras == null) return;
+
+            // Criar uma nova lista baseada em todas as compras
+            _comprasFiltradas = new List<CompraData>(_todasCompras);
+
+            // 1. Filtrar por fornecedor
+            string fornecedorSelecionadoId = FornecedorComboBox.SelectedValue as string;
+            if (!string.IsNullOrEmpty(fornecedorSelecionadoId))
+            {
+                _comprasFiltradas = _comprasFiltradas.Where(c => c.FornecedorId == fornecedorSelecionadoId).ToList();
+            }
+
+            // 2. Filtrar por produto
+            string produtoSelecionadoId = ProdutosCompradosComboBox.SelectedValue as string;
+            if (!string.IsNullOrEmpty(produtoSelecionadoId))
+            {
+                _comprasFiltradas = _comprasFiltradas.Where(c => c.Itens.Any(i => i.ProdutoId == produtoSelecionadoId)).ToList();
+            }
+
+            // 3. Filtrar por período
+            DateTime? dataInicio = DataInicioPicker.SelectedDate;
+            DateTime? dataFim = DataFimPicker.SelectedDate;
+
+            if (dataInicio.HasValue)
+            {
+                _comprasFiltradas = _comprasFiltradas.Where(c => c.DataCompra.Date >= dataInicio.Value.Date).ToList();
+            }
+
+            if (dataFim.HasValue)
+            {
+                _comprasFiltradas = _comprasFiltradas.Where(c => c.DataCompra.Date <= dataFim.Value.Date).ToList();
+            }
+
+            // 4. Filtrar por boletos pendentes
+            if (BoletosPagarCheckBox.IsChecked == true)
+            {
+                _comprasFiltradas = _comprasFiltradas.Where(c =>
+                    c.ProximoVencimento.HasValue &&
+                    c.ProximoVencimento.Value >= DateTime.Today).ToList();
+            }
+
+            // Aplicar direção de ordenação
+            var direcaoOrdenacao = (OrdemComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            if (direcaoOrdenacao == "desc" && _ordenacaoAtual != "recente" && _ordenacaoAtual != "preco")
+            {
+                // Inverter a ordenação atual para ordem decrescente
+                _comprasFiltradas.Reverse();
+            }
+
             FiltroPopup.IsOpen = false;
-            // string fornecedorSelecionado = FornecedorComboBox.SelectedItem?.ToString();
-            // _comprasFiltradas = _todasCompras.Where(v => v.Fornecedor == fornecedorSelecionado).ToList();
             AplicarOrdenacao();
             AtualizarInterfaceCompras();
         }
+
         private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Limpar filtros
+            // Limpar seleção de fornecedor e produto
+            if (FornecedorComboBox.Items.Count > 0) FornecedorComboBox.SelectedIndex = 0;
+            if (ProdutosCompradosComboBox.Items.Count > 0) ProdutosCompradosComboBox.SelectedIndex = 0;
 
-            // TODO: Limpar filtro Ordenar
+            // Limpar datas
+            DataInicioPicker.SelectedDate = null;
+            DataFimPicker.SelectedDate = null;
 
+            // Desmarcar checkbox de boletos pendentes
+            BoletosPagarCheckBox.IsChecked = false;
+
+            // Ordenação
+            _ordenacaoAtual = "recente";
+            _filtroTexto = "Ordenar por";
+
+            // Corrigir a referência para OrdemComboBox (estava usando como string)
+            if (OrdemComboBox.Items.Count > 0) OrdemComboBox.SelectedIndex = 0;
+
+            // Fechar popup e restaurar lista completa
             FiltroPopup.IsOpen = false;
             _comprasFiltradas = new List<CompraData>(_todasCompras);
             AplicarOrdenacao();
@@ -263,13 +411,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 _filtroTexto = $"Ordenar por {button.Content}";
 
                 // Atualiza o texto do botão de ordenação, se houver TextBlock no template
-                if (OrderButton.Template.FindName("OrderButtonText", OrderButton) is TextBlock textBlock)
+                if (OrdenarButton.Template.FindName("OrdenarButtonText", OrdenarButton) is TextBlock textBlock)
                 {
                     textBlock.Text = _filtroTexto;
                 }
                 else
                 {
-                    OrderButton.Content = _filtroTexto;
+                    OrdenarButton.Content = _filtroTexto;
                 }
 
                 OrdenarPopup.IsOpen = false;
