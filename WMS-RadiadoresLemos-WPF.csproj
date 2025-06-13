@@ -11,9 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="src\Default\**" />
     <Compile Remove="Wallet\**" />
+    <EmbeddedResource Remove="src\Default\**" />
     <EmbeddedResource Remove="Wallet\**" />
+    <None Remove="src\Default\**" />
     <None Remove="Wallet\**" />
+    <Page Remove="src\Default\**" />
     <Page Remove="Wallet\**" />
   </ItemGroup>
 
@@ -83,10 +87,6 @@
     <PackageReference Include="PdfiumViewer.Net.WPF" Version="3.0.4" />
     <PackageReference Include="Supabase" Version="0.12.0" />
 	<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3296.44" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="src\Default\" />
   </ItemGroup>
 
   <ItemGroup>

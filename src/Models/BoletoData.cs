@@ -20,6 +20,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [StringLength(200, ErrorMessage = "O nome do beneficiário deve ter no máximo 200 caracteres")]
         public string Beneficiario { get; set; } = string.Empty;
 
+
         /// <summary>
         /// CNPJ do beneficiário
         /// </summary>
@@ -133,6 +134,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         /// Número da nota fiscal relacionada
         /// </summary>
         [StringLength(50, ErrorMessage = "Nota fiscal deve ter no máximo 50 caracteres")]
+
+        // Nome do arquivo do boleto na pasta
+        [BsonField("nomeArquivo")]
+        public string? NomeArquivo { get; set; }
+
+        // Nota Fiscal associada à compra/venda
+        [BsonField("notaFiscal")]
+
         public string? NotaFiscal { get; set; }
 
         /// <summary>
@@ -156,19 +165,35 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         /// </summary>
         Pago = 1,
 
+
         /// <summary>
         /// Boleto vencido
         /// </summary>
         Vencido = 2,
+
+        [BsonField("pagamento")]
+        public DateTime? Pagamento { get; set; } = null;
+
+        // Número da parcela
+        [BsonField("parcela")]
+        public int Parcela { get; set; }
+
 
         /// <summary>
         /// Boleto cancelado
         /// </summary>
         Cancelado = 3,
 
+
         /// <summary>
         /// Boleto em processamento
         /// </summary>
         Processando = 4
+
+        public void SetIdFromNome()
+        {
+            Id = NomeArquivo;
+        }
+
     }
 }

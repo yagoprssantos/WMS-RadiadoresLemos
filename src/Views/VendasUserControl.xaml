@@ -41,7 +41,7 @@
                     <!-- Botão de Filtro -->
                     <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
                     <!-- Botão de Registrar Venda -->
-                    <Button Grid.Column="3" Content="Registrar Venda" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarVendaButton_Click"/>
+                    <Button Grid.Column="3" Content="Registrar Venda" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Click="RegistrarVendaButton_Click"/>
                 </Grid>
 
                 <!-- Conteúdo Principal: Itens de Venda -->
@@ -63,7 +63,6 @@
                                                 <TextBlock Text="{Binding ClienteCNPJ, StringFormat='Cliente: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14" TextWrapping="Wrap"/>
                                                 <TextBlock Text="{Binding Pedido, StringFormat='Pedido: {0}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                 <TextBlock Text="{Binding DataCompra, StringFormat='Data de Compra: {0:dd/MM/yyyy}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
-                                                <TextBlock Text="{Binding DataPagamento, StringFormat='Pagamento em: {0:dd/MM/yyyy}', TargetNullValue='Pagamento em: -'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                 <TextBlock Text="{Binding ValorTotal, StringFormat='Total: R$ {0:N2}'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold"/>
                                                 <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" Width="120" Margin="0,10,0,5" Click="DetalhesButton_Click"/>
                                             </StackPanel>
@@ -80,24 +79,101 @@
                 </Border>
             </Grid>
         </Border>
-        
+
         <!-- Popup de Filtro -->
         <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
             <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15">
                 <Border Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">
-                    <StackPanel Background="Transparent" Margin="0">
-                        <Button x:Name="OrderButton" Content="Ordenar por" ToolTip="Ordenar" Style="{StaticResource OrderButtonStyle}" Click="OrdenarButton_Click" Margin="0,0,10,0"/>
-                        <!-- Adicione aqui os controles de filtro específicos para vendas -->
+                    <StackPanel Background="Transparent" Margin="5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="15, 10">
-                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
-                            <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
+                            <!-- Botão de Ordenar -->
+                            <Button Grid.Column="0" x:Name="OrderButton" Content="Ordenar por" FontSize="14"
+                            ToolTip="Escolha um critério de ordenação"
+                            Click="OrdenarButton_Click"
+                            Style="{StaticResource OrderButtonStyle}"
+                            HorizontalAlignment="Left"/>
+
+                            <!-- Combobox com direção da ordenação -->
+                            <ComboBox Grid.Column="1" x:Name="OrdemComboBox" SelectedIndex="0" FontSize="14"
+                              Style="{StaticResource ComboBoxSearchStyle}" HorizontalAlignment="Right" >
+                                <ComboBoxItem Content="Crescente" Tag="asc"/>
+                                <ComboBoxItem Content="Decrescente" Tag="desc"/>
+                            </ComboBox>
+                        </Grid>
+
+                        <!-- Filtro por Cliente -->
+                        <TextBlock Text="Filtrar por Cliente" FontWeight="Bold" Margin="10,5,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="ClienteComboBox" 
+                          Style="{StaticResource ComboBoxSearchStyle}" 
+                          Background="{StaticResource PanelBackgroundBrush}"
+                          HorizontalAlignment="Stretch"
+                          Margin="10,0"
+                          DisplayMemberPath="Nome" 
+                          SelectedValuePath="Id"/>
+
+                        <!-- Filtro por Produto -->
+                        <TextBlock Text="Filtrar por Produto" FontWeight="Bold" Margin="10,10,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="ProdutosVendidosComboBox" 
+                          Style="{StaticResource ComboBoxSearchStyle}" 
+                          Background="{StaticResource PanelBackgroundBrush}"
+                          HorizontalAlignment="Stretch"
+                          Margin="10,0"
+                          DisplayMemberPath="Nome" 
+                          SelectedValuePath="Id"/>
+
+                        <!-- Filtro por Nota Fiscal -->
+                        <TextBlock Text="Filtrar por Nota Fiscal" FontWeight="Bold" Margin="10,10,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="NotaFiscalComboBox" 
+                          Style="{StaticResource ComboBoxSearchStyle}" 
+                          Background="{StaticResource PanelBackgroundBrush}"
+                          HorizontalAlignment="Stretch"
+                          Margin="10,0"
+                          DisplayMemberPath="NotaFiscal" 
+                          SelectedValuePath="Id"/>
+
+                        <!-- Filtro por Tipo de Pagamento -->
+                        <TextBlock Text="Filtrar por Tipo de Pagamento" FontWeight="Bold" Margin="10,10,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <ComboBox x:Name="TipoPagamentoComboBox" 
+                          Style="{StaticResource ComboBoxSearchStyle}" 
+                          Background="{StaticResource PanelBackgroundBrush}"
+                          HorizontalAlignment="Stretch"
+                          Margin="10,0,10,10">
+                            <ComboBoxItem Content="Todos" IsSelected="True"/>
+                            <ComboBoxItem Content="À vista"/>
+                            <ComboBoxItem Content="Parcelado"/>
+                        </ComboBox>
+
+                        <!-- Filtro por Período -->
+                        <TextBlock Text="Filtrar por Período" FontWeight="Bold" Margin="10,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,10,10">
+                            <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="0,0,10,0" Width="140" BorderThickness="5" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
+                                <DatePicker x:Name="DataInicioPicker" SelectedDate="{Binding FiltroDataInicio}" Style="{StaticResource DatePickerStyle}"/>
+                            </Border>
+                            <Border BorderBrush="{StaticResource PanelBackgroundBrush}" Margin="0,0,0,0" Width="140" BorderThickness="5" CornerRadius="15" Background="{StaticResource PanelBackgroundBrush}">
+                                <DatePicker x:Name="DataFimPicker" SelectedDate="{Binding FiltroDataFim}" Style="{StaticResource DatePickerStyle}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Botões de Ação -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" 
+                            Style="{StaticResource EmphasisButtonStyle}" 
+                            Width="150" FontSize="14" />
+                            <Button Content="Limpar" Click="LimparFiltroButton_Click" 
+                            Style="{StaticResource EmphasisButtonStyle}" 
+                            Background="{StaticResource HoverBackgroundBrush}"
+                            Width="100" FontSize="14"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
             </Border>
         </Popup>
-   
+
         <!-- Popup de Ordenar -->
         <Popup x:Name="OrdenarPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=OrderButton}">
             <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15">

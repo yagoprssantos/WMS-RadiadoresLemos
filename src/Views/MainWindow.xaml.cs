@@ -37,8 +37,9 @@ namespace WMS_RadiadoresLemos_WPF
         private readonly ControleEstoqueUserControl controleEstoqueUserControl;
         private readonly RegistroUserControl registroUserControl;
 
-        private Stack<UserControl> _navigationHistory = new Stack<UserControl>();
-        private Stack<UserControl> _forwardHistory = new Stack<UserControl>();
+        private NavigationService _navigationService;
+
+        public NavigationService NavigationService => _navigationService;
 
         public MainWindow()
         {
@@ -47,6 +48,9 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Escuta o evento de alteração na contagem de notificações
             Alerta.ContagemAlterada += AtualizarBotaoNotificacoes;
+
+            // Inicializa o serviço de navegação
+            _navigationService = new NavigationService(this, ContentArea, TitleTextBlock, IconImage);
 
             usuariosUserControl = new UsuariosUserControl();
             controleEstoqueUserControl = new ControleEstoqueUserControl();
@@ -74,9 +78,7 @@ namespace WMS_RadiadoresLemos_WPF
                     };
 
             _currentIndex = 0;
-            UpdateTitle();
         }
-
 
         // Configura a entrada do usuário no sistema
         private void ConfigurarEntrada()
@@ -148,7 +150,6 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
         // Configura a visibilidade dos botões de acordo com o cargo do usuário
         private void ConfigurarVisibilidadeBotoes()
         {
@@ -183,131 +184,67 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-
         // Método para lidar com o clique nos botões do menu
         private void MenuButton_Click(object sender, RoutedEventArgs e)
         {
-            // Salva a tela atual no histórico de navegação
-            if (ContentArea.Content is UserControl currentControl)
-            {
-                _navigationHistory.Push(currentControl); // Salva a tela atual no histórico
-            }
-
-            // Altera a cor do botão clicado nos itens do menu
-            foreach (var child in MenuItemsPanel.Children)
-            {
-                if (child is Button button)
-                {
-                    button.Style = (Style)FindResource("MenuButtonStyle");
-                    // Altera a cor do texto e do ícone do botão
-                    foreach (var innerChild in ((StackPanel)button.Content).Children)
-                    {
-                        if (innerChild is TextBlock textBlock)
-                        {
-                            textBlock.Foreground = (Brush)FindResource("TextBrush");
-                        }
-                        else if (innerChild is Image image)
-                        {
-                            // Verifica se é o botão de notificações
-                            if (button.Name == "BtnNotificacoes")
-                            {
-                                // Mantém o ícone de notificações se houver notificações não lidas
-                                image.Source = new BitmapImage(new Uri(
-                                    _notificationCount > 0
-                                        ? "/assets/Icons/NotSelected/SinoNotNS.png"
-                                        : "/assets/Icons/NotSelected/SinoNS.png",
-                                    UriKind.Relative));
-                            }
-                            else
-                            {
-                                // Define a imagem não selecionada para os outros botões
-                                string imageName = GetImageName(image.Name, "NotSelected");
-                                image.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{imageName}.png", UriKind.Relative));
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Altera a cor do botão clicado no rodapé do menu
-            foreach (var child in MenuItemsFooterPanel.Children)
-            {
-                if (child is Button button)
-                {
-                    button.Style = (Style)FindResource("MenuButtonStyle");
-                    // Altera a cor do texto e do ícone do botão
-                    foreach (var innerChild in ((StackPanel)button.Content).Children)
-                    {
-                        if (innerChild is TextBlock textBlock)
-                        {
-                            textBlock.Foreground = (Brush)FindResource("TextBrush");
-                        }
-                        else if (innerChild is Image image)
-                        {
-                            // Define a imagem não selecionada
-                            string imageName = GetImageName(image.Name, "NotSelected");
-                            image.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{imageName}.png", UriKind.Relative));
-                        }
-                    }
-                }
-            }
-
-            // Se o botão clicado for um botão
             if (sender is Button clickedButton)
             {
-                // Altera o estilo do botão clicado
-                clickedButton.Style = (Style)FindResource("MenuItemSelectedStyle");
+                UserControl control = null;
+                string title = "";
+                string iconPath = "";
 
-                // Define a aba correspondente
+                // Define o controle correspondente
                 switch (clickedButton.Name)
                 {
                     case "BtnCompras":
-                        ContentArea.Content = new ComprasUserControl();
+                        control = new ComprasUserControl();
+                        title = "Compras";
+                        iconPath = "/assets/Icons/Selected/ComprarS.png";
                         break;
                     case "BtnVendas":
-                        ContentArea.Content = new VendasUserControl();
+                        control = new VendasUserControl();
+                        title = "Vendas";
+                        iconPath = "/assets/Icons/Selected/PranchetaS.png";
                         break;
                     case "BtnRegistro":
-                        ContentArea.Content = new RegistroUserControl();
+                        control = new RegistroUserControl();
+                        title = "Registro";
+                        iconPath = "/assets/Icons/Selected/historicos.png";
                         break;
                     case "BtnEstoque":
-                        ContentArea.Content = new ControleEstoqueUserControl();
+                        control = new ControleEstoqueUserControl();
+                        title = "Estoque";
+                        iconPath = "/assets/Icons/Selected/CaixaS.png";
                         break;
                     case "BtnCadastro":
-                        ContentArea.Content = new CadastroUserControl();
+                        control = new CadastroUserControl();
+                        title = "Cadastro";
+                        iconPath = "/assets/Icons/Selected/CadastroS.png";
                         break;
                     case "BtnBoletos": // 👈 ADICIONE ESTE CASE
                         ContentArea.Content = new BoletoTestUserControl();
                         break;
                     case "BtnDashboard":
-                        ContentArea.Content = new DashboardUserControl();
+                        control = new DashboardUserControl();
+                        title = "Relatório";
+                        iconPath = "/assets/Icons/Selected/GraficoS.png";
                         break;
                     case "BtnNotificacoes":
-                        ContentArea.Content = new NotificacoesUserControl();
-                        ResetarBotaoNotificacoes(); // Reseta o botão de notificações
+                        control = new NotificacoesUserControl();
+                        title = "Notificações";
+                        iconPath = "/assets/Icons/Selected/SinoS.png";
+                        ResetarBotaoNotificacoes();
                         break;
                     case "BtnConfiguracoes":
-                        ContentArea.Content = new ConfiguracaoUserControl();
+                        control = new ConfiguracaoUserControl();
+                        title = "Configurações";
+                        iconPath = "/assets/Icons/Selected/EngrenagemS.png";
                         break;
                 }
 
-                // Atualiza o título
-                UpdateTitle();
-                UpdateIcon();
-
-                // Altera a cor do texto e do ícone do botão clicado
-                foreach (var innerChild in ((StackPanel)clickedButton.Content).Children)
+                if (control != null)
                 {
-                    if (innerChild is TextBlock textBlock)
-                    {
-                        textBlock.Foreground = (Brush)FindResource("AccentBrush");
-                    }
-                    else if (innerChild is Image image)
-                    {
-                        // Define a imagem selecionada
-                        string imageName = GetImageName(image.Name, "Selected");
-                        image.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{imageName}.png", UriKind.Relative));
-                    }
+                    _navigationService.Navigate(control, title, iconPath, clickedButton.Name);
                 }
             }
         }
@@ -322,16 +259,9 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para lidar com botões de navegação
         private void PreviousButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_navigationHistory.Count > 0)
+            if (_navigationService.CanGoBack)
             {
-                if (ContentArea.Content is UserControl currentControl)
-                {
-                    _forwardHistory.Push(currentControl); // Salva a tela atual no histórico de avanço
-                }
-
-                ContentArea.Content = _navigationHistory.Pop(); // Carrega a última tela do histórico
-                UpdateTitle();
-                UpdateIcon();
+                _navigationService.GoBack();
             }
             else
             {
@@ -340,16 +270,9 @@ namespace WMS_RadiadoresLemos_WPF
         }
         private void NextButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_forwardHistory.Count > 0)
+            if (_navigationService.CanGoForward)
             {
-                if (ContentArea.Content is UserControl currentControl)
-                {
-                    _navigationHistory.Push(currentControl); // Salva a tela atual no histórico de navegação
-                }
-
-                ContentArea.Content = _forwardHistory.Pop(); // Carrega a próxima tela do histórico de avanço
-                UpdateTitle();
-                UpdateIcon();
+                _navigationService.GoForward();
             }
             else
             {
@@ -358,12 +281,8 @@ namespace WMS_RadiadoresLemos_WPF
         }
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ContentArea.Content is UserControl currentControl)
-            {
-                ContentArea.Content = Activator.CreateInstance(currentControl.GetType());
-            }
+            _navigationService.Refresh();
         }
-
 
         // Método para lidar com o botão de logout
         private async void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -430,6 +349,7 @@ namespace WMS_RadiadoresLemos_WPF
                 _ => throw new ArgumentException("Nome de ícone desconhecido", nameof(iconName))
             };
         }
+
 
         // Métodos para atualizar o título da janela e o ícone do botão
         // No MainWindow.xaml.cs, SUBSTITUA completamente o método UpdateTitle():
@@ -574,6 +494,82 @@ namespace WMS_RadiadoresLemos_WPF
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
             this.Close();
+        }
+
+        // Adicione esse método para permitir atualização da seleção visual do menu
+        public void UpdateMenuSelection(string buttonName)
+        {
+            // Resetar todos os botões para o estilo padrão
+            ResetAllMenuButtons();
+
+            // Encontrar e atualizar o botão específico
+            Button button = FindName(buttonName) as Button;
+            if (button != null)
+            {
+                button.Style = (Style)FindResource("MenuItemSelectedStyle");
+
+                // Atualizar cores e ícones
+                foreach (var innerChild in ((StackPanel)button.Content).Children)
+                {
+                    if (innerChild is TextBlock textBlock)
+                    {
+                        textBlock.Foreground = (Brush)FindResource("AccentBrush");
+                    }
+                    else if (innerChild is Image image)
+                    {
+                        string imageName = GetImageName(image.Name, "Selected");
+                        image.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{imageName}.png", UriKind.Relative));
+                    }
+                }
+            }
+        }
+
+        // Método para resetar todos os botões do menu
+        private void ResetAllMenuButtons()
+        {
+            // Reset dos botões no painel principal
+            foreach (var child in MenuItemsPanel.Children)
+            {
+                ResetMenuButton(child as Button);
+            }
+
+            // Reset dos botões no painel de rodapé
+            foreach (var child in MenuItemsFooterPanel.Children)
+            {
+                ResetMenuButton(child as Button);
+            }
+        }
+
+        private void ResetMenuButton(Button button)
+        {
+            if (button == null) return;
+
+            button.Style = (Style)FindResource("MenuButtonStyle");
+
+            foreach (var innerChild in ((StackPanel)button.Content).Children)
+            {
+                if (innerChild is TextBlock textBlock)
+                {
+                    textBlock.Foreground = (Brush)FindResource("TextBrush");
+                }
+                else if (innerChild is Image image)
+                {
+                    // Caso especial para o botão de notificações
+                    if (button.Name == "BtnNotificacoes")
+                    {
+                        image.Source = new BitmapImage(new Uri(
+                            _notificationCount > 0
+                                ? "/assets/Icons/NotSelected/SinoNotNS.png"
+                                : "/assets/Icons/NotSelected/SinoNS.png",
+                            UriKind.Relative));
+                    }
+                    else
+                    {
+                        string imageName = GetImageName(image.Name, "NotSelected");
+                        image.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{imageName}.png", UriKind.Relative));
+                    }
+                }
+            }
         }
     }
 }

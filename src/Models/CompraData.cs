@@ -18,9 +18,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [BsonField("dataCompra")]
         public DateTime DataCompra { get; set; } = DateTime.Now;
 
-        [BsonField("dataPagamento")]
-        public DateTime? DataPagamento { get; set; }
-
         [BsonField("tipoPagamento")]
         public string TipoPagamento { get; set; } = string.Empty; // "À vista" ou "Parcelado"
 
@@ -41,6 +38,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
 
         [BsonField("detalhes")]
         public string? Detalhes { get; set; }
+
+        // Propriedade não persistida, calculada em tempo de execução
+        [BsonIgnore]
+        public DateTime? ProximoVencimento { get; set; }
 
         public void SetIdFromNotaFiscal()
         {

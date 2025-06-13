@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.IO;
+using System.Diagnostics;
+using System.Windows.Input;
 using WMS_RadiadoresLemos_WPF.src.Models;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -10,10 +16,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private CompraData? _compraAtual;
         private VendaData? _vendaAtual;
         private bool _isCompra;
+        private List<BoletoData> _boletosList = new List<BoletoData>();
 
         public DetalhesUserControl()
         {
             InitializeComponent();
+            _boletosList = new List<BoletoData>();
         }
 
         public DetalhesUserControl(CompraData compra)
@@ -21,13 +29,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             InitializeComponent();
             _compraAtual = compra;
             _isCompra = true;
+
+            if (FindName("FCLabel") is TextBlock FCLabel)
+                FCLabel.Text = "Fornecedor:";
+            if (FindName("FCTextBox") is TextBox FCTextBox)
+                FCTextBox.Text = compra.FornecedorNome;
+            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
+                ProdutoLabel.Text = "Produtos comprados:";
+
+            // Mostra campos de boletos
+            CampoBoletos.Visibility = Visibility.Visible;
+
             DataContext = compra;
-            
-            // Configura a exibição para compras
-            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
-                fornecedorLabel.Text = "Fornecedor:";
-            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
-                fornecedorBox.Text = compra.FornecedorNome;
+
+            CarregarItensProduto(compra);
+            CarregarBoletos();
         }
 
         public DetalhesUserControl(VendaData venda)
@@ -35,29 +51,267 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             InitializeComponent();
             _vendaAtual = venda;
             _isCompra = false;
+
+            // Altera textos para Venda
+            if (FindName("FCLabel") is TextBlock FCLabel)
+                FCLabel.Text = "Cliente:";
+            if (FindName("FCTextBox") is TextBox FCTextBox)
+                FCTextBox.Text = venda.ClienteCNPJ;
+            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
+                ProdutoLabel.Text = "Produtos vendidos:";
+
+            // Não mostra campos de boletos
+            CampoBoletos.Visibility = Visibility.Collapsed;
+
             DataContext = venda;
 
-            // Ajusta labels específicos para venda
-            if (FindName("FornecedorLabel") is TextBlock fornecedorLabel)
-                fornecedorLabel.Text = "Cliente:";
-            if (FindName("FornecedorTextBox") is TextBox fornecedorBox)
-                fornecedorBox.Text = venda.ClienteCNPJ;
+            CarregarItensProduto(venda);
         }
 
-        private void ImprimirPDF_Click(object sender, RoutedEventArgs e)
+
+        private void CarregarItensProduto(CompraData compra)
         {
-            MessageBox.Show("Funcionalidade de impressão em desenvolvimento", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Converter os itens da compra para o formato que o DataGrid espera
+            var produtosViewModel = compra.Itens.Select(item => new ProdutoViewModel
+            {
+                Nome = item.ProdutoNome,
+                Quantidade = item.Quantidade,
+                PrecoUnitario = item.Preco,
+            }).ToList();
+
+            // Atribuir ao DataGrid
+            ProdutosDataGrid.ItemsSource = produtosViewModel;
+        }
+        private void CarregarItensProduto(VendaData venda)
+        {
+            // Converter os itens da venda para o formato que o DataGrid espera
+            var produtosViewModel = venda.Itens.Select(item => new ProdutoViewModel
+            {
+                Nome = item.ProdutoNome,
+                Quantidade = item.Quantidade,
+                PrecoUnitario = item.Preco,
+            }).ToList();
+            // Atribuir ao DataGrid
+            ProdutosDataGrid.ItemsSource = produtosViewModel;
+        }
+        private void CarregarBoletos()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null && _compraAtual != null)
+                {
+                    var collection = db.GetCollection<BoletoData>("boletos");
+                    _boletosList = collection.FindAll().ToList();
+
+                    // Filtra pela Nota Fiscal
+                    _boletosList = _boletosList.Where(b => b.NotaFiscal == _compraAtual.NotaFiscal).ToList();
+
+                    // Trata dados para apresentar corretamente
+                    var boletosTratados = _boletosList.Select(b =>
+                    {
+                        // Verifica se o arquivo realmente existe
+                        bool arquivoExiste = !string.IsNullOrEmpty(b.CaminhoArquivo) && File.Exists(b.CaminhoArquivo);
+
+                        // Calcula status do boleto
+                        string status;
+                        if (b.Pagamento.HasValue)
+                            status = "Pago";
+                        else if (b.Vencimento.Date < DateTime.Now.Date)
+                            status = "Vencido";
+                        else
+                            status = "Pendente";
+
+                        // Calcula dias até vencimento ou dias de atraso
+                        int diasAteVencimento = (b.Vencimento.Date - DateTime.Now.Date).Days;
+                        string situacaoVencimento;
+
+                        if (b.Pagamento.HasValue)
+                            situacaoVencimento = "Pago em " + b.Pagamento.Value.ToString("dd/MM/yyyy");
+                        else if (diasAteVencimento > 0)
+                            situacaoVencimento = $"Vence em {diasAteVencimento} dia(s)";
+                        else if (diasAteVencimento < 0)
+                            situacaoVencimento = $"Vencido há {Math.Abs(diasAteVencimento)} dia(s)";
+                        else
+                            situacaoVencimento = "Vence hoje";
+
+                        // Informação de parcelamento
+                        string infoParcelamento = _compraAtual.Parcelas > 0
+                            ? $"Parcela {b.Parcela}/{_compraAtual.Parcelas}"
+                            : $"Parcela {b.Parcela}";
+
+                        // Criar o objeto ViewModel com todas as propriedades
+                        return new BoletoViewModel
+                        {
+                            Original = b,
+                            Id = b.Id,
+                            Parcela = infoParcelamento,
+                            Vencimento = b.Vencimento,
+                            VencimentoFormatado = b.Vencimento.ToString("dd/MM/yyyy"),
+                            Pagamento = b.Pagamento,
+                            PagamentoFormatado = b.Pagamento.HasValue ? b.Pagamento.Value.ToString("dd/MM/yyyy") : "Pendente",
+                            CaminhoArquivo = b.CaminhoArquivo,
+                            NotaFiscal = b.NotaFiscal,
+                            FornecedorId = b.FornecedorId,
+                            NomeArquivo = !string.IsNullOrEmpty(b.CaminhoArquivo) ? Path.GetFileName(b.CaminhoArquivo) : "Sem arquivo",
+                            ArquivoExiste = arquivoExiste,
+                            NomeFornecedor = _compraAtual.FornecedorNome,
+                            SituacaoVencimento = situacaoVencimento,
+                        };
+                    }).ToList();
+
+                    // Apresenta no DataGrid de boletos
+                    if (FindName("BoletosDataGrid") is DataGrid boletosDataGrid)
+                    {
+                        boletosDataGrid.ItemsSource = boletosTratados;
+                    }
+
+                    // Atualiza visibilidade da mensagem de "sem boletos" se necessário
+                    if (boletosTratados.Count == 0)
+                    {
+                        if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
+                        {
+                            semBoletosMsg.Visibility = Visibility.Visible;
+                            BoletosDataGrid.Visibility = Visibility.Collapsed;
+                            semBoletosMsg.Text = "Nenhum boleto registrado para esta compra.";
+                        }
+                    }
+                    else
+                    {
+                        if (FindName("SemBoletosMessage") is TextBlock semBoletosLabel)
+                        {
+                            semBoletosLabel.Visibility = Visibility.Collapsed;
+                            BoletosDataGrid.Visibility = Visibility.Visible;
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar boletos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AbrirPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is string caminhoArquivo)
+            {
+                try
+                {
+                    if (File.Exists(caminhoArquivo))
+                    {
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = "cmd.exe",
+                            Arguments = $"/c start \"\" \"{caminhoArquivo}\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        Process.Start(psi);
+                    }
+                    else
+                    {
+                        MessageBox.Show("O arquivo PDF não foi encontrado.",
+                            "Arquivo não encontrado", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir o arquivo: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void Editar_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Funcionalidade de edição em desenvolvimento", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+            // Abre a janela de edição passando a compra atual
+            var editarJanela = new EditarDetalhesWindow(_compraAtual);
+            bool? resultado = editarJanela.ShowDialog();
+
+            // Se a edição foi confirmada, recarrega os dados
+            if (resultado == true)
+            {
+                // Recarrega toda a janela com os dados atualizados
+                _isCompra = true;
+                if (_compraAtual != null)
+                {
+                    DataContext = _compraAtual;
+                    CarregarItensProduto(_compraAtual);
+                    CarregarBoletos();
+                }
+                else if (_vendaAtual != null)
+                {
+                    DataContext = _vendaAtual;
+                    CarregarItensProduto(_vendaAtual);
+                }
+                else
+                {
+                    MessageBox.Show("Nenhuma compra ou venda selecionada para editar.",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
-        private void GerarNotaFiscal_Click(object sender, RoutedEventArgs e)
+        private void VisualizarBoletos_Click(object sender, RoutedEventArgs e)
         {
-            string tipo = _isCompra ? "compra" : "venda";
-            MessageBox.Show($"Funcionalidade de geração de nota fiscal de {tipo} em desenvolvimento", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (_boletosList.Count == 0)
+            {
+                MessageBox.Show("Não há boletos registrados para esta operação",
+                    "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            string diretorioBoletos = Path.GetDirectoryName(_boletosList.First().CaminhoArquivo);
+
+            if (!Directory.Exists(diretorioBoletos))
+            {
+                try
+                {
+                    Directory.CreateDirectory(diretorioBoletos);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Não foi possível criar o diretório de boletos.\n\nDetalhes: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c start \"\" \"{diretorioBoletos}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                string mensagem = "Não foi possível abrir a pasta de boletos.\n\nBoletos disponíveis:\n\n";
+                foreach (var boleto in _boletosList)
+                {
+                    string status = boleto.Pagamento.HasValue ? "Pago" : "Pendente";
+                    mensagem += $"• Parcela {boleto.Parcela} - Vencimento: {boleto.Vencimento:dd/MM/yyyy} - Status: {status}\n";
+                }
+                MessageBox.Show(mensagem, "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        private void AdicionarBoletos_Click(object sender, RoutedEventArgs e)
+        {
+            // Abre a janela apenas para adicionar boletos
+            var editarJanela = new EditarDetalhesWindow(_compraAtual, true);
+            bool? resultado = editarJanela.ShowDialog();
+
+            // Se a adição foi confirmada, recarrega os boletos
+            if (resultado == true)
+            {
+                CarregarBoletos();
+            }
         }
     }
 }

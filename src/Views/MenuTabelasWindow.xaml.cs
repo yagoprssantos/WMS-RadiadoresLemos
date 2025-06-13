@@ -403,6 +403,9 @@ namespace WMS_RadiadoresLemos_WPF
                 case "vendas":
                     CarregarDadosGenerico<VendaData>("vendas");
                     break;
+                case "boletos":
+                    CarregarDadosGenerico<BoletoData>("boletos");
+                    break;
                 default:
                     MessageBox.Show("Tabela desconhecida. Não foi possível carregar os dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     break;

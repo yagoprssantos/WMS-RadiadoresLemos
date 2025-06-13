@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
+using WMS_RadiadoresLemos_WPF.src.Services;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -19,22 +20,22 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void BtnUsuarios_Click(object sender, RoutedEventArgs e)
         {
-            // Atualiza os ícones usando GetImageName
-            IconUsuarios.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{GetImageName("IconUsuarios", "Selected")}.png", UriKind.Relative));
-            IconBancoDados.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{GetImageName("IconBancoDados", "NotSelected")}.png", UriKind.Relative));
-
-            // Atualiza o conteúdo
-            ContentArea.Content = new UsuariosUserControl();
+            var usuariosControl = new UsuariosUserControl();
+            this.NavigateTo(
+                usuariosControl,
+                "Gerenciar Usuários",
+                "/assets/Icons/Selected/UsuárioS.png"
+            );
         }
 
         private void BtnBancoDados_Click(object sender, RoutedEventArgs e)
         {
-            // Atualiza os ícones usando GetImageName
-            IconBancoDados.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{GetImageName("IconBancoDados", "Selected")}.png", UriKind.Relative));
-            IconUsuarios.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{GetImageName("IconUsuarios", "NotSelected")}.png", UriKind.Relative));
-
-            // Atualiza o conteúdo
-            ContentArea.Content = new BancoDadosUserControl();
+            var bancoDadosControl = new BancoDadosUserControl();
+            this.NavigateTo(
+                bancoDadosControl,
+                "Banco de Dados",
+                "/assets/Icons/Selected/DataCenterS.png"
+            );
         }
 
         // Altera tema quando o usuário seleciona um novo tema

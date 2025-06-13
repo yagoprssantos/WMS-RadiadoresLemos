@@ -553,7 +553,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                ShowProgressBar.Visibility = Visibility.Visible;
+                //ShowProgressBar.Visibility = Visibility.Visible;
                 ProgressBarMessage.Text = "Atualizando informações...";
 
                 // Banco de Dados: Local
@@ -598,6 +598,29 @@ namespace WMS_RadiadoresLemos_WPF
                 // Backup Atual
                 var backupAtual = VerificarBackupAtual();
                 BackupAtualText.Text = $"Backup Atual: {backupAtual}";
+
+                // Espaço total no Supabase
+                var arquivos = await SupabaseUploader.ListarArquivosAsync();
+                await LimparArquivosAntigosSeNecessario(arquivos);
+                arquivos = await SupabaseUploader.ListarArquivosAsync(); // Atualiza lista após possível limpeza
+                if (arquivos != null && arquivos.Any())
+                {
+                    var espacoTotal = arquivos.Sum(a => a.size);
+                    var espacoFormatado = FormatBytes(espacoTotal);
+                    EspacoTotalText.Text = $"Espaço total na nuvem: {espacoFormatado}";
+
+                    // 1 GB = 1_073_741_824 bytes
+                    double porcentagem = (espacoTotal / 1073741824.0) * 100.0;
+                    if (porcentagem > 100) porcentagem = 100;
+                    EspacoProgressBar.Value = porcentagem;
+                    EspacoPorcentagemText.Text = $"{porcentagem:0.##}%";
+                }
+                else
+                {
+                    EspacoTotalText.Text = "Espaço total na nuvem: 0 bytes";
+                    EspacoProgressBar.Value = 0;
+                    EspacoPorcentagemText.Text = "0%";
+                }
             }
             catch (Exception ex)
             {
@@ -607,6 +630,19 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 ShowProgressBar.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private string FormatBytes(long bytes)
+        {
+            string[] suffixes = { "bytes", "KB", "MB", "GB", "TB" };
+            int counter = 0;
+            decimal number = bytes;
+            while (Math.Round(number / 1024) >= 1)
+            {
+                number = number / 1024;
+                counter++;
+            }
+            return $"{number:n2} {suffixes[counter]}";
         }
 
         // Método para obter o último backup exportado do Supabase
@@ -728,6 +764,33 @@ namespace WMS_RadiadoresLemos_WPF
             await AtualizarInformacoes();
         }
 
+        private async Task LimparArquivosAntigosSeNecessario(List<SupabaseArquivo> arquivos)
+        {
+            const long LIMITE_1GB = 1073741824;
+            const int LIMITE_100_ARQUIVOS = 100;
+            if (arquivos == null || arquivos.Count == 0)
+                return;
+
+            var arquivosOrdenados = arquivos.OrderBy(a => a.created_at ?? DateTime.MinValue).ToList();
+            long espacoTotal = arquivos.Sum(a => a.size);
+            int totalArquivos = arquivos.Count;
+            bool precisaLimpar = espacoTotal > LIMITE_1GB || totalArquivos > LIMITE_100_ARQUIVOS;
+
+            int deletados = 0;
+            while ((espacoTotal > LIMITE_1GB || totalArquivos > LIMITE_100_ARQUIVOS) && arquivosOrdenados.Count > 0)
+            {
+                var arquivoMaisAntigo = arquivosOrdenados.First();
+                await SupabaseUploader.DeletarArquivoAsync(arquivoMaisAntigo.fullPath);
+                arquivosOrdenados.RemoveAt(0);
+                espacoTotal -= arquivoMaisAntigo.size;
+                totalArquivos--;
+                deletados++;
+            }
+            if (deletados > 0)
+            {
+                MessageBox.Show($"{deletados} arquivo(s) antigo(s) foram removidos automaticamente para manter o limite de espaço ou quantidade.", "Limpeza automática", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
     }
 
     // Supabase
@@ -738,6 +801,8 @@ namespace WMS_RadiadoresLemos_WPF
         public string bucket_id { get; set; }
         public DateTime? updated_at { get; set; }
         public DateTime? created_at { get; set; }
+        public long size { get; set; }
+        public string fullPath { get; set; }
     }
 
     public static class SupabaseUploader
@@ -755,14 +820,39 @@ namespace WMS_RadiadoresLemos_WPF
                 .From(bucket)
                 .List();
 
-            return response.Select(item => new SupabaseArquivo
+            var arquivos = new List<SupabaseArquivo>();
+            using (var httpClient = new HttpClient())
             {
-                name = item.Name,
-                id = item.Id,
-                bucket_id = item.BucketId,
-                created_at = item.CreatedAt,
-                updated_at = item.UpdatedAt
-            }).ToList();
+                foreach (var item in response)
+                {
+                    var arquivo = new SupabaseArquivo
+                    {
+                        name = item.Name,
+                        id = item.Id,
+                        bucket_id = item.BucketId,
+                        created_at = item.CreatedAt,
+                        updated_at = item.UpdatedAt,
+                        fullPath = item.Name
+                    };
+                    try
+                    {
+                        var url = client.Storage
+                            .From(bucket)
+                            .GetPublicUrl(item.Name);
+                        var headResponse = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+                        if (headResponse.IsSuccessStatusCode)
+                        {
+                            arquivo.size = headResponse.Content.Headers.ContentLength ?? 0;
+                        }
+                    }
+                    catch
+                    {
+                        arquivo.size = 0;
+                    }
+                    arquivos.Add(arquivo);
+                }
+            }
+            return arquivos;
         }
 
         public static async Task DownloadFileAsync(string fileId, string destinationPath)
@@ -792,6 +882,16 @@ namespace WMS_RadiadoresLemos_WPF
                     CacheControl = "3600",
                     Upsert = true
                 });
+        }
+
+        public static async Task DeletarArquivoAsync(string filePath)
+        {
+            var client = new Supabase.Client(supabaseUrl, supabaseKey);
+            await client.InitializeAsync();
+
+            await client.Storage
+                .From(bucket)
+                .Remove(filePath);
         }
     }
 }

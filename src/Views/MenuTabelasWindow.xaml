@@ -36,7 +36,7 @@
                             <TextBox Name="SearchBox" Grid.Column="1" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource TextBrush}" Padding="5,0" Margin="0,0,10,0" TextChanged="SearchBox_TextChanged"/>
                         </Grid>
                     </Border>
-                    <Button Grid.Column="2" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
+                    <Button Grid.Column="2" x:Name="FiltrarButton"  Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
                     <ComboBox Grid.Column="3" x:Name="TabelasComboBox" Text="Selecionar tabela" ToolTip="Selecionar Tabela" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged">
                     </ComboBox>
                 </Grid>
@@ -62,13 +62,22 @@
         <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">
             <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15">
                 <Border Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">
-                    <StackPanel Background="Transparent" Margin="0">
+                    <StackPanel Background="Transparent" Margin="5">
                         <StackPanel x:Name="FiltroContainer" Orientation="Vertical" Margin="0, 10">
                             <!-- Os filtros serão adicionados dinamicamente aqui -->
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="15, 0, 15, 10">
-                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" Width="150" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Margin="0, 5, 0, 0"/>
-                            <Button Content="Limpar" Click="LimparFiltroButton_Click" Width="Auto" FontSize="14" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource HoverBackgroundBrush}" Margin="15, 5, 0, 0"/>
+
+                        <!-- Botões de Ação -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
+                            <Button Content="Aplicar Filtro" Click="AplicarFiltroButton_Click" 
+                            Style="{StaticResource EmphasisButtonStyle}" 
+                            Width="140" FontSize="14" />
+
+                            <Button Content="Limpar" Click="LimparFiltroButton_Click" 
+                            Style="{StaticResource EmphasisButtonStyle}" 
+                            Background="{StaticResource HoverBackgroundBrush}"
+                            Width="100" FontSize="14"
+                            Margin="15, 0, 0, 0"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>

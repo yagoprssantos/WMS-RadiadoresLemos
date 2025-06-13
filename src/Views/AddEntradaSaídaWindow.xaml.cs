@@ -28,9 +28,12 @@ namespace WMS_RadiadoresLemos_WPF
     {
         private List<ProdutoData> produtos = new List<ProdutoData>();
         private ObservableCollection<MovimentacaoData> movimentacoes = new ObservableCollection<MovimentacaoData>();
-        private List<MovimentacaoListItem> listaMovimentacoes = new List<MovimentacaoListItem>();
-        private List<CompraData> compras = new List<CompraData>();
-        private List<VendaData> vendas = new List<VendaData>();
+
+        private List<MovimentacaoListItem> listaMovimentacoes = new();
+        private List<CompraData> compras = new();
+        private List<VendaData> vendas = new();
+        private MovimentacaoData _itemEmEdicao = null;
+
         private ProdutoData? produtoSelecionado;
         private bool usePositiveNumber;
         private List<ClienteData> clientes = new List<ClienteData>();
@@ -80,8 +83,14 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 Fornecedor.Visibility = Visibility.Collapsed;
                 Cliente.Visibility = Visibility.Visible;
+
                 if (extracaoGroupBox != null) extracaoGroupBox.Visibility = Visibility.Collapsed;
                 if (camposBoletosStackPanel != null) camposBoletosStackPanel.Visibility = Visibility.Collapsed;
+
+
+                // Boletos
+                CamposBoletos.Visibility = Visibility.Collapsed;
+
             }
         }
 
@@ -158,8 +167,18 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (string.IsNullOrEmpty(GeminiApiKey) || GeminiApiKey == "SUA_CHAVE_API_AQUI")
             {
+
                 MessageBox.Show("Configure sua chave da API Gemini na variável 'GeminiApiKey'.", "Chave API Necessária", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
+
+                produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == inputText);
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+                }
+
             }
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
@@ -173,6 +192,7 @@ namespace WMS_RadiadoresLemos_WPF
                 ShowProgressExtracao("Iniciando...", true);
                 try
                 {
+
                     string base64ImageData = ""; string ocrText = "";
                     if (fileExtension == ".pdf")
                     {
@@ -194,6 +214,11 @@ namespace WMS_RadiadoresLemos_WPF
                     BoletoExtraidoData structuredData = await StructureTextToJsonAPIAsync(ocrText);
                     PopulateFieldsFromExtractedBoleto(structuredData, filePath);
                     ShowProgressExtracao("Dados extraídos! Verifique os campos e a lista de boletos.", false, isSuccess: true);
+
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+
                 }
                 catch (Exception ex)
                 {
@@ -217,6 +242,7 @@ namespace WMS_RadiadoresLemos_WPF
             return geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "";
         }
 
+
         private async Task<BoletoExtraidoData> StructureTextToJsonAPIAsync(string extractedText)
         {
             var schema = new GeminiSchema { Type = "OBJECT", Properties = new Dictionary<string, GeminiProperty> { { "beneficiario", new GeminiProperty { Type = "STRING", Description = "Nome do beneficiário. Se houver 'Beneficiário Final', usar este." } }, { "cnpjBeneficiario", new GeminiProperty { Type = "STRING", Description = "CNPJ do beneficiário (ou Final)." } }, { "cepBeneficiario", new GeminiProperty { Type = "STRING", Description = "CEP do beneficiário (ou Final)." } }, { "estadoBeneficiario", new GeminiProperty { Type = "STRING", Description = "Estado (UF) do beneficiário (ou Final)." } }, { "pagador", new GeminiProperty { Type = "STRING", Description = "Nome do pagador." } }, { "vencimento", new GeminiProperty { Type = "STRING", Description = "Data de vencimento (DD/MM/AAAA)." } }, { "valor", new GeminiProperty { Type = "STRING", Description = "Valor do boleto (ex: 123,45)." } }, { "linhaDigitavel", new GeminiProperty { Type = "STRING", Description = "Linha digitável completa." } }, { "nossoNumero", new GeminiProperty { Type = "STRING", Description = "'Nosso Número'." } }, { "agenciaCodigoBeneficiario", new GeminiProperty { Type = "STRING", Description = "'Agência / Código Beneficiário'." } } } };
@@ -232,6 +258,24 @@ namespace WMS_RadiadoresLemos_WPF
             string jsonDataPart = geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
             if (string.IsNullOrWhiteSpace(jsonDataPart)) throw new Exception("API JSON retornou resposta vazia.");
             return SystemTextJson.JsonSerializer.Deserialize<BoletoExtraidoData>(jsonDataPart) ?? new BoletoExtraidoData();
+
+            if (FornecedorComboBox.SelectedItem is string selected)
+                inputText = selected;
+
+            var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == inputText);
+            if (!string.IsNullOrEmpty(inputText) && fornecedor != null)
+            {
+                fornecedorSelecionado = fornecedor.Nome;
+            }
+            else
+            {
+                FornecedorComboBox.Text = string.Empty;
+                FornecedorComboBox.SelectedItem = null;
+                fornecedorSelecionado = null;
+            }
+
+            ValidarMovimentacao();
+
         }
 
         private void PopulateFieldsFromExtractedBoleto(BoletoExtraidoData data, string filePath)
@@ -242,6 +286,7 @@ namespace WMS_RadiadoresLemos_WPF
             // ✅ CÓDIGO CORRIGIDO:
             var novoBoleto = new BoletoData
             {
+
                 DataVencimento = DateTime.TryParseExact(data.Vencimento, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var venc) ? venc : DateTime.Today.AddMonths(proximaParcela - 1),
                 CaminhoArquivo = filePath,
                 LinhaDigitavel = data.LinhaDigitavel ?? "",
@@ -288,11 +333,18 @@ namespace WMS_RadiadoresLemos_WPF
         private void FornecedorComboBox_LostFocus(object sender, RoutedEventArgs e) { string inputText = FornecedorComboBox.Text; if (FornecedorComboBox.SelectedItem is string selected) inputText = selected; var fornecedor = fornecedores.FirstOrDefault(f => f.Nome.Equals(inputText, StringComparison.OrdinalIgnoreCase)); if (fornecedor != null) { fornecedorSelecionadoNome = fornecedor.Nome; fornecedorSelecionadoId = fornecedor.Id; FornecedorComboBox.Text = fornecedor.Nome; } else if (!string.IsNullOrWhiteSpace(inputText)) { fornecedorSelecionadoNome = inputText; fornecedorSelecionadoId = null; } else { FornecedorComboBox.Text = string.Empty; FornecedorComboBox.SelectedItem = null; fornecedorSelecionadoNome = null; fornecedorSelecionadoId = null; } ValidarMovimentacao(); }
         private void FornecedorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (FornecedorComboBox.SelectedItem is string selectedName) { var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == selectedName); if (fornecedor != null) { fornecedorSelecionadoNome = fornecedor.Nome; fornecedorSelecionadoId = fornecedor.Id; } } ValidarMovimentacao(); }
 
+                fornecedorSelecionado = selected;
+                ValidarMovimentacao();
+            }
+        }
+
+
         private void ClienteComboBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
             {
                 string searchText = textBox.Text;
+
                 // AQUI ESTÁ A LINHA COM O PROBLEMA (aproximadamente linha 274 da versão anterior)
                 // Verifique se 'clientes' está nulo antes de usar LINQ
                 if (clientes == null) return;
@@ -301,6 +353,7 @@ namespace WMS_RadiadoresLemos_WPF
                                         (clienteLocal.CNPJ != null && clienteLocal.CNPJ.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
                                         (clienteLocal.Email != null && clienteLocal.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
                                         .Select(clienteLocal => $"{clienteLocal.CNPJ} ({clienteLocal.Email})").ToList();
+
                 comboBox.ItemsSource = null;
                 comboBox.Items.Clear();
                 foreach (var display in filteredClientes) { comboBox.Items.Add(display); }
@@ -312,6 +365,10 @@ namespace WMS_RadiadoresLemos_WPF
         private void ClienteComboBox_LostFocus(object sender, RoutedEventArgs e)
         {
             string inputText = ClienteComboBox.Text;
+          
+          
+          
+
             if (ClienteComboBox.SelectedItem is string selectedDisplay)
                 inputText = selectedDisplay;
             var cliente = clientes.FirstOrDefault(c => $"{c.CNPJ} ({c.Email})" == inputText);
@@ -321,6 +378,25 @@ namespace WMS_RadiadoresLemos_WPF
                 clienteSelecionadoDisplay = $"{cliente.CNPJ} ({cliente.Email})"; // Fixed 'c' to 'cliente'
                 ClienteComboBox.Text = clienteSelecionadoDisplay;
             }
+            else
+            {
+                ClienteComboBox.Text = string.Empty;
+                ClienteComboBox.SelectedItem = null;
+                clienteSelecionado = null;
+            }
+
+            ValidarMovimentacao();
+        }
+        private void ClienteComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ClienteComboBox.SelectedItem is string selected)
+            {
+                clienteSelecionado = selected;
+                ValidarMovimentacao();
+
+  
+  
+            }
             else if (!string.IsNullOrWhiteSpace(inputText))
             {
                 clienteSelecionadoDisplay = inputText;
@@ -328,10 +404,31 @@ namespace WMS_RadiadoresLemos_WPF
             }
             else
             {
+
                 ClienteComboBox.Text = string.Empty;
                 ClienteComboBox.SelectedItem = null;
                 clienteSelecionadoDisplay = null;
                 clienteSelecionadoId = null;
+
+            }
+        }
+        private void FormaPagamentoComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selected)
+            {
+                formaPagamentoSelecionada = selected.Content?.ToString();
+
+                if (formaPagamentoSelecionada == "À vista")
+                {
+                    ParcelasTextBox.Text = "1";
+                    ParcelasTextBox.IsEnabled = false;
+                }
+                else
+                {
+                    ParcelasTextBox.Text = "";
+                    ParcelasTextBox.IsEnabled = true;
+                }
+
             }
             ValidarMovimentacao();
         }
@@ -343,6 +440,7 @@ namespace WMS_RadiadoresLemos_WPF
             // ✅ POR:
             var novoBoleto = new BoletoData
             {
+
                 DataVencimento = DateTime.Now.AddMonths(proximaParcela - 1),
                 CaminhoArquivo = string.Empty,
                 LinhaDigitavel = "",
@@ -359,6 +457,180 @@ namespace WMS_RadiadoresLemos_WPF
         private bool AtualizarCamposProduto(ProdutoData produto) { if (produto == null) { MessageBox.Show("Produto inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); return false; } TipoAntesDadoTextBlock.Text = produto.Tipo; MarcaAntesDadoTextBlock.Text = produto.Marca; CodigoAntesDadoTextBlock.Text = produto.Codigo; QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString(); PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C", CultureInfo.GetCultureInfo("pt-BR")); TipoDepoisDadoTextBlock.Text = produto.Tipo; MarcaDepoisDadoTextBlock.Text = produto.Marca; CodigoDepoisDadoTextBlock.Text = produto.Codigo; if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text)) { QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString(); PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C", CultureInfo.GetCultureInfo("pt-BR")); } else { if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double precoAlterado)) { int quantidadeFinal = usePositiveNumber ? produto.Quantidade + quantidadeAlterada : produto.Quantidade - quantidadeAlterada; if (!usePositiveNumber && quantidadeFinal < 0) { MessageBox.Show("Quantidade insuficiente no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); Invalida(); return false; } QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString(); if (usePositiveNumber) { double precoTotal = (produto.Preco * produto.Quantidade) + (precoAlterado * quantidadeAlterada); int quantidadeTotal = produto.Quantidade + quantidadeAlterada; double precoPonderado = (quantidadeTotal > 0) ? precoTotal / quantidadeTotal : 0; PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C", CultureInfo.GetCultureInfo("pt-BR")); } else { PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C", CultureInfo.GetCultureInfo("pt-BR")); } } else { QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString(); PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C", CultureInfo.GetCultureInfo("pt-BR")); } } ProdutoAntesDepois.Visibility = Visibility.Visible; return true; }
         private void DestacarMudancas() { TipoDepoisDadoTextBlock.Foreground = TipoDepoisDadoTextBlock.Text != TipoAntesDadoTextBlock.Text ? (Brush)FindResource("AccentBrush") : (Brush)FindResource("TextBrush"); MarcaDepoisDadoTextBlock.Foreground = MarcaDepoisDadoTextBlock.Text != MarcaAntesDadoTextBlock.Text ? (Brush)FindResource("AccentBrush") : (Brush)FindResource("TextBrush"); CodigoDepoisDadoTextBlock.Foreground = CodigoDepoisDadoTextBlock.Text != CodigoAntesDadoTextBlock.Text ? (Brush)FindResource("AccentBrush") : (Brush)FindResource("TextBrush"); QuantidadeDepoisDadoTextBlock.Foreground = int.TryParse(QuantidadeDepoisDadoTextBlock.Text, out int qtdDepois) && int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes) ? qtdDepois > qtdAntes ? (Brush)FindResource("AccentBrush") : qtdDepois < qtdAntes ? (Brush)FindResource("CancelButtonHoverBrush") : (Brush)FindResource("TextBrush") : (Brush)FindResource("TextBrush"); PrecoDepoisDadoTextBlock.Foreground = double.TryParse(PrecoDepoisDadoTextBlock.Text.Replace("R$", "").Trim().Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double precoDepois) && double.TryParse(PrecoAntesDadoTextBlock.Text.Replace("R$", "").Trim().Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double precoAntes) ? precoDepois > precoAntes ? (Brush)FindResource("AccentBrush") : precoDepois < precoAntes ? (Brush)FindResource("CancelButtonHoverBrush") : (Brush)FindResource("TextBrush") : (Brush)FindResource("TextBrush"); }
         private void ToggleLista_Click(object sender, RoutedEventArgs e) { Lista.Visibility = Lista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible; ToggleLista.Visibility = ToggleLista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible; }
+
+                Parcela = proximaParcela,
+                Vencimento = DateTime.Now.AddMonths(proximaParcela - 1),
+                CaminhoArquivo = string.Empty
+            };
+
+            boletos.Add(novoBoleto);
+        }
+
+        // Remove boleto da lista
+        private void RemoverBoletoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int parcela)
+            {
+                var boleto = boletos.FirstOrDefault(b => b.Parcela == parcela);
+                if (boleto != null)
+                {
+                    boletos.Remove(boleto);
+                    // Atualiza o ItemsControl
+                    BoletosItemsControl.Items.Refresh();
+                }
+            }
+        }
+        private void SelecionarBoletoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int parcela)
+            {
+                var boleto = boletos.FirstOrDefault(b => b.Parcela == parcela);
+                if (boleto != null)
+                {
+                    var dialog = new OpenFileDialog
+                    {
+                        Title = "Selecione o arquivo do boleto",
+                        Filter = "Arquivos PDF (*.pdf)|*.pdf|Todos os arquivos (*.*)|*.*",
+                        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        RestoreDirectory = true
+                    };
+
+                    if (dialog.ShowDialog() == true)
+                    {
+                        boleto.CaminhoArquivo = dialog.FileName;
+                        // Atualiza o ItemsControl
+                        BoletosItemsControl.Items.Refresh();
+                    }
+                }
+            }
+        }
+
+
+        // Método chamado quando um produto é selecionado, altera as informações apresentadas na tela
+        private bool AtualizarCamposProduto(ProdutoData produto)
+        {
+            if (produto == null)
+            {
+                MessageBox.Show("Produto inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            // Atualizar os campos "Antes" com os dados do produto
+            TipoAntesDadoTextBlock.Text = produto.Tipo;
+            MarcaAntesDadoTextBlock.Text = produto.Marca;
+            CodigoAntesDadoTextBlock.Text = produto.Codigo;
+            QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString();
+            PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C");
+
+            // Atualizar os campos "Depois" com os mesmos valores inicialmente
+            TipoDepoisDadoTextBlock.Text = produto.Tipo;
+            MarcaDepoisDadoTextBlock.Text = produto.Marca;
+            CodigoDepoisDadoTextBlock.Text = produto.Codigo;
+
+            // Validar os campos de entrada (Quantidade e Preço)
+            if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
+            {
+                // Se os campos estiverem vazios, apenas inicializa os valores "Depois" com os valores "Antes"
+                QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
+                PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+            }
+            else
+            {
+                // Realizar cálculos com os valores inseridos
+                if (int.TryParse(QuantidadeTextBox.Text, out int quantidadeAlterada) && double.TryParse(PrecoTextBox.Text, out double precoAlterado))
+                {
+                    int quantidadeFinal = usePositiveNumber
+                        ? produto.Quantidade + quantidadeAlterada // Entrada
+                        : produto.Quantidade - quantidadeAlterada; // Saída
+
+                    if (quantidadeFinal < 0)
+                    {
+                        Alerta.AdicionarAlerta("Erro",
+                                               "Quantidade insuficiente",
+                                               "Erro ao registrar movimentação de produtos. Possíveis motivos:\n" +
+                                               "- Quantidade insuficiente no estoque.",
+                                               "- Verifique a quantidade disponível no estoque.\n" +
+                                               "- Verifique se a quantidade inserida é válida.\n" +
+                                               "- Atualize a quantidade de produtos no estoque.");
+                        return false;
+                    }
+
+                    QuantidadeDepoisDadoTextBlock.Text = quantidadeFinal.ToString();
+
+                    if (usePositiveNumber)
+                    {
+                        double precoAtual = produto.Preco;
+                        int quantidadeAtual = produto.Quantidade;
+                        int quantidadeNova = quantidadeAlterada;
+                        int quantidadeTotal = quantidadeAtual + quantidadeNova;
+
+                        double precoPonderado = ((precoAtual * quantidadeAtual) + (precoAlterado * quantidadeNova)) / quantidadeTotal;
+                        PrecoDepoisDadoTextBlock.Text = precoPonderado.ToString("C");
+                    }
+                    else
+                    {
+                        PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                    }
+                }
+                else
+                {
+                    // Se não conseguir converter, apenas mostra os valores atuais
+                    QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
+                    PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C");
+                }
+            }
+
+            // Sempre mostrar o painel de detalhes
+            ProdutoAntesDepois.Visibility = Visibility.Visible;
+
+            return true;
+        }
+        private void DestacarMudancas()
+        {
+            // Comparar e destacar mudanças
+            TipoDepoisDadoTextBlock.Foreground = TipoDepoisDadoTextBlock.Text != TipoAntesDadoTextBlock.Text
+                ? (Brush)FindResource("AccentBrush")
+                : (Brush)FindResource("TextBrush");
+
+            MarcaDepoisDadoTextBlock.Foreground = MarcaDepoisDadoTextBlock.Text != MarcaAntesDadoTextBlock.Text
+                ? (Brush)FindResource("AccentBrush")
+                : (Brush)FindResource("TextBrush");
+
+            CodigoDepoisDadoTextBlock.Foreground = CodigoDepoisDadoTextBlock.Text != CodigoAntesDadoTextBlock.Text
+                ? (Brush)FindResource("AccentBrush")
+                : (Brush)FindResource("TextBrush");
+
+            QuantidadeDepoisDadoTextBlock.Foreground =
+                int.TryParse(QuantidadeDepoisDadoTextBlock.Text, out int qtdDepois) &&
+                int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes)
+                    ? qtdDepois > qtdAntes
+                        ? (Brush)FindResource("AccentBrush")
+                        : qtdDepois < qtdAntes
+                            ? (Brush)FindResource("CancelButtonHoverBrush")
+                            : (Brush)FindResource("TextBrush")
+                    : (Brush)FindResource("TextBrush");
+
+            PrecoDepoisDadoTextBlock.Foreground =
+                double.TryParse(PrecoDepoisDadoTextBlock.Text.Replace("R$", "").Trim(), out double precoDepois) &&
+                double.TryParse(PrecoAntesDadoTextBlock.Text.Replace("R$", "").Trim(), out double precoAntes)
+                    ? precoDepois > precoAntes
+                        ? (Brush)FindResource("AccentBrush")
+                        : precoDepois < precoAntes
+                            ? (Brush)FindResource("CancelButtonHoverBrush")
+                            : (Brush)FindResource("TextBrush")
+                    : (Brush)FindResource("TextBrush");
+        }
+
+        // Métodos para Lista
+        private void ToggleLista_Click(object sender, RoutedEventArgs e)
+        {
+            // Deixa lista visível
+            Lista.Visibility = Lista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+
+            // Oculta botão
+            ToggleLista.Visibility = ToggleLista.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidarMovimentacao() || !ValidarFinanceiro())
@@ -390,6 +662,7 @@ namespace WMS_RadiadoresLemos_WPF
                 if (boletos.Any())
                 {
                     compra.Boletos = new List<string>();
+
                     foreach (var boletoData in boletos)
                     {
                         if (string.IsNullOrEmpty(boletoData.FornecedorId) && !string.IsNullOrEmpty(fornecedorSelecionadoId))
@@ -399,7 +672,42 @@ namespace WMS_RadiadoresLemos_WPF
                         boletoData.NotaFiscal = numeroNotaFiscalAtual;
                         boletoData.Id = int.Parse(DateTime.Now.ToString("MMddHHmm")) + boletoData.Parcela; // ✅ CORRIGIDO
                         compra.Boletos.Add(boletoData.Id.ToString()); // ✅ CONVERTIDO PARA STRING
+
+
+                    var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado);
+                    if (fornecedor == null)
+                    {
+                        MessageBox.Show("Fornecedor não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
                     }
+
+                    // Criar uma cópia dos boletos atuais antes de iterar
+                    var boletosCopia = BoletosItemsControl.Items.Cast<BoletoData>().ToList();
+
+                    // Limpar a lista de boletos atual
+                    boletos.Clear();
+
+                    // Iterar sobre a cópia em vez do controle original
+                    foreach (var boleto in boletosCopia)
+                    {
+                        // Usa o método CriarBoletoData para criar um novo boleto com os dados corretos
+                        var novoBoleto = CriarBoletoData(boleto, numeroNotaFiscalAtual, fornecedor);
+
+                        // Adiciona o novo boleto à lista de boletos
+                        boletos.Add(novoBoleto);
+
+                        // Gera o nome do boleto no formato BoletoNF{numeroNF}-Parcela{boleto.Parcela}
+                        var extensao = Path.GetExtension(boleto.CaminhoArquivo);
+                        var nomeBoleto = $"BoletoNF{numeroNotaFiscalAtual}-Parcela{boleto.Parcela}{extensao}";
+
+                        // Adiciona o nome do boleto à lista de boletos da compra
+                        compra.Boletos.Add(nomeBoleto);
+
+                    }
+
+                    // Atualiza o controle de UI com a nova lista de boletos
+                    BoletosItemsControl.ItemsSource = null;
+                    BoletosItemsControl.ItemsSource = boletos;
                 }
                 compras.Add(compra);
             }
@@ -417,6 +725,7 @@ namespace WMS_RadiadoresLemos_WPF
             LimparCampos();
             Invalida();
         }
+
         private MovimentacaoData CriarMovimentacaoData(ProdutoData produto, int quantidade, double preco, string detalhes) { return new MovimentacaoData { ProdutoId = produto.Id, ProdutoNome = produto.Nome, Tipo = usePositiveNumber ? "Entrada" : "Saída", Preco = preco, Quantidade = quantidade, Data = DateTime.Now, Detalhes = detalhes }; }
         private MovimentacaoListItem CriarMovimentacaoListItem(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao) { return new MovimentacaoListItem { ProdutoId = produto.Id, ProdutoNome = produto.Nome, FornecedorId = usePositiveNumber ? fornecedorSelecionadoNome : null, ClienteId = !usePositiveNumber ? clienteSelecionadoDisplay : null, Quantidade = quantidade, Preco = preco, FormaPagamento = FormaPagamentoComboBox.Text, Parcelas = parcelas, Detalhes = detalhes, Data = DateTime.Now, MovimentacaoData = movimentacao }; }
         private CompraData CriarCompraData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao) { var compra = new CompraData { FornecedorId = fornecedorSelecionadoId ?? string.Empty, FornecedorNome = fornecedorSelecionadoNome ?? string.Empty, DataCompra = DateTime.Now, DataPagamento = formaPagamentoSelecionada == "À vista" ? DateTime.Now : (DateTime?)null, TipoPagamento = formaPagamentoSelecionada ?? string.Empty, Parcelas = parcelas, NotaFiscal = NotaFiscalTextBox.Text, Itens = new List<MovimentacaoData> { movimentacao }, ValorTotal = (decimal)(preco * quantidade), Detalhes = detalhes }; if (!string.IsNullOrEmpty(compra.NotaFiscal)) compra.SetIdFromNotaFiscal(); else compra.Id = Guid.NewGuid().ToString(); return compra; }
@@ -424,14 +733,109 @@ namespace WMS_RadiadoresLemos_WPF
         private void AnimateToggleLista() { ColorAnimation colorAnimation = new ColorAnimation { From = ((SolidColorBrush)FindResource("PanelBackgroundBrush")).Color, To = ((SolidColorBrush)FindResource("AccentBrush")).Color, Duration = TimeSpan.FromSeconds(0.3), AutoReverse = true, RepeatBehavior = new RepeatBehavior(2) }; SolidColorBrush brush = new SolidColorBrush(((SolidColorBrush)FindResource("PanelBackgroundBrush")).Color); ToggleLista.Background = brush; brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation); }
         private void ExcluirItem_Click(object sender, RoutedEventArgs e) { var button = sender as Button; if (button?.DataContext is MovimentacaoListItem itemToRemove) { var movimentacaoToRemove = itemToRemove.MovimentacaoData; if (movimentacaoToRemove != null) { movimentacoes.Remove(movimentacaoToRemove); } listaMovimentacoes.Remove(itemToRemove); ListaItemsControl.ItemsSource = null; ListaItemsControl.ItemsSource = listaMovimentacoes; } }
         private async void ConfirmarPedido_Click(object sender, RoutedEventArgs e)
+
+        private MovimentacaoData CriarMovimentacaoData(ProdutoData produto, int quantidade, double preco, string detalhes)
+        {
+            return new MovimentacaoData
+            {
+                ProdutoId = produto.Nome,
+                ProdutoNome = produto.Nome,
+                Tipo = usePositiveNumber ? "Entrada" : "Saída",
+                Preco = preco,
+                Quantidade = quantidade,
+                Data = DateTime.Now,
+                Detalhes = detalhes
+            };
+        }
+        private MovimentacaoListItem CriarMovimentacaoListItem(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
+        {
+            return new MovimentacaoListItem
+            {
+                ProdutoId = produto.Nome,
+                ProdutoNome = produto.Nome,
+                FornecedorId = usePositiveNumber ? FornecedorComboBox.Text : null,
+                ClienteId = !usePositiveNumber ? ClienteComboBox.Text : null,
+                Quantidade = quantidade,
+                Preco = preco,
+                FormaPagamento = FormaPagamentoComboBox.Text,
+                Parcelas = parcelas,
+                Detalhes = detalhes,
+                Data = DateTime.Now,
+                MovimentacaoData = movimentacao
+            };
+        }
+        private CompraData CriarCompraData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
+        {
+            var compra = new CompraData
+            {
+                FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado)?.Id ?? string.Empty,
+                FornecedorNome = fornecedorSelecionado ?? string.Empty,
+                DataCompra = DateTime.Now,
+                TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
+                Parcelas = parcelas,
+                NotaFiscal = NotaFiscalTextBox.Text,
+                Itens = new List<MovimentacaoData> { movimentacao },
+                ValorTotal = (decimal)(preco * quantidade),
+                Detalhes = detalhes
+            };
+            if (!string.IsNullOrEmpty(compra.NotaFiscal))
+                compra.SetIdFromNotaFiscal();
+            else
+                compra.Id = Guid.NewGuid().ToString();
+            return compra;
+        }
+        private BoletoData CriarBoletoData(BoletoData boleto, string numeroNotaFiscal, FornecedorData fornecedor)
+        {
+            // Criar nome do boleto padronizado
+            var extensao = Path.GetExtension(boleto.CaminhoArquivo);
+            string nomeBoleto = $"BoletoNF{numeroNotaFiscal}-Parcela{boleto.Parcela}{extensao}";
+
+            var novoBoleto = new BoletoData
+            {
+                Parcela = boleto.Parcela,
+                Vencimento = boleto.Vencimento,
+                Pagamento = boleto.Pagamento,
+                NomeArquivo = nomeBoleto, // Use o nome formatado
+                CaminhoArquivo = boleto.CaminhoArquivo,
+                NotaFiscal = numeroNotaFiscal,
+                FornecedorId = fornecedor.CNPJ
+            };
+
+            // Agora o ID será definido com o nome formatado
+            novoBoleto.SetIdFromNome();
+            return novoBoleto;
+        }
+        private VendaData CriarVendaData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
+
         {
             if (!listaMovimentacoes.Any()) { MessageBox.Show("Adicione pelo menos um item à lista."); return; }
             try
             {
+
                 if (usePositiveNumber)
                 {
                     // 👈 ADICIONE ESTA LINHA QUE ESTAVA FALTANDO:
                     foreach (var compra in compras) { RegistrarCompras(compra); }
+
+                ClienteId = cliente?.Id ?? string.Empty,
+                ClienteCNPJ = cliente?.CNPJ ?? string.Empty,
+                Pedido = NotaFiscalTextBox.Text, // ou outro campo de pedido se houver
+                DataCompra = DateTime.Now,
+                TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
+                Parcelas = parcelas,
+                NotaFiscal = NotaFiscalTextBox.Text,
+                Itens = new List<MovimentacaoData> { movimentacao },
+                ValorTotal = (decimal)(preco * quantidade),
+                DataCadastro = DateTime.Now,
+                Detalhes = detalhes
+            };
+            if (!string.IsNullOrEmpty(venda.NotaFiscal))
+                venda.SetIdFromNotaFiscal();
+            else
+                venda.Id = Guid.NewGuid().ToString();
+            return venda;
+        }
+
 
                     foreach (var boletoParaSalvar in boletos)
                     {
@@ -443,6 +847,7 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // ✅ ID único e seguro para int
                         boletoParaSalvar.Id = int.Parse(DateTime.Now.ToString("MMddHHmm")) + boletoParaSalvar.Parcela;
+
 
                         var boletosCollection = DatabaseConnect.Database.GetCollection<BoletoData>("boletos");
                         boletosCollection.Upsert(boletoParaSalvar);
@@ -484,6 +889,109 @@ namespace WMS_RadiadoresLemos_WPF
         private void Valida() { StatusMessage.Text = "Movimentação VÁLIDA!"; StatusMessage.Foreground = (Brush)FindResource("AccentBrush"); Financeiro.Visibility = Visibility.Visible; }
         private void Invalida() { StatusMessage.Text = "Movimentação INVÁLIDA"; StatusMessage.Foreground = (Brush)FindResource("CancelButtonHoverBrush"); Financeiro.Visibility = Visibility.Collapsed; }
         private void ImportarXMLButton_Click(object sender, RoutedEventArgs e)
+
+        private void EditarItem_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.DataContext is MovimentacaoListItem itemToEdit)
+            {
+                // Salva referência ao item em edição
+                _itemEmEdicao = itemToEdit.MovimentacaoData;
+
+                // Preenche os campos com os dados do item
+                PreencherCamposComItem(itemToEdit);
+
+                // Remove da lista de movimentações
+                if (_itemEmEdicao != null)
+                {
+                    movimentacoes.Remove(_itemEmEdicao);
+                }
+
+                // Remove da lista de itens
+                listaMovimentacoes.Remove(itemToEdit);
+
+                // Remove da lista de compras ou vendas
+                if (usePositiveNumber)
+                {
+                    var compraRelacionada = compras.FirstOrDefault(c => c.Itens.Contains(_itemEmEdicao));
+                    if (compraRelacionada != null)
+                    {
+                        // Preserva a nota fiscal para reutilização
+                        NotaFiscalTextBox.Text = compraRelacionada.NotaFiscal;
+                        compras.Remove(compraRelacionada);
+                    }
+                }
+                else
+                {
+                    var vendaRelacionada = vendas.FirstOrDefault(v => v.Itens.Contains(_itemEmEdicao));
+                    if (vendaRelacionada != null)
+                    {
+                        // Preserva a nota fiscal para reutilização
+                        NotaFiscalTextBox.Text = vendaRelacionada.NotaFiscal;
+                        vendas.Remove(vendaRelacionada);
+                    }
+                }
+
+                // Atualiza o ItemsSource do ListaItemsControl
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
+
+                // Esconde a lista para focar na edição
+                Lista.Visibility = Visibility.Collapsed;
+                ToggleLista.Visibility = Visibility.Visible;
+
+                // Foca no Produto novamente
+                ProdutoComboBox.Focus();
+            }
+        }
+
+        private void PreencherCamposComItem(MovimentacaoListItem item)
+        {
+            // Preenche o campo de produto
+            ProdutoComboBox.Text = item.ProdutoNome;
+            produtoSelecionado = produtos.FirstOrDefault(p => p.Nome == item.ProdutoNome);
+
+            // Preenche fornecedor ou cliente dependendo do tipo
+            if (usePositiveNumber)
+            {
+                FornecedorComboBox.Text = item.FornecedorId;
+                fornecedorSelecionado = item.FornecedorId;
+            }
+            else
+            {
+                ClienteComboBox.Text = item.ClienteId;
+                clienteSelecionado = item.ClienteId;
+            }
+
+            // Preenche quantidade e preço
+            QuantidadeTextBox.Text = item.Quantidade.ToString();
+            PrecoTextBox.Text = item.Preco.ToString();
+
+            // Preenche forma de pagamento
+            FormaPagamentoComboBox.SelectedItem = FormaPagamentoComboBox.Items
+                        .OfType<ComboBoxItem>()
+                        .FirstOrDefault(i => (i.Content?.ToString() ?? "") == item.FormaPagamento);
+            formaPagamentoSelecionada = item.FormaPagamento;
+
+            // Preenche parcelas
+            ParcelasTextBox.Text = item.Parcelas.ToString();
+
+            // Preenche detalhes
+            DetalhesTextBox.Text = item.Detalhes;
+
+            // Atualiza os campos de produto
+            if (produtoSelecionado != null)
+            {
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+            }
+
+            // Garante que a seção financeira esteja visível
+            Valida();
+        }
+
+        private void ExcluirItem_Click(object sender, RoutedEventArgs e)
+
         {
             var dialog = new OpenFileDialog { Title = "Selecione o arquivo XML da nota fiscal", Filter = "Arquivos XML (*.xml)|*.xml", InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), RestoreDirectory = true }; if (dialog.ShowDialog() == true)
             {
@@ -493,10 +1001,123 @@ namespace WMS_RadiadoresLemos_WPF
                     if (usePositiveNumber && !string.IsNullOrWhiteSpace(nota.EmitenteNome)) { FornecedorComboBox.Text = nota.EmitenteNome; fornecedorSelecionadoNome = nota.EmitenteNome; var fornecedorExistente = fornecedores.FirstOrDefault(f => f.Nome.Equals(nota.EmitenteNome, StringComparison.OrdinalIgnoreCase)); if (fornecedorExistente != null) fornecedorSelecionadoId = fornecedorExistente.Id; else fornecedorSelecionadoId = null; }
                     MessageBox.Show("Nota fiscal importada com sucesso!\n\n" + $"Número: {nota.NumeroNota}\n" + $"Emissão: {nota.DataEmissao:dd/MM/yyyy}\n" + $"Emitente: {nota.EmitenteNome}", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+
                 catch (Exception ex) { MessageBox.Show($"Erro ao importar arquivo XML:\n{ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); }
+
+
+                // Remove da lista de items
+                listaMovimentacoes.Remove(itemToRemove);
+
+                // Atualiza o ItemsSource do ListaItemsControl
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
+            }
+        }
+        private async void ConfirmarPedido_Click(object sender, RoutedEventArgs e)
+        {
+            if (movimentacoes.Count == 0)
+            {
+                MessageBox.Show("Adicione pelo menos um item à lista.");
+                return;
+            }
+
+            try
+            {
+                if (usePositiveNumber)
+                {
+                    // Registra cada compra
+                    foreach (var compra in compras)
+                    {
+                        RegistrarCompras(compra);
+                    }
+
+                    // Organiza os boletos (arquivos físicos)
+                    var organizadorBoleto = new OrganizarBoleto(numeroNotaFiscalAtual);
+                    foreach (var boleto in boletos)
+                    {
+                        if (!string.IsNullOrEmpty(boleto.CaminhoArquivo))
+                        {
+                            organizadorBoleto.Organizar(boleto);
+                        }
+                    }
+
+                    // Registra os boletos no banco de dados
+                    if (boletos.Count > 0)
+                    {
+                        foreach (var boleto in boletos)
+                        {
+                            RegistrarBoletos(boleto);
+                        }
+                    }
+                }
+                else
+                {
+                    // Registra cada venda
+                    foreach (var venda in vendas)
+                    {
+                        RegistrarVendas(venda);
+                    }
+                }
+
+                // Registra cada movimentação individualmente
+                foreach (var mov in movimentacoes)
+                {
+                    await RegistrarMovimentacaoAsync(mov);
+                }
+
+                // Limpa a lista e fecha a janela
+                movimentacoes.Clear();
+                listaMovimentacoes.Clear();
+                boletos.Clear();
+                ListaItemsControl.ItemsSource = null;
+                ListaItemsControl.ItemsSource = listaMovimentacoes;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar {(usePositiveNumber ? "compra" : "venda")}: {ex.Message}",
+                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RegistrarCompras(CompraData compra)
+        {
+            try
+            {
+                if (compra == null)
+                {
+                    MessageBox.Show("Compra inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                // Inserir a compra no banco de dados
+                var comprasCollection = DatabaseConnect.Database.GetCollection<CompraData>("compras");
+                comprasCollection.Insert(compra);
+
+                // Atualizar o relacionamento com o fornecedor
+                if (!string.IsNullOrEmpty(compra.FornecedorId))
+                {
+                    var fornecedoresCollection = DatabaseConnect.Database.GetCollection<FornecedorData>("fornecedores");
+                    var fornecedor = fornecedoresCollection.FindById(compra.FornecedorId);
+
+                    if (fornecedor != null)
+                    {
+                        // Adicionar o ID da compra à lista de compras relacionadas do fornecedor
+                        fornecedor.ComprasRelacionadas.Add(compra.Id);
+                        fornecedoresCollection.Update(fornecedor);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar compra: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+
             }
         }
         private void FecharLista_Click(object sender, RoutedEventArgs e) { Lista.Visibility = Visibility.Collapsed; ToggleLista.Visibility = Visibility.Visible; }
+
 
     }
 
@@ -520,5 +1141,648 @@ namespace WMS_RadiadoresLemos_WPF
         [JsonPropertyName("linhaDigitavel")] public string LinhaDigitavel { get; set; }
         [JsonPropertyName("nossoNumero")] public string NossoNumero { get; set; }
         [JsonPropertyName("agenciaCodigoBeneficiario")] public string AgenciaCodigoBeneficiario { get; set; }
+
+        private void RegistrarBoletos(BoletoData boleto)
+        {
+            try
+            {
+                if (boleto == null)
+                {
+                    MessageBox.Show("Boleto inválido.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                // Inserir o boleto no banco de dados
+                var boletosCollection = DatabaseConnect.Database.GetCollection<BoletoData>("boletos");
+                boletosCollection.Insert(boleto);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar boleto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RegistrarVendas(VendaData venda)
+        {
+            try
+            {
+                if (venda == null)
+                {
+                    MessageBox.Show("Venda inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                // Inserir a venda no banco de dados
+                var vendasCollection = DatabaseConnect.Database.GetCollection<VendaData>("vendas");
+                vendasCollection.Insert(venda);
+
+                // Atualizar o relacionamento com o cliente
+                if (!string.IsNullOrEmpty(venda.ClienteId))
+                {
+                    var clientesCollection = DatabaseConnect.Database.GetCollection<ClienteData>("clientes");
+                    var cliente = clientesCollection.FindById(venda.ClienteId);
+
+                    if (cliente != null)
+                    {
+                        // Adicionar o ID da venda à lista de vendas relacionadas do cliente
+                        cliente.VendasRelacionadas.Add(venda.Id);
+                        clientesCollection.Update(cliente);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar venda: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw; // Re-throw para ser capturado pelo método chamador
+            }
+        }
+
+        // Método assíncrono para registrar a movimentação de produtos
+        private async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao)
+        {
+            try
+            {
+                if (movimentacao == null)
+                {
+                    MessageBox.Show("Movimentação inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                collection.Insert(movimentacao);
+
+                // Atualiza o produto no banco de dados usando a função dedicada
+                var produto = produtos.FirstOrDefault(p => p.Nome == movimentacao.ProdutoId);
+                if (produto != null)
+                {
+                    AtualizarProdutoNoBanco(produto, movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Método para atualizar o produto no banco de dados
+        private void AtualizarProdutoNoBanco(ProdutoData produto, bool isEntrada, int quantidade, double preco)
+        {
+            if (produto == null) return;
+
+            if (isEntrada)
+            {
+                // Para compra - calcula preço médio ponderado
+                double precoTotal = (produto.Preco * produto.Quantidade) + (preco * quantidade);
+                int novaQuantidade = produto.Quantidade + quantidade;
+                produto.Preco = novaQuantidade > 0 ? precoTotal / novaQuantidade : 0;
+                produto.Quantidade = novaQuantidade;
+            }
+            else
+            {
+                // Para venda - apenas reduz a quantidade
+                produto.Quantidade -= quantidade;
+                if (produto.Quantidade < 0) produto.Quantidade = 0;
+            }
+
+            var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos");
+            produtoCollection.Update(produto);
+        }
+
+
+        // Método para limpar os campos de entrada
+        private void LimparCampos()
+        {
+            // Limpar campos de produto
+            ProdutoComboBox.SelectedItem = null;
+            ProdutoComboBox.Text = string.Empty;
+            produtoSelecionado = null;
+
+            // Limpar campos de fornecedor/cliente
+            if (usePositiveNumber)
+            {
+                LimparComboBox(FornecedorComboBox, out fornecedorSelecionado);
+            }
+            else
+            {
+                LimparComboBox(ClienteComboBox, out clienteSelecionado);
+            }
+
+            // Limpar campos de quantidade, preço, pagamento e detalhes
+            LimparTextBox(QuantidadeTextBox, PrecoTextBox, ParcelasTextBox, DetalhesTextBox, NotaFiscalTextBox);
+
+            FormaPagamentoComboBox.SelectedItem = null;
+            formaPagamentoSelecionada = null;
+
+            // Limpar campos de exibição
+            LimparTextBlock(
+                TipoAntesDadoTextBlock, MarcaAntesDadoTextBlock, CodigoAntesDadoTextBlock, PrecoAntesDadoTextBlock, QuantidadeAntesDadoTextBlock,
+                TipoDepoisDadoTextBlock, MarcaDepoisDadoTextBlock, CodigoDepoisDadoTextBlock, PrecoDepoisDadoTextBlock, QuantidadeDepoisDadoTextBlock
+            );
+
+            // Ocultar detalhes do produto
+            ProdutoAntesDepois.Visibility = Visibility.Collapsed;
+
+            // Foca no Produto novamente
+            ProdutoComboBox.Focus();
+        }
+        private void LimparComboBox(ComboBox comboBox, out string? selecionado)
+        {
+            comboBox.SelectedItem = null;
+            comboBox.Text = string.Empty;
+            selecionado = null;
+        }
+        private void LimparTextBox(params TextBox[] textBoxes)
+        {
+            foreach (var tb in textBoxes)
+                tb.Clear();
+        }
+        private void LimparTextBlock(params TextBlock[] textBlocks)
+        {
+            foreach (var tb in textBlocks)
+                tb.Text = string.Empty;
+        }
+
+
+        // Todos os métodos de validação de entrada de texto
+        // Quantidade
+        private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+        private void QuantidadeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (!textBox.Text.All(char.IsDigit))
+                {
+                    textBox.Clear();
+                    return;
+                }
+
+                // Verifica se vai faltar no estoque (apenas para saída)
+                if (!usePositiveNumber && int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes) && int.TryParse(textBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        textBox.Clear();
+                        return;
+                    }
+                }
+
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+                }
+            }
+        }
+        private void QuantidadeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                // Verifica se vai faltar no estoque (apenas para saída)
+                if (!usePositiveNumber && int.TryParse(QuantidadeAntesDadoTextBlock.Text, out int qtdAntes) && int.TryParse(QuantidadeTextBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        QuantidadeTextBox.Clear();
+                        return;
+                    }
+                }
+
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+                ValidarMovimentacao();
+            }
+        }
+        // Preço
+        private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos e uma vírgula (para decimal)
+            var textBox = (TextBox)sender;
+            string text = textBox.Text.Insert(textBox.SelectionStart, e.Text);
+
+            // Só permite uma vírgula e pelo menos um dígito
+            e.Handled = !IsValidDecimalInput(text);
+        }
+        private void PrecoTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsValidDecimalInput(text))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (!IsValidDecimalInput(textBox.Text))
+                    textBox.Clear();
+
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+                }
+            }
+        }
+        private bool IsValidDecimalInput(string text)
+        {
+            // Permite apenas dígitos e no máximo uma vírgula, e não pode começar por vírgula
+            if (string.IsNullOrEmpty(text)) return true;
+            int commaCount = text.Count(c => c == ',');
+            if (commaCount > 1) return false;
+            if (text.StartsWith(",")) return false;
+            return text.All(c => char.IsDigit(c) || c == ',');
+        }
+        private void PrecoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+                ValidarMovimentacao();
+            }
+        }
+        // Parcelas
+        private void ParcelasTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos e impede valor maior que 8
+            if (!e.Text.All(char.IsDigit))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var textBox = sender as TextBox;
+            string novoTexto = textBox != null
+                ? textBox.Text.Insert(textBox.SelectionStart, e.Text)
+                : e.Text;
+
+            if (int.TryParse(novoTexto, out int valor))
+            {
+                e.Handled = valor > 8 || valor < 1;
+            }
+            else
+            {
+                e.Handled = true;
+            }
+        }
+        private void ParcelasTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void ParcelasTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (!textBox.Text.All(char.IsDigit))
+                    textBox.Clear();
+            }
+        }
+        private void ParcelasTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox textBox)
+                return;
+
+            // Remove handlers para evitar recursão infinita ao alterar o texto
+            textBox.TextChanged -= ParcelasTextBox_TextChanged;
+
+            string textoOriginal = textBox.Text;
+            if (!string.IsNullOrEmpty(textoOriginal))
+            {
+                // Remove formatação e espaços
+                string textoLimpo = new string(textoOriginal.Where(char.IsDigit).ToArray());
+
+                if (int.TryParse(textoLimpo, out int parcelas))
+                {
+                    // Limita o valor entre 1 e 8
+                    if (parcelas < 1)
+                        parcelas = 1;
+                    else if (parcelas > 8)
+                        parcelas = 8;
+
+                    textBox.Text = parcelas.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
+                    textBox.CaretIndex = textBox.Text.Length;
+                }
+                else
+                {
+                    MessageBox.Show("Parcelas inválidas.");
+                    textBox.Clear();
+                }
+
+                // Verifica a forma de pagamento para alterar o texto
+                if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selected)
+                {
+                    formaPagamentoSelecionada = selected.Content?.ToString();
+
+                    if (formaPagamentoSelecionada == "À vista")
+                    {
+                        textBox.Text = "1";
+                        textBox.IsEnabled = false;
+                    }
+                    else if (formaPagamentoSelecionada == "Parcelado")
+                    {
+                        // Se for parcelado, impede parcelas iguais a 1
+                        if (textBox.Text == "1")
+                            textBox.Text = "";
+                    }
+
+                    if (!textBox.IsEnabled && formaPagamentoSelecionada == "Parcelado")
+                    {
+                        textBox.IsEnabled = true;
+                    }
+                }
+            }
+
+            // Reanexa o handler
+            textBox.TextChanged += ParcelasTextBox_TextChanged;
+        }
+        // Nota Fiscal - NÃO UTILIZADO ATÉ O MOMENTO
+        private void NotaFiscalTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                // Verifica se o texto é um número válido
+                if (!textBox.Text.All(char.IsDigit))
+                {
+                    MessageBox.Show("Nota fiscal inválida.");
+                    textBox.Clear();
+                }
+            }
+        }
+        private void NotaFiscalTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                // Verifica se o texto é um número válido
+                if (!textBox.Text.All(char.IsDigit))
+                {
+                    MessageBox.Show("Nota fiscal inválida.");
+                    textBox.Clear();
+                }
+            }
+        }
+        private void NotaFiscalTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+        private void NotaFiscalTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+
+        // Validações
+        // Método para validar Movimentação
+        private bool ValidarMovimentacao()
+        {
+            // Se algum campo estiver vazio, retorna false
+            if (string.IsNullOrEmpty(ProdutoComboBox.Text) || string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
+            {
+                Invalida();
+                return false;
+            }
+
+            // Verifica se já não está válida
+            if (StatusMessage.Text == "Movimentação VÁLIDA!")
+            {
+                return true;
+            }
+
+            // Valida produto selecionado
+            if (produtoSelecionado == null)
+            {
+                MessageBox.Show("Produto inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Valida fornecedor ou cliente selecionado
+            if (usePositiveNumber && string.IsNullOrEmpty(FornecedorComboBox.Text))
+            {
+                MessageBox.Show("Fornecedor inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+            else if (!usePositiveNumber && string.IsNullOrEmpty(ClienteComboBox.Text))
+            {
+                MessageBox.Show("Cliente inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Valida quantidade
+            if (!int.TryParse(QuantidadeTextBox.Text, out int quantidade) || quantidade <= 0)
+            {
+                // Verifica se existe quantidade suficiente no estoque
+                if (!usePositiveNumber && produtoSelecionado.Quantidade < quantidade)
+                {
+                    MessageBox.Show("Quantidade insuficiente no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Invalida();
+                    return false;
+                }
+                MessageBox.Show("Quantidade inválida.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Valida preço
+            if (!double.TryParse(PrecoTextBox.Text, out double preco) || preco <= 0)
+            {
+                MessageBox.Show("Preço inválido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Invalida();
+                return false;
+            }
+
+            // Se todas as validações passarem, valida
+            Valida();
+
+            return true;
+        }
+        // Método para validar parte financeira
+        private bool ValidarFinanceiro()
+        {
+            // Se algum campo estiver vazio, retorna false
+            if (string.IsNullOrEmpty(FormaPagamentoComboBox.Text) || string.IsNullOrEmpty(ParcelasTextBox.Text) || string.IsNullOrEmpty(NotaFiscalTextBox.Text))
+            {
+                return false;
+            }
+            // Valida forma de pagamento
+            if (formaPagamentoSelecionada == null)
+            {
+                MessageBox.Show("Forma de pagamento inválida.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            // Valida parcelas
+            if (!int.TryParse(ParcelasTextBox.Text, out int parcelas) || parcelas <= 0)
+            {
+                MessageBox.Show("Parcelas inválidas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            return true;
+        }
+
+        private void Valida()
+        {
+            // Ao validar, altera mensagem status
+            StatusMessage.Text = "Movimentação VÁLIDA!";
+            StatusMessage.Foreground = (Brush)FindResource("AccentBrush");
+
+            // Altera visibilidade da parte financeira
+            Financeiro.Visibility = Visibility.Visible;
+        }
+
+        private void Invalida()
+        {
+            // Ao invalidar, altera mensagem status
+            StatusMessage.Text = "Movimentação INVÁLIDA!";
+            StatusMessage.Foreground = (Brush)FindResource("CancelButtonHoverBrush");
+
+            // Altera visibilidade da parte financeira
+            Financeiro.Visibility = Visibility.Collapsed;
+        }
+
+        // Método para validar parte financeira
+
+
+
+
+
+
+
+
+
+
+        // TEMP
+
+        private void ImportarXMLButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecione o arquivo XML da nota fiscal",
+                Filter = "Arquivos XML (*.xml)|*.xml",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                RestoreDirectory = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var xmlDoc = XDocument.Load(dialog.FileName);
+                    XNamespace ns = "http://www.portalfiscal.inf.br/nfe";
+                    var infNFe = xmlDoc.Descendants(ns + "infNFe").FirstOrDefault();
+                    if (infNFe == null)
+                        throw new Exception("Estrutura de XML inválida para NF-e.");
+
+                    var nota = new NotaData();
+
+                    // Identificação
+                    nota.NumeroNota = infNFe.Element(ns + "ide")?.Element(ns + "nNF")?.Value ?? string.Empty;
+                    nota.Id = nota.NumeroNota; // O Id será o número da nota
+                    nota.DataEmissao = DateTime.TryParse(infNFe.Element(ns + "ide")?.Element(ns + "dhEmi")?.Value, out var dataEmissao) ? dataEmissao : DateTime.MinValue;
+                    nota.NaturezaOperacao = infNFe.Element(ns + "ide")?.Element(ns + "natOp")?.Value ?? string.Empty;
+
+                    // Emitente
+                    var emit = infNFe.Element(ns + "emit");
+                    nota.EmitenteCNPJ = emit?.Element(ns + "CNPJ")?.Value ?? string.Empty;
+                    nota.EmitenteNome = emit?.Element(ns + "xNome")?.Value ?? string.Empty;
+                    var enderEmit = emit?.Element(ns + "enderEmit");
+                    nota.EmitenteEndereco = enderEmit?.Element(ns + "xLgr")?.Value + ", " + enderEmit?.Element(ns + "nro")?.Value;
+                    nota.EmitenteBairro = enderEmit?.Element(ns + "xBairro")?.Value ?? string.Empty;
+                    nota.EmitenteMunicipio = enderEmit?.Element(ns + "xMun")?.Value ?? string.Empty;
+                    nota.EmitenteUF = enderEmit?.Element(ns + "UF")?.Value ?? string.Empty;
+                    nota.EmitenteCEP = enderEmit?.Element(ns + "CEP")?.Value ?? string.Empty;
+
+                    // Destinatário
+                    var dest = infNFe.Element(ns + "dest");
+                    nota.DestinatarioCNPJ = dest?.Element(ns + "CNPJ")?.Value ?? string.Empty;
+                    nota.DestinatarioNome = dest?.Element(ns + "xNome")?.Value ?? string.Empty;
+
+                    //// Salva no banco de dados
+                    //var collection = DatabaseConnect.Database.GetCollection<NotaData>("notas");
+                    //collection.Upsert(nota);
+
+                    MessageBox.Show(
+                        "Nota fiscal importada com sucesso!\n\n" +
+                        $"Número: {nota.NumeroNota}\n" +
+                        $"Emissão: {nota.DataEmissao:dd/MM/yyyy}\n" +
+                        $"Emitente: {nota.EmitenteNome}",
+                        "Sucesso",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Erro ao importar arquivo XML:\n{ex.Message}",
+                        "Erro",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void FecharLista_Click(object sender, RoutedEventArgs e)
+        {
+            // Deixa lista invisível
+            Lista.Visibility = Visibility.Collapsed;
+
+            // Mostra botão
+            ToggleLista.Visibility = Visibility.Visible;
+        }
+
+
     }
 }

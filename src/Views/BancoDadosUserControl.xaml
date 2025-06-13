@@ -120,6 +120,11 @@
                         <TextBlock x:Name="UltimoBackupImportadoText" Text="Último backup importado: Nenhum" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
                         <TextBlock x:Name="UltimoBackupExportadoText" Text="Último backup exportado: Nenhum" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
                         <TextBlock x:Name="BackupAtualText" Text="Backup Atual: Não salvo" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBlock x:Name="EspacoTotalText" Foreground="{StaticResource TextBrush}" FontSize="14" Margin="0,0,0,5" Width="234"><Run Text="Espaço total na nuvem: "/><Run Language="pt-br" Text="Carregando"/></TextBlock>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,5,0,0">
+                            <ProgressBar x:Name="EspacoProgressBar" Width="120" Height="16" Minimum="0" Maximum="100" Value="0" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="EspacoPorcentagemText" Text="0%" Foreground="{StaticResource TextBrush}" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Grid>
