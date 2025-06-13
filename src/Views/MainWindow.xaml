@@ -76,6 +76,15 @@
                             <TextBlock x:Name="TextCadastro" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Cadastrar"/></TextBlock>
                         </StackPanel>
                     </Button>
+                    <!-- Adicionar após o BtnCadastro -->
+                    <!-- Substitua o botão de boletos por este: -->
+                    <Button x:Name="BtnBoletos" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <!-- Usa ícone de cadastro temporariamente -->
+                            <Image x:Name="IconBoletos" Source="/assets/Icons/NotSelected/CadastroNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock x:Name="TextBoletos" Style="{StaticResource MenuItemTextStyle}"><Run Language="pt-br" Text="Boletos (Teste)"/></TextBlock>
+                        </StackPanel>
+                    </Button>
                     <Button x:Name="BtnDashboard" Style="{StaticResource MenuButtonStyle}" Click="MenuButton_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image x:Name="IconDashboard" Source="/assets/Icons/NotSelected/GraficoNS.png" Width="24" Height="24" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>

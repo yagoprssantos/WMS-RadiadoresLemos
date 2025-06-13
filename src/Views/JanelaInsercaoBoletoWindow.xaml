@@ -1,0 +1,75 @@
+﻿<Window x:Class="WMS_RadiadoresLemos_WPF.src.Views.JanelaInsercaoBoletoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Inserir Dados Extraídos do Boleto" 
+        Height="600" Width="500"
+        Background="{StaticResource BackgroundBrush}"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+    <Grid Margin="20">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="20" Background="{StaticResource PanelBackgroundBrush}">
+            <StackPanel>
+                <TextBlock Text="📋 Inserir Dados Extraídos" FontSize="18" FontWeight="Bold" 
+                           Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+                <TextBlock Text="Cole aqui os dados extraídos pela aplicação web:" 
+                           FontSize="14" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10"/>
+
+                <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Beneficiário:" FontWeight="Bold" Margin="0,5,10,5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtBeneficiario" Grid.Row="0" Grid.Column="1" Margin="0,5" Background="{StaticResource SecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="CNPJ:" FontWeight="Bold" Margin="0,5,10,5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtCNPJ" Grid.Row="1" Grid.Column="1" Margin="0,5" Background="{StaticResource SecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Pagador:" FontWeight="Bold" Margin="0,5,10,5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtPagador" Grid.Row="2" Grid.Column="1" Margin="0,5" Background="{StaticResource SecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Valor:" FontWeight="Bold" Margin="0,5,10,5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtValor" Grid.Row="3" Grid.Column="1" Margin="0,5" Background="{StaticResource SecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Vencimento:" FontWeight="Bold" Margin="0,5,10,5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtVencimento" Grid.Row="4" Grid.Column="1" Margin="0,5" Background="{StaticResource SecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Nosso Número:" FontWeight="Bold" Margin="0,5,10,5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtNossoNumero" Grid.Row="5" Grid.Column="1" Margin="0,5" Background="{StaticResource SecondaryBrush}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Linha Digitável:" FontWeight="Bold" Margin="0,5,10,5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="TxtLinhaDigitavel" Grid.Row="6" Grid.Column="1" Margin="0,5" Background="{StaticResource SecondaryBrush}"/>
+                    </Grid>
+                </ScrollViewer>
+
+                <Border Background="{StaticResource SecondaryBrush}" CornerRadius="10" Padding="15" Margin="0,20,0,20">
+                    <StackPanel>
+                        <TextBlock Text="💡 Como usar:" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentBrush}"/>
+                        <TextBlock Text="1. Copie os dados da aplicação web" FontSize="12" Foreground="{StaticResource TextBrush}" Margin="0,5,0,0"/>
+                        <TextBlock Text="2. Cole nos campos acima" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                        <TextBlock Text="3. Clique em 'Confirmar'" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="✅ Confirmar" Style="{StaticResource EmphasisButtonStyle}" 
+                            Click="Confirmar_Click" Margin="0,0,10,0" Padding="20,10"/>
+                    <Button Content="❌ Cancelar" Style="{StaticResource CancelButtonStyle}" 
+                            Click="Cancelar_Click" Margin="10,0,0,0" Padding="20,10"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

@@ -14,6 +14,7 @@ using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using WMS_RadiadoresLemos_WPF;
 
+
 namespace WMS_RadiadoresLemos_WPF
 {
     public partial class MainWindow : Window
@@ -70,6 +71,7 @@ namespace WMS_RadiadoresLemos_WPF
                         new RegistroUserControl(),
                         new ControleEstoqueUserControl(),
                         new CadastroUserControl(),
+                        new BoletoTestUserControl(), // 👈 ADICIONE ESTA LINHA
                         new DashboardUserControl(),
                         new NotificacoesUserControl(),
                         new ConfiguracaoUserControl()
@@ -219,6 +221,9 @@ namespace WMS_RadiadoresLemos_WPF
                         title = "Cadastro";
                         iconPath = "/assets/Icons/Selected/CadastroS.png";
                         break;
+                    case "BtnBoletos": // 👈 ADICIONE ESTE CASE
+                        ContentArea.Content = new BoletoTestUserControl();
+                        break;
                     case "BtnDashboard":
                         control = new DashboardUserControl();
                         title = "Relatório";
@@ -336,12 +341,114 @@ namespace WMS_RadiadoresLemos_WPF
                 "IconRegistro" => state == "Selected" ? "historicos" : "HistoricoNS",
                 "IconEstoque" => state == "Selected" ? "CaixaS" : "CaixaNS",
                 "IconCadastro" => state == "Selected" ? "CadastroS" : "CadastroNS",
+                "IconBoletos" => state == "Selected" ? "CadastroS" : "CadastroNS", // 👈 USA ÍCONE DE CADASTRO TEMPORARIAMENTE
                 "IconDashboard" => state == "Selected" ? "GraficoS" : "GraficoNS",
                 "IconNotificacoes" => state == "Selected" ? "SinoS" : "SinoNS",
                 "IconConfiguracoes" => state == "Selected" ? "EngrenagemS" : "EngrenagemNS",
                 "IconSair" => state == "Selected" ? "SairS" : "SairNS",
                 _ => throw new ArgumentException("Nome de ícone desconhecido", nameof(iconName))
             };
+        }
+
+
+        // Métodos para atualizar o título da janela e o ícone do botão
+        // No MainWindow.xaml.cs, SUBSTITUA completamente o método UpdateTitle():
+        private void UpdateTitle()
+        {
+            if (ContentArea.Content is ComprasUserControl)
+            {
+                TitleTextBlock.Text = "Compras";
+            }
+            else if (ContentArea.Content is VendasUserControl)
+            {
+                TitleTextBlock.Text = "Vendas";
+            }
+            else if (ContentArea.Content is RegistroUserControl)
+            {
+                TitleTextBlock.Text = "Registro";
+            }
+            else if (ContentArea.Content is ControleEstoqueUserControl)
+            {
+                TitleTextBlock.Text = "Estoque";
+            }
+            else if (ContentArea.Content is CadastroUserControl)
+            {
+                TitleTextBlock.Text = "Cadastro";
+            }
+            else if (ContentArea.Content is BoletoTestUserControl) // 👈 ADICIONE ESTA LINHA
+            {
+                TitleTextBlock.Text = "Boletos (Teste)";
+            }
+            else if (ContentArea.Content is DashboardUserControl)
+            {
+                TitleTextBlock.Text = "Relatório";
+            }
+            else if (ContentArea.Content is NotificacoesUserControl)
+            {
+                TitleTextBlock.Text = "Notificações";
+            }
+            else if (ContentArea.Content is ConfiguracaoUserControl)
+            {
+                TitleTextBlock.Text = "Configurações";
+            }
+        }
+        private void UpdateIcon()
+        {
+            Uri? iconUri = null; 
+
+            if (ContentArea.Content is ComprasUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/ComprarS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is VendasUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/PranchetaS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is RegistroUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/historicos.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is ControleEstoqueUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/CaixaS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is CadastroUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is BoletoTestUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative); // 👈 TEMPORÁRIO
+            }
+            else if (ContentArea.Content is DashboardUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/GraficoS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is NotificacoesUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/SinoS.png", UriKind.Relative);
+            }
+            else if (ContentArea.Content is ConfiguracaoUserControl)
+            {
+                iconUri = new Uri("/assets/Icons/Selected/EngrenagemS.png", UriKind.Relative);
+            }
+
+            if (iconUri != null)
+            {
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = iconUri;
+                bitmap.DecodePixelWidth = 64; 
+                bitmap.DecodePixelHeight = 64;
+                bitmap.EndInit();
+                RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
+                IconImage.Source = bitmap;
+            }
+            else
+            {
+                // Limpa o ícone se nenhum controle corresponder ou se ContentArea estiver vazio
+                IconImage.Source = null;
+            }
         }
 
         // Método para lidar com o fechamento da janela

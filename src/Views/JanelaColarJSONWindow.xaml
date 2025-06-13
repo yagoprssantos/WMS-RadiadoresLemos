@@ -1,0 +1,51 @@
+﻿<Window x:Class="WMS_RadiadoresLemos_WPF.src.Views.JanelaColarJSONWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Colar JSON da Aplicação Web" 
+        Height="500" Width="600"
+        Background="{StaticResource BackgroundBrush}"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+    <Grid Margin="20">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="20" Background="{StaticResource PanelBackgroundBrush}">
+            <StackPanel>
+                <TextBlock Text="📋 Colar JSON da Aplicação Web" FontSize="18" FontWeight="Bold" 
+                           Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+                <Border Background="{StaticResource SecondaryBrush}" CornerRadius="10" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="🔧 INSTRUÇÕES:" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentBrush}"/>
+                        <TextBlock Text="1. Na aplicação web, após a extração, vá até 'JSON Estruturado'" FontSize="12" Foreground="{StaticResource TextBrush}" Margin="0,5,0,0"/>
+                        <TextBlock Text="2. Copie TODO o conteúdo da caixa JSON (Ctrl+A, Ctrl+C)" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                        <TextBlock Text="3. Cole aqui na caixa abaixo (Ctrl+V)" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                        <TextBlock Text="4. Clique em 'Importar Dados'" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Cole o JSON aqui:" FontSize="14" Foreground="{StaticResource TextBrush}" Margin="0,0,0,10"/>
+
+                <ScrollViewer Height="250" VerticalScrollBarVisibility="Auto">
+                    <TextBox x:Name="TxtJSON" 
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap" 
+                             VerticalScrollBarVisibility="Auto"
+                             Background="{StaticResource SecondaryBrush}"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             Padding="10"
+                             BorderThickness="1"
+                             BorderBrush="{StaticResource HoverBackgroundBrush}"/>
+                </ScrollViewer>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <Button Content="✅ Importar Dados" Style="{StaticResource EmphasisButtonStyle}" 
+                            Click="ImportarDados_Click" Margin="0,0,10,0" Padding="20,10"/>
+                    <Button Content="🧹 Limpar" Style="{StaticResource HoverButtonStyle}" 
+                            Click="Limpar_Click" Margin="0,0,10,0" Padding="20,10"/>
+                    <Button Content="❌ Cancelar" Style="{StaticResource CancelButtonStyle}" 
+                            Click="Cancelar_Click" Margin="10,0,0,0" Padding="20,10"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
