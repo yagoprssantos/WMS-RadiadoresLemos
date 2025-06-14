@@ -29,7 +29,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 _listener.Start();
                 _isListening = true;
 
-                MessageBox.Show($"✅ Serviço de integração iniciado na porta {_port}", "Integração Ativa", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"✅ Serviço de integração iniciado na porta {_port}", "Integração Ativa", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
                 await Task.Run(() => EscutarRequisicoes());
             }
@@ -38,13 +38,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 MessageBox.Show($"❌ Erro de permissão na porta {_port}.\n\n" +
                                "Execute o aplicativo como Administrador ou use outra porta.\n\n" +
                                $"Erro técnico: {ex.Message}",
-                               "Erro de Permissão", MessageBoxButton.OK, MessageBoxImage.Warning);
+                               "Erro de Permissão", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao iniciar serviço de integração: {ex.Message}\n\n" +
                                "Tentando modo alternativo...",
-                               "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                               "Aviso", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);                                                                                                                                
             }
         }
 
@@ -87,7 +87,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            MessageBox.Show($"Erro no serviço: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show($"Erro no serviço: {ex.Message}", "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                         });
                     }
                 }
@@ -121,7 +121,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                     // 🔍 DEBUG: Mostrar JSON recebido
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        MessageBox.Show($"📋 JSON Recebido:\n\n{jsonData}", "DEBUG - JSON Raw", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show($"📋 JSON Recebido:\n\n{jsonData}", "DEBUG - JSON Raw", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                     });
 
                     var dadosExtraidos = JsonSerializer.Deserialize<BoletoExtraidoWebData>(jsonData);

@@ -657,7 +657,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             if (_todasCompras == null) return new List<CompraData>();
             return _todasCompras
-                .Where(c => (c.DataCompra.Date == data.Date) || (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date))
+                .Where(c => (c.DataCompra.Date == data.Date) || (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date));
 
             if (_comprasFiltradas == null)
                 return new List<CompraData>();

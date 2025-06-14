@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Windows;
 using WMS_RadiadoresLemos_WPF.src.Models;
 
 namespace WMS_RadiadoresLemos_WPF.src.Services
@@ -49,7 +51,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 : boletos.OrderByDescending(b => b.Valor).ToList();
         }
 
-
         /// <summary>
         /// Organiza boletos por beneficiário
         /// </summary>
@@ -65,20 +66,28 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         {
             return boletos.GroupBy(b => b.Status)
                          .ToDictionary(g => g.Key, g => g.Sum(b => b.Valor));
+        }
 
+        /// <summary>
+        /// Organiza o arquivo do boleto em pastas por ano/mês
+        /// </summary>
+        public static void OrganizarArquivoBoleto(BoletoData boleto, string numeroNotaFiscal)
+        {
+            try
+            {
                 // Obtém a extensão do arquivo original
                 string extensao = Path.GetExtension(boleto.CaminhoArquivo);
                 
                 // Cria o caminho base para os boletos
                 string caminhoBase = Path.Combine(
-                                                   Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                                                   "WMS-RadiadoresLemos",
-                                                   "Boletos"
-                                                 );
+                                                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                                                 "WMS-RadiadoresLemos",
+                                                 "Boletos"
+                                                );
 
                 // Cria as pastas do ano e mês
-                string pastaAno = Path.Combine(caminhoBase, boleto.Vencimento.Year.ToString());
-                string nomeMes = $"{boleto.Vencimento.Month} - {boleto.Vencimento.ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"))}";
+                string pastaAno = Path.Combine(caminhoBase, boleto.DataVencimento.Year.ToString());
+                string nomeMes = $"{boleto.DataVencimento.Month} - {boleto.DataVencimento.ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"))}";
                 string pastaMes = Path.Combine(pastaAno, nomeMes);
                 
                 // Cria as pastas se não existirem
@@ -105,13 +114,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao organizar boleto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao organizar boleto: {ex.Message}", "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
-
         }
 
-        // Método para retornar o caminho do boleto organizado
-        public string ObterCaminhoBoletoOrganizado(BoletoData boleto)
+        /// <summary>
+        /// Método para retornar o caminho do boleto organizado
+        /// </summary>
+        public static string ObterCaminhoBoletoOrganizado(BoletoData boleto)
         {
             // Apresenta o caminhoArquivo do boleto
             if (string.IsNullOrEmpty(boleto.CaminhoArquivo) || !File.Exists(boleto.CaminhoArquivo))
