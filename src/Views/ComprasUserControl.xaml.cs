@@ -35,9 +35,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CarregarCompras();
 
             CarregarCalendario(); // Se o calendário ainda for parte desta tela
-            if (OrderButton != null) // Garante que o botão de ordenação tenha o texto inicial correto
+            if (OrdenarButton != null) // Garante que o botão de ordenação tenha o texto inicial correto
             {
-                OrderButton.Content = _filtroTexto;
+                OrdenarButton.Content = _filtroTexto;
             }
 
             CarregarBoletos();
@@ -221,17 +221,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 // Encontrar o boleto com a data de vencimento mais próxima da data atual
                 DateTime hoje = DateTime.Today;
-                var boletosNaoVencidos = boletosCompra.Where(b => b.Vencimento >= hoje).ToList();
+                var boletosNaoVencidos = boletosCompra.Where(b => b.DataVencimento >= hoje).ToList();
 
                 if (boletosNaoVencidos.Any())
                 {
                     // Se há boletos não vencidos, pega o de vencimento mais próximo
-                    compra.ProximoVencimento = boletosNaoVencidos.OrderBy(b => b.Vencimento).First().Vencimento;
+                    compra.ProximoVencimento = boletosNaoVencidos.OrderBy(b => b.DataVencimento).First().DataVencimento;
                 }
                 else
                 {
                     // Se todos os boletos já venceram, pega o de vencimento mais recente
-                    compra.ProximoVencimento = boletosCompra.OrderByDescending(b => b.Vencimento).First().Vencimento;
+                    compra.ProximoVencimento = boletosCompra.OrderByDescending(b => b.DataVencimento).First().DataVencimento;
                 }
             }
         }
@@ -273,7 +273,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 day.HasPayment = VerificarComprasNaData(currentDate);
 
                 // Verificar se há boletos com vencimento neste dia
-                day.HasBoletoVencimento = VerificarBoletosNaData(currentDate);
+                day.HasPayment |= VerificarBoletosNaData(currentDate);
 
                 days.Add(day);
             }
@@ -303,7 +303,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             if (_todosBoletos == null) return false;
 
-            return _todosBoletos.Any(b => b.Vencimento.Date == data.Date && b.Pagamento == null);
+            return _todosBoletos.Any(b => b.DataVencimento.Date == data.Date && b.Pagamento == null);
         }
 
         // 2. Pesquisa
@@ -421,7 +421,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
             _ordenacaoAtual = "recente"; // Resetar ordenação
             _filtroTexto = "Ordenar por";
-            if (OrderButton != null) OrderButton.Content = _filtroTexto;
+            if (OrdenarButton != null) OrdenarButton.Content = _filtroTexto;
 
             AplicarOrdenacao();
             AtualizarInterfaceCompras();
@@ -555,42 +555,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         }
 
 
-        private void CarregarCalendario()
-        {
-            CalendarMonthText.Text = _currentCalendarMonth.ToString("MMMM yyyy", new System.Globalization.CultureInfo("pt-BR")); // Formatado para Português
-
-            var days = new List<CalendarDayViewModel>();
-            DateTime firstDayOfMonth = new DateTime(_currentCalendarMonth.Year, _currentCalendarMonth.Month, 1);
-            int offset = ((int)firstDayOfMonth.DayOfWeek);
-
-            DateTime dayIterator = firstDayOfMonth.AddDays(-offset);
-
-            for (int i = 0; i < 42; i++)
-            {
-                var dayVM = new CalendarDayViewModel
-                {
-                    Day = dayIterator.Day.ToString(),
-                    IsCurrentMonth = dayIterator.Month == _currentCalendarMonth.Month,
-                    IsToday = dayIterator.Date == DateTime.Today,
-                    Date = dayIterator.Date,
-                    HasPayment = VerificarPagamentosNaData(dayIterator.Date)
-                };
-                days.Add(dayVM);
-                dayIterator = dayIterator.AddDays(1);
-            }
-            CalendarDaysControl.ItemsSource = days;
-        }
-
-        private bool VerificarPagamentosNaData(DateTime data)
-        {
-            if (_todasCompras == null) return false;
-            return _todasCompras.Any(c =>
-                (c.DataCompra.Date == data.Date) ||
-                (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date)
-            );
-        }
-
-
         private void CalendarDayButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is CalendarDayViewModel dayVM)
@@ -599,13 +563,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 dayVM.IsSelected = true;
                 _selectedDay = dayVM;
 
+                DateTime selectedDate = dayVM.Date;
 
                 // Atualizar o texto da data selecionada
                 DataSelecionadaText.Text = selectedDate.ToString("dd 'de' MMMM 'de' yyyy");
 
                 // Buscar compras para a data selecionada
                 var comprasNoDia = BuscarComprasNoDia(selectedDate);
-
 
                 // Buscar boletos para a data selecionada
                 var boletosNoDia = BuscarBoletosNoDia(selectedDate);
@@ -634,7 +598,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     SemComprasNoDiaText.Visibility = Visibility.Visible;
                 }
 
-
                 // Configurar visualização de boletos
                 if (boletosNoDia.Any())
                 {
@@ -648,23 +611,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 }
 
                 // Mostrar o painel de detalhes
-
                 DiaDetalhesPanel.Visibility = Visibility.Visible;
             }
         }
         private List<CompraData> BuscarComprasNoDia(DateTime data)
         {
-
             if (_todasCompras == null) return new List<CompraData>();
+
             return _todasCompras
-                .Where(c => (c.DataCompra.Date == data.Date) || (c.DataPagamento.HasValue && c.DataPagamento.Value.Date == data.Date));
-
-            if (_comprasFiltradas == null)
-                return new List<CompraData>();
-
-            return _comprasFiltradas
-                .Where(c => c.DataCompra.Date == data.Date)
-
+                .Where(c =>
+                    c.DataCompra.Date == data.Date ||
+                    (c.DataPagamento != default && c.DataPagamento.Date == data.Date)) // Fixed: Removed HasValue and Value
                 .ToList();
         }
         private List<BoletoData> BuscarBoletosNoDia(DateTime data)
@@ -673,7 +630,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 return new List<BoletoData>();
 
             return _todosBoletos
-                .Where(b => b.Vencimento.Date == data.Date && b.Pagamento == null)
+                .Where(b => b.DataVencimento.Date == data.Date && b.Pagamento == null)
                 .ToList();
         }
 

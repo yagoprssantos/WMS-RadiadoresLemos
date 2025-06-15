@@ -18,6 +18,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Models
         [BsonField("dataCompra")]
         public DateTime DataCompra { get; set; } = DateTime.Now;
 
+        [BsonField("dataPagamento")]
+        public DateTime DataPagamento { get; set; }
+
         [BsonField("tipoPagamento")]
         public string TipoPagamento { get; set; } = string.Empty; // "À vista" ou "Parcelado"
 

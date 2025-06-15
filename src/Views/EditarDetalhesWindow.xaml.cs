@@ -514,7 +514,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 Id = Guid.NewGuid().ToString(),
                 NotaFiscal = _compraEditada.NotaFiscal,
                 FornecedorId = _compraEditada.FornecedorId,
-                Vencimento = DateTime.Now.AddMonths(proximaParcela - 1),
+                DataVencimento = DateTime.Now.AddMonths(proximaParcela - 1),
                 Parcela = proximaParcela,
                 CaminhoArquivo = "",
                 NomeArquivo = $"Boleto NF{_compraEditada.NotaFiscal} - Parcela {proximaParcela}"

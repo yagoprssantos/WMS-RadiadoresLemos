@@ -118,9 +118,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             }
         }
 
-        /// <summary>
-        /// Método para retornar o caminho do boleto organizado
-        /// </summary>
         public static string ObterCaminhoBoletoOrganizado(BoletoData boleto)
         {
             // Apresenta o caminhoArquivo do boleto

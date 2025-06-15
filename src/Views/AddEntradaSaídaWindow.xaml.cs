@@ -863,11 +863,11 @@ namespace WMS_RadiadoresLemos_WPF
                             boletoData.FornecedorId = fornecedorSelecionadoId;
                         }
                         boletoData.NotaFiscal = numeroNotaFiscalAtual;
-                        boletoData.Id = int.Parse(DateTime.Now.ToString("MMddHHmm")) + boletoData.Parcela; // ✅ CORRIGIDO
+                        boletoData.Id = (int.Parse(DateTime.Now.ToString("MMddHHmm")) + boletoData.Parcela).ToString();
                         compra.Boletos.Add(boletoData.Id.ToString()); // ✅ CONVERTIDO PARA STRING
 
 
-                        var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado);
+                        var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionadoId);
                         if (fornecedor == null)
                         {
                             MessageBox.Show("Fornecedor não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -994,8 +994,8 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var compra = new CompraData
             {
-                FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionado)?.Id ?? string.Empty,
-                FornecedorNome = fornecedorSelecionado ?? string.Empty,
+                FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionadoId)?.Id ?? string.Empty,
+                FornecedorNome = fornecedorSelecionadoNome ?? string.Empty,
                 DataCompra = DateTime.Now,
                 TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
                 Parcelas = parcelas,
@@ -1010,6 +1010,28 @@ namespace WMS_RadiadoresLemos_WPF
                 compra.Id = Guid.NewGuid().ToString();
             return compra;
         }
+
+        private VendaData CriarVendaData(ProdutoData produto, int quantidade, double preco, int parcelas, string detalhes, MovimentacaoData movimentacao)
+        {
+            var venda = new VendaData
+            {
+                ClienteId = clienteSelecionadoId ?? string.Empty,
+                ClienteCNPJ = clienteSelecionadoDisplay ?? string.Empty,
+                Pedido = "Pedido " + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                DataCompra = DateTime.Now,
+                TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
+                Parcelas = parcelas,
+                Itens = new List<MovimentacaoData> { movimentacao },
+                ValorTotal = (decimal)(preco * quantidade),
+                Detalhes = detalhes
+            };
+            if (!string.IsNullOrEmpty(venda.NotaFiscal))
+                venda.SetIdFromNotaFiscal();
+            else
+                venda.Id = Guid.NewGuid().ToString();
+            return venda;
+        }
+
         private BoletoData CriarBoletoData(BoletoData boleto, string numeroNotaFiscal, FornecedorData fornecedor)
         {
             // Criar nome do boleto padronizado
@@ -1019,7 +1041,7 @@ namespace WMS_RadiadoresLemos_WPF
             var novoBoleto = new BoletoData
             {
                 Parcela = boleto.Parcela,
-                Vencimento = boleto.Vencimento,
+                DataVencimento = boleto.DataVencimento,
                 Pagamento = boleto.Pagamento,
                 NomeArquivo = nomeBoleto, // Use o nome formatado
                 CaminhoArquivo = boleto.CaminhoArquivo,
@@ -1032,34 +1054,450 @@ namespace WMS_RadiadoresLemos_WPF
             return novoBoleto;
         }
 
-        private async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao) { try { if (movimentacao == null) { MessageBox.Show("Movimentação inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning); return; } if (DatabaseConnect.Database == null) return; var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes"); collection.Insert(movimentacao); var produto = produtos.FirstOrDefault(p => p.Id == movimentacao.ProdutoId); if (produto != null) { AtualizarProdutoNoBanco(produto, movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco); } } catch (Exception ex) { MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); } }
-        private void AtualizarProdutoNoBanco(ProdutoData produto, bool isEntrada, int quantidade, double preco) { if (produto == null) return; if (isEntrada) { double precoTotal = (produto.Preco * produto.Quantidade) + (preco * quantidade); int novaQuantidade = produto.Quantidade + quantidade; produto.Preco = novaQuantidade > 0 ? precoTotal / novaQuantidade : 0; produto.Quantidade = novaQuantidade; } else { produto.Quantidade -= quantidade; if (produto.Quantidade < 0) produto.Quantidade = 0; } var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos"); produtoCollection.Update(produto); }
-        private void LimparCampos() { ProdutoComboBox.SelectedItem = null; ProdutoComboBox.Text = string.Empty; produtoSelecionado = null; if (usePositiveNumber) { LimparComboBox(FornecedorComboBox, out fornecedorSelecionadoNome); fornecedorSelecionadoId = null; } else { LimparComboBox(ClienteComboBox, out clienteSelecionadoDisplay); clienteSelecionadoId = null; } LimparTextBox(QuantidadeTextBox, PrecoTextBox, ParcelasTextBox, DetalhesTextBox, NotaFiscalTextBox); FormaPagamentoComboBox.SelectedIndex = -1; formaPagamentoSelecionada = null; ParcelasTextBox.IsEnabled = true; ParcelasTextBox.Text = ""; boletos.Clear(); LimparTextBlock(TipoAntesDadoTextBlock, MarcaAntesDadoTextBlock, CodigoAntesDadoTextBlock, PrecoAntesDadoTextBlock, QuantidadeAntesDadoTextBlock, TipoDepoisDadoTextBlock, MarcaDepoisDadoTextBlock, CodigoDepoisDadoTextBlock, PrecoDepoisDadoTextBlock, QuantidadeDepoisDadoTextBlock); ProdutoAntesDepois.Visibility = Visibility.Collapsed; ProdutoComboBox.Focus(); Invalida(); }
-        private void LimparComboBox(ComboBox comboBox, out string? selecionado) { comboBox.SelectedItem = null; comboBox.Text = string.Empty; selecionado = null; }
-        private void LimparTextBox(params TextBox[] textBoxes) { foreach (var tb in textBoxes) tb.Clear(); }
-        private void LimparTextBlock(params TextBlock[] textBlocks) { foreach (var tb in textBlocks) tb.Text = string.Empty; }
-        private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) { e.Handled = !e.Text.All(char.IsDigit); }
-        private void QuantidadeTextBox_Pasting(object sender, DataObjectPastingEventArgs e) { if (e.DataObject.GetDataPresent(typeof(string))) { string text = (string)e.DataObject.GetData(typeof(string)); if (!text.All(char.IsDigit)) e.CancelCommand(); } else { e.CancelCommand(); } }
-        private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e) { if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text)) { if (!textBox.Text.All(char.IsDigit)) { textBox.Clear(); return; } if (!usePositiveNumber && produtoSelecionado != null && int.TryParse(produtoSelecionado.Quantidade.ToString(), out int qtdAntes) && int.TryParse(textBox.Text, out int qtdDigitada)) { if (qtdAntes - qtdDigitada < 0) { MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); textBox.Clear(); return; } } if (produtoSelecionado != null) { AtualizarCamposProduto(produtoSelecionado); DestacarMudancas(); ValidarMovimentacao(); } } }
-        private void QuantidadeTextBox_TextChanged(object sender, TextChangedEventArgs e) { if (produtoSelecionado != null) { if (!usePositiveNumber && produtoSelecionado != null && int.TryParse(produtoSelecionado.Quantidade.ToString(), out int qtdAntes) && int.TryParse(QuantidadeTextBox.Text, out int qtdDigitada)) { if (qtdAntes - qtdDigitada < 0) { /*MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); QuantidadeTextBox.Clear(); return; */} } AtualizarCamposProduto(produtoSelecionado); DestacarMudancas(); ValidarMovimentacao(); } }
-        private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) { var textBox = (TextBox)sender; string text = textBox.Text.Insert(textBox.CaretIndex, e.Text); e.Handled = !IsValidDecimalInput(text); }
-        private void PrecoTextBox_Pasting(object sender, DataObjectPastingEventArgs e) { if (e.DataObject.GetDataPresent(typeof(string))) { string text = (string)e.DataObject.GetData(typeof(string)); if (!IsValidDecimalInput(text)) e.CancelCommand(); } else { e.CancelCommand(); } }
-        private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e) { if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text)) { if (!IsValidDecimalInput(textBox.Text)) textBox.Clear(); else { if (double.TryParse(textBox.Text.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double valor)) textBox.Text = valor.ToString("N2", CultureInfo.GetCultureInfo("pt-BR")); } if (produtoSelecionado != null) { AtualizarCamposProduto(produtoSelecionado); DestacarMudancas(); ValidarMovimentacao(); } } }
-        private bool IsValidDecimalInput(string text) { if (string.IsNullOrEmpty(text)) return true; int commaCount = text.Count(c => c == ','); if (commaCount > 1) return false; if (text.StartsWith(",")) return false; return text.All(c => char.IsDigit(c) || c == ','); }
-        private void PrecoTextBox_TextChanged(object sender, TextChangedEventArgs e) { if (produtoSelecionado != null) { AtualizarCamposProduto(produtoSelecionado); DestacarMudancas(); ValidarMovimentacao(); } }
-        private void ParcelasTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) { if (!e.Text.All(char.IsDigit)) { e.Handled = true; return; } var textBox = sender as TextBox; string novoTexto = textBox != null ? textBox.Text.Insert(textBox.CaretIndex, e.Text) : e.Text; if (int.TryParse(novoTexto, out int valor)) { e.Handled = valor > 12 || valor < 1; } else { e.Handled = true; } }
-        private void ParcelasTextBox_Pasting(object sender, DataObjectPastingEventArgs e) { if (e.DataObject.GetDataPresent(typeof(string))) { string text = (string)e.DataObject.GetData(typeof(string)); if (!text.All(char.IsDigit)) e.CancelCommand(); } else { e.CancelCommand(); } }
-        private void ParcelasTextBox_LostFocus(object sender, RoutedEventArgs e) { if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text)) { if (!textBox.Text.All(char.IsDigit) || !int.TryParse(textBox.Text, out int val) || val < 1 || val > 12) textBox.Clear(); } }
-        private void ParcelasTextBox_TextChanged(object sender, TextChangedEventArgs e) { /* Validação já ocorre em LostFocus e PreviewTextInput */ }
-        private void NotaFiscalTextBox_LostFocus(object sender, RoutedEventArgs e) { /* Validação simples, pode ser expandida */ }
-        private void NotaFiscalTextBox_TextChanged_1(object sender, TextChangedEventArgs e) { /* Validação simples, pode ser expandida */ }
-        private void NotaFiscalTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) { /* Permite números e alguns caracteres comuns em NF */ e.Handled = !e.Text.All(c => char.IsLetterOrDigit(c) || c == '-' || c == '/'); }
-        private void NotaFiscalTextBox_Pasting(object sender, DataObjectPastingEventArgs e) { if (e.DataObject.GetDataPresent(typeof(string))) { string text = (string)e.DataObject.GetData(typeof(string)); if (!text.All(c => char.IsLetterOrDigit(c) || c == '-' || c == '/')) e.CancelCommand(); } else { e.CancelCommand(); } }
-        private bool ValidarMovimentacao() { if (produtoSelecionado == null) { Invalida(); return false; } if (usePositiveNumber && string.IsNullOrEmpty(fornecedorSelecionadoId) && string.IsNullOrEmpty(fornecedorSelecionadoNome)) { Invalida(); return false; } else if (!usePositiveNumber && string.IsNullOrEmpty(clienteSelecionadoId) && string.IsNullOrEmpty(clienteSelecionadoDisplay)) { Invalida(); return false; } if (!int.TryParse(QuantidadeTextBox.Text, out int quantidade) || quantidade <= 0) { Invalida(); return false; } if (!usePositiveNumber && produtoSelecionado.Quantidade < quantidade) { MessageBox.Show("Quantidade insuficiente no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); Invalida(); return false; } if (!double.TryParse(PrecoTextBox.Text.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double preco) || preco <= 0) { Invalida(); return false; } Valida(); return true; }
-        private bool ValidarFinanceiro() { if (string.IsNullOrEmpty(formaPagamentoSelecionada)) { return false; } if (!int.TryParse(ParcelasTextBox.Text, out int parcelas) || parcelas <= 0 || parcelas > 12) { return false; } if (string.IsNullOrWhiteSpace(NotaFiscalTextBox.Text)) { return false; } return true; }
-        private void Valida() { StatusMessage.Text = "Movimentação VÁLIDA!"; StatusMessage.Foreground = (Brush)FindResource("AccentBrush"); Financeiro.Visibility = Visibility.Visible; }
-        private void Invalida() { StatusMessage.Text = "Movimentação INVÁLIDA"; StatusMessage.Foreground = (Brush)FindResource("CancelButtonHoverBrush"); Financeiro.Visibility = Visibility.Collapsed; }
-        private void ImportarXMLButton_Click(object sender, RoutedEventArgs e) { }
+        private async Task RegistrarMovimentacaoAsync(MovimentacaoData movimentacao)
+        {
+            try
+            {
+                if (movimentacao == null)
+                {
+                    MessageBox.Show("Movimentação inválida.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (DatabaseConnect.Database == null)
+                    return;
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                collection.Insert(movimentacao);
+
+                var produto = produtos.FirstOrDefault(p => p.Id == movimentacao.ProdutoId);
+                if (produto != null)
+                {
+                    AtualizarProdutoNoBanco(produto, movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao registrar movimentação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void AtualizarProdutoNoBanco(ProdutoData produto, bool isEntrada, int quantidade, double preco)
+        {
+            if (produto == null)
+                return;
+
+            if (isEntrada)
+            {
+                // Cálculo do preço médio ponderado para entradas
+                double precoTotal = (produto.Preco * produto.Quantidade) + (preco * quantidade);
+                int novaQuantidade = produto.Quantidade + quantidade;
+                produto.Preco = novaQuantidade > 0 ? precoTotal / novaQuantidade : 0;
+                produto.Quantidade = novaQuantidade;
+            }
+            else
+            {
+                // Diminuição da quantidade para saídas
+                produto.Quantidade -= quantidade;
+                if (produto.Quantidade < 0)
+                    produto.Quantidade = 0;
+            }
+
+            var produtoCollection = DatabaseConnect.Database.GetCollection<ProdutoData>("produtos");
+            produtoCollection.Update(produto);
+        }
+
+        private void LimparCampos()
+        {
+            // Limpa seleção de produto
+            ProdutoComboBox.SelectedItem = null;
+            ProdutoComboBox.Text = string.Empty;
+            produtoSelecionado = null;
+
+            // Limpa fornecedor ou cliente dependendo do modo
+            if (usePositiveNumber)
+            {
+                LimparComboBox(FornecedorComboBox, out fornecedorSelecionadoNome);
+                fornecedorSelecionadoId = null;
+            }
+            else
+            {
+                LimparComboBox(ClienteComboBox, out clienteSelecionadoDisplay);
+                clienteSelecionadoId = null;
+            }
+
+            // Limpa campos de texto
+            LimparTextBox(QuantidadeTextBox, PrecoTextBox, ParcelasTextBox, DetalhesTextBox, NotaFiscalTextBox);
+
+            // Limpa forma de pagamento
+            FormaPagamentoComboBox.SelectedIndex = -1;
+            formaPagamentoSelecionada = null;
+
+            // Reset parcelas
+            ParcelasTextBox.IsEnabled = true;
+            ParcelasTextBox.Text = "";
+
+            // Limpa boletos
+            boletos.Clear();
+
+            // Limpa campos de comparação do produto
+            LimparTextBlock(
+                TipoAntesDadoTextBlock, MarcaAntesDadoTextBlock, CodigoAntesDadoTextBlock,
+                PrecoAntesDadoTextBlock, QuantidadeAntesDadoTextBlock, TipoDepoisDadoTextBlock,
+                MarcaDepoisDadoTextBlock, CodigoDepoisDadoTextBlock, PrecoDepoisDadoTextBlock,
+                QuantidadeDepoisDadoTextBlock
+            );
+
+            // Esconde a seção de comparação
+            ProdutoAntesDepois.Visibility = Visibility.Collapsed;
+
+            // Foca no combo de produtos
+            ProdutoComboBox.Focus();
+
+            // Define o estado como inválido
+            Invalida();
+        }
+
+        private void LimparComboBox(ComboBox comboBox, out string? selecionado)
+        {
+            comboBox.SelectedItem = null;
+            comboBox.Text = string.Empty;
+            selecionado = null;
+        }
+
+        private void LimparTextBox(params TextBox[] textBoxes)
+        {
+            foreach (var tb in textBoxes)
+            {
+                tb.Clear();
+            }
+        }
+
+        private void LimparTextBlock(params TextBlock[] textBlocks)
+        {
+            foreach (var tb in textBlocks)
+            {
+                tb.Text = string.Empty;
+            }
+        }
+        private void QuantidadeTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite apenas dígitos numéricos
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+        private void QuantidadeTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void QuantidadeTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                // Verifica se contém apenas dígitos
+                if (!textBox.Text.All(char.IsDigit))
+                {
+                    textBox.Clear();
+                    return;
+                }
+
+                // Verifica se há quantidade suficiente no estoque para saídas
+                if (!usePositiveNumber && produtoSelecionado != null &&
+                    int.TryParse(produtoSelecionado.Quantidade.ToString(), out int qtdAntes) &&
+                    int.TryParse(textBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        textBox.Clear();
+                        return;
+                    }
+                }
+
+                // Atualiza os campos do produto se um produto estiver selecionado
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+                }
+            }
+        }
+        private void QuantidadeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                // Verifica estoque para saídas (sem mostrar mensagem, apenas para validação visual)
+                if (!usePositiveNumber && produtoSelecionado != null &&
+                    int.TryParse(produtoSelecionado.Quantidade.ToString(), out int qtdAntes) &&
+                    int.TryParse(QuantidadeTextBox.Text, out int qtdDigitada))
+                {
+                    if (qtdAntes - qtdDigitada < 0)
+                    {
+                        // Comentado para não mostrar mensagem a cada digitação
+                        // MessageBox.Show("Falta no estoque.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        // QuantidadeTextBox.Clear();
+                        // return;
+                    }
+                }
+
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+                ValidarMovimentacao();
+            }
+        }
+        private void PrecoTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            var textBox = (TextBox)sender;
+            string text = textBox.Text.Insert(textBox.CaretIndex, e.Text);
+            e.Handled = !IsValidDecimalInput(text);
+        }
+        private void PrecoTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsValidDecimalInput(text))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void PrecoTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                if (!IsValidDecimalInput(textBox.Text))
+                {
+                    textBox.Clear();
+                }
+                else
+                {
+                    // Formata o valor como moeda brasileira
+                    if (double.TryParse(textBox.Text.Replace(",", "."),
+                        NumberStyles.Any, CultureInfo.InvariantCulture, out double valor))
+                    {
+                        textBox.Text = valor.ToString("N2", CultureInfo.GetCultureInfo("pt-BR"));
+                    }
+                }
+
+                if (produtoSelecionado != null)
+                {
+                    AtualizarCamposProduto(produtoSelecionado);
+                    DestacarMudancas();
+                    ValidarMovimentacao();
+                }
+            }
+        }
+        private bool IsValidDecimalInput(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return true;
+
+            int commaCount = text.Count(c => c == ',');
+
+            // Verifica se há mais de uma vírgula
+            if (commaCount > 1)
+                return false;
+
+            // Verifica se começa com vírgula
+            if (text.StartsWith(","))
+                return false;
+
+            // Verifica se contém apenas dígitos e vírgula
+            return text.All(c => char.IsDigit(c) || c == ',');
+        }
+        private void PrecoTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (produtoSelecionado != null)
+            {
+                AtualizarCamposProduto(produtoSelecionado);
+                DestacarMudancas();
+                ValidarMovimentacao();
+            }
+        }
+        private void ParcelasTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Verifica se é um dígito
+            if (!e.Text.All(char.IsDigit))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var textBox = sender as TextBox;
+            string novoTexto = textBox != null ? textBox.Text.Insert(textBox.CaretIndex, e.Text) : e.Text;
+
+            // Verifica se o valor está entre 1 e 12
+            if (int.TryParse(novoTexto, out int valor))
+            {
+                e.Handled = valor > 12 || valor < 1;
+            }
+            else
+            {
+                e.Handled = true;
+            }
+        }
+        private void ParcelasTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(char.IsDigit))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private void ParcelasTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+            {
+                // Limpa o texto se não for um número entre 1 e 12
+                if (!textBox.Text.All(char.IsDigit) ||
+                    !int.TryParse(textBox.Text, out int val) ||
+                    val < 1 || val > 12)
+                {
+                    textBox.Clear();
+                }
+            }
+        }
+        private void ParcelasTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            /* Validação já ocorre em LostFocus e PreviewTextInput */
+        }
+        private void NotaFiscalTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            /* Validação simples, pode ser expandida */
+        }
+        private void NotaFiscalTextBox_TextChanged_1(object sender, TextChangedEventArgs e)
+        {
+            /* Validação simples, pode ser expandida */
+        }
+        private void NotaFiscalTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            /* Permite números e alguns caracteres comuns em NF */
+            e.Handled = !e.Text.All(c => char.IsLetterOrDigit(c) || c == '-' || c == '/');
+        }
+        private void NotaFiscalTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!text.All(c => char.IsLetterOrDigit(c) || c == '-' || c == '/'))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+        private bool ValidarMovimentacao()
+        {
+            // Validar se o produto foi selecionado
+            if (produtoSelecionado == null)
+            {
+                Invalida();
+                return false;
+            }
+
+            // Validar o fornecedor (para entrada) ou cliente (para saída)
+            if (usePositiveNumber && string.IsNullOrEmpty(fornecedorSelecionadoId) &&
+                string.IsNullOrEmpty(fornecedorSelecionadoNome))
+            {
+                Invalida();
+                return false;
+            }
+            else if (!usePositiveNumber && string.IsNullOrEmpty(clienteSelecionadoId) &&
+                     string.IsNullOrEmpty(clienteSelecionadoDisplay))
+            {
+                Invalida();
+                return false;
+            }
+
+            // Validar quantidade
+            if (!int.TryParse(QuantidadeTextBox.Text, out int quantidade) || quantidade <= 0)
+            {
+                Invalida();
+                return false;
+            }
+
+            // Verificar estoque para operações de saída
+            if (!usePositiveNumber && produtoSelecionado.Quantidade < quantidade)
+            {
+                MessageBox.Show(
+                    "Quantidade insuficiente no estoque.",
+                    "Erro",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                Invalida();
+                return false;
+            }
+
+            // Validar preço
+            if (!double.TryParse(
+                    PrecoTextBox.Text.Replace(",", "."),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out double preco) || preco <= 0)
+            {
+                Invalida();
+                return false;
+            }
+
+            Valida();
+            return true;
+        }
+        private bool ValidarFinanceiro()
+        {
+            // Validar forma de pagamento
+            if (string.IsNullOrEmpty(formaPagamentoSelecionada))
+            {
+                return false;
+            }
+
+            // Validar número de parcelas
+            if (!int.TryParse(ParcelasTextBox.Text, out int parcelas) || parcelas <= 0 || parcelas > 12)
+            {
+                return false;
+            }
+
+            // Validar nota fiscal
+            if (string.IsNullOrWhiteSpace(NotaFiscalTextBox.Text))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private void Valida()
+        {
+            StatusMessage.Text = "Movimentação VÁLIDA!";
+            StatusMessage.Foreground = (Brush)FindResource("AccentBrush");
+            Financeiro.Visibility = Visibility.Visible;
+        }
+        private void Invalida()
+        {
+            StatusMessage.Text = "Movimentação INVÁLIDA";
+            StatusMessage.Foreground = (Brush)FindResource("CancelButtonHoverBrush");
+            Financeiro.Visibility = Visibility.Collapsed;
+        }
+        private void ImportarXMLButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Implementação futura para importação de XML
+        }
 
         private void EditarItem_Click(object sender, RoutedEventArgs e)
         {
@@ -1126,12 +1564,12 @@ namespace WMS_RadiadoresLemos_WPF
             if (usePositiveNumber)
             {
                 FornecedorComboBox.Text = item.FornecedorId;
-                fornecedorSelecionado = item.FornecedorId;
+                fornecedorSelecionadoId = item.FornecedorId;
             }
             else
             {
                 ClienteComboBox.Text = item.ClienteId;
-                clienteSelecionado = item.ClienteId;
+                clienteSelecionadoId = item.ClienteId;
             }
 
             // Preenche quantidade e preço
@@ -1180,12 +1618,13 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     // Organiza os boletos (arquivos físicos)
-                    var organizadorBoleto = new OrganizarBoleto(numeroNotaFiscalAtual);
+                    // Substitui a criação de instância pelo método estático
                     foreach (var boleto in boletos)
                     {
                         if (!string.IsNullOrEmpty(boleto.CaminhoArquivo))
                         {
-                            organizadorBoleto.Organizar(boleto);
+                            // Usa o método estático OrganizarArquivoBoleto
+                            OrganizarBoleto.OrganizarArquivoBoleto(boleto, numeroNotaFiscalAtual);
                         }
                     }
 

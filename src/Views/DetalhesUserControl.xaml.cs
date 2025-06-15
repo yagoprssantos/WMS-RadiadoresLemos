@@ -117,13 +117,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                         string status;
                         if (b.Pagamento.HasValue)
                             status = "Pago";
-                        else if (b.Vencimento.Date < DateTime.Now.Date)
+                        else if (b.DataVencimento.Date < DateTime.Now.Date)
                             status = "Vencido";
                         else
                             status = "Pendente";
 
                         // Calcula dias até vencimento ou dias de atraso
-                        int diasAteVencimento = (b.Vencimento.Date - DateTime.Now.Date).Days;
+                        int diasAteVencimento = (b.DataVencimento.Date - DateTime.Now.Date).Days;
                         string situacaoVencimento;
 
                         if (b.Pagamento.HasValue)
@@ -146,8 +146,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                             Original = b,
                             Id = b.Id,
                             Parcela = infoParcelamento,
-                            Vencimento = b.Vencimento,
-                            VencimentoFormatado = b.Vencimento.ToString("dd/MM/yyyy"),
+                            Vencimento = b.DataVencimento,
+                            VencimentoFormatado = b.DataVencimento.ToString("dd/MM/yyyy"),
                             Pagamento = b.Pagamento,
                             PagamentoFormatado = b.Pagamento.HasValue ? b.Pagamento.Value.ToString("dd/MM/yyyy") : "Pendente",
                             CaminhoArquivo = b.CaminhoArquivo,
@@ -296,7 +296,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 foreach (var boleto in _boletosList)
                 {
                     string status = boleto.Pagamento.HasValue ? "Pago" : "Pendente";
-                    mensagem += $"• Parcela {boleto.Parcela} - Vencimento: {boleto.Vencimento:dd/MM/yyyy} - Status: {status}\n";
+                    mensagem += $"• Parcela {boleto.Parcela} - Vencimento: {boleto.DataVencimento:dd/MM/yyyy} - Status: {status}\n";
                 }
                 MessageBox.Show(mensagem, "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);
             }
