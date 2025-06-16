@@ -100,10 +100,8 @@
                                         </StackPanel>
                                     </Grid>
 
-                                    <!-- Antes e Depois - ADICIONADO x:Name AOS TEXTBLOCKS -->
-                                    <!-- Dentro de AddEntradaSaídaWindow.xaml -->
+                                    <!-- Antes e Depois -->
                                     <Grid x:Name="ProdutoAntesDepois" Margin="0,15" Visibility="Collapsed">
-                                        <!-- Certifique-se que Visibility="Collapsed" é o estado inicial se preferir -->
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
@@ -174,7 +172,7 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"  Margin="0,10"
                                            Foreground="{StaticResource CancelButtonHoverBrush}" Visibility="Visible" />
 
-                                <StackPanel x:Name="Financeiro" Visibility="Collapsed">
+                                <StackPanel x:Name="Financeiro" Visibility="Visible">
                                     <Grid Margin="0, 0, 0, 5">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -199,10 +197,9 @@
                                         </StackPanel>
                                     </Grid>
 
-                                    <!-- SEÇÃO DE EXTRAÇÃO DE BOLETO -->
+                                    <!-- Extração de Boletos -->
                                     <GroupBox x:Name="ExtrairBoletoGroupBox" Header="Extração Automática de Dados do Boleto" Style="{StaticResource GroupBoxStyle}" Margin="0,15,0,5" Padding="10"
                                               Visibility="{Binding ElementName=Fornecedor, Path=Visibility}">
-                                        <!-- Visível se Fornecedor estiver visível (Compra) -->
                                         <StackPanel>
                                             <Button x:Name="BtnExtrairDeArquivo" Content="Carregar e Extrair Dados de Boleto (PDF/Imagem)..." 
                                                     Style="{StaticResource EmphasisButtonStyle}" Click="BtnExtrairDeArquivo_Click" 
@@ -212,8 +209,8 @@
                                                        Foreground="{StaticResource TextBrush}" Visibility="Collapsed"/>
                                         </StackPanel>
                                     </GroupBox>
-                                    <!-- FIM DA SEÇÃO DE EXTRAÇÃO -->
 
+                                    <!-- Campos de Boletos -->
                                     <StackPanel x:Name="CamposBoletos" Visibility="Visible">
                                         <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                                             <Grid.ColumnDefinitions>
@@ -229,11 +226,6 @@
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="200">
 
                                             <ItemsControl x:Name="BoletosItemsControl">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <StackPanel />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border Margin="0,5" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15">
@@ -254,35 +246,6 @@
                                                                     <ColumnDefinition Width="36"/>
                                                                     <!-- Botão Remover -->
                                                                 </Grid.ColumnDefinitions>
-
-                                                               
-                                                                <Button Grid.Row="0" Grid.Column="1"
-                                                                        Content="✖" FontSize="8" Style="{StaticResource DeleteButtonStyle}" Width="20" Height="20"
-                                                                        Margin="5,0,0,0" VerticalAlignment="Top" Click="RemoverBoletoButton_Click" Tag="{Binding Parcela}"/>
-                                                                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                                                            Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                                                                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Width="Auto" Margin="0,0,10,0" MinWidth="120" MaxWidth="220">
-                                                                        <TextBlock Text="Vencimento:" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="0"/>
-                                                                        <DatePicker SelectedDate="{Binding Vencimento}" Style="{StaticResource DatePickerStyle}" Height="30" FontSize="14" MinWidth="120" MaxWidth="200"/>
-                                                                    </StackPanel>
-                                                                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Stretch" Width="Auto" MinWidth="0" Margin="0">
-                                                                        <TextBlock Text="Arquivo:" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" Margin="0"/>
-                                                                        <Grid>
-                                                                            <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="*" />
-                                                                                <ColumnDefinition Width="Auto" />
-                                                                            </Grid.ColumnDefinitions>
-                                                                            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto" MinWidth="100" MaxWidth="400">
-                                                                                <TextBox Text="{Binding CaminhoArquivo}"  Background="{StaticResource PanelBackgroundBrush}"  Foreground="{StaticResource TextBrush}"
-                                                                                         FontSize="14"  Height="Auto" IsReadOnly="True" BorderThickness="0" Margin="0" 
-                                                                                         VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MaxWidth="400"/>
-                                                                            </ScrollViewer>
-                                                                            <Button Grid.Column="1" Content="..." Width="30" Height="30" Margin="5,0,0,0"
-                                                                                    Style="{StaticResource EmphasisButtonStyle}" Click="SelecionarBoletoButton_Click" Tag="{Binding Parcela}"/>
-                                                                        </Grid>
-                                                                    </StackPanel>
-                                                                </StackPanel>
-
 
                                                                 <!-- Linha 1 -->
                                                                 <!-- Título da Parcela -->
@@ -328,7 +291,7 @@
                                                                     <StackPanel Orientation="Horizontal" Margin="0,0,30,0" VerticalAlignment="Center" Grid.ColumnSpan="2">
                                                                         <TextBlock Text="Vencimento:" FontSize="14" Foreground="{StaticResource TextBrush}"
                                                                                        VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                                        <DatePicker SelectedDate="{Binding Vencimento}" Style="{StaticResource DatePickerStyle}"
+                                                                        <DatePicker SelectedDate="{Binding DataVencimento}" Style="{StaticResource DatePickerStyle}"
                                                                                         Height="28" FontSize="14" Width="Auto" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                                                     </StackPanel>
                                                                     <!-- Pagamento -->
@@ -359,10 +322,11 @@
                                                  MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap"  
                                                  TextChanged="NotaFiscalTextBox_TextChanged_1" LostFocus="NotaFiscalTextBox_LostFocus" 
                                                  PreviewTextInput="NotaFiscalTextBox_PreviewTextInput" DataObject.Pasting="NotaFiscalTextBox_Pasting" />
-                                        <Button Content="Importar XML Nota Fiscal" Style="{StaticResource EmphasisButtonStyle}"
-                                                Click="ImportarXMLButton_Click" Grid.Column="1" Margin="10,0,0,0" FontSize="11" Padding="8,5"/>
+                                       
+                                        <!-- 
                                         <Button Grid.Column="1" Content="Importar XML Nota Fiscal" Style="{StaticResource EmphasisButtonStyle}"
                                                 Click="ImportarXMLButton_Click"  Margin="10,0,0,0" FontSize="12"/>
+                                        -->
 
                                     </Grid>
 

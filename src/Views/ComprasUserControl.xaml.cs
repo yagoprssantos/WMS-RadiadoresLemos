@@ -4,11 +4,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media; // Adicionado para VisualTreeHelper
-// using System.Windows.Media.Imaging; // Não usado diretamente aqui
-// using System.Windows.Controls.Primitives; // Não usado diretamente aqui
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
-// Removida a referência a WMS_RadiadoresLemos_WPF.src.Views.Windows pois CadastroBoletoCompraWindow não é mais usada aqui
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -33,13 +30,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarCompras();
-
-            CarregarCalendario(); // Se o calendário ainda for parte desta tela
-            if (OrdenarButton != null) // Garante que o botão de ordenação tenha o texto inicial correto
-            {
-                OrdenarButton.Content = _filtroTexto;
-            }
-
+            CarregarCalendario();
             CarregarBoletos();
             CarregarFornecedores();
             CarregarProdutos();
@@ -65,20 +56,19 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     }
 
                     AplicarOrdenacao();
-
                     AtualizarInterfaceCompras();
                 }
                 else
                 {
                     MessageBox.Show("Não foi possível conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    _todasCompras = new List<CompraData>(); // Inicializa para evitar NullReferenceException
+                    _todasCompras = new List<CompraData>();
                     _comprasFiltradas = new List<CompraData>();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar compras: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                _todasCompras = new List<CompraData>(); // Inicializa em caso de erro
+                _todasCompras = new List<CompraData>();
                 _comprasFiltradas = new List<CompraData>();
             }
         }
@@ -270,9 +260,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 };
 
                 // Verificar se há compras neste dia
-                day.HasCompra = VerificarComprasNaData(currentDate);
+                day.HasPayment = VerificarComprasNaData(currentDate);
+
                 // Verificar se há boletos com vencimento neste dia
-                day.HasBoleto = VerificarBoletosNaData(currentDate);
+                day.HasBoletoVencimento = VerificarBoletosNaData(currentDate);
 
                 days.Add(day);
             }
@@ -327,6 +318,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             AtualizarInterfaceCompras();
         }
 
+        // 3. Filtros
         private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
             FiltroPopup.IsOpen = true;
@@ -509,6 +501,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             var comprasWindow = new AddEntradaSaídaWindow(isEntrada: true);
             comprasWindow.ShowDialog();
+
+            // Atualiza a lista de compras após o registro
             CarregarCompras();
             // Atualiza também os boletos e o calendário
             CarregarBoletos();
@@ -690,38 +684,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 }
             }
-        }
-    }
-
-    public class CalendarDayViewModel : System.ComponentModel.INotifyPropertyChanged
-    {
-        public string Day { get; set; }
-        public bool IsCurrentMonth { get; set; }
-        public bool IsToday { get; set; }
-        public DateTime Date { get; set; }
-        public bool HasCompra { get; set; }
-        public bool HasBoleto { get; set; }
-        public bool HasPayment => HasCompra || HasBoleto;
-
-        public System.Windows.Visibility BoletoVisibility => HasBoleto ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
-        public System.Windows.Visibility CompraVisibility => HasCompra ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
-
-        private bool _isSelected;
-        public bool IsSelected
-        {
-            get => _isSelected;
-            set { _isSelected = value; OnPropertyChanged(nameof(IsSelected)); OnPropertyChanged(nameof(SelectedBorderThickness)); }
-        }
-
-        public Thickness SelectedBorderThickness => IsSelected ? new Thickness(2) : new Thickness(0);
-        public Visibility TodayIndicatorVisibility => IsToday ? Visibility.Visible : Visibility.Collapsed;
-        public FontWeight FontWeight => IsCurrentMonth ? FontWeights.SemiBold : FontWeights.Normal; // Ajustado para SemiBold
-        public Visibility PaymentVisibility => HasPayment ? Visibility.Visible : Visibility.Collapsed;
-
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
         }
     }
 }
