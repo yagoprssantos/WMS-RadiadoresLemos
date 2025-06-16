@@ -132,6 +132,13 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var collection = db.GetCollection<ProdutoData>("produtos");
                     produtos = await Task.Run(() => collection.FindAll().OrderBy(p => p.Nome).ToList());
+
+                    // Se for venda, apresenta apenas produtos com quantidade > 0
+                    if (!usePositiveNumber)
+                    {
+                        produtos = produtos.Where(p => p.Quantidade > 0).ToList();
+                    }
+
                     ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).ToList();
                 }
             }
@@ -160,7 +167,7 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var collection = db.GetCollection<ClienteData>("clientes");
                     clientes = await Task.Run(() => collection.FindAll().OrderBy(c => c.CNPJ).ToList());
-                    ClienteComboBox.ItemsSource = clientes.Select(c => $"{c.CNPJ} ({c.Email})").ToList();
+                    ClienteComboBox.ItemsSource = clientes.Select(c => c.CNPJ).ToList();
                 }
             }
             catch (Exception ex) { MessageBox.Show($"Erro ao carregar clientes: {ex.Message}", "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); }
@@ -202,6 +209,10 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 return false;
             }
+
+            // Sempre mostrar o painel de detalhes
+            ProdutoAntesDepois.Visibility = Visibility.Visible;
+
             return true;
         }
 
