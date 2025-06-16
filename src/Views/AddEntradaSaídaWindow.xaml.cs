@@ -857,10 +857,10 @@ namespace WMS_RadiadoresLemos_WPF
             var movimentacao = CriarMovimentacaoData(produtoSelecionado, quantidade, preco, DetalhesTextBox.Text);
             movimentacoes.Add(movimentacao);
 
-            MovimentacaoListItem listItem;
+            MovimentacaoListItem listItem = CriarMovimentacaoListItem(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
+
             if (usePositiveNumber)
             {
-                listItem = CriarMovimentacaoListItem(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
                 var compra = CriarCompraData(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
 
                 if (boletos.Any())
@@ -875,8 +875,7 @@ namespace WMS_RadiadoresLemos_WPF
                         }
                         boletoData.NotaFiscal = numeroNotaFiscalAtual;
                         boletoData.Id = (int.Parse(DateTime.Now.ToString("MMddHHmm")) + boletoData.Parcela).ToString();
-                        compra.Boletos.Add(boletoData.Id.ToString()); // ✅ CONVERTIDO PARA STRING
-
+                        compra.Boletos.Add(boletoData.Id.ToString());
 
                         var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionadoId);
                         if (fornecedor == null)
@@ -885,31 +884,18 @@ namespace WMS_RadiadoresLemos_WPF
                             return;
                         }
 
-                        // Criar uma cópia dos boletos atuais antes de iterar
                         var boletosCopia = BoletosItemsControl.Items.Cast<BoletoData>().ToList();
-
-                        // Limpar a lista de boletos atual
                         boletos.Clear();
 
-                        // Iterar sobre a cópia em vez do controle original
                         foreach (var boleto in boletosCopia)
                         {
-                            // Usa o método CriarBoletoData para criar um novo boleto com os dados corretos
                             var novoBoleto = CriarBoletoData(boleto, numeroNotaFiscalAtual, fornecedor);
-
-                            // Adiciona o novo boleto à lista de boletos
                             boletos.Add(novoBoleto);
-
-                            // Gera o nome do boleto no formato BoletoNF{numeroNF}-Parcela{boleto.Parcela}
                             var extensao = Path.GetExtension(boleto.CaminhoArquivo);
                             var nomeBoleto = $"BoletoNF{numeroNotaFiscalAtual}-Parcela{boleto.Parcela}{extensao}";
-
-                            // Adiciona o nome do boleto à lista de boletos da compra
                             compra.Boletos.Add(nomeBoleto);
-
                         }
 
-                        // Atualiza o controle de UI com a nova lista de boletos
                         BoletosItemsControl.ItemsSource = null;
                         BoletosItemsControl.ItemsSource = boletos;
                     }
@@ -917,18 +903,21 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 else
                 {
-                    listItem = CriarMovimentacaoListItem(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
-                    var venda = CriarVendaData(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
-                    vendas.Add(venda);
+                    compras.Add(compra);
                 }
-
-                listaMovimentacoes.Add(listItem);
-                ListaItemsControl.ItemsSource = null;
-                ListaItemsControl.ItemsSource = listaMovimentacoes;
-                AnimateToggleLista();
-                LimparCampos();
-                Invalida();
             }
+            else
+            {
+                var venda = CriarVendaData(produtoSelecionado, quantidade, preco, parcelas, DetalhesTextBox.Text, movimentacao);
+                vendas.Add(venda);
+            }
+
+            listaMovimentacoes.Add(listItem);
+            ListaItemsControl.ItemsSource = null;
+            ListaItemsControl.ItemsSource = listaMovimentacoes;
+            AnimateToggleLista();
+            LimparCampos();
+            Invalida();
         }
 
 

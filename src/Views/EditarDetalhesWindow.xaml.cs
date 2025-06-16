@@ -19,6 +19,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
     {
         private CompraData _compraOriginal;
         private CompraData _compraEditada;
+        private VendaData _vendaOriginal;
+        private VendaData _vendaEditada;
+        private bool _isCompra;
         private ObservableCollection<ItemEdicaoViewModel> _itensCompra;
         private ObservableCollection<BoletoData> _boletos = new ObservableCollection<BoletoData>();
         private List<FornecedorData> _fornecedores = new List<FornecedorData>();
@@ -29,7 +32,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         public EditarDetalhesWindow(CompraData compra, bool apenasGerenciarBoletos = false)
         {
             InitializeComponent();
-
+            _isCompra = true;
             _compraOriginal = compra;
             _compraEditada = CloneCompra(compra);
             _apenasGerenciarBoletos = apenasGerenciarBoletos;
@@ -56,6 +59,26 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        public EditarDetalhesWindow(VendaData venda)
+        {
+            InitializeComponent();
+            _isCompra = false;
+            _vendaOriginal = venda;
+            _vendaEditada = CloneVenda(venda);
+
+            // Converte os itens para usar o ViewModel
+            _itensCompra = new ObservableCollection<ItemEdicaoViewModel>(
+                _vendaEditada.Itens.Select(item => new ItemEdicaoViewModel(item))
+            );
+
+            // Carrega dados e configura a interface
+            CarregarDadosVenda();
+            CalcularValorTotal();
+
+            // Esconde a seção de boletos para vendas
+            BoletosSection.Visibility = Visibility.Collapsed;
+        }
+
         private void ConfigurarModoGerenciarBoletos()
         {
 
@@ -76,6 +99,35 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 ValorTotal = original.ValorTotal,
                 Detalhes = original.Detalhes,
                 Boletos = original.Boletos != null ? new List<string>(original.Boletos) : new List<string>(),
+                Itens = original.Itens.Select(item => new MovimentacaoData
+                {
+                    ProdutoId = item.ProdutoId,
+                    ProdutoNome = item.ProdutoNome,
+                    Tipo = item.Tipo,
+                    Preco = item.Preco,
+                    Quantidade = item.Quantidade,
+                    Data = item.Data,
+                    Detalhes = item.Detalhes,
+                    CompraId = item.CompraId,
+                    VendaId = item.VendaId
+                }).ToList()
+            };
+            return clone;
+        }
+
+        private VendaData CloneVenda(VendaData original)
+        {
+            // Cria uma cópia profunda da venda para não modificar a original enquanto edita
+            var clone = new VendaData
+            {
+                Id = original.Id,
+                ClienteCNPJ = original.ClienteCNPJ,
+                DataCompra = original.DataCompra,
+                TipoPagamento = original.TipoPagamento,
+                Parcelas = original.Parcelas,
+                NotaFiscal = original.NotaFiscal,
+                ValorTotal = original.ValorTotal,
+                Detalhes = original.Detalhes,
                 Itens = original.Itens.Select(item => new MovimentacaoData
                 {
                     ProdutoId = item.ProdutoId,
@@ -178,21 +230,44 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        private void CarregarDadosVenda()
+        {
+            // Configura os campos da interface com os dados da venda
+            NotaFiscalTextBox.Text = _vendaEditada.NotaFiscal;
+            FornecedorComboBox.Text = _vendaEditada.ClienteCNPJ;
+            DataCompraDatePicker.SelectedDate = _vendaEditada.DataCompra;
+            DetalhesTextBox.Text = _vendaEditada.Detalhes;
+            TipoPagamentoComboBox.Text = _vendaEditada.TipoPagamento;
+            ParcelasTextBox.Text = _vendaEditada.Parcelas.ToString();
+
+            // Configura o DataGrid de itens
+            ItensDataGrid.ItemsSource = _itensCompra;
+
+            // Atualiza o título da janela
+            Title = "Editar Detalhes da Venda";
+        }
+
         private void CalcularValorTotal()
         {
-            // Calcula o valor total com base nos itens da compra usando o Subtotal do ViewModel
+            // Calcula o valor total com base nos itens da compra/venda usando o Subtotal do ViewModel
             decimal valorTotal = 0;
             foreach (var item in _itensCompra)
             {
                 valorTotal += (decimal)item.Subtotal;
             }
 
-            // Atualiza o valor total na compra e na interface
-            _compraEditada.ValorTotal = valorTotal;
-
-            // Atualiza o DataContext para refletir a mudança
-            DataContext = null;
-            DataContext = _compraEditada;
+            if (_isCompra && _compraEditada != null)
+            {
+                _compraEditada.ValorTotal = valorTotal;
+                DataContext = null;
+                DataContext = _compraEditada;
+            }
+            else if (!_isCompra && _vendaEditada != null)
+            {
+                _vendaEditada.ValorTotal = valorTotal;
+                DataContext = null;
+                DataContext = _vendaEditada;
+            }
         }
 
         private void ItensDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -373,13 +448,29 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                     textBox.Text = parcelas.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
                     textBox.CaretIndex = textBox.Text.Length;
-                    _compraEditada.Parcelas = parcelas;
+
+                    // Atualiza o objeto correto baseado no tipo de operação
+                    if (_isCompra)
+                    {
+                        _compraEditada.Parcelas = parcelas;
+                    }
+                    else
+                    {
+                        _vendaEditada.Parcelas = parcelas;
+                    }
                 }
                 else
                 {
                     MessageBox.Show("Parcelas inválidas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     textBox.Clear();
-                    _compraEditada.Parcelas = 0;
+                    if (_isCompra)
+                    {
+                        _compraEditada.Parcelas = 0;
+                    }
+                    else
+                    {
+                        _vendaEditada.Parcelas = 0;
+                    }
                 }
 
                 // Verifica a forma de pagamento para alterar o texto
@@ -391,7 +482,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     {
                         textBox.Text = "1";
                         textBox.IsEnabled = false;
-                        _compraEditada.Parcelas = 1;
+                        if (_isCompra)
+                        {
+                            _compraEditada.Parcelas = 1;
+                        }
+                        else
+                        {
+                            _vendaEditada.Parcelas = 1;
+                        }
                     }
                     else if (tipoPagamentoSelecionado == "Parcelado")
                     {
@@ -399,7 +497,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                         if (textBox.Text == "1")
                         {
                             textBox.Text = "";
-                            _compraEditada.Parcelas = 0;
+                            if (_isCompra)
+                            {
+                                _compraEditada.Parcelas = 0;
+                            }
+                            else
+                            {
+                                _vendaEditada.Parcelas = 0;
+                            }
                         }
                     }
 
@@ -647,42 +752,86 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void Salvar_Click(object sender, RoutedEventArgs e)
         {
-            // Valida se há informações essenciais
-            if (string.IsNullOrWhiteSpace(_compraEditada.NotaFiscal))
-            {
-                MessageBox.Show("É necessário informar o número da Nota Fiscal.",
-                    "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
-                NotaFiscalTextBox.Focus();
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(_compraEditada.FornecedorNome))
-            {
-                MessageBox.Show("É necessário informar o Fornecedor.",
-                    "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
-                FornecedorComboBox.Focus();
-                return;
-            }
-
             try
             {
-                // Atualiza os dados da compra a partir dos campos da interface
-                _compraEditada.NotaFiscal = NotaFiscalTextBox.Text;
-                _compraEditada.FornecedorNome = FornecedorComboBox.Text;
-                _compraEditada.DataCompra = DataCompraDatePicker.SelectedDate ?? DateTime.Now;
-                _compraEditada.Detalhes = DetalhesTextBox.Text;
+                if (_isCompra)
+                {
+                    // Valida se há informações essenciais para compra
+                    if (string.IsNullOrWhiteSpace(_compraEditada.NotaFiscal))
+                    {
+                        MessageBox.Show("É necessário informar o número da Nota Fiscal.",
+                            "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        NotaFiscalTextBox.Focus();
+                        return;
+                    }
 
-                // Atualiza a lista de itens da compra, convertendo de volta para MovimentacaoData
-                _compraEditada.Itens = _itensCompra.Select(vm => vm.ObterItem()).ToList();
+                    if (string.IsNullOrWhiteSpace(_compraEditada.FornecedorNome))
+                    {
+                        MessageBox.Show("É necessário informar o Fornecedor.",
+                            "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        FornecedorComboBox.Focus();
+                        return;
+                    }
 
-                // Recalcula o valor total antes de salvar
-                CalcularValorTotal();
+                    // Atualiza os dados da compra a partir dos campos da interface
+                    _compraEditada.NotaFiscal = NotaFiscalTextBox.Text;
+                    _compraEditada.FornecedorNome = FornecedorComboBox.Text;
+                    _compraEditada.DataCompra = DataCompraDatePicker.SelectedDate ?? DateTime.Now;
+                    _compraEditada.Detalhes = DetalhesTextBox.Text;
 
-                // Cria uma lista de nomes de boletos
-                _compraEditada.Boletos = _boletos.Select(b => b.NomeArquivo).ToList();
+                    // Atualiza a lista de itens da compra, convertendo de volta para MovimentacaoData
+                    _compraEditada.Itens = _itensCompra.Select(vm => vm.ObterItem()).ToList();
 
-                // Executa o processo de salvamento completo
-                RealizarSalvamentoCompleto();
+                    // Recalcula o valor total antes de salvar
+                    CalcularValorTotal();
+
+                    // Cria uma lista de nomes de boletos
+                    _compraEditada.Boletos = _boletos.Select(b => b.NomeArquivo).ToList();
+
+                    // Executa o processo de salvamento completo
+                    RealizarSalvamentoCompleto();
+                }
+                else
+                {
+                    // Valida se há informações essenciais para venda
+                    if (string.IsNullOrWhiteSpace(_vendaEditada.NotaFiscal))
+                    {
+                        MessageBox.Show("É necessário informar o número da Nota Fiscal.",
+                            "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        NotaFiscalTextBox.Focus();
+                        return;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(_vendaEditada.ClienteCNPJ))
+                    {
+                        MessageBox.Show("É necessário informar o Cliente.",
+                            "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        FornecedorComboBox.Focus();
+                        return;
+                    }
+
+                    // Atualiza os dados da venda a partir dos campos da interface
+                    _vendaEditada.NotaFiscal = NotaFiscalTextBox.Text;
+                    _vendaEditada.ClienteCNPJ = FornecedorComboBox.Text;
+                    _vendaEditada.DataCompra = DataCompraDatePicker.SelectedDate ?? DateTime.Now;
+                    _vendaEditada.Detalhes = DetalhesTextBox.Text;
+                    _vendaEditada.TipoPagamento = TipoPagamentoComboBox.Text;
+                    _vendaEditada.Parcelas = int.Parse(ParcelasTextBox.Text);
+
+                    // Atualiza a lista de itens da venda
+                    _vendaEditada.Itens = _itensCompra.Select(vm => vm.ObterItem()).ToList();
+
+                    // Recalcula o valor total antes de salvar
+                    CalcularValorTotal();
+
+                    // Salva a venda no banco de dados
+                    var db = DatabaseConnect.Database;
+                    if (db != null)
+                    {
+                        var collection = db.GetCollection<VendaData>("vendas");
+                        collection.Update(_vendaEditada);
+                    }
+                }
 
                 // Fecha a janela com sucesso
                 DialogResult = true;
@@ -690,7 +839,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao salvar as alterações: {ex.Message}",
+                MessageBox.Show($"Erro ao salvar alterações: {ex.Message}",
                     "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

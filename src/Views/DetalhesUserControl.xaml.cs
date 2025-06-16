@@ -226,30 +226,49 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
         private void Editar_Click(object sender, RoutedEventArgs e)
         {
-            // Abre a janela de edição passando a compra atual
-            var editarJanela = new EditarDetalhesWindow(_compraAtual);
-            bool? resultado = editarJanela.ShowDialog();
-
-            // Se a edição foi confirmada, recarrega os dados
-            if (resultado == true)
+            if (_isCompra && _compraAtual != null)
             {
-                // Recarrega toda a janela com os dados atualizados
-                _isCompra = true;
-                if (_compraAtual != null)
+                var editarJanela = new EditarDetalhesWindow(_compraAtual);
+                bool? resultado = editarJanela.ShowDialog();
+
+                if (resultado == true)
                 {
-                    DataContext = _compraAtual;
-                    CarregarItensProduto(_compraAtual);
-                    CarregarBoletos();
+                    // Recarrega a compra do banco de dados pelo ID atualizado
+                    var db = DatabaseConnect.Database;
+                    if (db != null)
+                    {
+                        var collection = db.GetCollection<CompraData>("compras");
+                        var compraAtualizada = collection.FindById(_compraAtual.Id);
+                        if (compraAtualizada != null)
+                        {
+                            _compraAtual = compraAtualizada;
+                            DataContext = _compraAtual;
+                            CarregarItensProduto(_compraAtual);
+                            CarregarBoletos();
+                        }
+                    }
                 }
-                else if (_vendaAtual != null)
+            }
+            else if (!_isCompra && _vendaAtual != null)
+            {
+                var editarJanela = new EditarDetalhesWindow(_vendaAtual);
+                bool? resultado = editarJanela.ShowDialog();
+
+                if (resultado == true)
                 {
-                    DataContext = _vendaAtual;
-                    CarregarItensProduto(_vendaAtual);
-                }
-                else
-                {
-                    MessageBox.Show("Nenhuma compra ou venda selecionada para editar.",
-                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    // Recarrega a venda do banco de dados pelo ID atualizado
+                    var db = DatabaseConnect.Database;
+                    if (db != null)
+                    {
+                        var collection = db.GetCollection<VendaData>("vendas");
+                        var vendaAtualizada = collection.FindById(_vendaAtual.Id);
+                        if (vendaAtualizada != null)
+                        {
+                            _vendaAtual = vendaAtualizada;
+                            DataContext = _vendaAtual;
+                            CarregarItensProduto(_vendaAtual);
+                        }
+                    }
                 }
             }
         }

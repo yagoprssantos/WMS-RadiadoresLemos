@@ -29,7 +29,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
                 _listener.Start();
                 _isListening = true;
 
-                MessageBox.Show($"✅ Serviço de integração iniciado na porta {_port}", "Integração Ativa", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                // MessageBox.Show($"✅ Serviço de integração iniciado na porta {_port}", "Integração Ativa", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
                 await Task.Run(() => EscutarRequisicoes());
             }

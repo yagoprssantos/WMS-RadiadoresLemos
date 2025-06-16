@@ -330,7 +330,7 @@
                         </StackPanel>
 
                         <!-- Coluna Direita: Boletos -->
-                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0" x:Name="BoletosSection">
                             <!-- SEÇÃO: BOLETOS -->
                             <Border CornerRadius="15" Padding="15" Margin="0,0,0,15"
                                     Background="{StaticResource SecondaryBrush}">
