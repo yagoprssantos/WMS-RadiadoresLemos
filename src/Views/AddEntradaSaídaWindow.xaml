@@ -6,7 +6,7 @@
         mc:Ignorable="d" 
         Title="Adicionar Entrada/Saída"
         MinHeight="700" MinWidth="800"
-        Height="900" Width="800"
+        Height="700" Width="800"
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
@@ -192,20 +192,7 @@
                                                      DataObject.Pasting="ParcelasTextBox_Pasting" />
                                         </StackPanel>
                                     </Grid>
-
-                                    <!-- Extração de Boletos -->
-                                    <GroupBox x:Name="ExtrairBoletoGroupBox" Header="Extração Automática de Dados do Boleto" Style="{StaticResource GroupBoxStyle}" Margin="0,15,0,5" Padding="10"
-                                              Visibility="{Binding ElementName=Fornecedor, Path=Visibility}">
-                                        <StackPanel>
-                                            <Button x:Name="BtnExtrairDeArquivo" Content="Carregar e Extrair Dados de Boleto (PDF/Imagem)..." 
-                                                    Style="{StaticResource EmphasisButtonStyle}" Click="BtnExtrairDeArquivo_Click" 
-                                                    Margin="5" Padding="8"/>
-                                            <ProgressBar x:Name="ProgressBarExtracao" Height="8" Margin="5,8,5,2" IsIndeterminate="False" Visibility="Collapsed"/>
-                                            <TextBlock x:Name="TxtStatusExtracao" TextWrapping="Wrap" Margin="5,2,5,5" FontSize="12"
-                                                       Foreground="{StaticResource TextBrush}" Visibility="Collapsed"/>
-                                        </StackPanel>
-                                    </GroupBox>
-
+                                    
                                     <!-- Campos de Boletos -->
                                     <StackPanel x:Name="CamposBoletos" Visibility="Visible">
                                         <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">

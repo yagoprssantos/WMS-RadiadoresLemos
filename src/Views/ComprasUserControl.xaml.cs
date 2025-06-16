@@ -30,11 +30,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private void ComprasUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CarregarCompras();
-            CarregarCalendario();
             CarregarBoletos();
+            CarregarCalendario();
             CarregarFornecedores();
             CarregarProdutos();
-
         }
 
         private void CarregarCompras()
@@ -293,9 +292,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             if (_todosBoletos == null) return false;
 
-            return _todosBoletos.Any(b => 
-                b.DataVencimento.Date == data.Date && 
-                b.Pagamento == null && 
+            return _todosBoletos.Any(b =>
+                b.DataVencimento.Date == data.Date &&
+                b.Pagamento == null &&
                 b.NotaFiscal != null);
         }
 
@@ -521,7 +520,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     "Detalhes da Compra",
                     "/assets/Icons/Selected/ComprarS.png"
                 );
-
             }
         }
 
@@ -684,6 +682,36 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 }
             }
+        }
+
+        // Abre os detalhes da compra ao clicar no botão de detalhes do boleto
+        private void VerCompraCalendarioButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Captura compra com base no boleto selecionado
+            if (sender is Button button && button.DataContext is BoletoData boleto)
+            {
+                // Busca a compra associada ao boleto
+                var compra = _todasCompras.FirstOrDefault(c => c.Boletos != null && c.Boletos.Contains(boleto.Id));
+                if (compra != null)
+                {
+                    var detalhesCompraUserControl = new DetalhesUserControl(compra);
+                    this.NavigateTo(
+                        detalhesCompraUserControl,
+                        "Detalhes da Compra",
+                        "/assets/Icons/Selected/ComprarS.png"
+                    );
+                }
+            }
+        }
+
+        // Recarrega itens necessários
+        public void RecarregarItens()
+        {
+            CarregarCompras();
+            CarregarBoletos();
+            CarregarCalendario();
+            CarregarFornecedores();
+            CarregarProdutos();
         }
     }
 }

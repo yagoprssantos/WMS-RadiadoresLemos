@@ -243,14 +243,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Limpar datas
             DataInicioPicker.SelectedDate = null;
             DataFimPicker.SelectedDate = null;
-            
+
             // Limpar tipo de pagamento
             TipoPagamentoComboBox.SelectedIndex = 0;
-            
+
             // Ordenação
             _ordenacaoAtual = "recente";
             _filtroTexto = "Ordenar por";
-            
+
             // Corrigir a referência para OrdemComboBox
             if (OrdemComboBox.Items.Count > 0) OrdemComboBox.SelectedIndex = 0;
 
@@ -358,6 +358,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     "/assets/Icons/Selected/PranchetaS.png"
                 );
             }
+        }
+
+        // Recarrega os itens
+        public void RecarregarItens()
+        {
+            CarregarVendas();
+            CarregarClientes();
+            CarregarProdutos();
+            CarregarNotasFiscais();
+            AplicarOrdenacao();
+            AtualizarInterfaceVendas();
         }
     }
 }
