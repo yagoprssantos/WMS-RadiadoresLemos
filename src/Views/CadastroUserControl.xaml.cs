@@ -94,8 +94,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             foreach (var propriedade in tipoModelo.GetProperties())
             {
-                if (propriedade.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
-                    continue; // Ignora a coluna Id
+                // Ignorar colunas
+                if (propriedade.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
+                    propriedade.Name.Equals("Senha", StringComparison.OrdinalIgnoreCase))
+                    continue;
 
                 // Verifica se a propriedade é uma lista de strings (VendasRelacionadas ou ComprasRelacionadas)
                 if ((propriedade.Name.Equals("VendasRelacionadas", StringComparison.OrdinalIgnoreCase) ||

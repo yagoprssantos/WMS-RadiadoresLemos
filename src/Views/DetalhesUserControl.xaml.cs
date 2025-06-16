@@ -227,6 +227,71 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             }
         }
 
+        private void RegistrarPagamento_Click(object sender, RoutedEventArgs e)
+        {
+            if (_boletosList.Count == 0)
+            {
+                MessageBox.Show("Não há boletos registrados para esta compra.",
+                    "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            var boletoSelecionado = BoletosDataGrid.SelectedItem as BoletoViewModel;
+            if (boletoSelecionado == null)
+            {
+                MessageBox.Show("Selecione um boleto para registrar o pagamento.",
+                    "Boletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Confirmação antes de registrar o pagamento
+            var confirmResult = MessageBox.Show(
+                $"Confirma o pagamento do boleto (parcela {boletoSelecionado.Original.Parcela}) no valor de R$ {boletoSelecionado.Original.Valor:N2}?",
+                "Confirmar Pagamento",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirmResult != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db != null)
+                {
+                    var collection = db.GetCollection<BoletoData>("boletos");
+
+                    // Atualiza os dados do boleto
+                    var boleto = boletoSelecionado.Original;
+                    DateTime dataAtual = DateTime.Now;
+
+                    // Atualiza ambos os campos de data de pagamento para consistência
+                    boleto.DataPagamento = dataAtual;
+                    boleto.Pagamento = dataAtual;
+                    boleto.Status = StatusBoleto.Pago;
+
+                    // Salva as alterações no banco de dados
+                    collection.Update(boleto);
+
+                    MessageBox.Show(
+                        $"Pagamento registrado com sucesso em {dataAtual:dd/MM/yyyy}!",
+                        "Pagamento Registrado",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+
+                    // Recarrega os boletos após o registro
+                    CarregarBoletos();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Erro ao registrar pagamento: {ex.Message}",
+                    "Erro",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
         private void Editar_Click(object sender, RoutedEventArgs e)
         {
             if (_isCompra && _compraAtual != null)
