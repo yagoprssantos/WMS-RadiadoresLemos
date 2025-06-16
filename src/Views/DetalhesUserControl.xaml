@@ -33,6 +33,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
                                    Text="{Binding NotaFiscal, StringFormat='Nota Fiscal: {0}', TargetNullValue='Sem Nota Fiscal'}"
@@ -40,9 +41,10 @@
                                    Foreground="{StaticResource TextBrush}"
                                    HorizontalAlignment="Left" 
                                    VerticalAlignment="Center"/>
-                        <Button Grid.Column="2" Content="Editar" FontSize="14" Height="Auto" Width="100" Margin="0"
+                        <Button Grid.Column="1" Content="Editar" FontSize="14" Height="Auto" Width="100" Margin="0,0,10,0"
                                 ToolTip="Editar informações" Style="{StaticResource EmphasisButtonStyle}" 
                                 Click="Editar_Click"/>
+                        <Button x:Name="ExcluirVendaButton" Grid.Column="2" Content="Excluir Venda" Style="{StaticResource CancelButtonStyle}" Width="150" Margin="0,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExcluirVenda_Click" Visibility="Collapsed" />
                     </Grid>
 
                     <!-- Separador -->

@@ -63,11 +63,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Não mostra campos de boletos
             CampoBoletos.Visibility = Visibility.Collapsed;
 
+            // Exibe o botão de excluir venda
+            if (FindName("ExcluirVendaButton") is Button excluirBtn)
+                excluirBtn.Visibility = Visibility.Visible;
+
             DataContext = venda;
 
             CarregarItensProduto(venda);
         }
-
 
         private void CarregarItensProduto(CompraData compra)
         {
@@ -330,6 +333,27 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (resultado == true)
             {
                 CarregarBoletos();
+            }
+        }
+
+        private void ExcluirVenda_Click(object sender, RoutedEventArgs e)
+        {
+            if (_vendaAtual == null) return;
+
+            var confirm = MessageBox.Show($"Tem certeza que deseja excluir a venda da nota fiscal '{_vendaAtual.NotaFiscal}'? Essa ação não pode ser desfeita.",
+                "Confirmar Exclusão", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (confirm != MessageBoxResult.Yes) return;
+
+            var db = DatabaseConnect.Database;
+            if (db != null)
+            {
+                var collection = db.GetCollection<VendaData>("vendas");
+                collection.Delete(_vendaAtual.Id);
+                MessageBox.Show("Venda excluída com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Opcional: você pode navegar para outra tela ou atualizar a interface
+                // Aqui, por padrão, pode-se ocultar os detalhes
+                this.Visibility = Visibility.Collapsed;
             }
         }
     }
