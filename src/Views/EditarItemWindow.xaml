@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2005"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Editar Item" Height="300" Width="400"
-        WindowStartupLocation="CenterOwner"
+        Title="Editar Item" Height="500" Width="400"
+        WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
     
     <Grid Margin="20">
@@ -87,7 +87,7 @@
             <Button Content="Salvar" 
                     Style="{StaticResource EmphasisButtonStyle}"
                     Width="100" 
-                    Height="35"
+                    
                     Click="Salvar_Click"/>
         </StackPanel>
     </Grid>
