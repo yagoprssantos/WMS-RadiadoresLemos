@@ -552,9 +552,32 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             if (sender is Button button && button.DataContext is ItemEdicaoViewModel item)
             {
-                // Implementação básica para editar um item
-                MessageBox.Show($"Editar item: {item.ProdutoNome}",
-                    "Editar Item", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Cria uma cópia do item para edição
+                var itemEditado = new ItemEdicaoViewModel(new MovimentacaoData
+                {
+                    ProdutoId = item.ObterItem().ProdutoId,
+                    ProdutoNome = item.ProdutoNome,
+                    Quantidade = item.Quantidade,
+                    Preco = item.Preco,
+                    Tipo = _isCompra ? "Entrada" : "Saída",
+                    Data = DateTime.Now,
+                    Detalhes = item.ObterItem().Detalhes
+                });
+
+                // Abre a janela de edição
+                var editarItemWindow = new EditarItemWindow(itemEditado);
+                if (editarItemWindow.ShowDialog() == true)
+                {
+                    // Atualiza o item na lista com os dados editados
+                    var index = _itensCompra.IndexOf(item);
+                    _itensCompra[index] = itemEditado;
+
+                    // Recalcula o valor total
+                    CalcularValorTotal();
+
+                    // Atualiza o DataGrid
+                    ItensDataGrid.Items.Refresh();
+                }
             }
         }
 

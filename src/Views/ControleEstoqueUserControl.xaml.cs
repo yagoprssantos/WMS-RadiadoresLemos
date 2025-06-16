@@ -174,6 +174,15 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
+            // Solicita a senha
+            var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+            confirmarSenhaWindow.ShowDialog();
+
+            if (!confirmarSenhaWindow.IsConfirmed)
+            {
+                return;
+            }
+
             var result = MessageBox.Show(
                 $"Tem certeza que deseja deletar o produto {produto.Nome}?",
                 "Confirmar exclusão",
