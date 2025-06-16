@@ -221,8 +221,10 @@ namespace WMS_RadiadoresLemos_WPF
                         title = "Cadastro";
                         iconPath = "/assets/Icons/Selected/CadastroS.png";
                         break;
-                    case "BtnBoletos": // 👈 ADICIONE ESTE CASE
-                        ContentArea.Content = new BoletoTestUserControl();
+                    case "BtnBoletos":
+                        control = new BoletoTestUserControl();
+                        title = "Boletos";
+                        iconPath = "/assets/Icons/Selected/CadastroS.png";
                         break;
                     case "BtnDashboard":
                         control = new DashboardUserControl();
