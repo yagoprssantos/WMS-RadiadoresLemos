@@ -270,10 +270,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 };
 
                 // Verificar se há compras neste dia
-                day.HasPayment = VerificarComprasNaData(currentDate);
-
+                day.HasCompra = VerificarComprasNaData(currentDate);
                 // Verificar se há boletos com vencimento neste dia
-                day.HasPayment |= VerificarBoletosNaData(currentDate);
+                day.HasBoleto = VerificarBoletosNaData(currentDate);
 
                 days.Add(day);
             }
@@ -303,7 +302,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             if (_todosBoletos == null) return false;
 
-            return _todosBoletos.Any(b => b.DataVencimento.Date == data.Date && b.Pagamento == null);
+            return _todosBoletos.Any(b => 
+                b.DataVencimento.Date == data.Date && 
+                b.Pagamento == null && 
+                b.NotaFiscal != null);
         }
 
         // 2. Pesquisa
@@ -697,7 +699,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         public bool IsCurrentMonth { get; set; }
         public bool IsToday { get; set; }
         public DateTime Date { get; set; }
-        public bool HasPayment { get; set; }
+        public bool HasCompra { get; set; }
+        public bool HasBoleto { get; set; }
+        public bool HasPayment => HasCompra || HasBoleto;
+
+        public System.Windows.Visibility BoletoVisibility => HasBoleto ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+        public System.Windows.Visibility CompraVisibility => HasCompra ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
 
         private bool _isSelected;
         public bool IsSelected

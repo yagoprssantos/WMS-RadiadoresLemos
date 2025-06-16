@@ -273,7 +273,19 @@ namespace WMS_RadiadoresLemos_WPF
             boletos.Add(novoBoleto);
             BoletosItemsControl.Items.Refresh();
             if (string.IsNullOrWhiteSpace(ParcelasTextBox.Text) || ParcelasTextBox.Text == "0") { ParcelasTextBox.Text = boletos.Count.ToString(); }
-            if (FormaPagamentoComboBox.SelectedIndex == -1 && boletos.Count > 0) { var itemParcelado = FormaPagamentoComboBox.Items.OfType<ComboBoxItem>().FirstOrDefault(cbi => cbi.Content?.ToString() == "Parcelado"); if (itemParcelado != null) FormaPagamentoComboBox.SelectedItem = itemParcelado; }
+            if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selectedItem &&
+                (selectedItem.Content?.ToString() ?? "") == "À vista")
+            {
+                ParcelasTextBox.Text = "1";
+                ParcelasTextBox.IsEnabled = false;
+            }
+            else
+            {
+                ParcelasTextBox.Text = "";
+                ParcelasTextBox.IsEnabled = true;
+                AdicionarBoletoButton.Visibility = Visibility.Visible;
+                BoletosItemsControl.Visibility = Visibility.Visible;
+            }
             StringBuilder detalhesAdicionais = new StringBuilder(); if (!string.IsNullOrWhiteSpace(DetalhesTextBox.Text)) detalhesAdicionais.AppendLine(DetalhesTextBox.Text).AppendLine("---");
             detalhesAdicionais.AppendLine($"Dados Extraídos do Boleto (Parcela {proximaParcela}):");
             if (!string.IsNullOrWhiteSpace(data.Beneficiario)) detalhesAdicionais.AppendLine($"  Beneficiário: {data.Beneficiario}");
@@ -516,8 +528,6 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     ParcelasTextBox.Text = "1";
                     ParcelasTextBox.IsEnabled = false;
-                    AdicionarBoletoButton.Visibility = Visibility.Collapsed;
-                    BoletosItemsControl.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
@@ -535,7 +545,8 @@ namespace WMS_RadiadoresLemos_WPF
             int proximaParcela = boletos.Count + 1;
             int totalParcelas = DeterminarTotalParcelas();
 
-            if (proximaParcela > totalParcelas && boletos.Any())
+            // Permitir adicionar o primeiro boleto se não houver nenhum, mesmo se for à vista
+            if (proximaParcela > totalParcelas && boletos.Count >= totalParcelas)
             {
                 MessageBox.Show(
                     "Todas as parcelas já foram adicionadas para o número de parcelas informado.",
