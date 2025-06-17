@@ -977,7 +977,7 @@ namespace WMS_RadiadoresLemos_WPF
                 var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
                 collection.Insert(movimentacao);
 
-                var produto = produtos.FirstOrDefault(p => p.Id == movimentacao.ProdutoId);
+                var produto = produtos.FirstOrDefault(p => p.Nome == movimentacao.ProdutoId);
                 if (produto != null)
                 {
                     AtualizarProdutoNoBanco(produto, movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
