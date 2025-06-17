@@ -273,5 +273,136 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CarregarHistorico();
             FiltroHistoricoPopup.IsOpen = false;
         }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var selectedCategory = CategoriasComboBox.SelectedItem as ComboBoxItem;
+            if (selectedCategory == null)
+                return;
+
+            string searchText = SearchBox.Text.ToLower();
+            string category = selectedCategory.Content.ToString();
+
+            // Se a caixa de pesquisa estiver vazia, recarregar todos os dados
+            if (string.IsNullOrEmpty(searchText))
+            {
+                if (category == "Entrada/Saída")
+                {
+                    CarregarEntradas();
+                    CarregarSaidas();
+                }
+                else if (category == "Histórico")
+                {
+                    CarregarHistorico();
+                }
+                return;
+            }
+
+            // Aplicar filtro baseado na categoria selecionada
+            if (category == "Entrada/Saída")
+            {
+                FiltrarMovimentacoesPorTexto(searchText);
+            }
+            else if (category == "Histórico")
+            {
+                FiltrarHistoricoPorTexto(searchText);
+            }
+        }
+
+        private void FiltrarMovimentacoesPorTexto(string searchText)
+        {
+            try
+            {
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
+                var movimentacoes = collection.FindAll().ToList();
+
+                // Entradas
+                // 1. Filtrar entradas
+                var entradasFiltradas = movimentacoes.Where(m =>
+                    m.Tipo == "Entrada" && (
+                        (m.ProdutoId?.ToLower().Contains(searchText) ?? false) ||
+                        (m.Quantidade.ToString().Contains(searchText))
+                    )).ToList();
+
+                // 2. Reordena os produtos filtrados com prioridade mais clara
+                entradasFiltradas = entradasFiltradas
+                    .OrderBy(m => m.ProdutoId?.ToLower().StartsWith(searchText) == true ? 0 : 1) // Prioriza correspondências no início do ProdutoId
+                    .ThenBy(m => m.ProdutoId?.ToLower().Contains(searchText) == true ? 0 : 1)    // Depois prioriza qualquer correspondência no ProdutoId
+                    .ThenBy(m => m.ProdutoId?.ToLower().IndexOf(searchText) ?? int.MaxValue)     // Depois por posição no ProdutoId
+                    .ThenBy(m => m.Quantidade.ToString().Contains(searchText) ? 0 : 1)           // Por último, correspondência na quantidade
+                    .ThenBy(m => m.ProdutoId)                                                    // Ordenação alfabética como critério final
+                    .ToList();
+
+                // Saídas
+                // 1. Filtrar saídas
+                var saidasFiltradas = movimentacoes.Where(m =>
+                    m.Tipo == "Saída" && (
+                        (m.ProdutoId?.ToLower().Contains(searchText) ?? false) ||
+                        (m.Quantidade.ToString().Contains(searchText))
+                    )).ToList();
+
+                // 2. Reordena os produtos filtrados com prioridade mais clara
+                saidasFiltradas = saidasFiltradas
+                    .OrderBy(m => m.ProdutoId?.ToLower().StartsWith(searchText) == true ? 0 : 1) // Prioriza correspondências no início do ProdutoId
+                    .ThenBy(m => m.ProdutoId?.ToLower().Contains(searchText) == true ? 0 : 1)    // Depois prioriza qualquer correspondência no ProdutoId
+                    .ThenBy(m => m.ProdutoId?.ToLower().IndexOf(searchText) ?? int.MaxValue)     // Depois por posição no ProdutoId
+                    .ThenBy(m => m.Quantidade.ToString().Contains(searchText) ? 0 : 1)           // Por último, correspondência na quantidade
+                    .ThenBy(m => m.ProdutoId)                                                    // Ordenação alfabética como critério final
+                    .ToList();
+
+                // Atualizar DataGrids
+                EntradaDataGrid.ItemsSource = entradasFiltradas;
+                SaidaDataGrid.ItemsSource = saidasFiltradas;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao filtrar movimentações: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void FiltrarHistoricoPorTexto(string searchText)
+        {
+            try
+            {
+                if (DatabaseConnect.Database == null)
+                {
+                    MessageBox.Show("Erro ao conectar ao banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var collection = DatabaseConnect.Database.GetCollection<LogData>("historico");
+                var historico = collection.FindAll().ToList();
+
+                // 1. Filtrar histórico
+                var historicoFiltrado = historico.Where(h =>
+                    (h.Tipo?.ToLower().Contains(searchText) ?? false) ||
+                    (h.Nivel?.ToLower().Contains(searchText) ?? false) ||
+                    (h.Usuario?.ToLower().Contains(searchText) ?? false)
+                ).ToList();
+
+                // 2. Reordena os produtos filtrados com prioridade mais clara
+                historicoFiltrado = historicoFiltrado
+                    .OrderBy(h => h.Tipo?.ToLower().StartsWith(searchText) == true ? 0 : 1) // Prioriza correspondências no início do Tipo
+                    .ThenBy(h => h.Tipo?.ToLower().Contains(searchText) == true ? 0 : 1)    // Depois prioriza qualquer correspondência no Tipo
+                    .ThenBy(h => h.Tipo?.ToLower().IndexOf(searchText) ?? int.MaxValue)     // Depois por posição no Tipo
+                    .ThenBy(h => h.Nivel?.ToLower().Contains(searchText) ?? false ? 0 : 1)   // Por último, correspondência no Nível
+                    .ThenBy(h => h.Usuario?.ToLower().Contains(searchText) ?? false ? 0 : 1) // E finalmente, correspondência no Usuário
+                    .ThenBy(h => h.Data)                                                    // Ordenação por data como critério final
+                    .ToList();
+
+                // Atualizar DataGrid
+                HistoricoDataGrid.ItemsSource = historicoFiltrado;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao filtrar histórico: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 }

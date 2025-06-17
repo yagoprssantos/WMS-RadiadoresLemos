@@ -575,7 +575,7 @@ namespace WMS_RadiadoresLemos_WPF
             var collection = _database.GetCollection(_tabelaAtual);
             var dadosOriginais = collection.FindAll().Cast<BsonDocument>().ToList();
 
-            // Filtra os dados com base no texto de pesquisa
+            // 1. Filtra os dados com base no texto de pesquisa
             var dadosFiltrados = dadosOriginais.Where(dado =>
             {
                 foreach (var propriedade in dado.Keys)
@@ -587,6 +587,20 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                 }
                 return false;
+            }).ToList();
+
+            // 2. Reordena os dados filtrados para que o primeiro item seja o que contém o texto de pesquisa
+            dadosFiltrados = dadosFiltrados.OrderBy(dado =>
+            {
+                foreach (var propriedade in dado.Keys)
+                {
+                    var valor = dado[propriedade]?.ToString()?.ToLower();
+                    if (!string.IsNullOrEmpty(valor) && valor.Contains(textoPesquisa))
+                    {
+                        return 0; // Prioriza os que contêm o texto de pesquisa
+                    }
+                }
+                return 1; // Coloca os demais itens depois
             }).ToList();
 
             // Converte os dados filtrados para o tipo correto

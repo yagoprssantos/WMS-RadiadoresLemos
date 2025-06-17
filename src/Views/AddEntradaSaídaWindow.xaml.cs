@@ -1094,9 +1094,13 @@ namespace WMS_RadiadoresLemos_WPF
             if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
             {
                 string searchText = textBox.Text;
+                // 1. Filtra o texto com base no texto digitado
                 var filteredProducts = produtos.Where(p => p.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                                               .Select(p => p.Nome)
                                               .ToList();
+
+                // 2. Reorganiza os itens do ComboBox para exibir primeiro os que começam com o texto digitado
+                filteredProducts = filteredProducts.OrderBy(p => p.StartsWith(searchText, StringComparison.OrdinalIgnoreCase) ? 0 : 1).ToList();
 
                 comboBox.ItemsSource = null;
                 comboBox.Items.Clear();
@@ -1162,9 +1166,13 @@ namespace WMS_RadiadoresLemos_WPF
             if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
             {
                 string searchText = textBox.Text;
+                // 1. Filtra o texto com base no texto digitado
                 var filteredFornecedores = fornecedores.Where(f => f.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                                                       .Select(f => f.Nome)
                                                       .ToList();
+
+                // 2. Reorganiza os itens do ComboBox para exibir primeiro os que começam com o texto digitado
+                filteredFornecedores = filteredFornecedores.OrderBy(f => f.StartsWith(searchText, StringComparison.OrdinalIgnoreCase) ? 0 : 1).ToList();
 
                 comboBox.ItemsSource = null;
                 comboBox.Items.Clear();

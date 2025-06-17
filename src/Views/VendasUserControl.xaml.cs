@@ -149,6 +149,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (_todasVendas == null) return;
 
             string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
+            // 1. Filtrar as vendas com base no texto de busca
             _vendasFiltradas = _todasVendas
                 .Where(v =>
                     (v.ClienteCNPJ?.ToLower().Contains(textoBusca) ?? false) ||
@@ -157,6 +158,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
                 )
                 .ToList();
+
+            // 2. Reordena os produtos filtrados com texto de busca mais próximo
+            if (!string.IsNullOrEmpty(textoBusca))
+            {
+                _vendasFiltradas = _vendasFiltradas
+                    .OrderByDescending(v => v.ClienteCNPJ?.ToLower().IndexOf(textoBusca) ?? -1)
+                    .ThenByDescending(v => v.Pedido?.ToLower().IndexOf(textoBusca) ?? -1)
+                    .ThenByDescending(v => v.Itens.Any(i => i.ProdutoNome.ToLower().IndexOf(textoBusca) >= 0) ? 1 : 0)
+                    .ThenByDescending(v => v.NotaFiscal?.ToLower().IndexOf(textoBusca) ?? -1)
+                    .ToList();
+            }
 
             AplicarOrdenacao();
             AtualizarInterfaceVendas();

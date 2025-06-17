@@ -713,5 +713,123 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Atualiza o DataGrid após a exclusão
             CarregarDadosTabela(_tabelaAtual);
         }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_tabelaAtual) || CadastroDataGrid.ItemsSource == null)
+            {
+                return;
+            }
+
+            string searchText = SearchBox.Text.ToLower();
+
+            // Se a caixa de pesquisa estiver vazia, recarregar todos os dados
+            if (string.IsNullOrEmpty(searchText))
+            {
+                CarregarDadosTabela(_tabelaAtual);
+                return;
+            }
+
+            switch (_tabelaAtual.ToLower())
+            {
+                case "produtos":
+                    FiltrarProdutosPorTexto(searchText);
+                    break;
+
+                case "clientes":
+                    FiltrarClientesPorTexto(searchText);
+                    break;
+
+                case "fornecedores":
+                    FiltrarFornecedoresPorTexto(searchText);
+                    break;
+
+                case "usuários":
+                    FiltrarUsuariosPorTexto(searchText);
+                    break;
+            }
+        }
+
+        private void FiltrarProdutosPorTexto(string searchText)
+        {
+            var collection = _database.GetCollection<ProdutoData>("produtos");
+            var produtos = collection.FindAll().ToList();
+
+            // Filtra produtos que contenham o texto de busca em qualquer campo relevante
+            var produtosFiltrados = produtos.Where(p =>
+                (p.Nome?.ToLower().Contains(searchText) ?? false) ||
+                (p.Tipo?.ToLower().Contains(searchText) ?? false) ||
+                (p.Marca?.ToLower().Contains(searchText) ?? false) ||
+                (p.Codigo?.ToLower().Contains(searchText) ?? false)).ToList();
+
+            // Reordena para mostrar primeiro os itens que começam com o texto de busca
+            produtosFiltrados = produtosFiltrados.OrderBy(p =>
+                (p.Nome?.ToLower().StartsWith(searchText) ?? false) ? 0 :
+                (p.Tipo?.ToLower().StartsWith(searchText) ?? false) ? 1 :
+                (p.Marca?.ToLower().StartsWith(searchText) ?? false) ? 2 :
+                (p.Codigo?.ToLower().StartsWith(searchText) ?? false) ? 3 : 4).ToList();
+
+            CadastroDataGrid.ItemsSource = produtosFiltrados;
+        }
+
+        private void FiltrarClientesPorTexto(string searchText)
+        {
+            var collection = _database.GetCollection<ClienteData>("clientes");
+            var clientes = collection.FindAll().ToList();
+
+            // Filtra clientes que contenham o texto de busca em qualquer campo relevante
+            var clientesFiltrados = clientes.Where(c =>
+                (c.CNPJ?.ToLower().Contains(searchText) ?? false) ||
+                (c.Email?.ToLower().Contains(searchText) ?? false) ||
+                (c.Estado?.ToLower().Contains(searchText) ?? false));
+
+            // Reordena para mostrar primeiro os itens que começam com o texto de busca
+            clientesFiltrados = clientesFiltrados.OrderBy(c =>
+                (c.CNPJ?.ToLower().StartsWith(searchText) ?? false) ? 0 :
+                (c.Email?.ToLower().StartsWith(searchText) ?? false) ? 1 :
+                (c.Estado?.ToLower().StartsWith(searchText) ?? false) ? 2 : 3).ToList();
+
+            CadastroDataGrid.ItemsSource = clientesFiltrados;
+        }
+
+        private void FiltrarFornecedoresPorTexto(string searchText)
+        {
+            var collection = _database.GetCollection<FornecedorData>("fornecedores");
+            var fornecedores = collection.FindAll().ToList();
+
+            // Filtra fornecedores que contenham o texto de busca em qualquer campo relevante
+            var fornecedoresFiltrados = fornecedores.Where(f =>
+                (f.Nome?.ToLower().Contains(searchText) ?? false) ||
+                (f.CNPJ?.ToLower().Contains(searchText) ?? false) ||
+                (f.Estado?.ToLower().Contains(searchText) ?? false));
+
+            // Reordena para mostrar primeiro os itens que começam com o texto de busca
+            fornecedoresFiltrados = fornecedoresFiltrados.OrderBy(f =>
+                (f.Nome?.ToLower().StartsWith(searchText) ?? false) ? 0 :
+                (f.CNPJ?.ToLower().StartsWith(searchText) ?? false) ? 1 :
+                (f.Estado?.ToLower().StartsWith(searchText) ?? false) ? 2 : 3).ToList();
+
+            CadastroDataGrid.ItemsSource = fornecedoresFiltrados;
+        }
+
+        private void FiltrarUsuariosPorTexto(string searchText)
+        {
+            var collection = _database.GetCollection<UsuarioData>("usuarios");
+            var usuarios = collection.FindAll().ToList();
+
+            // Filtra usuários que contenham o texto de busca em qualquer campo relevante
+            var usuariosFiltrados = usuarios.Where(u =>
+                (u.Nome?.ToLower().Contains(searchText) ?? false) ||
+                (u.Email?.ToLower().Contains(searchText) ?? false) ||
+                (u.Cargo?.ToLower().Contains(searchText) ?? false)).ToList();
+
+            // Reordena para mostrar primeiro os itens que começam com o texto de busca
+            usuariosFiltrados = usuariosFiltrados.OrderBy(u =>
+                (u.Nome?.ToLower().StartsWith(searchText) ?? false) ? 0 :
+                (u.Email?.ToLower().StartsWith(searchText) ?? false) ? 1 :
+                (u.Cargo?.ToLower().StartsWith(searchText) ?? false) ? 2 : 3).ToList();
+
+            CadastroDataGrid.ItemsSource = usuariosFiltrados;
+        }
     }
 }

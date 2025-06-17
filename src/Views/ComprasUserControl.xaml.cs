@@ -305,6 +305,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (_todasCompras == null) return;
 
             string textoBusca = SearchBox.Text?.Trim().ToLower() ?? "";
+            // 1. Filtrar compras com base no texto de busca
             _comprasFiltradas = _todasCompras
                 .Where(v =>
                     (v.FornecedorNome?.ToLower().Contains(textoBusca) ?? false) ||
@@ -312,6 +313,13 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     (v.NotaFiscal?.ToLower().Contains(textoBusca) ?? false)
                 )
                 .ToList();
+
+            // 2. Reordena os itens para aparecer primeiro os que contêm o texto de busca
+            _comprasFiltradas = _comprasFiltradas.OrderByDescending(v =>
+                v.FornecedorNome?.ToLower().Contains(textoBusca) == true ? 1 : 0 +
+                (v.Itens != null && v.Itens.Any(i => i.ProdutoNome != null && i.ProdutoNome.ToLower().Contains(textoBusca)) ? 1 : 0) +
+                (v.NotaFiscal?.ToLower().Contains(textoBusca) == true ? 1 : 0)
+            ).ToList();
 
             AplicarOrdenacao();
             AtualizarInterfaceCompras();
