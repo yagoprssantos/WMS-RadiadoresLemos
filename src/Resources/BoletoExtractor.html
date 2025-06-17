@@ -98,7 +98,7 @@
                 }
 
                 if (!combinedExtractedText) {
-                    throw new Error("Não foi possível extrair texto do arquivo");
+                    throw new Error("NÃ£o foi possÃ­vel extrair texto do arquivo");
                 }
 
                 enviarStatus('Estruturando dados...');
@@ -106,7 +106,7 @@
 
                 if (structuredJson) {
                     enviarDados(structuredJson);
-                    enviarStatus('Dados extraídos com sucesso!');
+                    enviarStatus('Dados extraÃ­dos com sucesso!');
                 } else {
                     throw new Error("Falha ao estruturar dados");
                 }
@@ -136,7 +136,7 @@
             const context = canvas.getContext('2d');
 
             for (let pageNum = 1; pageNum <= Math.min(pdf.numPages, 3); pageNum++) {
-                enviarStatus(`Processando página ${pageNum}...`);
+                enviarStatus(`Processando pÃ¡gina ${pageNum}...`);
 
                 const page = await pdf.getPage(pageNum);
                 const viewport = page.getViewport({ scale: 2.0 });
@@ -159,18 +159,18 @@
 
         async function extractTextFromImageAPI(base64ImageData) {
             const prompt = `
-                Analise esta imagem de boleto bancário e extraia EXATAMENTE as seguintes informações:
+                Analise esta imagem de boleto bancÃ¡rio e extraia EXATAMENTE as seguintes informaÃ§Ãµes:
 
-                - Beneficiário/Cedente (nome da empresa que irá receber)
-                - CNPJ do Beneficiário
+                - BeneficiÃ¡rio/Cedente (nome da empresa que irÃ¡ receber)
+                - CNPJ do BeneficiÃ¡rio
                 - Pagador/Sacado (quem deve pagar)
                 - Valor do boleto
                 - Data de vencimento
-                - Linha digitável
-                - Nosso número
-                - Agência e código do beneficiário
+                - Linha digitÃ¡vel
+                - Nosso nÃºmero
+                - AgÃªncia e cÃ³digo do beneficiÃ¡rio
 
-                Retorne apenas o texto extraído, sem explicações.
+                Retorne apenas o texto extraÃ­do, sem explicaÃ§Ãµes.
                 `;
 
             const requestBody = {
@@ -203,26 +203,26 @@
 
         async function structureTextToJson(extractedText) {
             const prompt = `
-                Transforme o seguinte texto extraído de um boleto em um JSON estruturado.
+                Transforme o seguinte texto extrapido de um boleto em um JSON estruturado.
                 Use EXATAMENTE estas chaves, mesmo que alguns valores sejam null:
 
                 {
-                    "beneficiario": "nome do beneficiário",
+                    "beneficiario": "nome do beneficiÃ¡rio",
                     "cnpjBeneficiario": "CNPJ formatado",
                     "cepBeneficiario": "CEP",
                     "estadoBeneficiario": "Estado",
                     "pagador": "nome do pagador",
                     "valor": "valor em formato brasileiro",
                     "vencimento": "data no formato dd/MM/yyyy",
-                    "linhaDigitavel": "linha digitável completa",
-                    "nossoNumero": "nosso número",
-                    "agenciaCodigoBeneficiario": "agência e código"
+                    "linhaDigitavel": "linha digitÃ¡vel completa",
+                    "nossoNumero": "nosso nÃºmero",
+                    "agenciaCodigoBeneficiario": "agÃªncia e cÃ³digo"
                 }
 
                 Texto a processar:
                 ${extractedText}
 
-                Retorne APENAS o JSON, sem explicações ou formatação markdown.
+                Retorne APENAS o JSON, sem explicaÃ§Ãµes ou formataÃ§Ã£o markdown.
                 `;
 
             const requestBody = {
@@ -238,7 +238,7 @@
             });
 
             if (!response.ok) {
-                throw new Error(`Erro na API de estruturação: ${response.status}`);
+                throw new Error(`Erro na API de estruturaÃ§Ã£o: ${response.status}`);
             }
 
             const data = await response.json();
