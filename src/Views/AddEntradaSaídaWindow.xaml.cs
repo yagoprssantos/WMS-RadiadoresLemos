@@ -1265,7 +1265,7 @@ namespace WMS_RadiadoresLemos_WPF
             if (ClienteComboBox.SelectedItem is string selected)
                 inputText = selected;
 
-            var cliente = clientes.FirstOrDefault(c => c.CNPJ == inputText || c.Email == inputText);
+            var cliente = clientes.FirstOrDefault(c => c.CNPJ == inputText);
             if (cliente != null)
             {
                 clienteSelecionadoId = cliente.Id;
@@ -1285,7 +1285,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (ClienteComboBox.SelectedItem is string selected)
             {
-                var cliente = clientes.FirstOrDefault(c => c.CNPJ == selected || c.Email == selected);
+                var cliente = clientes.FirstOrDefault(c => c.CNPJ == selected);
                 if (cliente != null)
                 {
                     clienteSelecionadoId = cliente.Id;
