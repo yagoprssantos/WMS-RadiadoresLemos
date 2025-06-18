@@ -20,6 +20,22 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             CarregarTabelas();
         }
 
+        public CadastroUserControl(string tipoTabela) : this()
+        {
+            // Seleciona automaticamente a tabela especificada
+            if (!string.IsNullOrEmpty(tipoTabela))
+            {
+                foreach (var item in TabelasComboBox.Items)
+                {
+                    if (item.ToString().Equals(tipoTabela, StringComparison.OrdinalIgnoreCase))
+                    {
+                        TabelasComboBox.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+        }
+
         private void CarregarTabelas()
         {
             // Adiciona as tabelas disponíveis ao ComboBox (Produtos, Clientes, Fornecedores e Usuários)

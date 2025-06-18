@@ -39,9 +39,11 @@
     <None Remove="assets\Icons\historicos.png" />
     <None Remove="assets\Icons\NotSelected\CadastroNS.png" />
     <None Remove="assets\Icons\NotSelected\CaixaNS.png" />
+    <None Remove="assets\Icons\NotSelected\ClientesNS.png" />
     <None Remove="assets\Icons\NotSelected\ComprarNS.png" />
     <None Remove="assets\Icons\NotSelected\DataCenterNS.png" />
     <None Remove="assets\Icons\NotSelected\EngrenagemNS.png" />
+    <None Remove="assets\Icons\NotSelected\FornecedoresNS.png" />
     <None Remove="assets\Icons\NotSelected\GraficoNS.png" />
     <None Remove="assets\Icons\NotSelected\HistoricoNS.png" />
     <None Remove="assets\Icons\NotSelected\PlusNS.png" />
@@ -55,8 +57,11 @@
     <None Remove="assets\Icons\PranchetaS.png" />
     <None Remove="assets\Icons\SairS.png" />
     <None Remove="assets\Icons\Selected\CadastroS.png" />
+    <None Remove="assets\Icons\Selected\CaixaS-2.png" />
+    <None Remove="assets\Icons\Selected\ClientesS.png" />
     <None Remove="assets\Icons\Selected\ComprarS.png" />
     <None Remove="assets\Icons\Selected\DataCenterS.png" />
+    <None Remove="assets\Icons\Selected\FornecedoresS.png" />
     <None Remove="assets\Icons\Selected\SwapS.png" />
     <None Remove="assets\Icons\Selected\UsuárioS.png" />
     <None Remove="assets\Icons\SinoS.png" />
@@ -126,6 +131,9 @@
     <Resource Include="assets\Icons\NotSelected\CaixaNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="assets\Icons\NotSelected\ClientesNS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="assets\Icons\NotSelected\ComprarNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -133,6 +141,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\Icons\NotSelected\EngrenagemNS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\Icons\NotSelected\FornecedoresNS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\Icons\NotSelected\GraficoNS.png">
@@ -165,7 +176,13 @@
     <Resource Include="assets\Icons\Selected\CadastroS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="assets\Icons\Selected\CaixaS-2.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="assets\Icons\Selected\CaixaS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\Icons\Selected\ClientesS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\Icons\Selected\ComprarS.png">
@@ -175,6 +192,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\Icons\Selected\EngrenagemS.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\Icons\Selected\FornecedoresS.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\Icons\Selected\GraficoS.png">
