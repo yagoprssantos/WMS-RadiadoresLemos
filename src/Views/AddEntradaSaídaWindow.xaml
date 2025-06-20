@@ -51,27 +51,75 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                            <TextBlock Text="Produto:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                                            <ComboBox Name="ProdutoComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
+                                        
+                                        <!-- Produto -->
+                                        <Grid Grid.Column="0" Margin="0,0,10,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="40" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            
+                                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Produto:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                            
+                                            <ComboBox Grid.Row="1" Grid.Column="0" Name="ProdutoComboBox" FontSize="14" Height="35" HorizontalAlignment="Stretch"
                                                       Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
                                                       LostFocus="ProdutoComboBox_LostFocus" TextBoxBase.TextChanged="ProdutoComboBox_TextChanged"
                                                       SelectionChanged="ProdutoComboBox_SelectionChanged" />
-                                        </StackPanel>
-                                        <StackPanel x:Name="Fornecedor" Grid.Column="1" Margin="10,0,0,0" Visibility="Visible">
-                                            <TextBlock Text="Fornecedor:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                                            <ComboBox Name="FornecedorComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
+                                            
+                                            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource EmphasisButtonStyle}" Width="35" Height="35" 
+                                                    Margin="5,0,0,0" Content="+" FontSize="16" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
+                                                    Name="AdicionarProdutoButton" Click="AdicionarProdutoButton_Click" />
+                                        </Grid>
+                                        
+                                        <!-- Fornecedor -->
+                                        <Grid Grid.Column="1" Margin="10,0,0,0" x:Name="Fornecedor" Visibility="Visible">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="40" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            
+                                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Fornecedor:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                            
+                                            <ComboBox Grid.Row="1" Grid.Column="0" Name="FornecedorComboBox" FontSize="14" Height="35" HorizontalAlignment="Stretch"
                                                       Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
                                                       LostFocus="FornecedorComboBox_LostFocus" TextBoxBase.TextChanged="FornecedorComboBox_TextChanged"
                                                       SelectionChanged="FornecedorComboBox_SelectionChanged" />
-                                        </StackPanel>
-                                        <StackPanel x:Name="Cliente" Grid.Column="1" Margin="10,0,0,0" Visibility="Collapsed">
-                                            <TextBlock Text="Cliente:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                                            <ComboBox Name="ClienteComboBox" Margin="0" FontSize="14" Height="35" HorizontalAlignment="Stretch"
+                                            
+                                            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource EmphasisButtonStyle}" Width="35" Height="35" 
+                                                    Margin="5,0,0,0" Content="+" FontSize="16" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
+                                                    Name="AdicionarFornecedorButton" Click="AdicionarFornecedorButton_Click" />
+                                        </Grid>
+                                        
+                                        <!-- Cliente -->
+                                        <Grid Grid.Column="1" Margin="10,0,0,0" x:Name="Cliente" Visibility="Collapsed">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="40" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            
+                                            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Cliente:" Margin="0,0,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                            
+                                            <ComboBox Grid.Row="1" Grid.Column="0" Name="ClienteComboBox" FontSize="14" Height="35" HorizontalAlignment="Stretch"
                                                       Style="{StaticResource ComboBoxSearchStyle}" Background="{StaticResource PanelBackgroundBrush}"
                                                       LostFocus="ClienteComboBox_LostFocus" TextBoxBase.TextChanged="ClienteComboBox_TextChanged"
                                                       SelectionChanged="ClienteComboBox_SelectionChanged" />
-                                        </StackPanel>
+                                            
+                                            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource EmphasisButtonStyle}" Width="35" Height="35" 
+                                                    Margin="5,0,0,0" Content="+" FontSize="16" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
+                                                    Name="AdicionarClienteButton" Click="AdicionarClienteButton_Click" />
+                                        </Grid>
                                     </Grid>
 
                                     <!-- Quantidade e Preço -->

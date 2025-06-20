@@ -21,6 +21,7 @@ using System.Windows.Media.Animation;
 using System.Xml.Linq;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -1791,6 +1792,75 @@ namespace WMS_RadiadoresLemos_WPF
         {
             StatusMessage.Visibility = Visibility.Visible;
             Financeiro.Visibility = Visibility.Collapsed;
+        }
+
+        private void AdicionarProdutoButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var editarProdutoWindow = new EditarProdutoWindow(null);
+                if (editarProdutoWindow.ShowDialog() == true)
+                {
+                    // Atualiza a lista de produtos e seleciona o produto recém-criado
+                    CarregarProdutos();
+                    ProdutoComboBox.SelectedValue = editarProdutoWindow.Produto.Codigo;
+                    ProdutoComboBox.Text = editarProdutoWindow.Produto.Nome;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir janela de edição de produto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Alerta.AdicionarAlerta("Erro", 
+                    ex.Message,
+                    "Erro ao adicionar novo produto.",
+                    "- Verifique se a janela de edição de produto pode ser aberta.");
+            }
+        }
+
+        private void AdicionarFornecedorButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var editarFornecedorWindow = new EditarFornecedorWindow(null);
+                if (editarFornecedorWindow.ShowDialog() == true)
+                {
+                    // Atualiza a lista de fornecedores e seleciona o fornecedor recém-criado
+                    CarregarFornecedores();
+                    FornecedorComboBox.SelectedValue = editarFornecedorWindow.Fornecedor.CNPJ;
+                    FornecedorComboBox.Text = editarFornecedorWindow.Fornecedor.Nome;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir janela de edição de fornecedor: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Alerta.AdicionarAlerta("Erro", 
+                    ex.Message,
+                    "Erro ao adicionar novo fornecedor.",
+                    "- Verifique se a janela de edição de fornecedor pode ser aberta.");
+            }
+        }
+
+        private void AdicionarClienteButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var editarClienteWindow = new EditarClienteWindow(null);
+                if (editarClienteWindow.ShowDialog() == true)
+                {
+                    // Atualiza a lista de clientes e seleciona o cliente recém-criado
+                    CarregarClientes();
+                    ClienteComboBox.SelectedValue = editarClienteWindow.Cliente.CNPJ;
+                    ClienteComboBox.Text = editarClienteWindow.Cliente.Email;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir janela de edição de cliente: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Alerta.AdicionarAlerta("Erro", 
+                    ex.Message,
+                    "Erro ao adicionar novo cliente.",
+                    "- Verifique se a janela de edição de cliente pode ser aberta.");
+            }
         }
     }
 }
