@@ -177,6 +177,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 return;
             }
 
+            // Solicita a senha do usuário para confirmar a exclusão
+            var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+            confirmarSenhaWindow.ShowDialog();
+
+            if (!confirmarSenhaWindow.IsConfirmed)
+            {
+                return; // Cancela a operação se a senha não for confirmada
+            }
+
             var confirmacao = MessageBox.Show(
                 $"Tem certeza que deseja deletar o arquivo '{arquivoSelecionado.name}'?\n\n" +
                 "Esta ação não pode ser desfeita!",

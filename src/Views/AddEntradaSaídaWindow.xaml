@@ -71,7 +71,7 @@
                                                       SelectionChanged="ProdutoComboBox_SelectionChanged" />
                                             
                                             <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource EmphasisButtonStyle}" Width="35" Height="35" 
-                                                    Margin="5,0,0,0" Content="+" FontSize="16" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
+                                                    Margin="5,0,0,0" Content="➕" FontSize="11" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
                                                     Name="AdicionarProdutoButton" Click="AdicionarProdutoButton_Click" />
                                         </Grid>
                                         
@@ -94,7 +94,7 @@
                                                       SelectionChanged="FornecedorComboBox_SelectionChanged" />
                                             
                                             <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource EmphasisButtonStyle}" Width="35" Height="35" 
-                                                    Margin="5,0,0,0" Content="+" FontSize="16" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
+                                                    Margin="5,0,0,0" Content="➕" FontSize="11" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
                                                     Name="AdicionarFornecedorButton" Click="AdicionarFornecedorButton_Click" />
                                         </Grid>
                                         

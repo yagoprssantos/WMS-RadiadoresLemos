@@ -777,6 +777,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
+                // Solicita a senha do usuário para confirmar a alteração
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (!confirmarSenhaWindow.IsConfirmed)
+                {
+                    return; // Cancela a operação se a senha não for confirmada
+                }
+
                 if (_isCompra)
                 {
                     // Valida se há informações essenciais para compra

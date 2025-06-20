@@ -12,6 +12,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
@@ -39,30 +40,33 @@
 
                     <!-- Botão de filtro -->
                     <Button Grid.Column="1" x:Name="FiltrarButton" Content="Filtrar por" ToolTip="Filtrar" Style="{StaticResource FilterButtonStyle}" Click="FiltrarButton_Click"/>
-                    
+
                     <!-- ComboBox para seleção de tabela -->
                     <ComboBox Grid.Column="2" x:Name="TabelasComboBox" Text="Selecionar tabela" ToolTip="Categorias" Style="{StaticResource ComboBoxSelectStyle}" Margin="5,0,0,0" SelectionChanged="TabelasComboBox_SelectionChanged"/>
                 </Grid>
 
-                <!-- Exibição de dados -->
-                <Border Grid.Row="1" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0">
-                    <StackPanel>
-                        <!-- Título da tabela atual -->
-                        <TextBlock x:Name="Titulo" Text="Selecione uma tabela" FontSize="18" FontWeight="Bold" 
-                                   Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,15,0,10"/>
-                        <Separator Margin="15,15,15,5"/>
+                <!-- Título da tabela atual -->
+                <TextBlock Grid.Row="1" x:Name="Titulo" Text="Selecione uma tabela" FontSize="18" FontWeight="Bold" 
+                           Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-                        <!-- DataGrid para exibição de dados -->
-                        <DataGrid x:Name="CadastroDataGrid" AutoGenerateColumns="False" HeadersVisibility="Column" 
-                                  Style="{StaticResource CustomDataGridStyle}" Margin="15,5,15,20"/>
-                    </StackPanel>
+                <Separator Grid.Row="1" Margin="15,25,15,10"/>
+
+                <!-- Exibição de dados -->
+                <Border Grid.Row="2" CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5" Margin="0,0,0,10">
+                    <DataGrid x:Name="CadastroDataGrid" AutoGenerateColumns="False" HeadersVisibility="Column"
+                              Style="{StaticResource CustomDataGridStyle}"
+                              VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Auto"
+                              ScrollViewer.CanContentScroll="True"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
                 </Border>
-                
+
                 <!-- Botões de ação -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
-                    <Button Content="Cadastrar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="0,10,0,0" Click="CadastrarButton_Click"/>
-                    <Button Content="Editar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="15,10,0,0" Click="EditarButton_Click"/>
-                    <Button Content="Deletar" Width="150" Style="{StaticResource CancelButtonStyle}" Margin="15,10,0,0" Click="DeletarButton_Click"/>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
+                    <Button Content="Cadastrar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="0,0,0,0" Click="CadastrarButton_Click"/>
+                    <Button Content="Editar" Width="150" Style="{StaticResource EmphasisButtonStyle}" Margin="15,0,0,0" Click="EditarButton_Click"/>
+                    <Button Content="Deletar" Width="150" Style="{StaticResource CancelButtonStyle}" Margin="15,0,0,0" Click="DeletarButton_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

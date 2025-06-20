@@ -81,6 +81,15 @@ namespace WMS_RadiadoresLemos_WPF
                 return;
             }
 
+            // Solicita a senha do usuário para confirmar a exclusãos
+            var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+            confirmarSenhaWindow.ShowDialog();
+
+            if (!confirmarSenhaWindow.IsConfirmed)
+            {
+                return; // Cancela a operação se a senha não for confirmada
+            }
+
             var result = MessageBox.Show(
                 $"Tem certeza que deseja deletar o usuário {usuario.Nome}?",
                 "Confirmar exclusão",

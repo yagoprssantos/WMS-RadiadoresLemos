@@ -609,6 +609,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 return;
             }
 
+            // Solicita a senha do usuário para confirmar a exclusão
+            var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+            confirmarSenhaWindow.ShowDialog();
+
+            if (!confirmarSenhaWindow.IsConfirmed)
+            {
+                return; // Cancela a operação se a senha não for confirmada
+            }
+
             // Confirmação do usuário
             var confirmacao = MessageBox.Show("Tem certeza que deseja deletar o registro selecionado?", "Confirmação", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (confirmacao != MessageBoxResult.Yes)
@@ -623,7 +632,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     if (CadastroDataGrid.SelectedItem is ProdutoData produtoSelecionado)
                     {
                         var collectionProdutos = _database.GetCollection<ProdutoData>("produtos");
-                        collectionProdutos.Delete(produtoSelecionado.Id); // Assume que o modelo possui uma propriedade "Id"
+                        collectionProdutos.Delete(produtoSelecionado.Id);
                         MessageBox.Show("Produto deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     break;
@@ -716,7 +725,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     if (CadastroDataGrid.SelectedItem is UsuarioData usuarioSelecionado)
                     {
                         var collectionUsuarios = _database.GetCollection<UsuarioData>("usuarios");
-                        collectionUsuarios.Delete(usuarioSelecionado.Id); // Assume que o modelo possui uma propriedade "Id"
+                        collectionUsuarios.Delete(usuarioSelecionado.Id);
                         MessageBox.Show("Usuário deletado com sucesso.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     break;

@@ -529,7 +529,35 @@ namespace WMS_RadiadoresLemos_WPF
         // Deleta a linha selecionada no DataGrid.
         private void DeletarButton_Click(object sender, RoutedEventArgs e)
         {
-            if (TabelaDataGrid.SelectedItem is not null)
+            // Verifica se há um item selecionado no DataGrid
+            if (TabelaDataGrid.SelectedItem == null)
+            {
+                MessageBox.Show("Por favor, selecione um registro para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            // Solicita a senha do usuário para confirmar a exclusão
+            var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+            confirmarSenhaWindow.ShowDialog();
+            
+            if (!confirmarSenhaWindow.IsConfirmed)
+            {
+                return; // Cancela a operação se a senha não for confirmada
+            }
+            
+            // Solicita confirmação adicional do usuário
+            var confirmacao = MessageBox.Show(
+                "Tem certeza que deseja deletar o registro selecionado?", 
+                "Confirmação de exclusão", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Question);
+                
+            if (confirmacao != MessageBoxResult.Yes)
+            {
+                return;
+            }
+            
+            try
             {
                 // Obtém o item selecionado e o ID
                 var registroSelecionado = TabelaDataGrid.SelectedItem;
@@ -543,7 +571,7 @@ namespace WMS_RadiadoresLemos_WPF
                     var collection = _database.GetCollection(_tabelaAtual);
                     if (collection.Delete(new BsonValue(idValor)))
                     {
-                        MessageBox.Show("Registro deletado com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Registro deletado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                         CarregarDadosTabela(_tabelaAtual);
                     }
                     else
@@ -556,9 +584,9 @@ namespace WMS_RadiadoresLemos_WPF
                     MessageBox.Show("O registro selecionado não possui um ID válido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Por favor, selecione um registro para deletar.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Erro ao deletar registro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

@@ -108,6 +108,15 @@ namespace WMS_RadiadoresLemos_WPF
 
                 if (confirmacao == MessageBoxResult.Yes)
                 {
+                    // Solicita a senha do usuário para confirmar a operação
+                    var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                    confirmarSenhaWindow.ShowDialog();
+
+                    if (!confirmarSenhaWindow.IsConfirmed)
+                    {
+                        return; // Cancela a operação se a senha não for confirmada
+                    }
+
                     try
                     {
                         ProgressBarMessage.Text = $"Baixando {arquivo.name}...";
@@ -275,118 +284,120 @@ namespace WMS_RadiadoresLemos_WPF
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
-                if (confirmacao == MessageBoxResult.Yes)
+                if (confirmacao != MessageBoxResult.Yes)
                 {
+                    return; // Cancela a operação se o usuário não confirmou
+                }
+
+                // Solicita a senha do usuário para confirmar a operação
+                var confirmarSenhaWindow = new ConfirmarSenhaWindow();
+                confirmarSenhaWindow.ShowDialog();
+
+                if (!confirmarSenhaWindow.IsConfirmed)
+                {
+                    return; // Cancela a operação se a senha não for confirmada
+                }
+
+                try
+                {
+                    ShowProgressBar.Visibility = Visibility.Visible;
+                    ProgressBarMessage.Text = "Importando banco de dados...";
+
+                    // Fecha todas as conexões com o banco atual
+                    DatabaseConnect.Disconnect();
+
+                    // Aguarda um momento para garantir que todas as conexões foram fechadas
+                    await Task.Delay(1000);
+
+                    // Faz backup do banco atual antes de substituir
+                    if (File.Exists(bancoAtual))
+                    {
+                        DatabaseBackup.CreateBackup(bancoAtual);
+                    }
+
+                    // Tenta substituir o banco de dados
                     try
                     {
-                        ShowProgressBar.Visibility = Visibility.Visible;
-                        ProgressBarMessage.Text = "Importando banco de dados...";
-
-                        // Fecha todas as conexões com o banco atual
-                        DatabaseConnect.Disconnect();
-
-                        // Aguarda um momento para garantir que todas as conexões foram fechadas
-                        await Task.Delay(1000);
-
-                        // Faz backup do banco atual antes de substituir
+                        // Se o arquivo existir, tenta deletá-lo primeiro
                         if (File.Exists(bancoAtual))
                         {
-                            DatabaseBackup.CreateBackup(bancoAtual);
+                            File.Delete(bancoAtual);
                         }
 
-                        // Tenta substituir o banco de dados
+                        // Copia o novo arquivo
+                        File.Copy(novoBanco, bancoAtual, true);
+
+                        // Verifica se o banco é válido
                         try
                         {
-                            // Se o arquivo existir, tenta deletá-lo primeiro
-                            if (File.Exists(bancoAtual))
+                            using (var testDb = new LiteDatabase(bancoAtual))
                             {
-                                File.Delete(bancoAtual);
+                                // Se chegou aqui, o banco está íntegro
+                                testDb.Dispose();
                             }
 
-                            // Copia o novo arquivo
-                            File.Copy(novoBanco, bancoAtual, true);
+                            ProgressBarMessage.Text = "Banco de dados importado com sucesso!";
 
-                            // Verifica se o banco é válido
-                            try
+                            // Obtém informações do backup mais recente
+                            var bancoDir = Path.GetDirectoryName(bancoAtual);
+                            if (bancoDir == null)
                             {
-                                using (var testDb = new LiteDatabase(bancoAtual))
-                                {
-                                    // Se chegou aqui, o banco está íntegro
-                                    testDb.Dispose();
-                                }
-
-                                ProgressBarMessage.Text = "Banco de dados importado com sucesso!";
-
-                                // Obtém informações do backup mais recente
-                                var bancoDir = Path.GetDirectoryName(bancoAtual);
-                                if (bancoDir == null)
-                                {
-                                    throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
-                                }
-                                var backupDir = Path.Combine(bancoDir, "local");
-
-                                var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
-                                    .OrderByDescending(f => File.GetLastWriteTime(f))
-                                    .ToList();
-
-                                if (!backups.Any())
-                                {
-                                    MessageBox.Show(
-                                        "Erro: Nenhum backup encontrado na pasta local.",
-                                        "Erro",
-                                        MessageBoxButton.OK,
-                                        MessageBoxImage.Error);
-                                    return;
-                                }
-
-                                var successWindow = new ImportSuccessWindow(
-                                    Path.GetFileName(backups.First()),
-                                    File.GetLastWriteTime(backups.First()),
-                                    novoBanco,
-                                    bancoAtual);
-
-                                successWindow.ShowDialog();
-
-                                if (!successWindow.Confirmado)
-                                {
-                                    // Se o usuário cancelou, restaura o backup
-                                    var backupMaisRecente = backups.First();
-                                    File.Copy(backupMaisRecente, bancoAtual, true);
-                                    return;
-                                }
+                                throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
                             }
-                            catch (Exception ex)
+                            var backupDir = Path.Combine(bancoDir, "local");
+
+                            var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                                .OrderByDescending(f => File.GetLastWriteTime(f))
+                                .ToList();
+
+                            if (!backups.Any())
                             {
-                                // Se o banco estiver corrompido, restaura o backup mais recente
-                                var bancoDir = Path.GetDirectoryName(bancoAtual);
-                                if (bancoDir == null)
-                                {
-                                    throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
-                                }
-                                var backupDir = Path.Combine(bancoDir, "local");
-
-                                var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
-                                    .OrderByDescending(f => File.GetLastWriteTime(f))
-                                    .ToList();
-
-                                if (backups.Any())
-                                {
-                                    File.Copy(backups.First(), bancoAtual, true);
-                                }
-
                                 MessageBox.Show(
-                                    $"O banco de dados importado está corrompido:\n{ex.Message}\n\n" +
-                                    "O banco anterior foi restaurado.",
+                                    "Erro: Nenhum backup encontrado na pasta local.",
                                     "Erro",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
+                                return;
+                            }
+
+                            var successWindow = new ImportSuccessWindow(
+                                Path.GetFileName(backups.First()),
+                                File.GetLastWriteTime(backups.First()),
+                                novoBanco,
+                                bancoAtual);
+
+                            successWindow.ShowDialog();
+
+                            if (!successWindow.Confirmado)
+                            {
+                                // Se o usuário cancelou, restaura o backup
+                                var backupMaisRecente = backups.First();
+                                File.Copy(backupMaisRecente, bancoAtual, true);
+                                return;
                             }
                         }
                         catch (Exception ex)
                         {
+                            // Se o banco estiver corrompido, restaura o backup mais recente
+                            var bancoDir = Path.GetDirectoryName(bancoAtual);
+                            if (bancoDir == null)
+                            {
+                                throw new InvalidOperationException("O diretório do banco de dados não pôde ser determinado.");
+                            }
+                            var backupDir = Path.Combine(bancoDir, "local");
+
+                            var backups = Directory.GetFiles(backupDir, "Database_v*_*.db")
+                                .OrderByDescending(f => File.GetLastWriteTime(f))
+                                .ToList();
+
+                            if (backups.Any())
+                            {
+                                File.Copy(backups.First(), bancoAtual, true);
+                            }
+
                             MessageBox.Show(
-                                $"Erro ao substituir o banco de dados:\n{ex.Message}\n\n" +
-                                "Tente fechar o programa e tentar novamente.",
+                                $"O banco de dados importado está corrompido:\n{ex.Message}\n\n" +
+                                "O banco anterior foi restaurado.",
                                 "Erro",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
@@ -395,15 +406,24 @@ namespace WMS_RadiadoresLemos_WPF
                     catch (Exception ex)
                     {
                         MessageBox.Show(
-                            $"Erro ao importar banco de dados:\n{ex.Message}",
+                            $"Erro ao substituir o banco de dados:\n{ex.Message}\n\n" +
+                            "Tente fechar o programa e tentar novamente.",
                             "Erro",
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
                     }
-                    finally
-                    {
-                        ShowProgressBar.Visibility = Visibility.Collapsed;
-                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Erro ao importar banco de dados:\n{ex.Message}",
+                        "Erro",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+                finally
+                {
+                    ShowProgressBar.Visibility = Visibility.Collapsed;
                 }
             }
         }
