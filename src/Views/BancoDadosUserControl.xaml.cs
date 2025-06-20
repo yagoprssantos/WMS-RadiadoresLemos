@@ -768,18 +768,18 @@ namespace WMS_RadiadoresLemos_WPF
 
         private async Task LimparArquivosAntigosSeNecessario(List<SupabaseArquivo> arquivos)
         {
-            const long LIMITE_1GB = 1073741824;
-            const int LIMITE_100_ARQUIVOS = 100;
+            const long LIMITE_0_95GB = 1020054732; // 0.95 GB = 0.95 * 1024^3
+            const int LIMITE_99_ARQUIVOS = 99;
             if (arquivos == null || arquivos.Count == 0)
                 return;
 
             var arquivosOrdenados = arquivos.OrderBy(a => a.created_at ?? DateTime.MinValue).ToList();
             long espacoTotal = arquivos.Sum(a => a.size);
             int totalArquivos = arquivos.Count;
-            bool precisaLimpar = espacoTotal > LIMITE_1GB || totalArquivos > LIMITE_100_ARQUIVOS;
+            bool precisaLimpar = espacoTotal > LIMITE_0_95GB || totalArquivos > LIMITE_99_ARQUIVOS;
 
             int deletados = 0;
-            while ((espacoTotal > LIMITE_1GB || totalArquivos > LIMITE_100_ARQUIVOS) && arquivosOrdenados.Count > 0)
+            while ((espacoTotal > LIMITE_0_95GB || totalArquivos > LIMITE_99_ARQUIVOS) && arquivosOrdenados.Count > 0)
             {
                 var arquivoMaisAntigo = arquivosOrdenados.First();
                 await SupabaseUploader.DeletarArquivoAsync(arquivoMaisAntigo.fullPath);
