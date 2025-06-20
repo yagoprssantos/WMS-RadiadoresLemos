@@ -19,6 +19,8 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Net.Http;
 using Supabase;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -603,6 +605,7 @@ namespace WMS_RadiadoresLemos_WPF
                 var arquivos = await SupabaseUploader.ListarArquivosAsync();
                 await LimparArquivosAntigosSeNecessario(arquivos);
                 arquivos = await SupabaseUploader.ListarArquivosAsync(); // Atualiza lista após possível limpeza
+                
                 if (arquivos != null && arquivos.Any())
                 {
                     var espacoTotal = arquivos.Sum(a => a.size);
@@ -697,7 +700,6 @@ namespace WMS_RadiadoresLemos_WPF
         {
             await AtualizarInformacoes();
         }
-
 
         // Backup automático
         // Método que verifica o banco de dados mais recente para fazer o backup
@@ -821,38 +823,65 @@ namespace WMS_RadiadoresLemos_WPF
                 .List();
 
             var arquivos = new List<SupabaseArquivo>();
-            using (var httpClient = new HttpClient())
+            
+            // Configuração para limitar requisições simultâneas
+            var semaphore = new SemaphoreSlim(10, 10); // Máximo 10 requisições simultâneas
+            var tasks = new List<Task<SupabaseArquivo>>();
+
+            foreach (var item in response)
             {
-                foreach (var item in response)
+                tasks.Add(ProcessarArquivoAsync(client, item, semaphore));
+            }
+
+            // Aguarda todas as tarefas completarem
+            var resultados = await Task.WhenAll(tasks);
+            arquivos.AddRange(resultados);
+
+            return arquivos;
+        }
+
+        private static async Task<SupabaseArquivo> ProcessarArquivoAsync(Supabase.Client client, Supabase.Storage.FileObject item, SemaphoreSlim semaphore)
+        {
+            await semaphore.WaitAsync();
+            try
+            {
+                var arquivo = new SupabaseArquivo
                 {
-                    var arquivo = new SupabaseArquivo
+                    name = item.Name,
+                    id = item.Id,
+                    bucket_id = item.BucketId,
+                    created_at = item.CreatedAt,
+                    updated_at = item.UpdatedAt,
+                    fullPath = item.Name
+                };
+
+                try
+                {
+                    var url = client.Storage
+                        .From(bucket)
+                        .GetPublicUrl(item.Name);
+                    
+                    using (var httpClient = new HttpClient())
                     {
-                        name = item.Name,
-                        id = item.Id,
-                        bucket_id = item.BucketId,
-                        created_at = item.CreatedAt,
-                        updated_at = item.UpdatedAt,
-                        fullPath = item.Name
-                    };
-                    try
-                    {
-                        var url = client.Storage
-                            .From(bucket)
-                            .GetPublicUrl(item.Name);
+                        httpClient.Timeout = TimeSpan.FromSeconds(10); // Timeout de 10 segundos
                         var headResponse = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
                         if (headResponse.IsSuccessStatusCode)
                         {
                             arquivo.size = headResponse.Content.Headers.ContentLength ?? 0;
                         }
                     }
-                    catch
-                    {
-                        arquivo.size = 0;
-                    }
-                    arquivos.Add(arquivo);
                 }
+                catch
+                {
+                    arquivo.size = 0;
+                }
+
+                return arquivo;
             }
-            return arquivos;
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         public static async Task DownloadFileAsync(string fileId, string destinationPath)
