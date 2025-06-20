@@ -6,18 +6,18 @@ using System.Globalization;
 
 namespace WMS_RadiadoresLemos_WPF
 {
-    public class BytesToMBConverter : IValueConverter
+    public class BytesToKBConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is long bytes)
             {
-                if (bytes == 0) return "0 MB";
+                if (bytes == 0) return "0 KB";
                 
-                double mb = bytes / (1024.0 * 1024.0);
-                return $"{mb:F2} MB";
+                double kb = bytes / 1024.0;
+                return $"{kb:F2} KB";
             }
-            return "0 MB";
+            return "0 KB";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

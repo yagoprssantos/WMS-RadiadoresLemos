@@ -4,6 +4,8 @@ using System.Windows;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Views;
 using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace WMS_RadiadoresLemos_WPF
 {
@@ -45,6 +47,17 @@ namespace WMS_RadiadoresLemos_WPF
                         }
                     }
                 }
+
+                // Verificar e limpar arquivos antigos do Supabase ao abrir o aplicativo
+                try
+                {
+                    var arquivosSupabase = await SupabaseUploader.ListarArquivosAsync();
+                    await LimparArquivosAntigosSeNecessario(arquivosSupabase);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao verificar arquivos do Supabase: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
@@ -55,6 +68,34 @@ namespace WMS_RadiadoresLemos_WPF
             AddAdminUser.AddAdmin();
             
             base.OnStartup(e);
+        }
+
+        private async Task LimparArquivosAntigosSeNecessario(List<SupabaseArquivo> arquivos)
+        {
+            const long LIMITE_0_95GB = 1020054732; // 0.95 GB = 0.95 * 1024^3
+            const int LIMITE_99_ARQUIVOS = 99;
+            if (arquivos == null || arquivos.Count == 0)
+                return;
+
+            var arquivosOrdenados = arquivos.OrderBy(a => a.created_at ?? DateTime.MinValue).ToList();
+            long espacoTotal = arquivos.Sum(a => a.size);
+            int totalArquivos = arquivos.Count;
+            bool precisaLimpar = espacoTotal > LIMITE_0_95GB || totalArquivos > LIMITE_99_ARQUIVOS;
+
+            int deletados = 0;
+            while ((espacoTotal > LIMITE_0_95GB || totalArquivos > LIMITE_99_ARQUIVOS) && arquivosOrdenados.Count > 0)
+            {
+                var arquivoMaisAntigo = arquivosOrdenados.First();
+                await SupabaseUploader.DeletarArquivoAsync(arquivoMaisAntigo.fullPath);
+                arquivosOrdenados.RemoveAt(0);
+                espacoTotal -= arquivoMaisAntigo.size;
+                totalArquivos--;
+                deletados++;
+            }
+            if (deletados > 0)
+            {
+                Console.WriteLine($"{deletados} arquivo(s) antigo(s) foram removidos automaticamente para manter o limite de espaço ou quantidade.");
+            }
         }
 
         // Metodo para quando aplicação for fechada
