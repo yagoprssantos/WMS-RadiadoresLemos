@@ -21,6 +21,7 @@ using System.Windows.Media.Animation;
 using System.Xml.Linq;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using WMS_RadiadoresLemos_WPF.src.Views;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -56,10 +57,6 @@ namespace WMS_RadiadoresLemos_WPF
         private ObservableCollection<BoletoData> boletos = new ObservableCollection<BoletoData>();
         private string? numeroNotaFiscalAtual;
 
-        private static readonly HttpClient httpClient = new HttpClient();
-        private string GeminiApiKey = "AIzaSyDE-arZPG2EgGJRGSZtz4-k0o7KF4bfNTw";
-
-
         public AddEntradaSaídaWindow()
         {
             InitializeComponent();
@@ -88,7 +85,6 @@ namespace WMS_RadiadoresLemos_WPF
                 Cliente.Visibility = Visibility.Collapsed;
 
                 // Exibe Campos Boletos
-                ExtrairBoletoGroupBox.Visibility = Visibility.Visible;
                 CamposBoletos.Visibility = Visibility.Visible;
             }
             else
@@ -100,7 +96,6 @@ namespace WMS_RadiadoresLemos_WPF
                 Cliente.Visibility = Visibility.Visible;
 
                 // Esconde Campos Boletos
-                ExtrairBoletoGroupBox.Visibility = Visibility.Collapsed;
                 CamposBoletos.Visibility = Visibility.Collapsed;
             }
         }
@@ -374,155 +369,12 @@ namespace WMS_RadiadoresLemos_WPF
                                   NumberStyles.Any, CultureInfo.InvariantCulture, out precoAntes);
         }
 
-        // Extração Automática de Dados do Boleto - Gemini
-        private async void BtnExtrairDeArquivo_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(GeminiApiKey) || GeminiApiKey == "SUA_CHAVE_API_AQUI")
-            {
-                MessageBox.Show("Configure sua chave da API Gemini na variável 'GeminiApiKey'.", "Chave API Necessária", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-                return;
-            }
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Title = "Selecionar Arquivo de Boleto",
-                Filter = "Arquivos Suportados (*.png;*.jpg;*.jpeg;*.pdf)|*.png;*.jpg;*.jpeg;*.pdf|Imagens (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg|PDF (*.pdf)|*.pdf|Todos (*.*)|*.*"
-            };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                string filePath = openFileDialog.FileName;
-                string fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
-                ShowProgressExtracao("Iniciando...", true);
-                try
-                {
-
-                    string base64ImageData = ""; string ocrText = "";
-                    if (fileExtension == ".pdf")
-                    {
-                        ShowProgressExtracao("Processamento de PDF não implementado. Converta para imagem.", false, true);
-                        MessageBox.Show("Converta o PDF para imagem (PNG/JPG) e tente novamente.", "PDF", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-                        return;
-                    }
-                    else if (fileExtension == ".png" || fileExtension == ".jpg" || fileExtension == ".jpeg")
-                    {
-                        ShowProgressExtracao("Processando imagem...", true);
-                        byte[] imageBytes = File.ReadAllBytes(filePath);
-                        base64ImageData = Convert.ToBase64String(imageBytes);
-                        ShowProgressExtracao("Extraindo texto da imagem (OCR)...", true);
-                        ocrText = await ExtractTextFromImageAPIAsync(base64ImageData);
-                    }
-                    else { throw new Exception("Formato de arquivo não suportado."); }
-                    if (string.IsNullOrWhiteSpace(ocrText)) { throw new Exception("Não foi possível extrair texto do arquivo."); }
-                    ShowProgressExtracao("Estruturando dados...", true);
-                    BoletoExtraidoData structuredData = await StructureTextToJsonAPIAsync(ocrText);
-                    PopulateFieldsFromExtractedBoleto(structuredData, filePath);
-                    ShowProgressExtracao("Dados extraídos! Verifique os campos e a lista de boletos.", false, isSuccess: true);
-
-                }
-                catch (Exception ex)
-                {
-                    ShowProgressExtracao($"Erro: {ex.Message}", false, true);
-                    MessageBox.Show($"Erro na extração: {ex.Message}", "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                }
-            }
-        }
-
-        private async Task<string> ExtractTextFromImageAPIAsync(string base64ImageData)
-        {
-            var imagePrompt = "Extraia todo o texto desta imagem de um boleto bancário brasileiro. Priorize a precisão de linha digitável, valor, vencimento, beneficiário e pagador.";
-            var payload = new { contents = new[] { new { parts = new object[] { new { text = imagePrompt }, new { inlineData = new { mimeType = "image/jpeg", data = base64ImageData } } } } } };
-            string requestUri = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GeminiApiKey}";
-            var jsonPayload = SystemTextJson.JsonSerializer.Serialize(payload);
-            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await httpClient.PostAsync(requestUri, content);
-            string responseBody = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode) throw new Exception($"API OCR: {response.StatusCode} - {responseBody}");
-            var geminiResponse = SystemTextJson.JsonSerializer.Deserialize<GeminiResponse>(responseBody);
-            return geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text ?? "";
-        }
-        private async Task<BoletoExtraidoData> StructureTextToJsonAPIAsync(string extractedText)
-        {
-            var schema = new GeminiSchema { Type = "OBJECT", Properties = new Dictionary<string, GeminiProperty> { { "beneficiario", new GeminiProperty { Type = "STRING", Description = "Nome do beneficiário. Se houver 'Beneficiário Final', usar este." } }, { "cnpjBeneficiario", new GeminiProperty { Type = "STRING", Description = "CNPJ do beneficiário (ou Final)." } }, { "cepBeneficiario", new GeminiProperty { Type = "STRING", Description = "CEP do beneficiário (ou Final)." } }, { "estadoBeneficiario", new GeminiProperty { Type = "STRING", Description = "Estado (UF) do beneficiário (ou Final)." } }, { "pagador", new GeminiProperty { Type = "STRING", Description = "Nome do pagador." } }, { "vencimento", new GeminiProperty { Type = "STRING", Description = "Data de vencimento (DD/MM/AAAA)." } }, { "valor", new GeminiProperty { Type = "STRING", Description = "Valor do boleto (ex: 123,45)." } }, { "linhaDigitavel", new GeminiProperty { Type = "STRING", Description = "Linha digitável completa." } }, { "nossoNumero", new GeminiProperty { Type = "STRING", Description = "'Nosso Número'." } }, { "agenciaCodigoBeneficiario", new GeminiProperty { Type = "STRING", Description = "'Agência / Código Beneficiário'." } } } };
-            var jsonPrompt = $"Analise o texto OCR de um boleto e preencha o schema JSON. Se 'Beneficiário Final' existir, use seus dados para os campos de beneficiário. Se um campo não for encontrado, retorne null ou string vazia. Texto OCR:\n\n{extractedText}";
-            var payload = new { contents = new[] { new { parts = new[] { new { text = jsonPrompt } } } }, generationConfig = new { responseMimeType = "application/json", responseSchema = schema } };
-            string requestUri = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GeminiApiKey}";
-            var jsonPayload = SystemTextJson.JsonSerializer.Serialize(payload);
-            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await httpClient.PostAsync(requestUri, content);
-            string responseBody = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode) throw new Exception($"API JSON: {response.StatusCode} - {responseBody}");
-            var geminiResponse = SystemTextJson.JsonSerializer.Deserialize<GeminiResponse>(responseBody);
-            string jsonDataPart = geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
-            if (string.IsNullOrWhiteSpace(jsonDataPart)) throw new Exception("API JSON retornou resposta vazia.");
-            return SystemTextJson.JsonSerializer.Deserialize<BoletoExtraidoData>(jsonDataPart) ?? new BoletoExtraidoData();
-        }
-        private void PopulateFieldsFromExtractedBoleto(BoletoExtraidoData data, string filePath)
-        {
-            if (string.IsNullOrWhiteSpace(NotaFiscalTextBox.Text)) { NotaFiscalTextBox.Text = data.NossoNumero ?? data.LinhaDigitavel?.Split(' ').LastOrDefault()?.Trim() ?? ""; }
-            if (usePositiveNumber && !string.IsNullOrWhiteSpace(data.Beneficiario)) { if (string.IsNullOrWhiteSpace(FornecedorComboBox.Text) || FornecedorComboBox.SelectedItem == null) { var fornecedorEncontrado = fornecedores.FirstOrDefault(f => f.Nome.Equals(data.Beneficiario, StringComparison.OrdinalIgnoreCase)); if (fornecedorEncontrado != null) { FornecedorComboBox.SelectedItem = fornecedorEncontrado.Nome; fornecedorSelecionadoId = fornecedorEncontrado.Id; fornecedorSelecionadoNome = fornecedorEncontrado.Nome; } else { FornecedorComboBox.Text = data.Beneficiario; fornecedorSelecionadoNome = data.Beneficiario; fornecedorSelecionadoId = null; } } }
-            int proximaParcela = boletos.Count + 1;
-            var novoBoleto = new BoletoData
-            {
-                DataVencimento = DateTime.TryParseExact(data.Vencimento, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var venc) ? venc : DateTime.Today.AddMonths(proximaParcela - 1),
-                CaminhoArquivo = filePath,
-                LinhaDigitavel = data.LinhaDigitavel ?? "",
-                Beneficiario = data.Beneficiario ?? "",
-                CnpjBeneficiario = data.CnpjBeneficiario,
-                Pagador = data.Pagador ?? "",
-                Valor = decimal.TryParse(data.Valor?.Replace(".", "").Replace(",", "."), NumberStyles.Number, CultureInfo.InvariantCulture, out var valorDecimal) ? valorDecimal : 0,
-                NossoNumero = data.NossoNumero,
-                AgenciaCodigoBeneficiario = data.AgenciaCodigoBeneficiario,
-                Status = StatusBoleto.Pendente,
-                DataCadastro = DateTime.UtcNow,
-                UsuarioCadastro = MainWindow.UsuarioLogado?.Nome,
-                Observacoes = $"Parcela {proximaParcela} - Extraído automaticamente"
-            };
-            boletos.Add(novoBoleto);
-            BoletosItemsControl.Items.Refresh();
-            if (string.IsNullOrWhiteSpace(ParcelasTextBox.Text) || ParcelasTextBox.Text == "0") { ParcelasTextBox.Text = boletos.Count.ToString(); }
-            if (FormaPagamentoComboBox.SelectedItem is ComboBoxItem selectedItem &&
-                (selectedItem.Content?.ToString() ?? "") == "À vista")
-            {
-                ParcelasTextBox.Text = "1";
-                ParcelasTextBox.IsEnabled = false;
-            }
-            else
-            {
-                ParcelasTextBox.Text = "";
-                ParcelasTextBox.IsEnabled = true;
-                AdicionarBoletoButton.Visibility = Visibility.Visible;
-                BoletosItemsControl.Visibility = Visibility.Visible;
-            }
-            StringBuilder detalhesAdicionais = new StringBuilder(); if (!string.IsNullOrWhiteSpace(DetalhesTextBox.Text)) detalhesAdicionais.AppendLine(DetalhesTextBox.Text).AppendLine("---");
-            detalhesAdicionais.AppendLine($"Dados Extraídos do Boleto (Parcela {proximaParcela}):");
-            if (!string.IsNullOrWhiteSpace(data.Beneficiario)) detalhesAdicionais.AppendLine($"  Beneficiário: {data.Beneficiario}");
-            if (!string.IsNullOrWhiteSpace(data.CnpjBeneficiario)) detalhesAdicionais.AppendLine($"  CNPJ Benef.: {data.CnpjBeneficiario}");
-            if (!string.IsNullOrWhiteSpace(data.Pagador)) detalhesAdicionais.AppendLine($"  Pagador: {data.Pagador}");
-            if (!string.IsNullOrWhiteSpace(data.LinhaDigitavel)) detalhesAdicionais.AppendLine($"  Linha Digitável: {data.LinhaDigitavel}");
-            if (!string.IsNullOrWhiteSpace(data.NossoNumero)) detalhesAdicionais.AppendLine($"  Nosso Número: {data.NossoNumero}");
-            if (!string.IsNullOrWhiteSpace(data.AgenciaCodigoBeneficiario)) detalhesAdicionais.AppendLine($"  Ag/Cód. Benef.: {data.AgenciaCodigoBeneficiario}");
-            if (!string.IsNullOrWhiteSpace(data.Valor)) detalhesAdicionais.AppendLine($"  Valor (Boleto): {data.Valor}");
-            if (!string.IsNullOrWhiteSpace(data.Vencimento)) detalhesAdicionais.AppendLine($"  Vencimento (Boleto): {data.Vencimento}");
-            DetalhesTextBox.Text = detalhesAdicionais.ToString().Trim();
-        }
-        private void ShowProgressExtracao(string message, bool isLoading, bool isError = false, bool isSuccess = false)
-        {
-            if (TxtStatusExtracao != null) { TxtStatusExtracao.Text = message; TxtStatusExtracao.Visibility = Visibility.Visible; TxtStatusExtracao.Foreground = System.Windows.Media.Brushes.Gray; if (isError) TxtStatusExtracao.Foreground = System.Windows.Media.Brushes.Red; if (isSuccess) TxtStatusExtracao.Foreground = System.Windows.Media.Brushes.Green; }
-            if (ProgressBarExtracao != null) { ProgressBarExtracao.IsIndeterminate = isLoading; ProgressBarExtracao.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed; }
-            if (BtnExtrairDeArquivo != null) BtnExtrairDeArquivo.IsEnabled = !isLoading;
-        }
-
         // Métodos sobre boleto
         private void AdicionarBoletoButton_Click(object sender, RoutedEventArgs e)
         {
             int proximaParcela = boletos.Count + 1;
             int totalParcelas = 1;
             int.TryParse(ParcelasTextBox.Text, out totalParcelas);
-
-            // Reordena os números das parcelas
-            for (int i = 0; i < boletos.Count; i++)
-            {
-                boletos[i].Parcela = i + 1;
-            }
 
             // Permitir adicionar o primeiro boleto se não houver nenhum, mesmo se for à vista
             if (proximaParcela > totalParcelas && boletos.Count >= totalParcelas)
@@ -539,10 +391,11 @@ namespace WMS_RadiadoresLemos_WPF
         {
             return new BoletoData
             {
+                Parcela = numeroParcela,
                 DataVencimento = DateTime.Now.AddMonths(numeroParcela - 1),
                 CaminhoArquivo = string.Empty,
                 LinhaDigitavel = "",
-                Beneficiario = fornecedorSelecionadoNome ?? "",
+                FornecedorId = fornecedorSelecionadoId ?? "",
                 Pagador = "A definir",
                 Valor = 0,
                 Status = StatusBoleto.Pendente,
@@ -630,12 +483,7 @@ namespace WMS_RadiadoresLemos_WPF
                 if (boletos.Any())
                 {
                     compra.Boletos = new List<string>();
-                    var fornecedor = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionadoId);
-                    if (fornecedor == null)
-                    {
-                        MessageBox.Show("Fornecedor não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                    var fornecedor = fornecedores.FirstOrDefault(f => f.Id == fornecedorSelecionadoId);
 
                     // Criar uma cópia dos boletos atuais FORA do loop
                     var boletosCopia = boletos.ToList();
@@ -741,7 +589,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             var compra = new CompraData
             {
-                FornecedorId = fornecedores.FirstOrDefault(f => f.Nome == fornecedorSelecionadoId)?.Id ?? string.Empty,
+                FornecedorId = fornecedores.FirstOrDefault(f => f.Id == fornecedorSelecionadoId)?.Id ?? string.Empty,
                 FornecedorNome = fornecedorSelecionadoNome ?? string.Empty,
                 DataCompra = DateTime.Now,
                 TipoPagamento = formaPagamentoSelecionada ?? string.Empty,
@@ -1130,7 +978,7 @@ namespace WMS_RadiadoresLemos_WPF
                 var collection = DatabaseConnect.Database.GetCollection<MovimentacaoData>("movimentacoes");
                 collection.Insert(movimentacao);
 
-                var produto = produtos.FirstOrDefault(p => p.Id == movimentacao.ProdutoId);
+                var produto = produtos.FirstOrDefault(p => p.Nome == movimentacao.ProdutoId);
                 if (produto != null)
                 {
                     AtualizarProdutoNoBanco(produto, movimentacao.Tipo == "Entrada", movimentacao.Quantidade, movimentacao.Preco);
@@ -1247,9 +1095,13 @@ namespace WMS_RadiadoresLemos_WPF
             if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
             {
                 string searchText = textBox.Text;
+                // 1. Filtra o texto com base no texto digitado
                 var filteredProducts = produtos.Where(p => p.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                                               .Select(p => p.Nome)
                                               .ToList();
+
+                // 2. Reorganiza os itens do ComboBox para exibir primeiro os que começam com o texto digitado
+                filteredProducts = filteredProducts.OrderBy(p => p.StartsWith(searchText, StringComparison.OrdinalIgnoreCase) ? 0 : 1).ToList();
 
                 comboBox.ItemsSource = null;
                 comboBox.Items.Clear();
@@ -1315,9 +1167,13 @@ namespace WMS_RadiadoresLemos_WPF
             if (sender is ComboBox comboBox && comboBox.Template.FindName("PART_EditableTextBox", comboBox) is TextBox textBox)
             {
                 string searchText = textBox.Text;
+                // 1. Filtra o texto com base no texto digitado
                 var filteredFornecedores = fornecedores.Where(f => f.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                                                       .Select(f => f.Nome)
                                                       .ToList();
+
+                // 2. Reorganiza os itens do ComboBox para exibir primeiro os que começam com o texto digitado
+                filteredFornecedores = filteredFornecedores.OrderBy(f => f.StartsWith(searchText, StringComparison.OrdinalIgnoreCase) ? 0 : 1).ToList();
 
                 comboBox.ItemsSource = null;
                 comboBox.Items.Clear();
@@ -1410,7 +1266,7 @@ namespace WMS_RadiadoresLemos_WPF
             if (ClienteComboBox.SelectedItem is string selected)
                 inputText = selected;
 
-            var cliente = clientes.FirstOrDefault(c => c.CNPJ == inputText || c.Email == inputText);
+            var cliente = clientes.FirstOrDefault(c => c.CNPJ == inputText);
             if (cliente != null)
             {
                 clienteSelecionadoId = cliente.Id;
@@ -1430,7 +1286,7 @@ namespace WMS_RadiadoresLemos_WPF
         {
             if (ClienteComboBox.SelectedItem is string selected)
             {
-                var cliente = clientes.FirstOrDefault(c => c.CNPJ == selected || c.Email == selected);
+                var cliente = clientes.FirstOrDefault(c => c.CNPJ == selected);
                 if (cliente != null)
                 {
                     clienteSelecionadoId = cliente.Id;
@@ -1676,7 +1532,7 @@ namespace WMS_RadiadoresLemos_WPF
                     !int.TryParse(textBox.Text, out int val) ||
                     val < 1 || val > 8)
                 {
-                    textBox.Clear();
+                    textBox.Text = "1";
                 }
             }
         }
@@ -1707,8 +1563,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 else
                 {
-                    MessageBox.Show("Parcelas inválidas.");
-                    textBox.Clear();
+                    textBox.Text = "1";
                 }
 
                 // Verifica a forma de pagamento para alterar o texto
@@ -1725,7 +1580,7 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         // Se for parcelado, impede parcelas iguais a 1
                         if (textBox.Text == "1")
-                            textBox.Text = "";
+                            textBox.Text = "2";
                     }
 
                     if (!textBox.IsEnabled && formaPagamentoSelecionada == "Parcelado")
@@ -1784,7 +1639,6 @@ namespace WMS_RadiadoresLemos_WPF
                 // Verifica se o texto é um número válido
                 if (!textBox.Text.All(char.IsDigit))
                 {
-                    MessageBox.Show("Nota fiscal inválida.");
                     textBox.Clear();
                 }
             }
@@ -1796,7 +1650,6 @@ namespace WMS_RadiadoresLemos_WPF
                 // Verifica se o texto é um número válido
                 if (!textBox.Text.All(char.IsDigit))
                 {
-                    MessageBox.Show("Nota fiscal inválida.");
                     textBox.Clear();
                 }
             }
@@ -1939,6 +1792,75 @@ namespace WMS_RadiadoresLemos_WPF
         {
             StatusMessage.Visibility = Visibility.Visible;
             Financeiro.Visibility = Visibility.Collapsed;
+        }
+
+        private void AdicionarProdutoButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var editarProdutoWindow = new EditarProdutoWindow(null);
+                if (editarProdutoWindow.ShowDialog() == true)
+                {
+                    // Atualiza a lista de produtos e seleciona o produto recém-criado
+                    CarregarProdutos();
+                    ProdutoComboBox.SelectedValue = editarProdutoWindow.Produto.Codigo;
+                    ProdutoComboBox.Text = editarProdutoWindow.Produto.Nome;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir janela de edição de produto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Alerta.AdicionarAlerta("Erro", 
+                    ex.Message,
+                    "Erro ao adicionar novo produto.",
+                    "- Verifique se a janela de edição de produto pode ser aberta.");
+            }
+        }
+
+        private void AdicionarFornecedorButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var editarFornecedorWindow = new EditarFornecedorWindow(null);
+                if (editarFornecedorWindow.ShowDialog() == true)
+                {
+                    // Atualiza a lista de fornecedores e seleciona o fornecedor recém-criado
+                    CarregarFornecedores();
+                    FornecedorComboBox.SelectedValue = editarFornecedorWindow.Fornecedor.CNPJ;
+                    FornecedorComboBox.Text = editarFornecedorWindow.Fornecedor.Nome;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir janela de edição de fornecedor: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Alerta.AdicionarAlerta("Erro", 
+                    ex.Message,
+                    "Erro ao adicionar novo fornecedor.",
+                    "- Verifique se a janela de edição de fornecedor pode ser aberta.");
+            }
+        }
+
+        private void AdicionarClienteButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var editarClienteWindow = new EditarClienteWindow(null);
+                if (editarClienteWindow.ShowDialog() == true)
+                {
+                    // Atualiza a lista de clientes e seleciona o cliente recém-criado
+                    CarregarClientes();
+                    ClienteComboBox.SelectedValue = editarClienteWindow.Cliente.CNPJ;
+                    ClienteComboBox.Text = editarClienteWindow.Cliente.Email;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir janela de edição de cliente: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                Alerta.AdicionarAlerta("Erro", 
+                    ex.Message,
+                    "Erro ao adicionar novo cliente.",
+                    "- Verifique se a janela de edição de cliente pode ser aberta.");
+            }
         }
     }
 }

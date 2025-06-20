@@ -70,8 +70,8 @@ namespace WMS_RadiadoresLemos_WPF
                         new VendasUserControl(),
                         new RegistroUserControl(),
                         new ControleEstoqueUserControl(),
-                        new CadastroUserControl(),
-                        new BoletoTestUserControl(), // 👈 ADICIONE ESTA LINHA
+                        new EscolherCadastroUserControl(),
+                        new BoletoTestUserControl(),
                         new DashboardUserControl(),
                         new NotificacoesUserControl(),
                         new ConfiguracaoUserControl()
@@ -217,7 +217,7 @@ namespace WMS_RadiadoresLemos_WPF
                         iconPath = "/assets/Icons/Selected/CaixaS.png";
                         break;
                     case "BtnCadastro":
-                        control = new CadastroUserControl();
+                        control = new EscolherCadastroUserControl();
                         title = "Cadastro";
                         iconPath = "/assets/Icons/Selected/CadastroS.png";
                         break;
@@ -373,7 +373,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 TitleTextBlock.Text = "Estoque";
             }
-            else if (ContentArea.Content is CadastroUserControl)
+            else if (ContentArea.Content is EscolherCadastroUserControl)
             {
                 TitleTextBlock.Text = "Cadastro";
             }
@@ -414,7 +414,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 iconUri = new Uri("/assets/Icons/Selected/CaixaS.png", UriKind.Relative);
             }
-            else if (ContentArea.Content is CadastroUserControl)
+            else if (ContentArea.Content is EscolherCadastroUserControl)
             {
                 iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative);
             }

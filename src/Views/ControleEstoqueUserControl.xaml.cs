@@ -217,11 +217,20 @@ namespace WMS_RadiadoresLemos_WPF
             if (produtosCarregados)
             {
                 string searchText = SearchBox.Text.ToLower();
+
+                // 1. Filtra para apresentar produtos que contenham o texto de busca (de qualquer parte do nome, tipo, marca ou código)
                 var produtosFiltrados = produtos.Where(p =>
                     p.Nome.ToLower().Contains(searchText) ||
                     p.Tipo.ToLower().Contains(searchText) ||
                     p.Marca.ToLower().Contains(searchText) ||
                     p.Codigo.ToLower().Contains(searchText)).ToList();
+
+                // 2. Reordena os produtos filtrados para apresentar itens com o começo dos campos mais próximo do texto de busca
+                produtosFiltrados = produtosFiltrados.OrderBy(p =>
+                    p.Nome.ToLower().StartsWith(searchText) ? 0 :
+                    p.Tipo.ToLower().StartsWith(searchText) ? 1 :
+                    p.Marca.ToLower().StartsWith(searchText) ? 2 :
+                    p.Codigo.ToLower().StartsWith(searchText) ? 3 : 4).ToList();
 
                 EstoqueDataGrid.ItemsSource = produtosFiltrados;
             }

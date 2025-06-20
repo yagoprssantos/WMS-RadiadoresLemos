@@ -1,0 +1,72 @@
+﻿<UserControl x:Class="WMS_RadiadoresLemos_WPF.src.Views.EscolherCadastroUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF.src.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="630" d:DesignWidth="800"
+             Background="{StaticResource BackgroundBrush}">
+
+    <Grid Margin="15,15,15,0">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
+            <Border x:Name="Principal" Grid.Column="0" CornerRadius="15" Padding="25" Margin="0" Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
+                <StackPanel Margin="20" MaxWidth="700">
+                    <TextBlock Text="Selecione o tipo de cadastro" 
+                               FontSize="22" 
+                               FontWeight="Bold" 
+                               Foreground="{StaticResource TextBrush}" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,10,0,30"/>
+
+                    <!-- Lista de opções de cadastro -->
+                    <StackPanel>
+                        <!-- Produtos -->
+                        <Button x:Name="BtnProdutos" Style="{StaticResource CustomButtonStyle}" Height="65" 
+                                Click="BtnProdutos_Click" MouseEnter="BtnProdutos_MouseEnter" MouseLeave="BtnProdutos_MouseLeave">
+                            <StackPanel Orientation="Horizontal">
+                                <Image x:Name="IconProdutos" Source="/assets/Icons/NotSelected/CaixaNS.png" 
+                                       Stretch="Uniform" Height="30" Width="30" Margin="15,0" 
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <TextBlock Text="Produtos" Style="{StaticResource TextBoxCustomButtonStyle}"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- Clientes -->
+                        <Button x:Name="BtnClientes" Style="{StaticResource CustomButtonStyle}" Height="65" 
+                                Click="BtnClientes_Click" MouseEnter="BtnClientes_MouseEnter" MouseLeave="BtnClientes_MouseLeave">
+                            <StackPanel Orientation="Horizontal">
+                                <Image x:Name="IconClientes" Source="/assets/Icons/NotSelected/ClientesNS.png" 
+                                       Stretch="Uniform" Height="30" Width="30" Margin="15,0" 
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <TextBlock Text="Clientes" Style="{StaticResource TextBoxCustomButtonStyle}"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- Usuários -->
+                        <Button x:Name="BtnUsuarios" Style="{StaticResource CustomButtonStyle}" Height="65"
+                                Click="BtnUsuarios_Click" MouseEnter="BtnUsuarios_MouseEnter" MouseLeave="BtnUsuarios_MouseLeave">
+                            <StackPanel Orientation="Horizontal">
+                                <Image x:Name="IconUsuarios" Source="/assets/Icons/NotSelected/UsuárioNS.png" 
+                                       Stretch="Uniform" Height="30" Width="30" Margin="15,0" 
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <TextBlock Text="Usuários" Style="{StaticResource TextBoxCustomButtonStyle}"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- Fornecedores -->
+                        <Button x:Name="BtnFornecedores" Style="{StaticResource CustomButtonStyle}" Height="65" 
+                                Click="BtnFornecedores_Click" MouseEnter="BtnFornecedores_MouseEnter" MouseLeave="BtnFornecedores_MouseLeave">
+                            <StackPanel Orientation="Horizontal">
+                                <Image x:Name="IconFornecedores" Source="/assets/Icons/NotSelected/FornecedoresNS.png" 
+                                       Stretch="Uniform" Height="30" Width="30" Margin="15,0" 
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <TextBlock Text="Fornecedores" Style="{StaticResource TextBoxCustomButtonStyle}"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

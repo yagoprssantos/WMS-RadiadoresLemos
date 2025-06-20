@@ -96,5 +96,10 @@ namespace WMS_RadiadoresLemos_WPF
         {
 
         }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

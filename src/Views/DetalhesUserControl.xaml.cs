@@ -280,6 +280,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                     // Recarrega os boletos após o registro
                     CarregarBoletos();
+
+                    // Recarrega itens de CompraUserControl se for uma compra
+                    if (_isCompra && _compraAtual != null)
+                    {
+                        var comprasUserControl = new ComprasUserControl();
+                        comprasUserControl.RecarregarItens();
+                    }
+                    else if (!_isCompra && _vendaAtual != null)
+                    {
+                        var vendasUserControl = new VendasUserControl();
+                        vendasUserControl.RecarregarItens();
+                    }
                 }
             }
             catch (Exception ex)

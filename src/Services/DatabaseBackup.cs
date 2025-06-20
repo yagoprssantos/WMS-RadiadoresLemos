@@ -13,7 +13,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             if (backupDirectory == null)
             {
                 var directory = Path.GetDirectoryName(dbPath);
-                backupDirectory = Path.Combine(directory, "local");
+                backupDirectory = Path.Combine(directory, "backup");
                 
                 // Cria o diretório de backup se não existir
                 if (!Directory.Exists(backupDirectory))
