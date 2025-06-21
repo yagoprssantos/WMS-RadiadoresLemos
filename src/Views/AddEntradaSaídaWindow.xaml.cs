@@ -389,6 +389,9 @@ namespace WMS_RadiadoresLemos_WPF
 
         private BoletoData CriarNovoBoleto(int numeroParcela)
         {
+            // Localiza o fornecedor selecionado para usar seus dados
+            var fornecedor = fornecedores.FirstOrDefault(f => f.Id == fornecedorSelecionadoId);
+            
             return new BoletoData
             {
                 Parcela = numeroParcela,
@@ -396,12 +399,16 @@ namespace WMS_RadiadoresLemos_WPF
                 CaminhoArquivo = string.Empty,
                 LinhaDigitavel = "",
                 FornecedorId = fornecedorSelecionadoId ?? "",
-                Pagador = "A definir",
+                // Usa o nome do fornecedor como beneficiário se disponível
+                Beneficiario = fornecedor?.Nome ?? "A definir",
+                CnpjBeneficiario = fornecedor?.CNPJ,
+                Pagador = "Radiadores Lemos", // Nome da empresa como pagador
                 Valor = 0,
                 Status = StatusBoleto.Pendente,
                 DataCadastro = DateTime.UtcNow,
                 UsuarioCadastro = MainWindow.UsuarioLogado?.Nome,
-                Observacoes = $"Parcela {numeroParcela} - Adicionado manualmente"
+                Observacoes = $"Parcela {numeroParcela} - Adicionado manualmente",
+                NotaFiscal = numeroNotaFiscalAtual
             };
         }
 
@@ -455,6 +462,72 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        private void ExtrairDadosBoleto_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is BoletoData boleto)
+            {
+                try
+                {
+                    // Cria e exibe a janela de extração
+                    var extractionWindow = new BoletoExtractionWindow();
+                    extractionWindow.Owner = this;
+                    
+                    bool? result = extractionWindow.ShowDialog();
+                    
+                    // Se o diálogo retornar true, dados foram extraídos com sucesso
+                    if (result == true && extractionWindow.BoletoSalvo != null)
+                    {
+                        // Copia os dados extraídos para o boleto atual
+                        AtualizarBoletoDadosExtraidos(boleto, extractionWindow.BoletoSalvo);
+                        
+                        // Atualiza a interface
+                        BoletosItemsControl.Items.Refresh();
+                        
+                        MessageBox.Show("Dados do boleto extraídos com sucesso!", "Sucesso", 
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao extrair dados do boleto: {ex.Message}", 
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void AtualizarBoletoDadosExtraidos(BoletoData boletoDestino, BoletoData boletoExtraido)
+        {
+            // Preserva os campos que não devem ser substituídos
+            int parcela = boletoDestino.Parcela;
+            string fornecedorId = boletoDestino.FornecedorId;
+            string notaFiscal = boletoDestino.NotaFiscal;
+            DateTime dataCadastro = boletoDestino.DataCadastro;
+            string usuarioCadastro = boletoDestino.UsuarioCadastro;
+            string caminhoArquivo = boletoDestino.CaminhoArquivo;
+            
+            // Copia todos os campos relevantes do boleto extraído
+            boletoDestino.Beneficiario = boletoExtraido.Beneficiario;
+            boletoDestino.CnpjBeneficiario = boletoExtraido.CnpjBeneficiario;
+            boletoDestino.CepBeneficiario = boletoExtraido.CepBeneficiario;
+            boletoDestino.EstadoBeneficiario = boletoExtraido.EstadoBeneficiario;
+            boletoDestino.Pagador = boletoExtraido.Pagador;
+            boletoDestino.DataVencimento = boletoExtraido.DataVencimento;
+            boletoDestino.Valor = boletoExtraido.Valor;
+            boletoDestino.LinhaDigitavel = boletoExtraido.LinhaDigitavel;
+            boletoDestino.NossoNumero = boletoExtraido.NossoNumero;
+            boletoDestino.AgenciaCodigoBeneficiario = boletoExtraido.AgenciaCodigoBeneficiario;
+            
+            // Restaura os campos que não devem ser modificados
+            boletoDestino.Parcela = parcela;
+            boletoDestino.FornecedorId = fornecedorId;
+            boletoDestino.NotaFiscal = notaFiscal;
+            boletoDestino.DataCadastro = dataCadastro;
+            boletoDestino.UsuarioCadastro = usuarioCadastro;
+            boletoDestino.CaminhoArquivo = caminhoArquivo;
+            
+            // Atualiza a observação
+            boletoDestino.Observacoes = $"Parcela {parcela} - Dados extraídos automaticamente";
+        }
 
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
         {
@@ -1683,85 +1756,76 @@ namespace WMS_RadiadoresLemos_WPF
 
         private async Task<bool> NotaFiscalExiste(string numeroNotaFiscal, bool mostrarMensagem = true)
         {
+            // Retorna false se a nota fiscal estiver vazia
+            if (string.IsNullOrWhiteSpace(numeroNotaFiscal))
+                return false;
+
             try
             {
-                if (string.IsNullOrWhiteSpace(numeroNotaFiscal))
-                    return false;
-
                 // Verifica nas compras/vendas da lista atual
-                bool existeNaLista = usePositiveNumber 
+                var existeNaLista = usePositiveNumber
                     ? compras.Any(c => c.NotaFiscal == numeroNotaFiscal)
                     : vendas.Any(v => v.NotaFiscal == numeroNotaFiscal);
 
                 if (existeNaLista)
                 {
                     if (mostrarMensagem)
-                    {
                         MessageBox.Show(
                             $"Já existe uma {(usePositiveNumber ? "compra" : "venda")} com esta nota fiscal na lista atual.",
-                            "Nota Fiscal Duplicada", 
-                            MessageBoxButton.OK, 
-                            MessageBoxImage.Warning
-                        );
-                    }
+                            "Nota Fiscal Duplicada",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
                     return true;
                 }
 
-                // Verifica no banco de dados
+                // Verifica no banco de dados (se disponível)
                 var db = DatabaseConnect.Database;
                 if (db == null)
                     return false;
 
-                if (usePositiveNumber) // Se for entrada (compra)
+                // Verifica de acordo com o tipo de operação (entrada ou saída)
+                bool existeNoBanco;
+                
+                if (usePositiveNumber)
                 {
-                    var comprasCollection = db.GetCollection<CompraData>("compras");
-                    var compraExistente = await Task.Run(() => 
-                        comprasCollection.FindOne(c => c.NotaFiscal == numeroNotaFiscal)
-                    );
-                    
-                    if (compraExistente != null && mostrarMensagem)
-                    {
-                        MessageBox.Show(
-                            "Já existe uma compra com esta nota fiscal no banco de dados.",
-                            "Nota Fiscal Duplicada", 
-                            MessageBoxButton.OK, 
-                            MessageBoxImage.Warning
-                        );
-                    }
-                    
-                    return compraExistente != null;
+                    // Verificação em compras (entradas)
+                    var colecaoCompras = db.GetCollection<CompraData>("compras");
+                    existeNoBanco = colecaoCompras.Exists(Query.EQ("notaFiscal", numeroNotaFiscal));
                 }
                 else
                 {
-                    var vendasCollection = db.GetCollection<VendaData>("vendas");
-                    var vendaExistente = await Task.Run(() => 
-                        vendasCollection.FindOne(v => v.NotaFiscal == numeroNotaFiscal)
-                    );
-                    
-                    if (vendaExistente != null && mostrarMensagem)
-                    {
-                        MessageBox.Show(
-                            "Já existe uma venda com esta nota fiscal no banco de dados.",
-                            "Nota Fiscal Duplicada", 
-                            MessageBoxButton.OK, 
-                            MessageBoxImage.Warning
-                        );
-                    }
-                    
-                    return vendaExistente != null;
+                    // Verificação em vendas (saídas)
+                    var colecaoVendas = db.GetCollection<VendaData>("vendas");
+                    existeNoBanco = colecaoVendas.Exists(Query.EQ("notaFiscal", numeroNotaFiscal));
                 }
+
+                if (existeNoBanco && mostrarMensagem)
+                    MessageBox.Show(
+                        $"Já existe uma {(usePositiveNumber ? "compra" : "venda")} com esta nota fiscal no banco de dados.",
+                        "Nota Fiscal Duplicada",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                return existeNoBanco;
+            }
+            catch (OperationCanceledException)
+            {
+                if (mostrarMensagem)
+                    MessageBox.Show(
+                        "A verificação da nota fiscal demorou muito tempo e foi cancelada.",
+                        "Tempo Esgotado",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                return false;
             }
             catch (Exception ex)
             {
                 if (mostrarMensagem)
-                {
                     MessageBox.Show(
-                        $"Erro ao verificar nota fiscal: {ex.Message}", 
-                        "Erro", 
-                        MessageBoxButton.OK, 
-                        MessageBoxImage.Error
-                    );
-                }
+                        $"Erro ao verificar nota fiscal: {ex.Message}",
+                        "Erro",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                 return false;
             }
         }
