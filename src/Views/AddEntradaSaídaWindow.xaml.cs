@@ -1641,6 +1641,14 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     textBox.Clear();
                 }
+                else
+                {
+                    // Verifica se a nota fiscal já existe
+                    if (NotaFiscalExiste(textBox.Text).Result)
+                    {
+                        textBox.Clear();
+                    }
+                }
             }
         }
         private void NotaFiscalTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -1670,6 +1678,91 @@ namespace WMS_RadiadoresLemos_WPF
             else
             {
                 e.CancelCommand();
+            }
+        }
+
+        private async Task<bool> NotaFiscalExiste(string numeroNotaFiscal, bool mostrarMensagem = true)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(numeroNotaFiscal))
+                    return false;
+
+                // Verifica nas compras/vendas da lista atual
+                bool existeNaLista = usePositiveNumber 
+                    ? compras.Any(c => c.NotaFiscal == numeroNotaFiscal)
+                    : vendas.Any(v => v.NotaFiscal == numeroNotaFiscal);
+
+                if (existeNaLista)
+                {
+                    if (mostrarMensagem)
+                    {
+                        MessageBox.Show(
+                            $"Já existe uma {(usePositiveNumber ? "compra" : "venda")} com esta nota fiscal na lista atual.",
+                            "Nota Fiscal Duplicada", 
+                            MessageBoxButton.OK, 
+                            MessageBoxImage.Warning
+                        );
+                    }
+                    return true;
+                }
+
+                // Verifica no banco de dados
+                var db = DatabaseConnect.Database;
+                if (db == null)
+                    return false;
+
+                if (usePositiveNumber) // Se for entrada (compra)
+                {
+                    var comprasCollection = db.GetCollection<CompraData>("compras");
+                    var compraExistente = await Task.Run(() => 
+                        comprasCollection.FindOne(c => c.NotaFiscal == numeroNotaFiscal)
+                    );
+                    
+                    if (compraExistente != null && mostrarMensagem)
+                    {
+                        MessageBox.Show(
+                            "Já existe uma compra com esta nota fiscal no banco de dados.",
+                            "Nota Fiscal Duplicada", 
+                            MessageBoxButton.OK, 
+                            MessageBoxImage.Warning
+                        );
+                    }
+                    
+                    return compraExistente != null;
+                }
+                else
+                {
+                    var vendasCollection = db.GetCollection<VendaData>("vendas");
+                    var vendaExistente = await Task.Run(() => 
+                        vendasCollection.FindOne(v => v.NotaFiscal == numeroNotaFiscal)
+                    );
+                    
+                    if (vendaExistente != null && mostrarMensagem)
+                    {
+                        MessageBox.Show(
+                            "Já existe uma venda com esta nota fiscal no banco de dados.",
+                            "Nota Fiscal Duplicada", 
+                            MessageBoxButton.OK, 
+                            MessageBoxImage.Warning
+                        );
+                    }
+                    
+                    return vendaExistente != null;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (mostrarMensagem)
+                {
+                    MessageBox.Show(
+                        $"Erro ao verificar nota fiscal: {ex.Message}", 
+                        "Erro", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Error
+                    );
+                }
+                return false;
             }
         }
 
