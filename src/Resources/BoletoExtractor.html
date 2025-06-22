@@ -159,19 +159,22 @@
 
         async function extractTextFromImageAPI(base64ImageData) {
             const prompt = `
-                Analise esta imagem de boleto bancário e extraia EXATAMENTE as seguintes informações:
+                    Analise esta imagem de boleto bancário e extraia EXATAMENTE as seguintes informações:
 
-                - Beneficiário/Cedente (nome da empresa que irá receber)
-                - CNPJ do Beneficiário
-                - Pagador/Sacado (quem deve pagar)
-                - Valor do boleto
-                - Data de vencimento
-                - Linha digitável
-                - Nosso número
-                - Agência e código do beneficiário
+                    - Beneficiário/Cedente (nome da empresa que irá receber)
+                    - CNPJ do Beneficiário
+                    - CNPJ do Pagador/Cedente
+                    - Pagador/Sacado (quem deve pagar)
+                    - Valor do boleto
+                    - Data de vencimento
+                    - Linha digitável
+                    - Nosso número
+                    - Agência e código do beneficiário
+                    - Estado do beneficiário
+                    - CEP do beneficiário
 
-                Retorne apenas o texto extraído, sem explicações.
-                `;
+                    Retorne apenas o texto extraído, sem explicações.
+                    `;
 
             const requestBody = {
                 contents: [{
@@ -203,27 +206,28 @@
 
         async function structureTextToJson(extractedText) {
             const prompt = `
-                Transforme o seguinte texto extrapido de um boleto em um JSON estruturado.
-                Use EXATAMENTE estas chaves, mesmo que alguns valores sejam null:
+                    Transforme o seguinte texto extrapido de um boleto em um JSON estruturado.
+                    Use EXATAMENTE estas chaves, mesmo que alguns valores sejam null:
 
-                {
-                    "beneficiario": "nome do beneficiário",
-                    "cnpjBeneficiario": "CNPJ formatado",
-                    "cepBeneficiario": "CEP",
-                    "estadoBeneficiario": "Estado",
-                    "pagador": "nome do pagador",
-                    "valor": "valor em formato brasileiro",
-                    "vencimento": "data no formato dd/MM/yyyy",
-                    "linhaDigitavel": "linha digitável completa",
-                    "nossoNumero": "nosso número",
-                    "agenciaCodigoBeneficiario": "agência e código"
-                }
+                    {
+                        "beneficiario": "nome do beneficiário",
+                        "cnpjBeneficiario": "CNPJ beneficiario formatado",
+                        "cnpjPagador": "CNPJ pagador formatado",
+                        "cepBeneficiario": "CEP",
+                        "estadoBeneficiario": "Estado",
+                        "pagador": "nome do pagador",
+                        "valor": "valor em formato brasileiro",
+                        "vencimento": "data no formato dd/MM/yyyy",
+                        "linhaDigitavel": "linha digitável completa",
+                        "nossoNumero": "nosso número",
+                        "agenciaCodigoBeneficiario": "agência e código"
+                    }
 
-                Texto a processar:
-                ${extractedText}
+                    Texto a processar:
+                    ${extractedText}
 
-                Retorne APENAS o JSON, sem explicações ou formatação markdown.
-                `;
+                    Retorne APENAS o JSON, sem explicações ou formatação markdown.
+                    `;
 
             const requestBody = {
                 contents: [{
