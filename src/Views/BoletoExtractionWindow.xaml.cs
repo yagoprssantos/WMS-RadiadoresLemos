@@ -19,6 +19,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private BoletoData? _dadosExtraidos;
         private bool _dadosCarregados = false;
         private string _arquivoBoleto = string.Empty;
+        private bool _webViewPronto = false;
+        private bool _processoAutomaticoAgendado = false;
 
         public BoletoData? BoletoSalvo { get; private set; }
 
@@ -31,7 +33,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         public BoletoExtractionWindow(string caminhoArquivo)
         {
             InitializeComponent();
-            _arquivoBoleto = caminhoArquivo;
+
+            if (!string.IsNullOrEmpty(caminhoArquivo) && File.Exists(caminhoArquivo))
+            {
+                _arquivoBoleto = caminhoArquivo;
+                _processoAutomaticoAgendado = true;
+                Console.WriteLine($"BoletoExtractionWindow inicializada com arquivo: {caminhoArquivo}");
+            }
+
             Loaded += BoletoExtractionWindow_Loaded;
         }
 
@@ -39,16 +48,120 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
+                StatusTextBlock.Text = "Inicializando...";
                 await InicializarWebView();
 
-                // Solicitar o arquivo do boleto imediatamente ao abrir a janela
-                SelecionarArquivoDoBoletoPrimeiro();
+                // Verifica se há um arquivo para processar automaticamente
+                if (_processoAutomaticoAgendado && !string.IsNullOrEmpty(_arquivoBoleto) && File.Exists(_arquivoBoleto))
+                {
+                    StatusTextBlock.Text = $"Processando arquivo: {Path.GetFileName(_arquivoBoleto)}";
+                    await ProcessarArquivoAutomaticamente(_arquivoBoleto);
+                }
+                else
+                {
+                    // Solicitar o arquivo do boleto se nenhum foi fornecido
+                    SelecionarArquivoDoBoletoPrimeiro();
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erro ao carregar a janela: {ex.Message}", "Erro",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 StatusTextBlock.Text = $"Erro ao inicializar: {ex.Message}";
+            }
+        }
+
+        private async Task ProcessarArquivoAutomaticamente(string caminhoArquivo)
+        {
+            try
+            {
+                // Espera até que o WebView esteja totalmente inicializado
+                if (!_webViewPronto)
+                {
+                    StatusTextBlock.Text = "Aguardando inicialização do WebView...";
+                    await EsperarWebViewPronto();
+                }
+
+                if (WebViewExtractor.CoreWebView2 == null)
+                {
+                    StatusTextBlock.Text = "WebView não inicializado corretamente. Tente novamente.";
+                    return;
+                }
+
+                // Verificar se o arquivo existe
+                if (!File.Exists(caminhoArquivo))
+                {
+                    StatusTextBlock.Text = $"Arquivo não encontrado: {caminhoArquivo}";
+                    MessageBox.Show($"O arquivo não foi encontrado: {caminhoArquivo}",
+                        "Arquivo não encontrado", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Lê o arquivo como base64
+                byte[] fileBytes = await File.ReadAllBytesAsync(caminhoArquivo);
+                string base64Data = Convert.ToBase64String(fileBytes);
+                string mimeType = "application/octet-stream";
+
+                // Determina o tipo MIME com base na extensão
+                string extensao = Path.GetExtension(caminhoArquivo).ToLower();
+                if (extensao == ".pdf") mimeType = "application/pdf";
+                else if (extensao == ".png") mimeType = "image/png";
+                else if (extensao == ".jpg" || extensao == ".jpeg") mimeType = "image/jpeg";
+                else
+                {
+                    StatusTextBlock.Text = $"Tipo de arquivo não suportado: {extensao}";
+                    MessageBox.Show($"O tipo de arquivo {extensao} não é suportado. Use PDF, PNG ou JPG.",
+                        "Tipo de arquivo não suportado", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Formato completo de base64 com prefixo de dados
+                string base64Content = $"data:{mimeType};base64,{base64Data}";
+                string fileName = Path.GetFileName(caminhoArquivo);
+
+                // Envia o comando para o WebView processar o arquivo
+                var command = new
+                {
+                    action = "processarArquivo",
+                    fileData = base64Content,
+                    fileName = fileName
+                };
+
+                string commandJson = JsonSerializer.Serialize(command);
+                Console.WriteLine($"Enviando comando para WebView: {fileName} ({mimeType})");
+
+                // Atualiza a interface antes de enviar o comando
+                StatusTextBlock.Text = $"Enviando arquivo para processamento: {fileName}";
+                await Task.Delay(500); // Pequena pausa para garantir que a UI seja atualizada
+
+                // Envia o comando para o WebView
+                WebViewExtractor.CoreWebView2.PostWebMessageAsString(commandJson);
+
+                // Guarda o caminho do arquivo para uso posterior
+                _arquivoBoleto = caminhoArquivo;
+            }
+            catch (Exception ex)
+            {
+                StatusTextBlock.Text = $"Erro ao processar arquivo: {ex.Message}";
+                MessageBox.Show($"Erro ao processar arquivo: {ex.Message}", "Erro",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task EsperarWebViewPronto(int timeoutMs = 10000)
+        {
+            int elapsedTime = 0;
+            int checkInterval = 100;
+
+            while (!_webViewPronto && elapsedTime < timeoutMs)
+            {
+                await Task.Delay(checkInterval);
+                elapsedTime += checkInterval;
+            }
+
+            if (!_webViewPronto)
+            {
+                throw new TimeoutException("Tempo limite excedido aguardando a inicialização do WebView.");
             }
         }
 
@@ -77,8 +190,15 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                         _dadosExtraidos.CaminhoArquivo = _arquivoBoleto;
                     }
 
-                    // Aqui você poderia enviar o arquivo para o WebView processar
-                    // através de alguma comunicação JavaScript, se possível
+                    // Processar o arquivo selecionado automaticamente
+                    if (_webViewPronto)
+                    {
+                        _ = ProcessarArquivoAutomaticamente(_arquivoBoleto);
+                    }
+                    else
+                    {
+                        _processoAutomaticoAgendado = true;
+                    }
                 }
                 else
                 {
@@ -98,12 +218,24 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
+                StatusTextBlock.Text = "Inicializando WebView...";
                 await WebViewExtractor.EnsureCoreWebView2Async(null);
                 WebViewExtractor.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
 
-                await CarregarArquivoHtml();
+                // Adiciona um handler para navegação completada
+                WebViewExtractor.CoreWebView2.NavigationCompleted += (s, e) =>
+                {
+                    _webViewPronto = true;
+                    StatusTextBlock.Text = "WebView inicializado e pronto.";
 
-                StatusTextBlock.Text = "Aplicação carregada. Use o extrator para processar o boleto.";
+                    // Se houver um arquivo agendado para processamento, processa-o agora
+                    if (_processoAutomaticoAgendado && !string.IsNullOrEmpty(_arquivoBoleto) && File.Exists(_arquivoBoleto))
+                    {
+                        _ = ProcessarArquivoAutomaticamente(_arquivoBoleto);
+                    }
+                };
+
+                await CarregarArquivoHtml();
             }
             catch (Exception ex)
             {
@@ -258,10 +390,11 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     }
                 }
 
-                // Definir o caminho do arquivo se foi informado
+                // IMPORTANTE: Definir o caminho do arquivo se foi informado
                 if (!string.IsNullOrEmpty(_arquivoBoleto))
                 {
                     _dadosExtraidos.CaminhoArquivo = _arquivoBoleto;
+                    Console.WriteLine($"Caminho do arquivo definido: {_arquivoBoleto}");
                 }
 
                 PreencherCampos();
@@ -277,16 +410,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     WriteIndented = true,
                     Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
                 });
-
-                // Exibe uma mensagem de sucesso mais simples para evitar problemas
-                MessageBox.Show(
-                    "Dados do boleto extraídos com sucesso!\n\n" +
-                    "Você pode agora verificar os dados, validá-los e clicar em 'Extrair e Retornar' " +
-                    "para enviar os dados de volta à tela anterior.",
-                    "Extração Concluída",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
             }
             catch (Exception ex)
             {
@@ -425,7 +548,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 {
                     string cnpjLimpo = _dadosExtraidos.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
                     string cnpjEsperado = "38046801000160";
-                    
+
                     if (cnpjLimpo != cnpjEsperado)
                     {
                         MessageBox.Show(
@@ -451,7 +574,10 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 }
 
                 // SEMPRE garantir que o caminho do arquivo seja preservado
-                _dadosExtraidos.CaminhoArquivo = _arquivoBoleto;
+                if (!string.IsNullOrEmpty(_arquivoBoleto))
+                {
+                    _dadosExtraidos.CaminhoArquivo = _arquivoBoleto;
+                }
 
                 _dadosExtraidos.DataCadastro = DateTime.UtcNow;
                 _dadosExtraidos.UsuarioCadastro = MainWindow.UsuarioLogado?.Nome;
@@ -462,9 +588,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 // Debug para verificar se o caminho está sendo atribuído corretamente
                 Console.WriteLine($"Caminho do arquivo sendo retornado: {_dadosExtraidos.CaminhoArquivo}");
-
-                MessageBox.Show("Dados extraídos com sucesso! Retornando para a tela principal.",
-                    "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 DialogResult = true;
                 Close();
@@ -497,6 +620,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _dadosExtraidos.NossoNumero = NossoNumeroTextBox.Text;
             _dadosExtraidos.AgenciaCodigoBeneficiario = AgenciaCodigoTextBox.Text;
 
+            // SEMPRE preserve o caminho do arquivo
             if (string.IsNullOrEmpty(_dadosExtraidos.CaminhoArquivo) && !string.IsNullOrEmpty(_arquivoBoleto))
             {
                 _dadosExtraidos.CaminhoArquivo = _arquivoBoleto;
@@ -525,7 +649,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 {
                     string cnpjPagadorLimpo = CnpjPagadorTextBox.Text.Replace(".", "").Replace("/", "").Replace("-", "");
                     string cnpjEsperado = "38046801000160";
-                    
+
                     if (cnpjPagadorLimpo != cnpjEsperado)
                     {
                         erros.Add("• CNPJ do pagador deve ser exatamente 38.046.801/0001-60 (Radiadores Lemos)");

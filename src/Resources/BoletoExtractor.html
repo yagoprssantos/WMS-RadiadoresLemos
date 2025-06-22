@@ -78,8 +78,84 @@
             }
         }
 
-        async function handleFileSelect(event) {
-            const file = event.target.files[0];
+        // Função para processar arquivo recebido do C#
+        function processarArquivoAutomatico(fileData, fileName) {
+            document.getElementById('loader').classList.remove('hidden');
+            enviarStatus(`Processando arquivo automático: ${fileName}...`);
+
+            try {
+                // Converter base64 para File
+                const file = base64ToFile(fileData, fileName);
+
+                // Atualizar a UI para mostrar o arquivo selecionado
+                if (window.DataTransfer && file) {
+                    try {
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        document.getElementById('boletoFile').files = dataTransfer.files;
+                    } catch (e) {
+                        console.error("Erro ao atualizar campo de arquivo:", e);
+                    }
+                }
+
+                // Processar o arquivo
+                processarArquivo(file);
+            } catch (error) {
+                enviarStatus(`Erro ao processar arquivo automático: ${error.message}`);
+                document.getElementById('loader').classList.add('hidden');
+            }
+        }
+
+        // Converter base64 para File
+        function base64ToFile(base64Data, fileName) {
+            try {
+                // Se base64Data já inclui o prefixo data:, extrair apenas os dados
+                let mime = 'application/octet-stream';
+                let base64 = base64Data;
+
+                if (base64Data.includes('data:')) {
+                    const parts = base64Data.split(',');
+                    mime = parts[0].match(/:(.*?);/)[1];
+                    base64 = parts[1];
+                }
+
+                // Determinar o tipo de arquivo com base na extensão
+                if (fileName.toLowerCase().endsWith('.pdf')) {
+                    mime = 'application/pdf';
+                } else if (fileName.toLowerCase().endsWith('.png')) {
+                    mime = 'image/png';
+                } else if (fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg')) {
+                    mime = 'image/jpeg';
+                }
+
+                // Converter base64 para array de bytes
+                const byteCharacters = atob(base64);
+                const byteArrays = [];
+
+                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                    const slice = byteCharacters.slice(offset, offset + 512);
+
+                    const byteNumbers = new Array(slice.length);
+                    for (let i = 0; i < slice.length; i++) {
+                        byteNumbers[i] = slice.charCodeAt(i);
+                    }
+
+                    const byteArray = new Uint8Array(byteNumbers);
+                    byteArrays.push(byteArray);
+                }
+
+                // Criar Blob e depois File
+                const blob = new Blob(byteArrays, { type: mime });
+                return new File([blob], fileName, { type: mime });
+            } catch (error) {
+                console.error("Erro ao converter base64:", error);
+                enviarStatus(`Erro na conversão do arquivo: ${error.message}`);
+                return null;
+            }
+        }
+
+        // Função central de processamento de arquivo
+        async function processarArquivo(file) {
             if (!file) return;
 
             document.getElementById('loader').classList.remove('hidden');
@@ -95,6 +171,8 @@
                     enviarStatus('Processando imagem...');
                     const base64ImageData = await convertFileToBase64(file);
                     combinedExtractedText = await extractTextFromImageAPI(base64ImageData);
+                } else {
+                    throw new Error(`Tipo de arquivo não suportado: ${file.type}`);
                 }
 
                 if (!combinedExtractedText) {
@@ -110,11 +188,18 @@
                 } else {
                     throw new Error("Falha ao estruturar dados");
                 }
-
             } catch (error) {
                 enviarStatus(`Erro: ${error.message}`);
             } finally {
                 document.getElementById('loader').classList.add('hidden');
+            }
+        }
+
+        // Handler para seleção manual de arquivo
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                await processarArquivo(file);
             }
         }
 
@@ -132,26 +217,45 @@
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             let allExtractedText = "";
 
-            const canvas = document.getElementById('pdfCanvas');
-            const context = canvas.getContext('2d');
+            // Container para os canvas
+            const canvasContainer = document.createElement('div');
+            canvasContainer.style.display = 'none';
+            document.body.appendChild(canvasContainer);
 
-            for (let pageNum = 1; pageNum <= Math.min(pdf.numPages, 3); pageNum++) {
-                enviarStatus(`Processando página ${pageNum}...`);
+            try {
+                // Processa até 3 páginas
+                for (let pageNum = 1; pageNum <= Math.min(pdf.numPages, 3); pageNum++) {
+                    enviarStatus(`Processando página ${pageNum}...`);
 
-                const page = await pdf.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 2.0 });
+                    // Cria um novo canvas para cada página
+                    const canvas = document.createElement('canvas');
+                    canvasContainer.appendChild(canvas);
+                    const context = canvas.getContext('2d');
 
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
+                    const page = await pdf.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: 2.0 });
 
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
 
-                const imageData = canvas.toDataURL('image/png').split(',')[1];
-                const extractedText = await extractTextFromImageAPI(imageData);
+                    // Renderiza a página no canvas recém-criado
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
 
-                if (extractedText) {
-                    allExtractedText += extractedText + " ";
+                    const imageData = canvas.toDataURL('image/png').split(',')[1];
+                    const extractedText = await extractTextFromImageAPI(imageData);
+
+                    if (extractedText) {
+                        allExtractedText += extractedText + " ";
+                    }
+
+                    // Limpa o canvas após o uso
+                    canvas.width = 0;
+                    canvas.height = 0;
+                    canvasContainer.removeChild(canvas);
                 }
+            } finally {
+                // Limpa todos os canvas criados
+                document.body.removeChild(canvasContainer);
             }
 
             return allExtractedText.trim();
@@ -159,22 +263,22 @@
 
         async function extractTextFromImageAPI(base64ImageData) {
             const prompt = `
-                    Analise esta imagem de boleto bancário e extraia EXATAMENTE as seguintes informações:
+                        Analise esta imagem de boleto bancário e extraia EXATAMENTE as seguintes informações:
 
-                    - Beneficiário/Cedente (nome da empresa que irá receber)
-                    - CNPJ do Beneficiário
-                    - CNPJ do Pagador/Cedente
-                    - Pagador/Sacado (quem deve pagar)
-                    - Valor do boleto
-                    - Data de vencimento
-                    - Linha digitável
-                    - Nosso número
-                    - Agência e código do beneficiário
-                    - Estado do beneficiário
-                    - CEP do beneficiário
+                        - Beneficiário/Cedente (nome da empresa que irá receber)
+                        - CNPJ do Beneficiário
+                        - CNPJ do Pagador/Cedente
+                        - Pagador/Sacado (quem deve pagar)
+                        - Valor do boleto
+                        - Data de vencimento
+                        - Linha digitável
+                        - Nosso número
+                        - Agência e código do beneficiário
+                        - Estado do beneficiário
+                        - CEP do beneficiário
 
-                    Retorne apenas o texto extraído, sem explicações.
-                    `;
+                        Retorne apenas o texto extraído, sem explicações.
+                        `;
 
             const requestBody = {
                 contents: [{
@@ -206,28 +310,28 @@
 
         async function structureTextToJson(extractedText) {
             const prompt = `
-                    Transforme o seguinte texto extrapido de um boleto em um JSON estruturado.
-                    Use EXATAMENTE estas chaves, mesmo que alguns valores sejam null:
+                        Transforme o seguinte texto extrapido de um boleto em um JSON estruturado.
+                        Use EXATAMENTE estas chaves, mesmo que alguns valores sejam null:
 
-                    {
-                        "beneficiario": "nome do beneficiário",
-                        "cnpjBeneficiario": "CNPJ beneficiario formatado",
-                        "cnpjPagador": "CNPJ pagador formatado",
-                        "cepBeneficiario": "CEP",
-                        "estadoBeneficiario": "Estado",
-                        "pagador": "nome do pagador",
-                        "valor": "valor em formato brasileiro",
-                        "vencimento": "data no formato dd/MM/yyyy",
-                        "linhaDigitavel": "linha digitável completa",
-                        "nossoNumero": "nosso número",
-                        "agenciaCodigoBeneficiario": "agência e código"
-                    }
+                        {
+                            "beneficiario": "nome do beneficiário",
+                            "cnpjBeneficiario": "CNPJ beneficiario formatado",
+                            "cnpjPagador": "CNPJ pagador formatado",
+                            "cepBeneficiario": "CEP",
+                            "estadoBeneficiario": "Estado",
+                            "pagador": "nome do pagador",
+                            "valor": "valor em formato brasileiro",
+                            "vencimento": "data no formato dd/MM/yyyy",
+                            "linhaDigitavel": "linha digitável completa",
+                            "nossoNumero": "nosso número",
+                            "agenciaCodigoBeneficiario": "agência e código"
+                        }
 
-                    Texto a processar:
-                    ${extractedText}
+                        Texto a processar:
+                        ${extractedText}
 
-                    Retorne APENAS o JSON, sem explicações ou formatação markdown.
-                    `;
+                        Retorne APENAS o JSON, sem explicações ou formatação markdown.
+                        `;
 
             const requestBody = {
                 contents: [{
@@ -262,6 +366,10 @@
                 if (command.action === 'limpar') {
                     document.getElementById('boletoFile').value = '';
                     enviarStatus('Pronto para novo arquivo');
+                }
+                else if (command.action === 'processarArquivo' && command.fileData) {
+                    // Processar arquivo enviado pelo WPF
+                    processarArquivoAutomatico(command.fileData, command.fileName || 'arquivo.pdf');
                 }
             });
         }

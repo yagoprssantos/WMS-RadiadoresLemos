@@ -436,11 +436,40 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 try
                 {
-                    // Cria e exibe a janela de extração sem passar o caminho do arquivo
-                    // O usuário escolherá o arquivo na própria janela de extração
-                    var extractionWindow = new BoletoExtractionWindow();
-                    extractionWindow.Owner = this;
+                    BoletoExtractionWindow extractionWindow;
 
+                    // Verifica se o boleto já tem um caminho de arquivo associado
+                    if (!string.IsNullOrEmpty(boleto.CaminhoArquivo) && File.Exists(boleto.CaminhoArquivo))
+                    {
+                        // Se o arquivo existe, passa o caminho para a janela de extração processar automaticamente
+                        extractionWindow = new BoletoExtractionWindow(boleto.CaminhoArquivo);
+                    }
+                    else
+                    {
+                        // Se não tem arquivo associado, solicita ao usuário selecionar um arquivo
+                        OpenFileDialog openFileDialog = new OpenFileDialog
+                        {
+                            Title = "Selecione o arquivo do boleto",
+                            Filter = "Arquivos PDF (*.pdf)|*.pdf|Todos os arquivos (*.*)|*.*",
+                            Multiselect = false
+                        };
+
+                        if (openFileDialog.ShowDialog() == true)
+                        {
+                            // Preenche o caminho do arquivo selecionado no boleto
+                            boleto.CaminhoArquivo = openFileDialog.FileName;
+
+                            // Cria a janela de extração com o caminho do arquivo selecionado
+                            extractionWindow = new BoletoExtractionWindow(openFileDialog.FileName);
+                        }
+                        else
+                        {
+                            // Se o usuário cancelar, não faz nada
+                            return;
+                        }
+                    }
+
+                    extractionWindow.Owner = this;
                     bool? result = extractionWindow.ShowDialog();
 
                     // Se o diálogo retornar true, dados foram extraídos com sucesso
@@ -460,14 +489,8 @@ namespace WMS_RadiadoresLemos_WPF
                         {
                             string cnpjLimpo = boleto.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
                             string cnpjEsperado = "38046801000160";
-                            
-                            if (cnpjLimpo == cnpjEsperado)
-                            {
-                                MessageBox.Show("Dados do boleto aplicados com sucesso ao boleto selecionado!\n\n" +
-                                    $"CNPJ do pagador validado: {boleto.CnpjPagador}",
-                                    "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                            }
-                            else
+
+                            if (cnpjLimpo != cnpjEsperado)
                             {
                                 MessageBox.Show("Dados do boleto foram aplicados, mas o CNPJ do pagador não corresponde ao esperado.\n\n" +
                                     $"CNPJ encontrado: {boleto.CnpjPagador}\n" +

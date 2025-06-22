@@ -290,10 +290,10 @@
                                                                     <TextBlock Grid.Column="0" Text="Arquivo:" FontSize="14" Foreground="{StaticResource TextBrush}"
                                                                                VerticalAlignment="Center" Margin="0,0,5,0"/>
                                                                     <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="3" VerticalAlignment="Center" MinWidth="120">
-                                                                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" Padding="1,0">
+                                                                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden">
                                                                             <TextBox Text="{Binding CaminhoArquivo}" Background="Transparent"
-                                                                                     Foreground="{StaticResource TextBrush}" FontSize="13" 
-                                                                                     IsReadOnly="True" BorderThickness="0" Padding="5,0"
+                                                                                     Foreground="{StaticResource TextBrush}" FontSize="13" Padding="0"
+                                                                                     IsReadOnly="True" BorderThickness="0" Margin="5,0" Height="28"
                                                                                      VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                                                                         </ScrollViewer>
                                                                     </Border>
@@ -311,57 +311,39 @@
                                                                         VerticalAlignment="Center" Click="RemoverBoletoButton_Click"/>
                                                                 
                                                                 <!-- Linha 2 e 3 unificadas: Informações básicas e datas -->
-                                                                <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0" HorizontalAlignment="Stretch">
-                                                                    <!-- Par: Valor e Nota Fiscal -->
-                                                                    <Grid Margin="0,0,10,5">
+                                                                <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0" HorizontalAlignment="Center">
+                                                                    <Grid Margin="0,0,0,5">
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="Auto"/> <!-- Rótulo Valor -->
-                                                                            <ColumnDefinition Width="*"/> <!-- TextBox Valor -->
-                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Nota Fiscal -->
-                                                                            <ColumnDefinition Width="*"/> <!-- TextBox Nota Fiscal -->
+                                                                            <ColumnDefinition Width="Auto"/> <!-- TextBox Valor -->
+                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Vencimento -->
+                                                                            <ColumnDefinition Width="Auto"/> <!-- DatePicker Vencimento -->
+                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Pagamento -->
+                                                                            <ColumnDefinition Width="Auto"/> <!-- DatePicker Pagamento -->
                                                                         </Grid.ColumnDefinitions>
-        
+
                                                                         <!-- Valor -->
                                                                         <TextBlock Grid.Column="0" Text="Valor:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
                                                                                    VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                                        <TextBox Grid.Column="1" Text="{Binding Valor, StringFormat=N2, ConverterCulture='pt-BR'}" FontSize="13" MinWidth="100"
+                                                                        <TextBox Grid.Column="1" Text="{Binding Valor, StringFormat=N2, ConverterCulture='pt-BR'}" FontSize="13"
                                                                                  Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                                                                                 Background="{StaticResource SecondaryBrush}"
-                                                                                 BorderThickness="1" />
-        
-                                                                        <!-- Nota Fiscal do Boleto -->
-                                                                        <TextBlock Grid.Column="2" Text="Nota Fiscal:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
-                                                                                   VerticalAlignment="Center" Margin="15,0,5,0"/>
-                                                                        <TextBox Grid.Column="3" Text="{Binding NotaFiscal}" FontSize="13" MinWidth="100"
-                                                                                 Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                                                                                 Background="{StaticResource SecondaryBrush}"
-                                                                                 BorderThickness="1" />
-                                                                    </Grid>
-    
-                                                                    <!-- Par: Vencimento e Pagamento -->
-                                                                    <Grid Margin="0,0,0,5">
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Vencimento -->
-                                                                            <ColumnDefinition Width="*"/> <!-- DatePicker Vencimento -->
-                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Pagamento -->
-                                                                            <ColumnDefinition Width="*"/> <!-- DatePicker Pagamento -->
-                                                                        </Grid.ColumnDefinitions>
-        
+                                                                                 Background="{StaticResource SecondaryBrush}" Width="100"
+                                                                                 BorderThickness="1" Margin="0,0,15,0" />
+
                                                                         <!-- Vencimento -->
-                                                                        <TextBlock Grid.Column="0" Text="Vencimento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
+                                                                        <TextBlock Grid.Column="2" Text="Vencimento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
                                                                                    VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                                        <DatePicker Grid.Column="1" x:Name="VencimentoDate" 
+                                                                        <DatePicker Grid.Column="3" x:Name="VencimentoDate" 
                                                                                     SelectedDate="{Binding DataVencimento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                                                                     SelectedDateChanged="VencimentoDate_SelectedDateChanged"
-                                                                                    Style="{StaticResource DatePickerStyle}"
-                                                                                    FontSize="13" MinWidth="120"
-                                                                                    VerticalAlignment="Center" />
-        
+                                                                                    Style="{StaticResource DatePickerStyle}" Width="130"
+                                                                                    FontSize="13" VerticalAlignment="Center" Margin="0,0,15,0" />
+
                                                                         <!-- Pagamento -->
-                                                                        <TextBlock Grid.Column="2" Text="Pagamento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
-                                                                                   VerticalAlignment="Center" Margin="15,0,5,0"/>
-                                                                        <DatePicker Grid.Column="3" SelectedDate="{Binding DataPagamento}" Style="{StaticResource DatePickerStyle}"
-                                                                                    FontSize="13" MinWidth="120" VerticalAlignment="Center" />
+                                                                        <TextBlock Grid.Column="4" Text="Pagamento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
+                                                                                   VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                                        <DatePicker Grid.Column="5" SelectedDate="{Binding DataPagamento}" Style="{StaticResource DatePickerStyle}" Width="130"
+                                                                                    FontSize="13" VerticalAlignment="Center" />
                                                                     </Grid>
                                                                 </WrapPanel>
 
