@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="LoginWindow" Height="350" Width="400"
+        Title="Tela de Login" Height="350" Width="400"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}"
         Loaded="Window_Loaded">

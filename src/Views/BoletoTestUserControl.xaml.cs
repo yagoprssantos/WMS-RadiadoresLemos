@@ -10,7 +10,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 {
     public partial class BoletoTestUserControl : UserControl
     {
-        private BoletoIntegrationService? integrationService;
+        // Instância estática compartilhada do serviço para implementar o padrão Singleton
+        private static BoletoIntegrationService? _sharedIntegrationService;
+        private bool _servicoInicializado = false;
 
         public BoletoTestUserControl()
         {
@@ -23,11 +25,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         {
             try
             {
-                integrationService = new BoletoIntegrationService();
-                integrationService.DadosRecebidos += OnDadosRecebidos;
-                await integrationService.IniciarServicoAsync();
+                // Verifica se o serviço já foi inicializado anteriormente
+                if (_sharedIntegrationService == null)
+                {
+                    _sharedIntegrationService = new BoletoIntegrationService();
+                    await _sharedIntegrationService.IniciarServicoAsync();
+                }
 
-                int portaAtiva = integrationService.ObterPorta();
+                // Apenas registra o evento de dados recebidos se ainda não foi inicializado
+                if (!_servicoInicializado)
+                {
+                    _sharedIntegrationService.DadosRecebidos += OnDadosRecebidos;
+                    _servicoInicializado = true;
+                }
+
+                int portaAtiva = _sharedIntegrationService.ObterPorta();
                 TxtStatusExtracao.Text = $"🌐 Aguardando dados da aplicação web na porta {portaAtiva}...";
                 TxtStatusExtracao.Visibility = Visibility.Visible;
             }

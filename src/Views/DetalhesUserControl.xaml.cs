@@ -30,12 +30,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _compraAtual = compra;
             _isCompra = true;
 
+            // Textos específicos para compra
             if (FindName("FCLabel") is TextBlock FCLabel)
                 FCLabel.Text = "Fornecedor:";
             if (FindName("FCTextBox") is TextBox FCTextBox)
                 FCTextBox.Text = compra.FornecedorNome;
-            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
-                ProdutoLabel.Text = "Produtos comprados:";
+            if (FindName("ProdutosLabel") is TextBlock ProdutosLabel)
+                ProdutosLabel.Text = "Produtos comprados:";
+            if (FindName("InfoTituloTextBlock") is TextBlock infoTitulo)
+                infoTitulo.Text = "Informações da Compra";
+            if (FindName("DataLabel") is TextBlock dataLabel)
+                dataLabel.Text = "Data da Compra:";
+            if (FindName("BoletosHeaderTextBlock") is TextBlock boletosHeader)
+                boletosHeader.Text = "Boletos e Parcelas da Compra";
+            if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
+                semBoletosMsg.Text = "Nenhum boleto registrado para esta compra.";
 
             // Mostra campos de boletos
             CampoBoletos.Visibility = Visibility.Visible;
@@ -52,13 +61,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _vendaAtual = venda;
             _isCompra = false;
 
-            // Altera textos para Venda
+            // Textos específicos para venda
             if (FindName("FCLabel") is TextBlock FCLabel)
                 FCLabel.Text = "Cliente:";
             if (FindName("FCTextBox") is TextBox FCTextBox)
                 FCTextBox.Text = venda.ClienteCNPJ;
-            if (FindName("ProdutoLabel") is TextBlock ProdutoLabel)
-                ProdutoLabel.Text = "Produtos vendidos:";
+            if (FindName("ProdutosLabel") is TextBlock ProdutosLabel)
+                ProdutosLabel.Text = "Produtos vendidos:";
+            if (FindName("InfoTituloTextBlock") is TextBlock infoTitulo)
+                infoTitulo.Text = "Informações da Venda";
+            if (FindName("DataLabel") is TextBlock dataLabel)
+                dataLabel.Text = "Data da Venda:";
+            if (FindName("BoletosHeaderTextBlock") is TextBlock boletosHeader)
+                boletosHeader.Text = "Boletos e Parcelas da Venda";
+            if (FindName("SemBoletosMessage") is TextBlock semBoletosMsg)
+                semBoletosMsg.Text = "Nenhum boleto registrado para esta venda.";
 
             // Não mostra campos de boletos
             CampoBoletos.Visibility = Visibility.Collapsed;
@@ -176,7 +193,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                         {
                             semBoletosMsg.Visibility = Visibility.Visible;
                             BoletosDataGrid.Visibility = Visibility.Collapsed;
-                            semBoletosMsg.Text = "Nenhum boleto registrado para esta compra.";
                         }
                     }
                     else

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS_RadiadoresLemos_WPF"
         mc:Ignorable="d"
-        Title="EditarProdutoWindow" Height="600" Width="600" FontSize="18"
+        Title="Editar Produto" Height="600" Width="600" FontSize="18"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource PanelBackgroundBrush}">
 

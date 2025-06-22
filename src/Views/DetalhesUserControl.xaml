@@ -44,7 +44,9 @@
                         <Button Grid.Column="1" Content="Editar" FontSize="14" Height="Auto" Width="100" Margin="0,0,10,0"
                                 ToolTip="Editar informações" Style="{StaticResource EmphasisButtonStyle}" 
                                 Click="Editar_Click"/>
-                        <Button x:Name="ExcluirVendaButton" Grid.Column="2" Content="Excluir Venda" Style="{StaticResource CancelButtonStyle}" Width="150" Margin="0,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExcluirVenda_Click" Visibility="Collapsed" />
+                        <Button Grid.Column="2"  x:Name="ExcluirVendaButton" Content="Excluir Venda" FontSize="14" Height="Auto" Width="150" Margin="0"
+                                ToolTip="Excluir vendas" Style="{StaticResource EmphasisButtonStyle}" Background="{StaticResource CancelButtonBrush}" Foreground="White"
+                                HorizontalAlignment="Right" VerticalAlignment="Top" Click="ExcluirVenda_Click" Visibility="Visible" />
                     </Grid>
 
                     <!-- Separador -->
@@ -76,6 +78,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" 
+                                               x:Name="InfoTituloTextBlock"
                                                Text="Informações" 
                                                FontSize="16" 
                                                FontWeight="SemiBold" 
@@ -170,7 +173,8 @@
                                         </Grid.RowDefinitions>
 
                                         <!-- Data -->
-                                        <TextBlock Grid.Row="0" Grid.Column="0" 
+                                        <TextBlock x:Name="DataLabel"
+                                                   Grid.Row="0" Grid.Column="0" 
                                                    Text="Data:" 
                                                    FontWeight="SemiBold"
                                                    VerticalAlignment="Center"
@@ -215,7 +219,7 @@
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0"
                                                    x:Name="ProdutosLabel"
-                                                   Text="Produtos da Compra:" 
+                                                   Text="Produtos:" 
                                                    FontWeight="SemiBold"
                                                    FontSize="16"
                                                    Foreground="{StaticResource TextBrush}" 
@@ -308,6 +312,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" 
+                                               x:Name="BoletosHeaderTextBlock"
                                                Text="Boletos e Parcelas" 
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Left"
@@ -334,7 +339,7 @@
                                         CornerRadius="15">
                                     <Grid>
                                         <TextBlock x:Name="SemBoletosMessage" 
-                                                   Text="Nenhum boleto registrado para esta compra." 
+                                                   Text="Nenhum boleto registrado para esta operação." 
                                                    Foreground="{StaticResource TextBrush}"
                                                    FontSize="16"
                                                    FontWeight="SemiBold"

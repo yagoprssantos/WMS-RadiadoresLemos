@@ -240,7 +240,27 @@
                                                      DataObject.Pasting="ParcelasTextBox_Pasting" />
                                         </StackPanel>
                                     </Grid>
-                                    
+
+
+                                    <TextBlock Text="Nota Fiscal:" Margin="0,10,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
+                                    <Grid Margin="0,0,0,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0" Name="NotaFiscalTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" Margin="0,0,0,0"
+                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
+                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap"  
+                                                 TextChanged="NotaFiscalTextBox_TextChanged" LostFocus="NotaFiscalTextBox_LostFocus" 
+                                                 PreviewTextInput="NotaFiscalTextBox_PreviewTextInput" DataObject.Pasting="NotaFiscalTextBox_Pasting" />
+
+                                        <!-- 
+                                        <Button Grid.Column="1" Content="Importar XML Nota Fiscal" Style="{StaticResource EmphasisButtonStyle}"
+                                                Click="ImportarXMLButton_Click"  Margin="10,0,0,0" FontSize="12"/>
+                                        -->
+
+                                    </Grid>
+
                                     <!-- Campos de Boletos -->
                                     <StackPanel x:Name="CamposBoletos" Visibility="Visible">
                                         <Grid Margin="0,5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -309,17 +329,23 @@
                                                                 <Button Grid.Row="0" Grid.Column="4" Content="✖" FontSize="12"
                                                                         Style="{StaticResource DeleteButtonStyle}" Width="30" Height="28" 
                                                                         VerticalAlignment="Center" Click="RemoverBoletoButton_Click"/>
-                                                                
+
                                                                 <!-- Linha 2: Informações básicas e datas -->
                                                                 <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0" HorizontalAlignment="Center">
                                                                     <Grid Margin="0,0,0,5">
                                                                         <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Valor -->
-                                                                            <ColumnDefinition Width="Auto"/> <!-- TextBox Valor -->
-                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Vencimento -->
-                                                                            <ColumnDefinition Width="Auto"/> <!-- DatePicker Vencimento -->
-                                                                            <ColumnDefinition Width="Auto"/> <!-- Rótulo Pagamento -->
-                                                                            <ColumnDefinition Width="Auto"/> <!-- DatePicker Pagamento -->
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <!-- Rótulo Valor -->
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <!-- TextBox Valor -->
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <!-- Rótulo Vencimento -->
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <!-- DatePicker Vencimento -->
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <!-- Rótulo Pagamento -->
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <!-- DatePicker Pagamento -->
                                                                         </Grid.ColumnDefinitions>
 
                                                                         <!-- Valor -->
@@ -392,7 +418,7 @@
                                                                             <TextBox Text="{Binding Pagador}" Margin="0,3,0,0" FontSize="14"
                                                                                      Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
                                                                         </StackPanel>
-                                                                        
+
                                                                         <!-- CNPJ do Pagador -->
                                                                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,5,0,5">
                                                                             <TextBlock Text="CNPJ do Pagador:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
@@ -415,25 +441,6 @@
                                             </ItemsControl>
                                         </ScrollViewer>
                                     </StackPanel>
-
-                                    <TextBlock Text="Nota Fiscal:" Margin="0,10,0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
-                                    <Grid Margin="0,0,0,5">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Grid.Column="0" Name="NotaFiscalTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" Margin="0,0,0,0"
-                                                 Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}" 
-                                                 MinHeight="35" Height="Auto" AcceptsReturn="True" TextWrapping="Wrap"  
-                                                 TextChanged="NotaFiscalTextBox_TextChanged" LostFocus="NotaFiscalTextBox_LostFocus" 
-                                                 PreviewTextInput="NotaFiscalTextBox_PreviewTextInput" DataObject.Pasting="NotaFiscalTextBox_Pasting" />
-                                       
-                                        <!-- 
-                                        <Button Grid.Column="1" Content="Importar XML Nota Fiscal" Style="{StaticResource EmphasisButtonStyle}"
-                                                Click="ImportarXMLButton_Click"  Margin="10,0,0,0" FontSize="12"/>
-                                        -->
-
-                                    </Grid>
 
                                     <TextBlock Text="Detalhes:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />
                                     <TextBox Name="DetalhesTextBox" FontSize="14" Style="{StaticResource {x:Type TextBox}}" 
