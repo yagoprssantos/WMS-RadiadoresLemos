@@ -199,7 +199,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 // Filtrar boletos associados a esta compra que ainda não foram pagos
                 var boletosCompra = _todosBoletos
-                    .Where(b => compra.Boletos.Contains(b.Id) && b.Pagamento == null)
+                    .Where(b => compra.Boletos.Contains(b.Id) && b.DataPagamento == null)
                     .ToList();
 
                 if (!boletosCompra.Any())
@@ -294,7 +294,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             return _todosBoletos.Any(b =>
                 b.DataVencimento.Date == data.Date &&
-                b.Pagamento == null &&
+                b.DataPagamento == null &&
                 b.NotaFiscal != null);
         }
 
@@ -632,7 +632,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 return new List<BoletoData>();
 
             return _todosBoletos
-                .Where(b => b.DataVencimento.Date == data.Date && b.Pagamento == null)
+                .Where(b => b.DataVencimento.Date == data.Date && b.DataPagamento == null)
                 .ToList();
         }
 

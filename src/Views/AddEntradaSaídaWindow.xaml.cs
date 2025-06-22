@@ -412,38 +412,6 @@ namespace WMS_RadiadoresLemos_WPF
             };
         }
 
-
-        // TODO: Transformar com Extração Automática de Dados do Boleto
-        /*
-         Atualmente, esta parte do código apenas permite selecionar um arquivo de boleto quando adicionado
-        um boleto manualmente, o que com a função de extração automática de dados do boleto utilizando
-        o Gemini faz, tornando esta parte do código obsoleta
-
-        Assim, se faz necessário atualizar a função para que este código faça parte da extração automática
-        para o boleto específico, retirando o ExtrairBoletoGroupBox que está no lugar errado
-         */
-        private void SelecionarBoletoButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is BoletoData boleto)
-            {
-                var dialog = new OpenFileDialog
-                {
-                    Title = "Selecione o arquivo do boleto",
-                    Filter = "Arquivos PDF (*.pdf)|*.pdf|" +
-                             "Imagens (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg|" +
-                             "Todos os arquivos (*.*)|*.*",
-                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                    RestoreDirectory = true
-                };
-
-                if (dialog.ShowDialog() == true)
-                {
-                    boleto.CaminhoArquivo = dialog.FileName;
-                    BoletosItemsControl.Items.Refresh();
-                }
-            }
-        }
-
         private void RemoverBoletoButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is BoletoData boletoParaRemover)
@@ -468,65 +436,81 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 try
                 {
-                    // Cria e exibe a janela de extração
+                    // Cria e exibe a janela de extração sem passar o caminho do arquivo
+                    // O usuário escolherá o arquivo na própria janela de extração
                     var extractionWindow = new BoletoExtractionWindow();
                     extractionWindow.Owner = this;
-                    
+
                     bool? result = extractionWindow.ShowDialog();
-                    
+
                     // Se o diálogo retornar true, dados foram extraídos com sucesso
                     if (result == true && extractionWindow.BoletoSalvo != null)
                     {
                         // Copia os dados extraídos para o boleto atual
                         AtualizarBoletoDadosExtraidos(boleto, extractionWindow.BoletoSalvo);
-                        
+
                         // Atualiza a interface
                         BoletosItemsControl.Items.Refresh();
-                        
-                        MessageBox.Show("Dados do boleto extraídos com sucesso!", "Sucesso", 
-                            MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Log para debug - confirmar que o caminho está sendo propagado
+                        Console.WriteLine($"Caminho do arquivo após extração: {boleto.CaminhoArquivo}");
+
+                        MessageBox.Show("Dados do boleto aplicados com sucesso ao boleto selecionado!",
+                            "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Erro ao extrair dados do boleto: {ex.Message}", 
+                    MessageBox.Show($"Erro ao extrair dados do boleto: {ex.Message}",
                         "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
-
         private void AtualizarBoletoDadosExtraidos(BoletoData boletoDestino, BoletoData boletoExtraido)
         {
-            // Preserva os campos que não devem ser substituídos
-            int parcela = boletoDestino.Parcela;
-            string fornecedorId = boletoDestino.FornecedorId;
-            string notaFiscal = boletoDestino.NotaFiscal;
-            DateTime dataCadastro = boletoDestino.DataCadastro;
-            string usuarioCadastro = boletoDestino.UsuarioCadastro;
-            string caminhoArquivo = boletoDestino.CaminhoArquivo;
-            
-            // Copia todos os campos relevantes do boleto extraído
-            boletoDestino.Beneficiario = boletoExtraido.Beneficiario;
-            boletoDestino.CnpjBeneficiario = boletoExtraido.CnpjBeneficiario;
-            boletoDestino.CepBeneficiario = boletoExtraido.CepBeneficiario;
-            boletoDestino.EstadoBeneficiario = boletoExtraido.EstadoBeneficiario;
-            boletoDestino.Pagador = boletoExtraido.Pagador;
-            boletoDestino.DataVencimento = boletoExtraido.DataVencimento;
-            boletoDestino.Valor = boletoExtraido.Valor;
-            boletoDestino.LinhaDigitavel = boletoExtraido.LinhaDigitavel;
-            boletoDestino.NossoNumero = boletoExtraido.NossoNumero;
-            boletoDestino.AgenciaCodigoBeneficiario = boletoExtraido.AgenciaCodigoBeneficiario;
-            
-            // Restaura os campos que não devem ser modificados
-            boletoDestino.Parcela = parcela;
-            boletoDestino.FornecedorId = fornecedorId;
-            boletoDestino.NotaFiscal = notaFiscal;
-            boletoDestino.DataCadastro = dataCadastro;
-            boletoDestino.UsuarioCadastro = usuarioCadastro;
-            boletoDestino.CaminhoArquivo = caminhoArquivo;
-            
-            // Atualiza a observação
-            boletoDestino.Observacoes = $"Parcela {parcela} - Dados extraídos automaticamente";
+            try
+            {
+                // Preserva os campos que não devem ser substituídos
+                int parcela = boletoDestino.Parcela;
+                string fornecedorId = boletoDestino.FornecedorId;
+                string notaFiscal = boletoDestino.NotaFiscal;
+                DateTime dataCadastro = boletoDestino.DataCadastro;
+                string usuarioCadastro = boletoDestino.UsuarioCadastro;
+                
+                // Copia todos os campos relevantes do boleto extraído
+                boletoDestino.Beneficiario = boletoExtraido.Beneficiario;
+                boletoDestino.CnpjBeneficiario = boletoExtraido.CnpjBeneficiario;
+                boletoDestino.CepBeneficiario = boletoExtraido.CepBeneficiario;
+                boletoDestino.EstadoBeneficiario = boletoExtraido.EstadoBeneficiario;
+                boletoDestino.Pagador = boletoExtraido.Pagador;
+                boletoDestino.CnpjPagador = boletoExtraido.CnpjPagador;
+                boletoDestino.DataVencimento = boletoExtraido.DataVencimento;
+                boletoDestino.Valor = boletoExtraido.Valor;
+                boletoDestino.LinhaDigitavel = boletoExtraido.LinhaDigitavel;
+                boletoDestino.NossoNumero = boletoExtraido.NossoNumero;
+                boletoDestino.AgenciaCodigoBeneficiario = boletoExtraido.AgenciaCodigoBeneficiario;
+                
+                // IMPORTANTE: SEMPRE use o caminho do arquivo extraído
+                boletoDestino.CaminhoArquivo = boletoExtraido.CaminhoArquivo;
+                
+                // Restaura os campos que não devem ser modificados
+                boletoDestino.Parcela = parcela;
+                boletoDestino.FornecedorId = fornecedorId;
+                boletoDestino.NotaFiscal = notaFiscal;
+                boletoDestino.DataCadastro = dataCadastro;
+                boletoDestino.UsuarioCadastro = usuarioCadastro;
+                
+                // Atualiza a observação
+                boletoDestino.Observacoes = $"Parcela {parcela} - Dados extraídos automaticamente em {DateTime.Now:dd/MM/yyyy HH:mm}";
+                
+                // Log para debug - importante para verificar se o caminho está sendo transferido
+                Console.WriteLine($"Caminho do arquivo após atualização: {boletoDestino.CaminhoArquivo}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar dados do boleto: {ex.Message}", 
+                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
@@ -688,7 +672,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 Parcela = boleto.Parcela,
                 DataVencimento = boleto.DataVencimento,
-                Pagamento = boleto.Pagamento,
+                DataPagamento = boleto.DataPagamento,
                 NomeArquivo = nomeBoleto, // Use o nome formatado
                 CaminhoArquivo = boleto.CaminhoArquivo,
                 NotaFiscal = numeroNotaFiscal,
@@ -1518,7 +1502,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Forma de Pagamento
+        // Forma de DataPagamento
         private void FormaPagamentoComboBox_LostFocus(object sender, RoutedEventArgs e)
         {
             string inputText = FormaPagamentoComboBox.Text;
