@@ -118,7 +118,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                         // Calcula status do boleto
                         string status;
-                        if (b.Pagamento.HasValue)
+                        if (b.DataPagamento.HasValue)
                             status = "Pago";
                         else if (b.DataVencimento.Date < DateTime.Now.Date)
                             status = "Vencido";
@@ -129,8 +129,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                         int diasAteVencimento = (b.DataVencimento.Date - DateTime.Now.Date).Days;
                         string situacaoVencimento;
 
-                        if (b.Pagamento.HasValue)
-                            situacaoVencimento = "Pago em " + b.Pagamento.Value.ToString("dd/MM/yyyy");
+                        if (b.DataPagamento.HasValue)
+                            situacaoVencimento = "Pago em " + b.DataPagamento.Value.ToString("dd/MM/yyyy");
                         else if (diasAteVencimento > 0)
                             situacaoVencimento = $"Vence em {diasAteVencimento} dia(s)";
                         else if (diasAteVencimento < 0)
@@ -151,8 +151,8 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                             Parcela = infoParcelamento,
                             Vencimento = b.DataVencimento,
                             VencimentoFormatado = b.DataVencimento.ToString("dd/MM/yyyy"),
-                            Pagamento = b.Pagamento,
-                            PagamentoFormatado = b.Pagamento.HasValue ? b.Pagamento.Value.ToString("dd/MM/yyyy") : "Pendente",
+                            Pagamento = b.DataPagamento,
+                            PagamentoFormatado = b.DataPagamento.HasValue ? b.DataPagamento.Value.ToString("dd/MM/yyyy") : "Pendente",
                             CaminhoArquivo = b.CaminhoArquivo,
                             NotaFiscal = b.NotaFiscal,
                             FornecedorId = b.FornecedorId,
@@ -246,7 +246,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             // Confirmação antes de registrar o pagamento
             var confirmResult = MessageBox.Show(
                 $"Confirma o pagamento do boleto (parcela {boletoSelecionado.Original.Parcela}) no valor de R$ {boletoSelecionado.Original.Valor:N2}?",
-                "Confirmar Pagamento",
+                "Confirmar DataPagamento",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
@@ -266,15 +266,14 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                     // Atualiza ambos os campos de data de pagamento para consistência
                     boleto.DataPagamento = dataAtual;
-                    boleto.Pagamento = dataAtual;
                     boleto.Status = StatusBoleto.Pago;
 
                     // Salva as alterações no banco de dados
                     collection.Update(boleto);
 
                     MessageBox.Show(
-                        $"Pagamento registrado com sucesso em {dataAtual:dd/MM/yyyy}!",
-                        "Pagamento Registrado",
+                        $"DataPagamento registrado com sucesso em {dataAtual:dd/MM/yyyy}!",
+                        "DataPagamento Registrado",
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
 
@@ -394,7 +393,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 string mensagem = "Não foi possível abrir a pasta de boletos.\n\nBoletos disponíveis:\n\n";
                 foreach (var boleto in _boletosList)
                 {
-                    string status = boleto.Pagamento.HasValue ? "Pago" : "Pendente";
+                    string status = boleto.DataPagamento.HasValue ? "Pago" : "Pendente";
                     mensagem += $"• Parcela {boleto.Parcela} - Vencimento: {boleto.DataVencimento:dd/MM/yyyy} - Status: {status}\n";
                 }
                 MessageBox.Show(mensagem, "Boletos", MessageBoxButton.OK, MessageBoxImage.Information);

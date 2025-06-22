@@ -8,178 +8,228 @@
         Background="{StaticResource BackgroundBrush}"
         WindowStartupLocation="CenterOwner">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <Border Grid.Column="0" Background="{StaticResource SecondaryBrush}" CornerRadius="10" Margin="10">
+    <Grid Margin="15">
+        <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Extração de Dados do Boleto" FontSize="18" FontWeight="Bold" 
-                           Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" Margin="10"/>
+                <!-- Painel de Visualização do Boleto -->
+                <Border Grid.Column="0" Background="{StaticResource SecondaryBrush}" CornerRadius="15" Margin="0,0,10,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                <Border Grid.Row="1" Margin="10" CornerRadius="5" Background="White" 
-                        BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
-                    <wv2:WebView2 x:Name="WebViewExtractor"/>
-                </Border>
-            </Grid>
-        </Border>
-
-        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="{StaticResource PanelBackgroundBrush}"/>
-
-        <Border Grid.Column="2" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="10" Margin="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="Dados Extraídos" FontSize="18" FontWeight="Bold" 
-                           Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Center" Margin="10"/>
-
-                <ScrollViewer Grid.Row="1" Margin="15" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-
-                        <Border Background="{StaticResource SecondaryBrush}" CornerRadius="5" Padding="10" Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock Text="Status:" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                                <TextBlock x:Name="StatusTextBlock" Text="Aguardando upload de arquivo..." 
-                                           Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
-                            </StackPanel>
+                        <!-- Título -->
+                        <Border Grid.Row="0" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="7" Width="250" HorizontalAlignment="Center" Margin="0,15,0,10">
+                            <TextBlock Text="Extração de Dados do Boleto" FontSize="16" FontWeight="Bold" 
+                                      Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center"/>
                         </Border>
 
-                        <!-- 📝 DADOS DO BENEFICIÁRIO - EDITÁVEIS -->
-                        <Expander Header="Dados do Beneficiário" IsExpanded="True" Margin="0,0,0,10">
-                            <StackPanel Margin="10">
-                                <TextBlock Text="Nome/Razão Social:" Margin="0,0,0,3"/>
-                                <TextBox x:Name="BeneficiarioTextBox" Margin="0,0,0,5" 
-                                         ToolTip="Campo editável - você pode corrigir se necessário"/>
+                        <!-- WebView -->
+                        <Border Grid.Row="1" Margin="15" CornerRadius="10" Background="White" 
+                                BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1">
+                            <wv2:WebView2 x:Name="WebViewExtractor"/>
+                        </Border>
+                    </Grid>
+                </Border>
 
-                                <TextBlock Text="CNPJ:" Margin="0,5,0,3"/>
-                                <TextBox x:Name="CnpjBeneficiarioTextBox" Margin="0,0,0,5"
-                                         ToolTip="Campo editável - formato: 00.000.000/0000-00"/>
+                <!-- GridSplitter -->
+                <GridSplitter Grid.Column="1" Width="5" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+                    <GridSplitter.Template>
+                        <ControlTemplate TargetType="{x:Type GridSplitter}">
+                            <Border Background="Transparent" BorderThickness="0" Padding="2,0" Cursor="SizeWE">
+                                <Rectangle Width="3" Fill="{StaticResource SecondaryBrush}" 
+                                          HorizontalAlignment="Center" VerticalAlignment="Stretch" 
+                                          RadiusX="1.5" RadiusY="1.5"/>
+                            </Border>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
 
-                                <Grid Margin="0,5,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                <!-- Painel de Dados Extraídos -->
+                <Border Grid.Column="2" Background="{StaticResource SecondaryBrush}" CornerRadius="15" Margin="10,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                                        <TextBlock Text="CEP:" Margin="0,0,0,3"/>
-                                        <TextBox x:Name="CepBeneficiarioTextBox" 
-                                                 ToolTip="Campo editável - formato: 00000-000"/>
+                        <!-- Título -->
+                        <Border Grid.Row="0" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="7" Width="160" HorizontalAlignment="Center" Margin="0,15,0,10">
+                            <TextBlock Text="Dados Extraídos" FontSize="16" FontWeight="Bold" 
+                                      Foreground="{StaticResource TextBrush}" HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Conteúdo dos Dados -->
+                        <ScrollViewer Grid.Row="1" Margin="15" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <!-- Status -->
+                                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="15" Margin="0,0,0,15">
+                                    <StackPanel>
+                                        <TextBlock Text="Status:" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                                        <TextBlock x:Name="StatusTextBlock" Text="Aguardando upload de arquivo..." 
+                                                  Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
                                     </StackPanel>
+                                </Border>
 
-                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                        <TextBlock Text="Estado:" Margin="0,0,0,3"/>
-                                        <TextBox x:Name="EstadoBeneficiarioTextBox"
-                                                 ToolTip="Campo editável - sigla do estado (SP, RJ, etc.)"/>
-                                    </StackPanel>
-                                </Grid>
+                                <!-- Dados do Beneficiário -->
+                                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="10" Margin="0,0,0,15">
+                                    <Expander Header="Dados do Beneficiário" IsExpanded="True"
+                                             Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}">
+                                        <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15" Margin="0,5,0,0" CornerRadius="0,0,15,15">
+                                            <StackPanel>
+                                                <TextBlock Text="Nome/Razão Social:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                <TextBox x:Name="BeneficiarioTextBox" Margin="0,0,0,10" 
+                                                        ToolTip="Campo editável - você pode corrigir se necessário"/>
+
+                                                <TextBlock Text="CNPJ:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                <TextBox x:Name="CnpjBeneficiarioTextBox" Margin="0,0,0,10"
+                                                        ToolTip="Campo editável - formato: 00.000.000/0000-00"/>
+
+                                                <Grid Margin="0,0,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                                        <TextBlock Text="CEP:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                        <TextBox x:Name="CepBeneficiarioTextBox" 
+                                                                ToolTip="Campo editável - formato: 00000-000"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                                        <TextBlock Text="Estado:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                        <TextBox x:Name="EstadoBeneficiarioTextBox"
+                                                                ToolTip="Campo editável - sigla do estado (SP, RJ, etc.)"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </Expander>
+                                </Border>
+
+                                <!-- Dados do Pagador -->
+                                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="10" Margin="0,0,0,15">
+                                    <Expander Header="Dados do Pagador" IsExpanded="True"
+                                             Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}">
+                                        <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15" Margin="0,5,0,0" CornerRadius="0,0,15,15">
+                                            <StackPanel>
+                                                <TextBlock Text="Nome/Razão Social:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                <TextBox x:Name="PagadorTextBox" 
+                                                        ToolTip="Campo editável - nome ou razão social do pagador"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Expander>
+                                </Border>
+
+                                <!-- Dados Financeiros -->
+                                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="10" Margin="0,0,0,15">
+                                    <Expander Header="Dados Financeiros" IsExpanded="True"
+                                             Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}">
+                                        <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15" Margin="0,5,0,0" CornerRadius="0,0,15,15">
+                                            <StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                                        <TextBlock Text="Valor:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                        <TextBox x:Name="ValorTextBox" 
+                                                                ToolTip="Campo editável - formato: R$ 0,00"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                                        <TextBlock Text="Vencimento:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                        <TextBox x:Name="VencimentoTextBox" 
+                                                                ToolTip="Campo editável - formato: dd/MM/yyyy"/>
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <TextBlock Text="Linha Digitável:" Margin="0,10,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                <TextBox x:Name="LinhaDigitavelTextBox" Margin="0,0,0,10"
+                                                        ToolTip="Campo editável - linha digitável do boleto"/>
+
+                                                <Grid Margin="0,0,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                                        <TextBlock Text="Nosso Número:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                        <TextBox x:Name="NossoNumeroTextBox"
+                                                                ToolTip="Campo editável - nosso número do boleto"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                                        <TextBlock Text="Agência/Código:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                        <TextBox x:Name="AgenciaCodigoTextBox"
+                                                                ToolTip="Campo editável - agência e código do beneficiário"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </Expander>
+                                </Border>
+
+                                <!-- Debug/JSON -->
+                                <Border Background="{StaticResource PanelBackgroundBrush}" CornerRadius="15" Padding="10" Margin="0,0,0,10">
+                                    <Expander Header="Debug/JSON" IsExpanded="False"
+                                             Background="{StaticResource PanelBackgroundBrush}" Foreground="{StaticResource TextBrush}">
+                                        <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15" Margin="0,5,0,0" CornerRadius="0,0,15,15">
+                                            <StackPanel>
+                                                <TextBlock Text="JSON Estruturado:" FontWeight="Bold" Margin="0,0,0,5" Foreground="{StaticResource TextBrush}"/>
+                                                <ScrollViewer Height="100" VerticalScrollBarVisibility="Auto">
+                                                    <TextBox x:Name="JsonDebugTextBox" IsReadOnly="True" TextWrapping="Wrap" 
+                                                            AcceptsReturn="True" Background="{StaticResource SecondaryBrush}"
+                                                            Foreground="{StaticResource TextBrush}"
+                                                            ToolTip="Dados brutos extraídos - somente leitura"/>
+                                                </ScrollViewer>
+                                            </StackPanel>
+                                        </Border>
+                                    </Expander>
+                                </Border>
                             </StackPanel>
-                        </Expander>
+                        </ScrollViewer>
 
-                        <!-- 📝 DADOS DO PAGADOR - EDITÁVEIS -->
-                        <Expander Header="Dados do Pagador" IsExpanded="True" Margin="0,0,0,10">
-                            <StackPanel Margin="10">
-                                <TextBlock Text="Nome/Razão Social:" Margin="0,0,0,3"/>
-                                <TextBox x:Name="PagadorTextBox" 
-                                         ToolTip="Campo editável - nome ou razão social do pagador"/>
-                            </StackPanel>
-                        </Expander>
-
-                        <!-- 📝 DADOS FINANCEIROS - EDITÁVEIS -->
-                        <Expander Header="Dados Financeiros" IsExpanded="True" Margin="0,0,0,10">
-                            <StackPanel Margin="10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                                        <TextBlock Text="Valor:" Margin="0,0,0,3"/>
-                                        <TextBox x:Name="ValorTextBox" 
-                                                 ToolTip="Campo editável - formato: R$ 0,00"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                        <TextBlock Text="Vencimento:" Margin="0,0,0,3"/>
-                                        <TextBox x:Name="VencimentoTextBox" 
-                                                 ToolTip="Campo editável - formato: dd/MM/yyyy"/>
-                                    </StackPanel>
-                                </Grid>
-
-                                <TextBlock Text="Linha Digitável:" Margin="0,5,0,3"/>
-                                <TextBox x:Name="LinhaDigitavelTextBox" Margin="0,0,0,5"
-                                         ToolTip="Campo editável - linha digitável do boleto"/>
-
-                                <Grid Margin="0,5,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                                        <TextBlock Text="Nosso Número:" Margin="0,0,0,3"/>
-                                        <TextBox x:Name="NossoNumeroTextBox"
-                                                 ToolTip="Campo editável - nosso número do boleto"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                        <TextBlock Text="Agência/Código:" Margin="0,0,0,3"/>
-                                        <TextBox x:Name="AgenciaCodigoTextBox"
-                                                 ToolTip="Campo editável - agência e código do beneficiário"/>
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
-                        </Expander>
-
-                        <!-- 🔍 DEBUG INFO - SOMENTE LEITURA -->
-                        <Expander Header="Debug/JSON" IsExpanded="False" Margin="0,0,0,10">
-                            <StackPanel Margin="10">
-                                <TextBlock Text="JSON Estruturado:" FontWeight="Bold" Margin="0,0,0,5"/>
-                                <ScrollViewer Height="100" VerticalScrollBarVisibility="Auto">
-                                    <TextBox x:Name="JsonDebugTextBox" IsReadOnly="True" TextWrapping="Wrap" 
-                                             AcceptsReturn="True" Background="{StaticResource SecondaryBrush}"
-                                             ToolTip="Dados brutos extraídos - somente leitura"/>
-                                </ScrollViewer>
-                            </StackPanel>
-                        </Expander>
-                    </StackPanel>
-                </ScrollViewer>
-
-                <!-- 🔘 BOTÕES DE AÇÃO -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="15">
-                    <Button x:Name="ValidarButton" Content="🔍 Validar Dados" 
-                            Style="{StaticResource EmphasisButtonStyle}"
-                            Background="{StaticResource AccentBrush}"
-                            Click="ValidarDados_Click" Margin="0,0,10,0"
-                            ToolTip="Valida se os dados editados estão corretos"/>
-                    <Button x:Name="LimparButton" Content="🗑️ Limpar" 
-                            Style="{StaticResource EmphasisButtonStyle}"
-                            Background="{StaticResource HoverBackgroundBrush}"
-                            Click="Limpar_Click" Margin="0,0,10,0"
-                            ToolTip="Limpa todos os campos"/>
-                    <Button x:Name="SalvarBoletoButton" Content="💾 Salvar Boleto" 
-                            Style="{StaticResource EmphasisButtonStyle}"
-                            Click="SalvarBoleto_Click" 
-                            IsEnabled="False" Margin="0,0,10,0"
-                            ToolTip="Salva o boleto no banco de dados"/>
-                    <Button x:Name="FecharButton" Content="❌ Fechar" 
-                            Style="{StaticResource CancelButtonStyle}"
-                            Click="Fechar_Click"
-                            ToolTip="Fecha a janela"/>
-                </StackPanel>
+                        <!-- Botões de Ação -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,15,20,20">
+                            <Button x:Name="ValidarButton" Content="Validar Dados" 
+                                    Style="{StaticResource EmphasisButtonStyle}"
+                                    Click="ValidarDados_Click" Margin="5,0,5,0" Width="130"
+                                    ToolTip="Valida se os dados editados estão corretos"/>
+                                                    <Button x:Name="LimparButton" Content="Limpar" 
+                                    Style="{StaticResource EmphasisButtonStyle}"
+                                    Background="{StaticResource HoverBackgroundBrush}"
+                                    Click="Limpar_Click" Margin="5,0,5,0" Width="130"
+                                    ToolTip="Limpa todos os campos"/>
+                                                    <Button x:Name="ExtrairRetornarButton" Content="Extrair e Retornar" 
+                                    Style="{StaticResource EmphasisButtonStyle}"
+                                    Click="ExtrairERetornar_Click" 
+                                    IsEnabled="False" Margin="5,0,5,0" Width="130"
+                                    ToolTip="Extrai os dados e retorna para a tela anterior"/>
+                                                    <Button x:Name="SalvarBoletoButton" Content="Salvar Boleto" 
+                                    Style="{StaticResource EmphasisButtonStyle}"
+                                    Click="SalvarBoleto_Click" 
+                                    IsEnabled="False" Margin="5,0,5,0" Width="130"
+                                    ToolTip="Salva o boleto no banco de dados"/>
+                                                    <Button x:Name="FecharButton" Content="Fechar" 
+                                    Style="{StaticResource CancelButtonStyle}"
+                                    Click="Fechar_Click" Width="130" Margin="5,0,5,0"
+                                    ToolTip="Fecha a janela"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
     </Grid>

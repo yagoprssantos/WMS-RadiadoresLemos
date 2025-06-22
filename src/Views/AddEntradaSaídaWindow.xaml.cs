@@ -389,6 +389,9 @@ namespace WMS_RadiadoresLemos_WPF
 
         private BoletoData CriarNovoBoleto(int numeroParcela)
         {
+            // Localiza o fornecedor selecionado para usar seus dados
+            var fornecedor = fornecedores.FirstOrDefault(f => f.Id == fornecedorSelecionadoId);
+            
             return new BoletoData
             {
                 Parcela = numeroParcela,
@@ -396,45 +399,17 @@ namespace WMS_RadiadoresLemos_WPF
                 CaminhoArquivo = string.Empty,
                 LinhaDigitavel = "",
                 FornecedorId = fornecedorSelecionadoId ?? "",
-                Pagador = "A definir",
+                // Usa o nome do fornecedor como beneficiário se disponível
+                Beneficiario = fornecedor?.Nome ?? "A definir",
+                CnpjBeneficiario = fornecedor?.CNPJ,
+                Pagador = "Radiadores Lemos", // Nome da empresa como pagador
                 Valor = 0,
                 Status = StatusBoleto.Pendente,
                 DataCadastro = DateTime.UtcNow,
                 UsuarioCadastro = MainWindow.UsuarioLogado?.Nome,
-                Observacoes = $"Parcela {numeroParcela} - Adicionado manualmente"
+                Observacoes = $"Parcela {numeroParcela} - Adicionado manualmente",
+                NotaFiscal = numeroNotaFiscalAtual
             };
-        }
-
-
-        // TODO: Transformar com Extração Automática de Dados do Boleto
-        /*
-         Atualmente, esta parte do código apenas permite selecionar um arquivo de boleto quando adicionado
-        um boleto manualmente, o que com a função de extração automática de dados do boleto utilizando
-        o Gemini faz, tornando esta parte do código obsoleta
-
-        Assim, se faz necessário atualizar a função para que este código faça parte da extração automática
-        para o boleto específico, retirando o ExtrairBoletoGroupBox que está no lugar errado
-         */
-        private void SelecionarBoletoButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is BoletoData boleto)
-            {
-                var dialog = new OpenFileDialog
-                {
-                    Title = "Selecione o arquivo do boleto",
-                    Filter = "Arquivos PDF (*.pdf)|*.pdf|" +
-                             "Imagens (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg|" +
-                             "Todos os arquivos (*.*)|*.*",
-                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                    RestoreDirectory = true
-                };
-
-                if (dialog.ShowDialog() == true)
-                {
-                    boleto.CaminhoArquivo = dialog.FileName;
-                    BoletosItemsControl.Items.Refresh();
-                }
-            }
         }
 
         private void RemoverBoletoButton_Click(object sender, RoutedEventArgs e)
@@ -455,6 +430,88 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
+        private void ExtrairDadosBoleto_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is BoletoData boleto)
+            {
+                try
+                {
+                    // Cria e exibe a janela de extração sem passar o caminho do arquivo
+                    // O usuário escolherá o arquivo na própria janela de extração
+                    var extractionWindow = new BoletoExtractionWindow();
+                    extractionWindow.Owner = this;
+
+                    bool? result = extractionWindow.ShowDialog();
+
+                    // Se o diálogo retornar true, dados foram extraídos com sucesso
+                    if (result == true && extractionWindow.BoletoSalvo != null)
+                    {
+                        // Copia os dados extraídos para o boleto atual
+                        AtualizarBoletoDadosExtraidos(boleto, extractionWindow.BoletoSalvo);
+
+                        // Atualiza a interface
+                        BoletosItemsControl.Items.Refresh();
+
+                        // Log para debug - confirmar que o caminho está sendo propagado
+                        Console.WriteLine($"Caminho do arquivo após extração: {boleto.CaminhoArquivo}");
+
+                        MessageBox.Show("Dados do boleto aplicados com sucesso ao boleto selecionado!",
+                            "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao extrair dados do boleto: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+        private void AtualizarBoletoDadosExtraidos(BoletoData boletoDestino, BoletoData boletoExtraido)
+        {
+            try
+            {
+                // Preserva os campos que não devem ser substituídos
+                int parcela = boletoDestino.Parcela;
+                string fornecedorId = boletoDestino.FornecedorId;
+                string notaFiscal = boletoDestino.NotaFiscal;
+                DateTime dataCadastro = boletoDestino.DataCadastro;
+                string usuarioCadastro = boletoDestino.UsuarioCadastro;
+                
+                // Copia todos os campos relevantes do boleto extraído
+                boletoDestino.Beneficiario = boletoExtraido.Beneficiario;
+                boletoDestino.CnpjBeneficiario = boletoExtraido.CnpjBeneficiario;
+                boletoDestino.CepBeneficiario = boletoExtraido.CepBeneficiario;
+                boletoDestino.EstadoBeneficiario = boletoExtraido.EstadoBeneficiario;
+                boletoDestino.Pagador = boletoExtraido.Pagador;
+                boletoDestino.CnpjPagador = boletoExtraido.CnpjPagador;
+                boletoDestino.DataVencimento = boletoExtraido.DataVencimento;
+                boletoDestino.Valor = boletoExtraido.Valor;
+                boletoDestino.LinhaDigitavel = boletoExtraido.LinhaDigitavel;
+                boletoDestino.NossoNumero = boletoExtraido.NossoNumero;
+                boletoDestino.AgenciaCodigoBeneficiario = boletoExtraido.AgenciaCodigoBeneficiario;
+                
+                // IMPORTANTE: SEMPRE use o caminho do arquivo extraído
+                boletoDestino.CaminhoArquivo = boletoExtraido.CaminhoArquivo;
+                
+                // Restaura os campos que não devem ser modificados
+                boletoDestino.Parcela = parcela;
+                boletoDestino.FornecedorId = fornecedorId;
+                boletoDestino.NotaFiscal = notaFiscal;
+                boletoDestino.DataCadastro = dataCadastro;
+                boletoDestino.UsuarioCadastro = usuarioCadastro;
+                
+                // Atualiza a observação
+                boletoDestino.Observacoes = $"Parcela {parcela} - Dados extraídos automaticamente em {DateTime.Now:dd/MM/yyyy HH:mm}";
+                
+                // Log para debug - importante para verificar se o caminho está sendo transferido
+                Console.WriteLine($"Caminho do arquivo após atualização: {boletoDestino.CaminhoArquivo}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao atualizar dados do boleto: {ex.Message}", 
+                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
         {
@@ -615,7 +672,7 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 Parcela = boleto.Parcela,
                 DataVencimento = boleto.DataVencimento,
-                Pagamento = boleto.Pagamento,
+                DataPagamento = boleto.DataPagamento,
                 NomeArquivo = nomeBoleto, // Use o nome formatado
                 CaminhoArquivo = boleto.CaminhoArquivo,
                 NotaFiscal = numeroNotaFiscal,
@@ -1445,7 +1502,7 @@ namespace WMS_RadiadoresLemos_WPF
             }
         }
 
-        // Forma de Pagamento
+        // Forma de DataPagamento
         private void FormaPagamentoComboBox_LostFocus(object sender, RoutedEventArgs e)
         {
             string inputText = FormaPagamentoComboBox.Text;
@@ -1641,6 +1698,14 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     textBox.Clear();
                 }
+                else
+                {
+                    // Verifica se a nota fiscal já existe
+                    if (NotaFiscalExiste(textBox.Text).Result)
+                    {
+                        textBox.Clear();
+                    }
+                }
             }
         }
         private void NotaFiscalTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -1670,6 +1735,82 @@ namespace WMS_RadiadoresLemos_WPF
             else
             {
                 e.CancelCommand();
+            }
+        }
+
+        private async Task<bool> NotaFiscalExiste(string numeroNotaFiscal, bool mostrarMensagem = true)
+        {
+            // Retorna false se a nota fiscal estiver vazia
+            if (string.IsNullOrWhiteSpace(numeroNotaFiscal))
+                return false;
+
+            try
+            {
+                // Verifica nas compras/vendas da lista atual
+                var existeNaLista = usePositiveNumber
+                    ? compras.Any(c => c.NotaFiscal == numeroNotaFiscal)
+                    : vendas.Any(v => v.NotaFiscal == numeroNotaFiscal);
+
+                if (existeNaLista)
+                {
+                    if (mostrarMensagem)
+                        MessageBox.Show(
+                            $"Já existe uma {(usePositiveNumber ? "compra" : "venda")} com esta nota fiscal na lista atual.",
+                            "Nota Fiscal Duplicada",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                    return true;
+                }
+
+                // Verifica no banco de dados (se disponível)
+                var db = DatabaseConnect.Database;
+                if (db == null)
+                    return false;
+
+                // Verifica de acordo com o tipo de operação (entrada ou saída)
+                bool existeNoBanco;
+                
+                if (usePositiveNumber)
+                {
+                    // Verificação em compras (entradas)
+                    var colecaoCompras = db.GetCollection<CompraData>("compras");
+                    existeNoBanco = colecaoCompras.Exists(Query.EQ("notaFiscal", numeroNotaFiscal));
+                }
+                else
+                {
+                    // Verificação em vendas (saídas)
+                    var colecaoVendas = db.GetCollection<VendaData>("vendas");
+                    existeNoBanco = colecaoVendas.Exists(Query.EQ("notaFiscal", numeroNotaFiscal));
+                }
+
+                if (existeNoBanco && mostrarMensagem)
+                    MessageBox.Show(
+                        $"Já existe uma {(usePositiveNumber ? "compra" : "venda")} com esta nota fiscal no banco de dados.",
+                        "Nota Fiscal Duplicada",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                return existeNoBanco;
+            }
+            catch (OperationCanceledException)
+            {
+                if (mostrarMensagem)
+                    MessageBox.Show(
+                        "A verificação da nota fiscal demorou muito tempo e foi cancelada.",
+                        "Tempo Esgotado",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (mostrarMensagem)
+                    MessageBox.Show(
+                        $"Erro ao verificar nota fiscal: {ex.Message}",
+                        "Erro",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                return false;
             }
         }
 

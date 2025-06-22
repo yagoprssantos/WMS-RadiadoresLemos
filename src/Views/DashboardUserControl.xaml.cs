@@ -54,16 +54,16 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Define o botão "Semanal" como selecionado inicialmente
             AtualizarEstiloBotoes(SemanalButton);
-
-            // Seleciona o período inicial
-            string periodoInicial = "Última Semana";
-            
-            // Carrega todos os dados necessários para os gráficos
-            CarregarGraficos(periodoInicial);
             
             // Garante que o primeiro item do ComboBox esteja selecionado
             GraficoComboBox.SelectedIndex = 0;
-            
+
+            // Seleciona o período inicial
+            string periodoInicial = "Última Semana";
+
+            // Carrega todos os dados necessários para os gráficos
+            CarregarGraficos(periodoInicial);
+
             // Força a atualização do gráfico selecionado com o período inicial
             if (GraficoComboBox.SelectedItem is ComboBoxItem item && item.Content != null)
             {
