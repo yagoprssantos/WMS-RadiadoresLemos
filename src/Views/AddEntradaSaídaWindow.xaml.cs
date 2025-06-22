@@ -372,44 +372,231 @@ namespace WMS_RadiadoresLemos_WPF
         // Métodos sobre boleto
         private void AdicionarBoletoButton_Click(object sender, RoutedEventArgs e)
         {
-            int proximaParcela = boletos.Count + 1;
-            int totalParcelas = 1;
-            int.TryParse(ParcelasTextBox.Text, out totalParcelas);
-
-            // Permitir adicionar o primeiro boleto se não houver nenhum, mesmo se for à vista
-            if (proximaParcela > totalParcelas && boletos.Count >= totalParcelas)
+            // Validar campos obrigatórios para adicionar boletos
+            if (string.IsNullOrEmpty(fornecedorSelecionadoId))
             {
-                MessageBox.Show("Todas as parcelas já foram adicionadas.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Selecione um fornecedor antes de adicionar boletos.",
+                    "Fornecedor Obrigatório", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+            // Verifica se o número de parcelas foi definido e é válido
+            if (string.IsNullOrEmpty(ParcelasTextBox.Text) || !int.TryParse(ParcelasTextBox.Text, out int totalParcelas) || totalParcelas <= 0)
+            {
+                MessageBox.Show("Defina um número válido de parcelas antes de adicionar boletos.",
+                    "Parcelas Inválidas", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Verifica se é possível adicionar mais boletos com base no número de parcelas e na quantidade de boletos já existentes
+            if (boletos.Count >= totalParcelas)
+            {
+                MessageBox.Show("Já foram adicionados boletos suficientes para o número de parcelas definido.",
+                    "Limite de Parcelas Atingido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Se a nota fiscal não estiver definida, solicita ao usuário
+            if (string.IsNullOrEmpty(NotaFiscalTextBox.Text))
+            {
+                MessageBox.Show("Informe o número da Nota Fiscal antes de adicionar boletos.",
+                    "Nota Fiscal Obrigatória", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                // Foca no campo de nota fiscal
+                NotaFiscalTextBox.Focus();
+                return;
+            }
+
+            // Atualiza a variável global da nota fiscal
+            numeroNotaFiscalAtual = NotaFiscalTextBox.Text.Trim();
+
+            // Determina a próxima parcela
+            int proximaParcela = boletos.Count + 1;
+
+            // Verifica se já atingiu o limite de parcelas
+            if (proximaParcela > totalParcelas && boletos.Count > 0)
+            {
+                return;
+            }
+
+            // Cria o novo boleto com dados completos
             var novoBoleto = CriarNovoBoleto(proximaParcela);
-            boletos.Add(novoBoleto);
+
+            // Verifica se o boleto foi criado com sucesso
+            if (novoBoleto != null)
+            {
+                // Adiciona à coleção e atualiza a interface
+                boletos.Add(novoBoleto);
+                BoletosItemsControl.Items.Refresh();
+            }
         }
 
         private BoletoData CriarNovoBoleto(int numeroParcela)
         {
-            // Localiza o fornecedor selecionado para usar seus dados
-            var fornecedor = fornecedores.FirstOrDefault(f => f.Id == fornecedorSelecionadoId);
-            
-            return new BoletoData
+            // Validações iniciais
+            if (string.IsNullOrEmpty(fornecedorSelecionadoId))
             {
+                MessageBox.Show(
+                    "Selecione um fornecedor antes de adicionar boletos.",
+                    "Fornecedor Obrigatório",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return null;
+            }
+
+            // Obtém o fornecedor selecionado para usar seus dados
+            var fornecedor = fornecedores.FirstOrDefault(f => f.Id == fornecedorSelecionadoId);
+            if (fornecedor == null)
+            {
+                MessageBox.Show(
+                    "Fornecedor não encontrado no sistema. Verifique a seleção.",
+                    "Fornecedor Inválido",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return null;
+            }
+
+            // Atualiza o número da nota fiscal atual
+            if (!string.IsNullOrEmpty(NotaFiscalTextBox.Text))
+            {
+                numeroNotaFiscalAtual = NotaFiscalTextBox.Text.Trim();
+            }
+
+            // Calcula a data de vencimento (30 dias por parcela a partir da data atual)
+            DateTime dataVencimento = DateTime.Now.AddDays(30 * numeroParcela);
+
+            // Calcula o valor da parcela com base nas movimentações ou total de parcelas
+            decimal valorParcela = 0;
+            if (int.TryParse(ParcelasTextBox.Text, out int totalParcelas) && totalParcelas > 0)
+            {
+                // Se já existem produtos na lista, calcula com base neles
+                if (listaMovimentacoes.Count > 0)
+                {
+                    decimal valorTotal = listaMovimentacoes.Sum(item => (decimal)(item.Preco * item.Quantidade));
+                    valorParcela = Math.Round(valorTotal / totalParcelas, 2);
+                }
+                // Se não há produtos, verifica se há um único produto selecionado
+                else if (produtoSelecionado != null &&
+                         !string.IsNullOrEmpty(QuantidadeTextBox.Text) &&
+                         !string.IsNullOrEmpty(PrecoTextBox.Text) &&
+                         int.TryParse(QuantidadeTextBox.Text, out int quantidade) &&
+                         double.TryParse(PrecoTextBox.Text.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double preco))
+                {
+                    decimal valorTotal = (decimal)(preco * quantidade);
+                    valorParcela = Math.Round(valorTotal / totalParcelas, 2);
+                }
+            }
+
+            // Cria um novo boleto com todos os dados necessários
+            var novoBoleto = new BoletoData
+            {
+                // Dados de identificação e controle
+                Id = string.IsNullOrEmpty(numeroNotaFiscalAtual)
+                    ? $"Boleto-Parcela{numeroParcela}"
+                    : $"BoletoNF{numeroNotaFiscalAtual}-Parcela{numeroParcela}",
                 Parcela = numeroParcela,
-                DataVencimento = DateTime.Now.AddMonths(numeroParcela - 1),
+                NotaFiscal = numeroNotaFiscalAtual,
+
+                // Dados do arquivo
                 CaminhoArquivo = string.Empty,
-                LinhaDigitavel = "",
-                FornecedorId = fornecedorSelecionadoId ?? "",
-                // Usa o nome do fornecedor como beneficiário se disponível
-                Beneficiario = fornecedor?.Nome ?? "A definir",
-                CnpjBeneficiario = fornecedor?.CNPJ,
-                Pagador = "Radiadores Lemos", // Nome da empresa como pagador
-                Valor = 0,
+                NomeArquivo = string.IsNullOrEmpty(numeroNotaFiscalAtual)
+                    ? $"Boleto-Parcela{numeroParcela}"
+                    : $"BoletoNF{numeroNotaFiscalAtual}-Parcela{numeroParcela}",
+
+                // Dados do fornecedor/beneficiário
+                FornecedorId = fornecedorSelecionadoId,
+                Beneficiario = fornecedor.Nome,
+                CnpjBeneficiario = null,
+                EstadoBeneficiario = fornecedor.Estado,
+
+                // Dados financeiros
+                DataVencimento = dataVencimento,
+                DataPagamento = null,
+                Valor = valorParcela,
                 Status = StatusBoleto.Pendente,
+
+                // Dados do pagador (Radiadores Lemos)
+                Pagador = "Radiadores Lemos",
+                CnpjPagador = "38.046.801/0001-60",  // CNPJ padrão da empresa
+
+                // Outros dados
+                LinhaDigitavel = string.Empty,
+                NossoNumero = string.Empty,
+                AgenciaCodigoBeneficiario = string.Empty,
+
+                // Dados de auditoria
                 DataCadastro = DateTime.UtcNow,
                 UsuarioCadastro = MainWindow.UsuarioLogado?.Nome,
-                Observacoes = $"Parcela {numeroParcela} - Adicionado manualmente",
-                NotaFiscal = numeroNotaFiscalAtual
+                Observacoes = $"Parcela {numeroParcela} de {(ParcelasTextBox.Text?.Trim() ?? "1")} - Criado em {DateTime.Now:dd/MM/yyyy HH:mm}"
             };
+
+            return novoBoleto;
+        }
+
+        private void AtualizarValoresBoletos()
+        {
+            // Se não houver boletos ou parcelas definidas, não há o que atualizar
+            if (boletos.Count == 0 || string.IsNullOrEmpty(ParcelasTextBox.Text) ||
+                !int.TryParse(ParcelasTextBox.Text, out int totalParcelas) || totalParcelas <= 0)
+                return;
+
+            // Calcula o valor total das movimentações
+            decimal valorTotal = 0;
+
+            // Se já temos movimentações na lista, usamos seus valores
+            if (listaMovimentacoes.Count > 0)
+            {
+                valorTotal = listaMovimentacoes.Sum(item => (decimal)(item.Preco * item.Quantidade));
+            }
+            // Se não, verificamos se há um produto selecionado com quantidade e preço
+            else if (produtoSelecionado != null &&
+                     !string.IsNullOrEmpty(QuantidadeTextBox.Text) &&
+                     !string.IsNullOrEmpty(PrecoTextBox.Text))
+            {
+                if (int.TryParse(QuantidadeTextBox.Text, out int quantidade) &&
+                    double.TryParse(PrecoTextBox.Text.Replace(",", "."),
+                                   NumberStyles.Any, CultureInfo.InvariantCulture, out double preco))
+                {
+                    valorTotal = (decimal)(preco * quantidade);
+                }
+            }
+
+            // Se não há valor total, não há o que distribuir
+            if (valorTotal <= 0)
+                return;
+
+            // Calcula o valor por parcela
+            decimal valorPorParcela = Math.Round(valorTotal / totalParcelas, 2);
+
+            // Distribui o valor arredondado entre as parcelas
+            decimal valorRestante = valorTotal;
+
+            // Atualiza cada boleto na coleção
+            for (int i = 0; i < boletos.Count; i++)
+            {
+                // Para a última parcela, usamos o valor restante para evitar diferenças de arredondamento
+                if (i == boletos.Count - 1 && i < totalParcelas - 1)
+                {
+                    boletos[i].Valor = valorRestante;
+                }
+                else
+                {
+                    boletos[i].Valor = valorPorParcela;
+                    valorRestante -= valorPorParcela;
+                }
+
+                // Atualiza a observação para refletir o número total de parcelas
+                boletos[i].Observacoes = $"Parcela {boletos[i].Parcela} de {totalParcelas} - Atualizado em {DateTime.Now:dd/MM/yyyy HH:mm}";
+
+                // Atualiza o nome do arquivo com a nota fiscal atual
+                if (!string.IsNullOrEmpty(numeroNotaFiscalAtual))
+                {
+                    var extensao = Path.GetExtension(boletos[i].CaminhoArquivo);
+                    boletos[i].NomeArquivo = $"BoletoNF{numeroNotaFiscalAtual}-Parcela{boletos[i].Parcela}{extensao}";
+                    boletos[i].NotaFiscal = numeroNotaFiscalAtual;
+                }
+            }
+
+            // Atualiza a interface
+            BoletosItemsControl.Items.Refresh();
         }
 
         private void RemoverBoletoButton_Click(object sender, RoutedEventArgs e)
@@ -584,6 +771,9 @@ namespace WMS_RadiadoresLemos_WPF
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                 }
+
+                // Atualizar boleto
+                AtualizarValoresBoletos();
             }
             catch (Exception ex)
             {
@@ -621,54 +811,51 @@ namespace WMS_RadiadoresLemos_WPF
                     compra.Boletos = new List<string>();
                     var fornecedor = fornecedores.FirstOrDefault(f => f.Id == fornecedorSelecionadoId);
 
-                    // Criar uma cópia dos boletos atuais FORA do loop
-                    var boletosCopia = boletos.ToList();
-                    var novosBoletos = new ObservableCollection<BoletoData>();
-
-                    // Processa todos os boletos existentes
-                    foreach (var boletoData in boletosCopia)
+                    // Preserva os boletos existentes e apenas atualiza os campos necessários
+                    foreach (var boleto in boletos)
                     {
-                        // Atualiza ID e NotaFiscal para cada boleto
-                        if (string.IsNullOrEmpty(boletoData.FornecedorId) && !string.IsNullOrEmpty(fornecedorSelecionadoId))
+                        // Atualiza apenas os campos que precisam ser padronizados para a nota fiscal
+                        if (string.IsNullOrEmpty(boleto.FornecedorId) && !string.IsNullOrEmpty(fornecedorSelecionadoId))
                         {
-                            boletoData.FornecedorId = fornecedorSelecionadoId;
+                            boleto.FornecedorId = fornecedorSelecionadoId;
                         }
-                        boletoData.NotaFiscal = numeroNotaFiscalAtual;
-                        boletoData.Id = (int.Parse(DateTime.Now.ToString("MMddHHmm")) + boletoData.Parcela).ToString();
-                        compra.Boletos.Add(boletoData.Id.ToString());
 
-                        // Cria um novo boleto com os dados corretos
-                        var novoBoleto = CriarBoletoData(boletoData, numeroNotaFiscalAtual, fornecedor);
-                        novosBoletos.Add(novoBoleto);
+                        // Atualiza a nota fiscal no boleto
+                        boleto.NotaFiscal = numeroNotaFiscalAtual;
 
-                        // Gera o nome do boleto no formato BoletoNF{numeroNF}-Parcela{boleto.Parcela}
-                        var extensao = Path.GetExtension(boletoData.CaminhoArquivo);
-                        var nomeBoleto = $"BoletoNF{numeroNotaFiscalAtual}-Parcela{boletoData.Parcela}{extensao}";
+                        // Atualiza o nome do arquivo baseado na nota fiscal e parcela
+                        var extensao = !string.IsNullOrEmpty(boleto.CaminhoArquivo) ?
+                            Path.GetExtension(boleto.CaminhoArquivo) : "";
+                        boleto.NomeArquivo = $"BoletoNF{numeroNotaFiscalAtual}-Parcela{boleto.Parcela}{extensao}";
 
-                        // Adiciona o nome do boleto à lista de boletos da compra
-                        compra.Boletos.Add(nomeBoleto);
+                        // Gera um ID apropriado se necessário
+                        if (string.IsNullOrEmpty(boleto.Id))
+                        {
+                            // Define o ID do boleto com base no nome do arquivo ou hora+parcela
+                            if (!string.IsNullOrEmpty(boleto.NomeArquivo))
+                            {
+                                boleto.Id = boleto.NomeArquivo;
+                            }
+                            else
+                            {
+                                boleto.Id = (int.Parse(DateTime.Now.ToString("MMddHHmm")) + boleto.Parcela).ToString();
+                            }
+                        }
+
+                        // Adiciona o ID do boleto à lista de boletos da compra
+                        compra.Boletos.Add(boleto.Id);
                     }
 
-                    // Atualiza a coleção de boletos DEPOIS de processar todos
-                    boletos.Clear();
-                    foreach (var novoBoleto in novosBoletos)
-                    {
-                        boletos.Add(novoBoleto);
-                    }
-
-                    // Atualiza o controle de UI com a nova lista de boletos
-                    BoletosItemsControl.ItemsSource = null;
-                    BoletosItemsControl.ItemsSource = boletos;
+                    // Atualiza a interface sem recriar os boletos
+                    BoletosItemsControl.Items.Refresh();
 
                     compras.Add(compra);
                 }
-
                 else
                 {
                     compras.Add(compra);
                 }
             }
-
             // Para venda
             else
             {
@@ -1759,6 +1946,9 @@ namespace WMS_RadiadoresLemos_WPF
 
             // Reanexa o handler
             textBox.TextChanged += ParcelasTextBox_TextChanged;
+
+            // Atualiza os valores dos boletos quando o número de parcelas muda
+            AtualizarValoresBoletos();
         }
 
         // Boleto
@@ -1826,6 +2016,15 @@ namespace WMS_RadiadoresLemos_WPF
                 if (!textBox.Text.All(char.IsDigit))
                 {
                     textBox.Clear();
+                }
+                else
+                {
+                    // Atualiza a nota fiscal nos boletos
+                    if (!string.IsNullOrEmpty(NotaFiscalTextBox.Text))
+                    {
+                        numeroNotaFiscalAtual = NotaFiscalTextBox.Text.Trim();
+                        AtualizarValoresBoletos();
+                    }
                 }
             }
         }

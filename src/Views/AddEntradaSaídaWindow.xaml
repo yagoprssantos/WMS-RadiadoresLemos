@@ -249,7 +249,7 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="Boletos:" FontSize="16" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                            <Button Grid.Column="1" x:Name="AdicionarBoletoButton" Visibility="Visible" Content="Adicionar Boleto Manualmente" Style="{StaticResource EmphasisButtonStyle}"
+                                            <Button Grid.Column="1" x:Name="AdicionarBoletoButton" Visibility="Visible" Content="Adicionar Boleto" Style="{StaticResource EmphasisButtonStyle}"
                                                     HorizontalAlignment="Left" FontSize="12" Padding="10,5" Click="AdicionarBoletoButton_Click"/>
                                         </Grid>
 
@@ -310,7 +310,7 @@
                                                                         Style="{StaticResource DeleteButtonStyle}" Width="30" Height="28" 
                                                                         VerticalAlignment="Center" Click="RemoverBoletoButton_Click"/>
                                                                 
-                                                                <!-- Linha 2 e 3 unificadas: Informações básicas e datas -->
+                                                                <!-- Linha 2: Informações básicas e datas -->
                                                                 <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0" HorizontalAlignment="Center">
                                                                     <Grid Margin="0,0,0,5">
                                                                         <Grid.ColumnDefinitions>
@@ -347,7 +347,7 @@
                                                                     </Grid>
                                                                 </WrapPanel>
 
-                                                                <!-- Linha 4: Expander com detalhes extras -->
+                                                                <!-- Linha 3: Expander com detalhes extras -->
                                                                 <Expander Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" 
                                                                           Header="Detalhes adicionais" Margin="0,8,0,0"
                                                                           Background="Transparent"
