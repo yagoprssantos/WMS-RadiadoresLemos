@@ -123,8 +123,12 @@
                                         <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15" Margin="0,5,0,0" CornerRadius="0,0,15,15">
                                             <StackPanel>
                                                 <TextBlock Text="Nome/Razão Social:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
-                                                <TextBox x:Name="PagadorTextBox" 
+                                                <TextBox x:Name="PagadorTextBox" Margin="0,0,0,10"
                                                         ToolTip="Campo editável - nome ou razão social do pagador"/>
+
+                                                <TextBlock Text="CNPJ:" Margin="0,0,0,3" Foreground="{StaticResource TextBrush}"/>
+                                                <TextBox x:Name="CnpjPagadorTextBox" 
+                                                        ToolTip="Campo editável - CNPJ do pagador (formato: 00.000.000/0000-00)"/>
                                             </StackPanel>
                                         </Border>
                                     </Expander>

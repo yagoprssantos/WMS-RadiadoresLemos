@@ -455,8 +455,33 @@ namespace WMS_RadiadoresLemos_WPF
                         // Log para debug - confirmar que o caminho está sendo propagado
                         Console.WriteLine($"Caminho do arquivo após extração: {boleto.CaminhoArquivo}");
 
-                        MessageBox.Show("Dados do boleto aplicados com sucesso ao boleto selecionado!",
-                            "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        // Verifica se o CNPJ do pagador é válido após a extração
+                        if (!string.IsNullOrWhiteSpace(boleto.CnpjPagador))
+                        {
+                            string cnpjLimpo = boleto.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
+                            string cnpjEsperado = "38046801000160";
+                            
+                            if (cnpjLimpo == cnpjEsperado)
+                            {
+                                MessageBox.Show("Dados do boleto aplicados com sucesso ao boleto selecionado!\n\n" +
+                                    $"CNPJ do pagador validado: {boleto.CnpjPagador}",
+                                    "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Dados do boleto foram aplicados, mas o CNPJ do pagador não corresponde ao esperado.\n\n" +
+                                    $"CNPJ encontrado: {boleto.CnpjPagador}\n" +
+                                    $"CNPJ esperado: 38.046.801/0001-60\n\n" +
+                                    "Por favor, verifique e corrija o CNPJ do pagador antes de salvar.",
+                                    "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Dados do boleto foram aplicados, mas o CNPJ do pagador não foi encontrado.\n\n" +
+                                "Por favor, preencha o CNPJ do pagador manualmente antes de salvar.",
+                                "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -505,6 +530,37 @@ namespace WMS_RadiadoresLemos_WPF
                 
                 // Log para debug - importante para verificar se o caminho está sendo transferido
                 Console.WriteLine($"Caminho do arquivo após atualização: {boletoDestino.CaminhoArquivo}");
+                
+                // Verifica se o CNPJ do pagador é exatamente "38.046.801/0001-60" logo após a extração
+                if (!string.IsNullOrWhiteSpace(boletoDestino.CnpjPagador))
+                {
+                    string cnpjLimpo = boletoDestino.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
+                    string cnpjEsperado = "38046801000160";
+                    
+                    if (cnpjLimpo != cnpjEsperado)
+                    {
+                        MessageBox.Show(
+                            $"CNPJ do pagador inválido no boleto da parcela {boletoDestino.Parcela}!\n\n" +
+                            $"CNPJ encontrado: {boletoDestino.CnpjPagador}\n" +
+                            $"CNPJ esperado: 38.046.801/0001-60\n\n" +
+                            $"Por favor, verifique se o boleto é realmente da empresa Radiadores Lemos.",
+                            "CNPJ Inválido",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        
+                        // Limpa o CNPJ do pagador para forçar o usuário a corrigir
+                        boletoDestino.CnpjPagador = "";
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"CNPJ do pagador não foi extraído do boleto da parcela {boletoDestino.Parcela}!\n\n" +
+                        $"Por favor, verifique se o arquivo do boleto contém o CNPJ do pagador ou preencha manualmente.",
+                        "CNPJ Não Encontrado",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
             }
             catch (Exception ex)
             {
@@ -970,6 +1026,37 @@ namespace WMS_RadiadoresLemos_WPF
                     MessageBox.Show("Boleto inválido.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
+
+                // Verifica se o CNPJ do pagador é exatamente "38.046.801/0001-60"
+                if (!string.IsNullOrWhiteSpace(boleto.CnpjPagador))
+                {
+                    string cnpjLimpo = boleto.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
+                    string cnpjEsperado = "38046801000160";
+                    
+                    if (cnpjLimpo != cnpjEsperado)
+                    {
+                        MessageBox.Show(
+                            $"CNPJ do pagador inválido no boleto da parcela {boleto.Parcela}!\n\n" +
+                            $"CNPJ encontrado: {boleto.CnpjPagador}\n" +
+                            $"CNPJ esperado: 38.046.801/0001-60\n\n" +
+                            $"Por favor, verifique se o boleto é realmente da empresa Radiadores Lemos.",
+                            "CNPJ Inválido",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"CNPJ do pagador não foi informado no boleto da parcela {boleto.Parcela}!\n\n" +
+                        $"Por favor, preencha o CNPJ do pagador para continuar.",
+                        "CNPJ Obrigatório",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
                 if (DatabaseConnect.Database == null)
                     return;
 

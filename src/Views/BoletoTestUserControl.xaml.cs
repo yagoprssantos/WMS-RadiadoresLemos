@@ -139,6 +139,37 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     boleto.Status = vencimento < DateTime.Now ? StatusBoleto.Vencido : StatusBoleto.Pendente;
                 }
 
+                // Verifica se o CNPJ do pagador é exatamente "38.046.801/0001-60"
+                // Como este controle não tem campo específico para CNPJ do pagador, 
+                // vamos verificar se o pagador contém o CNPJ correto
+                if (!string.IsNullOrWhiteSpace(boleto.Pagador))
+                {
+                    // Verifica se o texto do pagador contém o CNPJ esperado
+                    string cnpjEsperado = "38.046.801/0001-60";
+                    if (!boleto.Pagador.Contains(cnpjEsperado))
+                    {
+                        MessageBox.Show(
+                            $"CNPJ do pagador inválido!\n\n" +
+                            $"Pagador informado: {boleto.Pagador}\n" +
+                            $"CNPJ esperado: {cnpjEsperado}\n\n" +
+                            $"Por favor, verifique se o boleto é realmente da empresa Radiadores Lemos.",
+                            "CNPJ Inválido",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Pagador não foi informado!\n\n" +
+                        "Por favor, preencha o pagador para continuar.",
+                        "Pagador Obrigatório",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
                 // Salva no banco
                 var db = DatabaseConnect.Database;
                 if (db != null)

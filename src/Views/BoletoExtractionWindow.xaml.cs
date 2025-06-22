@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Microsoft.Web.WebView2.Wpf;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
 
@@ -304,6 +306,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 CepBeneficiarioTextBox.Text = _dadosExtraidos.CepBeneficiario ?? "";
                 EstadoBeneficiarioTextBox.Text = _dadosExtraidos.EstadoBeneficiario ?? "";
                 PagadorTextBox.Text = _dadosExtraidos.Pagador;
+                CnpjPagadorTextBox.Text = _dadosExtraidos.CnpjPagador ?? "";
                 ValorTextBox.Text = _dadosExtraidos.Valor.ToString("C", CultureInfo.GetCultureInfo("pt-BR"));
                 VencimentoTextBox.Text = _dadosExtraidos.DataVencimento.ToString("dd/MM/yyyy");
                 LinhaDigitavelTextBox.Text = _dadosExtraidos.LinhaDigitavel;
@@ -332,6 +335,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 CepBeneficiarioTextBox.Text = "";
                 EstadoBeneficiarioTextBox.Text = "";
                 PagadorTextBox.Text = "";
+                CnpjPagadorTextBox.Text = "";
                 ValorTextBox.Text = "";
                 VencimentoTextBox.Text = "";
                 LinhaDigitavelTextBox.Text = "";
@@ -370,6 +374,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 // Atualiza dados dos campos editados para o objeto
                 AtualizarDadosDoFormulario();
+
+                // Verifica se o CNPJ do pagador é válido
+                if (!BoletoValidationService.ValidarCnpjPagador(_dadosExtraidos.CnpjPagador))
+                {
+                    return;
+                }
 
                 _dadosExtraidos.DataCadastro = DateTime.UtcNow;
                 _dadosExtraidos.UsuarioCadastro = MainWindow.UsuarioLogado?.Nome;
@@ -410,6 +420,36 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Atualiza dados dos campos editados para o objeto
                 AtualizarDadosDoFormulario();
 
+                // Verifica se o CNPJ do pagador é exatamente "38.046.801/0001-60"
+                if (!string.IsNullOrWhiteSpace(_dadosExtraidos.CnpjPagador))
+                {
+                    string cnpjLimpo = _dadosExtraidos.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
+                    string cnpjEsperado = "38046801000160";
+                    
+                    if (cnpjLimpo != cnpjEsperado)
+                    {
+                        MessageBox.Show(
+                            $"CNPJ do pagador inválido!\n\n" +
+                            $"CNPJ encontrado: {_dadosExtraidos.CnpjPagador}\n" +
+                            $"CNPJ esperado: 38.046.801/0001-60\n\n" +
+                            $"Por favor, verifique se o boleto é realmente da empresa Radiadores Lemos.",
+                            "CNPJ Inválido",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "CNPJ do pagador não foi informado!\n\n" +
+                        "Por favor, preencha o CNPJ do pagador para continuar.",
+                        "CNPJ Obrigatório",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
                 // SEMPRE garantir que o caminho do arquivo seja preservado
                 _dadosExtraidos.CaminhoArquivo = _arquivoBoleto;
 
@@ -444,6 +484,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _dadosExtraidos.CepBeneficiario = CepBeneficiarioTextBox.Text;
             _dadosExtraidos.EstadoBeneficiario = EstadoBeneficiarioTextBox.Text;
             _dadosExtraidos.Pagador = PagadorTextBox.Text;
+            _dadosExtraidos.CnpjPagador = CnpjPagadorTextBox.Text;
 
             string valorStr = ValorTextBox.Text.Replace("R$", "").Replace(".", "").Replace(",", ".").Trim();
             if (decimal.TryParse(valorStr, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal valorDecimal))
@@ -474,6 +515,22 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 string cnpj = CnpjBeneficiarioTextBox.Text?.Replace(".", "").Replace("/", "").Replace("-", "");
                 if (!string.IsNullOrEmpty(cnpj) && cnpj.Length != 14)
                     erros.Add("• CNPJ deve ter 14 dígitos");
+
+                // Validação do CNPJ do pagador
+                if (string.IsNullOrWhiteSpace(CnpjPagadorTextBox.Text))
+                {
+                    erros.Add("• CNPJ do pagador é obrigatório");
+                }
+                else
+                {
+                    string cnpjPagadorLimpo = CnpjPagadorTextBox.Text.Replace(".", "").Replace("/", "").Replace("-", "");
+                    string cnpjEsperado = "38046801000160";
+                    
+                    if (cnpjPagadorLimpo != cnpjEsperado)
+                    {
+                        erros.Add("• CNPJ do pagador deve ser exatamente 38.046.801/0001-60 (Radiadores Lemos)");
+                    }
+                }
 
                 if (!string.IsNullOrEmpty(ValorTextBox.Text))
                 {

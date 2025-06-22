@@ -924,6 +924,28 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Insere os boletos atualizados
                 foreach (var boleto in _boletos)
                 {
+                    // Verifica se o CNPJ do pagador é exatamente "38.046.801/0001-60"
+                    if (!string.IsNullOrWhiteSpace(boleto.CnpjPagador))
+                    {
+                        string cnpjLimpo = boleto.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
+                        string cnpjEsperado = "38046801000160";
+                        
+                        if (cnpjLimpo != cnpjEsperado)
+                        {
+                            throw new InvalidOperationException(
+                                $"CNPJ do pagador inválido no boleto da parcela {boleto.Parcela}!\n\n" +
+                                $"CNPJ encontrado: {boleto.CnpjPagador}\n" +
+                                $"CNPJ esperado: 38.046.801/0001-60\n\n" +
+                                $"Por favor, verifique se o boleto é realmente da empresa Radiadores Lemos.");
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"CNPJ do pagador não foi informado no boleto da parcela {boleto.Parcela}!\n\n" +
+                            $"Por favor, preencha o CNPJ do pagador para continuar.");
+                    }
+
                     // Garante que a nota fiscal está atualizada
                     boleto.NotaFiscal = _compraEditada.NotaFiscal;
                     boleto.FornecedorId = _compraEditada.FornecedorId;
