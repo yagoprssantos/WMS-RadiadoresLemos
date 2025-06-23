@@ -148,10 +148,16 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var collection = db.GetCollection<FornecedorData>("fornecedores");
                     fornecedores = await Task.Run(() => collection.FindAll().OrderBy(f => f.Nome).ToList());
+                    
+                    // Limpar os itens antes de definir o ItemsSource
+                    FornecedorComboBox.Items.Clear();
                     FornecedorComboBox.ItemsSource = fornecedores.Select(f => f.Nome).ToList();
                 }
             }
-            catch (Exception ex) { MessageBox.Show($"Erro ao carregar fornecedores: {ex.Message}", "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); }
+            catch (Exception ex) { 
+                MessageBox.Show($"Erro ao carregar fornecedores: {ex.Message}", 
+                    "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); 
+            }
         }
         private async Task CarregarClientes()
         {
@@ -165,7 +171,7 @@ namespace WMS_RadiadoresLemos_WPF
                     ClienteComboBox.ItemsSource = clientes.Select(c => c.CNPJ).ToList();
                 }
             }
-            catch (Exception ex) { MessageBox.Show($"Erro ao carregar clientes: {ex.Message}", "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); }
+            catch (Exception ex) { MessageBox.Show($"Erro ao carregar clientes: {ex.Message}", "Erro", MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); }
         }
 
         private void ToggleVisibility(bool isVisible)
@@ -701,7 +707,7 @@ namespace WMS_RadiadoresLemos_WPF
                 }
             }
         }
-        private void AtualizarBoletoDadosExtraidos(BoletoData boletoDestino, BoletoData boletoExtraido)
+        private async void AtualizarBoletoDadosExtraidos(BoletoData boletoDestino, BoletoData boletoExtraido)
         {
             try
             {
@@ -728,9 +734,14 @@ namespace WMS_RadiadoresLemos_WPF
                 // IMPORTANTE: SEMPRE use o caminho do arquivo extraído
                 boletoDestino.CaminhoArquivo = boletoExtraido.CaminhoArquivo;
                 
-                // Restaura os campos que não devem ser modificados
+                // Verifica se o fornecedor do boleto é diferente do selecionado
+                await VerificarFornecedorBoleto(boletoDestino);
+                
+                // Restaura os campos que não devem ser modificados (apenas se não foram atualizados pela verificação do fornecedor)
+                if (string.IsNullOrEmpty(boletoDestino.FornecedorId))
+                    boletoDestino.FornecedorId = fornecedorId;
+                    
                 boletoDestino.Parcela = parcela;
-                boletoDestino.FornecedorId = fornecedorId;
                 boletoDestino.NotaFiscal = notaFiscal;
                 boletoDestino.DataCadastro = dataCadastro;
                 boletoDestino.UsuarioCadastro = usuarioCadastro;
@@ -738,10 +749,7 @@ namespace WMS_RadiadoresLemos_WPF
                 // Atualiza a observação
                 boletoDestino.Observacoes = $"Parcela {parcela} - Dados extraídos automaticamente em {DateTime.Now:dd/MM/yyyy HH:mm}";
                 
-                // Log para debug - importante para verificar se o caminho está sendo transferido
-                Console.WriteLine($"Caminho do arquivo após atualização: {boletoDestino.CaminhoArquivo}");
-                
-                // Verifica se o CNPJ do pagador é exatamente "38.046.801/0001-60" logo após a extração
+                // Verificações do CNPJ do pagador (código original mantido)
                 if (!string.IsNullOrWhiteSpace(boletoDestino.CnpjPagador))
                 {
                     string cnpjLimpo = boletoDestino.CnpjPagador.Replace(".", "").Replace("/", "").Replace("-", "");
@@ -758,7 +766,6 @@ namespace WMS_RadiadoresLemos_WPF
                             MessageBoxButton.OK,
                             MessageBoxImage.Warning);
                         
-                        // Limpa o CNPJ do pagador para forçar o usuário a corrigir
                         boletoDestino.CnpjPagador = "";
                     }
                 }
@@ -780,6 +787,66 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show($"Erro ao atualizar dados do boleto: {ex.Message}", 
                     "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private async Task<bool> VerificarFornecedorBoleto(BoletoData boleto)
+        {
+            // Se não houver nome do beneficiário no boleto ou fornecedor selecionado, não há o que verificar
+            if (string.IsNullOrWhiteSpace(boleto.Beneficiario) || string.IsNullOrWhiteSpace(fornecedorSelecionadoNome))
+                return true;
+
+            // Se o fornecedor do boleto for igual ao selecionado, está ok
+            if (boleto.Beneficiario.Equals(fornecedorSelecionadoNome, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // Fornecedor do boleto é diferente do selecionado
+            var resultado = MessageBox.Show(
+                $"O nome do fornecedor no boleto ({boleto.Beneficiario}) é diferente do fornecedor selecionado ({fornecedorSelecionadoNome}).\n\n" +
+                "Deseja adicionar este fornecedor ao sistema?",
+                "Fornecedor Diferente",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (resultado == MessageBoxResult.Yes)
+            {
+                // Criar novo fornecedor com os dados do boleto
+                var novoFornecedor = new FornecedorData
+                {
+                    Nome = boleto.Beneficiario,
+                    CNPJ = boleto.CnpjBeneficiario ?? "", // CNPJ vazio se não disponível
+                    Estado = boleto.EstadoBeneficiario ?? "", // Estado vazio se não disponível
+                    ComprasRelacionadas = new List<string>(),
+                    Id = string.Empty // Será preenchido pelo SetIdFromCNPJ
+                };
+
+                // Abrir janela de edição do fornecedor
+                var editarFornecedorWindow = new EditarFornecedorWindow(novoFornecedor);
+                bool? result = editarFornecedorWindow.ShowDialog();
+                
+                if (result == true)
+                {
+                    // Fornecedor salvo com sucesso
+                    await CarregarFornecedores();
+                    
+                    // Atualizar fornecedor selecionado
+                    fornecedorSelecionadoId = editarFornecedorWindow.Fornecedor.Id;
+                    fornecedorSelecionadoNome = editarFornecedorWindow.Fornecedor.Nome;
+                    FornecedorComboBox.Text = fornecedorSelecionadoNome;
+                    
+                    // Atualizar o fornecedor no boleto
+                    boleto.FornecedorId = fornecedorSelecionadoId;
+                    
+                    return true;
+                }
+                else
+                {
+                    // Usuário cancelou a adição do fornecedor
+                    return false;
+                }
+            }
+            
+            // Usuário não quis adicionar o fornecedor
+            return false;
         }
 
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
@@ -1157,7 +1224,7 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         foreach (var boleto in boletos)
                         {
-                            RegistrarBoletos(boleto);
+                            await RegistrarBoletosAsync(boleto);
                         }
                     }
                 }
@@ -1227,7 +1294,7 @@ namespace WMS_RadiadoresLemos_WPF
 
             }
         }
-        private void RegistrarBoletos(BoletoData boleto)
+        private async Task RegistrarBoletosAsync(BoletoData boleto)
         {
             try
             {
@@ -1264,6 +1331,16 @@ namespace WMS_RadiadoresLemos_WPF
                         "CNPJ Obrigatório",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Verificar fornecedor do boleto
+                if (!await VerificarFornecedorBoleto(boleto))
+                {
+                    MessageBox.Show(
+                        "O fornecedor do boleto não foi confirmado. Verifique o fornecedor antes de continuar.",
+                        "Fornecedor Não Confirmado",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 

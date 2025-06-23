@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using WMS_RadiadoresLemos_WPF.src.Services;
+using System.Threading.Tasks;
 
 namespace WMS_RadiadoresLemos_WPF.src.Views
 {
@@ -23,7 +24,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             isModified = false;
         }
 
-        private void InicializarFornecedor(FornecedorData? fornecedor)
+        private async void InicializarFornecedor(FornecedorData? fornecedor)
         {
             if (fornecedor == null)
             {
@@ -40,6 +41,52 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             else
             {
                 this.fornecedor = fornecedor;
+                
+                // Verifica se o fornecedor já existe no banco de dados
+                await Task.Run(() => VerificarFornecedorExistente());
+            }
+        }
+
+        private void VerificarFornecedorExistente()
+        {
+            try
+            {
+                var db = DatabaseConnect.Database;
+                if (db == null)
+                    return;
+
+                var collection = db.GetCollection<FornecedorData>("fornecedores");
+                
+                // Verifica primeiro pelo ID
+                var fornecedorExistente = !string.IsNullOrEmpty(fornecedor.Id) 
+                    ? collection.FindById(fornecedor.Id) 
+                    : null;
+                
+                // Se não encontrou pelo ID, tenta pelo CNPJ
+                if (fornecedorExistente == null && !string.IsNullOrEmpty(fornecedor.CNPJ))
+                {
+                    fornecedorExistente = collection.FindOne(f => f.CNPJ == fornecedor.CNPJ);
+                }
+
+                // Se não existe no banco, é um novo fornecedor
+                isNewFornecedor = fornecedorExistente == null;
+                
+                // Se existe, atualiza o objeto fornecedor com os dados do banco
+                if (!isNewFornecedor)
+                {
+                    this.fornecedor = fornecedorExistente;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Em caso de erro, assume que é um novo fornecedor
+                isNewFornecedor = true;
+                Dispatcher.Invoke(() => {
+                    Alerta.AdicionarAlerta("Aviso", 
+                        ex.Message,
+                        "Não foi possível verificar se o fornecedor já existe no banco de dados.",
+                        "O fornecedor será tratado como novo.");
+                });
             }
         }
 
@@ -50,6 +97,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 NomeTextBox.Text = fornecedor.Nome;
                 CNPJTextBox.Text = fornecedor.CNPJ;
                 EstadoTextBox.Text = fornecedor.Estado;
+                
+                // Atualiza o título da janela
+                this.Title = isNewFornecedor ? "Cadastrar Fornecedor" : "Editar Fornecedor";
             }
             catch (Exception ex)
             {
@@ -111,7 +161,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 var collection = db.GetCollection<FornecedorData>("fornecedores");
 
                 // Verifica se já existe um fornecedor com o mesmo CNPJ
-                var fornecedorExistente = collection.FindOne(f => f.CNPJ == fornecedor.CNPJ);
+                var fornecedorExistente = collection.FindOne(f => f.CNPJ == CNPJTextBox.Text.Trim());
                 if (fornecedorExistente != null)
                 {
                     MessageBox.Show("Já existe um fornecedor com este CNPJ.", "Fornecedor Existente", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -122,6 +172,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 data.SetIdFromCNPJ();
 
                 collection.Insert(data);
+                
+                // Atualiza o objeto fornecedor com o objeto recém-inserido
+                fornecedor = data;
 
                 var log = new LogData
                 {
@@ -163,6 +216,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 data.SetIdFromCNPJ();
 
                 collection.Update(data);
+                
+                // Atualiza o objeto fornecedor com o objeto atualizado
+                fornecedor = data;
 
                 var log = new LogData
                 {
