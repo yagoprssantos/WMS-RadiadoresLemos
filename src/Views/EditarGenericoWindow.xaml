@@ -21,8 +21,8 @@
 
         <!-- Botões fixos na parte inferior -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20">
-            <!-- Botão Salvar -->
-            <Button Content="Salvar" Width="250" Margin="10" Click="Salvar_Click" Style="{StaticResource EmphasisButtonStyle}"/>
+            <!-- Botão Salvar com nome para referência no código -->
+            <Button x:Name="SalvarButton" Content="Salvar" Width="250" Margin="10" Click="Salvar_Click" Style="{StaticResource EmphasisButtonStyle}"/>
             <!-- Botão Cancelar -->
             <Button Content="Cancelar" Width="150" Margin="10" Click="Cancelar_Click" Style="{StaticResource CancelButtonStyle}"/>
         </StackPanel>

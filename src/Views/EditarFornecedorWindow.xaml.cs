@@ -100,6 +100,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 
                 // Atualiza o título da janela
                 this.Title = isNewFornecedor ? "Cadastrar Fornecedor" : "Editar Fornecedor";
+                
+                // Atualiza o texto do botão de salvar
+                SalvarButton.Content = isNewFornecedor ? "Cadastrar Fornecedor" : "Atualizar Fornecedor";
             }
             catch (Exception ex)
             {

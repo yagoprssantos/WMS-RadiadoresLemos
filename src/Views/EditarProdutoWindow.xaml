@@ -56,8 +56,8 @@
 
                 <!-- Botões -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,10,0,0">
-                    <!-- Botão Salvar -->
-                    <Button Content="Atualizar Produto" Click="Salvar_Click" Width="250" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <!-- Botão Salvar (renomeado para identificação mais clara) -->
+                    <Button x:Name="AtualizarButton" Content="Atualizar Produto" Click="Salvar_Click" Width="250" Margin="10" Style="{StaticResource EmphasisButtonStyle}"/>
                     <!-- Botão Cancelar -->
                     <Button Content="Cancelar" Click="Cancelar_Click" Width="150" Margin="10"
                             Style="{StaticResource CancelButtonStyle}"/>

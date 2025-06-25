@@ -71,6 +71,12 @@ namespace WMS_RadiadoresLemos_WPF
                 EmailTextBox.Text = usuario.Email;
                 MatriculaTextBox.Text = usuario.Matricula;
                 PermissaoComboBox.SelectedItem = GetComboBoxItemByContent(usuario.Cargo);
+                
+                // Atualiza o título da janela
+                this.Title = isNewUser ? "Cadastrar Usuário" : "Editar Usuário";
+                
+                // Atualiza o texto do botão de salvar
+                SalvarButton.Content = isNewUser ? "Cadastrar Usuário" : "Atualizar Usuário";
             }
             catch (Exception ex)
             {

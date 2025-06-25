@@ -26,6 +26,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         private readonly string _tabela;
         private readonly Type _modelo;
         private readonly Dictionary<string, Control> _campos = new();
+        private readonly bool _isNovoRegistro;
 
         public EditarGenericoWindow(string tabela, BsonDocument? registro = null)
         {
@@ -33,6 +34,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             _tabela = tabela;
             _registro = registro ?? new BsonDocument();
             _modelo = ObterModelo(tabela);
+            _isNovoRegistro = registro == null || registro.Keys.Count == 0;
+
+            // Atualiza o título da janela e o texto do botão com base em ser novo ou edição
+            this.Title = _isNovoRegistro ? $"Cadastrar {ObterNomeEntidade(tabela)}" : $"Editar {ObterNomeEntidade(tabela)}";
+            SalvarButton.Content = _isNovoRegistro ? $"Cadastrar {ObterNomeEntidade(tabela)}" : $"Atualizar {ObterNomeEntidade(tabela)}";
+
             GerarCampos();
         }
 
@@ -46,6 +53,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 "movimentacoes" => typeof(MovimentacaoData),
                 "alertas" => typeof(AlertaData),
                 _ => throw new InvalidOperationException($"Modelo para a tabela '{tabela}' não encontrado.")
+            };
+        }
+
+        private string ObterNomeEntidade(string tabela)
+        {
+            return tabela.ToLower() switch
+            {
+                "usuarios" => "Usuário",
+                "produtos" => "Produto",
+                "clientes" => "Cliente",
+                "fornecedores" => "Fornecedor",
+                "historico" => "Histórico",
+                "movimentacoes" => "Movimentação",
+                "alertas" => "Alerta",
+                _ => "Registro"
             };
         }
 

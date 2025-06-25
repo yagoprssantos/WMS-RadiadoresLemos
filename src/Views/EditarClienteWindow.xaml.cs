@@ -52,6 +52,12 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 TelefoneTextBox.Text = cliente.Telefone;
                 CNPJTextBox.Text = cliente.CNPJ;
                 EstadoTextBox.Text = cliente.Estado;
+                
+                // Atualiza o título da janela
+                this.Title = isNewClient ? "Cadastrar Cliente" : "Editar Cliente";
+                
+                // Atualiza o texto do botão de salvar
+                SalvarButton.Content = isNewClient ? "Cadastrar Cliente" : "Atualizar Cliente";
             }
             catch (Exception ex)
             {

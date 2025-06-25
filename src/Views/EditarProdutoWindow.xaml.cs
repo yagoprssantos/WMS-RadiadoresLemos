@@ -67,6 +67,10 @@ namespace WMS_RadiadoresLemos_WPF
                 CodigoProduto.Text = produto.Codigo;
                 PrecoProduto.Text = produto.Preco.ToString("F2");
                 QuantidadeInicial.Text = produto.Quantidade.ToString("N0");
+                
+                // Atualiza o título da janela e texto do botão de acordo com a operação
+                this.Title = isNewProduct ? "Cadastrar Produto" : "Editar Produto";
+                AtualizarButton.Content = isNewProduct ? "Cadastrar Produto" : "Atualizar Produto";
             }
             catch (Exception ex)
             {

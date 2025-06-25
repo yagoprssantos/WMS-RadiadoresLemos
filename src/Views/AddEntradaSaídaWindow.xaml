@@ -117,7 +117,7 @@
                                                       SelectionChanged="ClienteComboBox_SelectionChanged" />
                                             
                                             <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource EmphasisButtonStyle}" Width="35" Height="35" 
-                                                    Margin="5,0,0,0" Content="+" FontSize="16" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
+                                                    Margin="5,0,0,0" Content="➕" FontSize="16" FontWeight="Bold" Padding="0" VerticalContentAlignment="Center"
                                                     Name="AdicionarClienteButton" Click="AdicionarClienteButton_Click" />
                                         </Grid>
                                     </Grid>
@@ -216,7 +216,7 @@
                                 <TextBlock x:Name="StatusMessage" Text="Movimentação INVÁLIDA" FontSize="18" Margin="0,10" HorizontalAlignment="Center"
                                            Foreground="{StaticResource CancelButtonHoverBrush}" Visibility="Collapsed" />
 
-                                <StackPanel x:Name="Financeiro" Visibility="Visible">
+                                <StackPanel x:Name="Financeiro" Visibility="Collapsed">
                                     <Grid Margin="0,5">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -274,172 +274,170 @@
                                         </Grid>
 
                                         <!-- Lista de boletos -->
-                                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="280">
-                                            <ItemsControl x:Name="BoletosItemsControl">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Margin="0,5" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="12" Padding="12">
-                                                            <Grid>
-                                                                <Grid.RowDefinitions>
-                                                                    <RowDefinition Height="Auto"/>
-                                                                    <RowDefinition Height="Auto"/>
-                                                                    <RowDefinition Height="Auto"/>
-                                                                    <RowDefinition Height="Auto"/>
-                                                                </Grid.RowDefinitions>
+                                        <ItemsControl x:Name="BoletosItemsControl">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,5" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="12" Padding="12">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto"/>
+                                                                <RowDefinition Height="Auto"/>
+                                                                <RowDefinition Height="Auto"/>
+                                                                <RowDefinition Height="Auto"/>
+                                                            </Grid.RowDefinitions>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <!-- Linha 1: Título e Botões -->
+                                                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                                                        Text="{Binding Parcela, StringFormat='Parcela {0}:'}"
+                                                                        FontWeight="SemiBold" FontSize="14"
+                                                                        Foreground="{StaticResource AccentBrush}"
+                                                                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                                                            <!-- Arquivo -->
+                                                            <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,5,0" VerticalAlignment="Center">
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="Auto"/>
                                                                     <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0" Text="Arquivo:" FontSize="14" Foreground="{StaticResource TextBrush}"
+                                                                            VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                                <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="3" VerticalAlignment="Center" MinWidth="120">
+                                                                    <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled">
+                                                                        <TextBox Text="{Binding CaminhoArquivo}" Background="Transparent"
+                                                                                    Foreground="{StaticResource TextBrush}" FontSize="13" Padding="0"
+                                                                                    IsReadOnly="True" BorderThickness="0" Margin="5,0" Height="28"
+                                                                                    VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                                                                    </ScrollViewer>
+                                                                </Border>
+                                                            </Grid>
 
-                                                                <!-- Linha 1: Título e Botões -->
-                                                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                                                           Text="{Binding Parcela, StringFormat='Parcela {0}:'}"
-                                                                           FontWeight="SemiBold" FontSize="14"
-                                                                           Foreground="{StaticResource AccentBrush}"
-                                                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                            <!-- Botões alinhados -->
+                                                            <Button Grid.Row="0" Grid.Column="2" Content="📁" FontSize="13" 
+                                                                    Style="{StaticResource DeleteButtonStyle}" Background="{StaticResource AccentBrush}"
+                                                                    Width="28" Height="28" Margin="10,0" Padding="0"
+                                                                    VerticalAlignment="Center" Click="ExtrairDadosBoleto_Click"
+                                                                    ToolTip="Extrair dados do boleto automaticamente"/>
 
-                                                                <!-- Arquivo -->
-                                                                <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,5,0" VerticalAlignment="Center">
+                                                            <Button Grid.Row="0" Grid.Column="4" Content="✖" FontSize="12"
+                                                                    Style="{StaticResource DeleteButtonStyle}" Width="28" Height="28" 
+                                                                    VerticalAlignment="Center" Click="RemoverBoletoButton_Click"/>
+
+                                                            <!-- Linha 2: Informações básicas e datas -->
+                                                            <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0" HorizontalAlignment="Center">
+                                                                <Grid Margin="0,0,0,5">
                                                                     <Grid.ColumnDefinitions>
                                                                         <ColumnDefinition Width="Auto"/>
+                                                                        <!-- Rótulo Valor -->
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <!-- TextBox Valor -->
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <!-- Rótulo Vencimento -->
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <!-- DatePicker Vencimento -->
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <!-- Rótulo Pagamento -->
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <!-- DatePicker Pagamento -->
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <!-- Valor -->
+                                                                    <TextBlock Grid.Column="0" Text="Valor:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
+                                                                                VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                                    <TextBox Grid.Column="1" Text="{Binding Valor, StringFormat=N2, ConverterCulture='pt-BR'}" FontSize="13"
+                                                                                Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                                                                                Background="{StaticResource SecondaryBrush}" Width="100"
+                                                                                BorderThickness="1" Margin="0,0,15,0" />
+
+                                                                    <!-- Vencimento -->
+                                                                    <TextBlock Grid.Column="2" Text="Vencimento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
+                                                                                VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                                    <DatePicker Grid.Column="3" x:Name="VencimentoDate" 
+                                                                                SelectedDate="{Binding DataVencimento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                                                SelectedDateChanged="VencimentoDate_SelectedDateChanged"
+                                                                                Style="{StaticResource DatePickerStyle}" Width="130"
+                                                                                FontSize="13" VerticalAlignment="Center" Margin="0,0,15,0" />
+
+                                                                    <!-- Pagamento -->
+                                                                    <TextBlock Grid.Column="4" Text="Pagamento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
+                                                                                VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                                    <DatePicker Grid.Column="5" SelectedDate="{Binding DataPagamento}" Style="{StaticResource DatePickerStyle}" Width="130"
+                                                                                FontSize="13" VerticalAlignment="Center" />
+                                                                </Grid>
+                                                            </WrapPanel>
+
+                                                            <!-- Linha 3: Expander com detalhes extras -->
+                                                            <Expander Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" 
+                                                                        Header="Detalhes adicionais" Margin="0,8,0,0"
+                                                                        Background="Transparent"
+                                                                        Foreground="{StaticResource TextBrush}">
+                                                                <Grid Margin="10,5,0,0">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
                                                                         <ColumnDefinition Width="*"/>
                                                                     </Grid.ColumnDefinitions>
-                                                                    <TextBlock Grid.Column="0" Text="Arquivo:" FontSize="14" Foreground="{StaticResource TextBrush}"
-                                                                               VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                                    <Border Grid.Column="1" Background="{StaticResource SecondaryBrush}" CornerRadius="3" VerticalAlignment="Center" MinWidth="120">
-                                                                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden">
-                                                                            <TextBox Text="{Binding CaminhoArquivo}" Background="Transparent"
-                                                                                     Foreground="{StaticResource TextBrush}" FontSize="13" Padding="0"
-                                                                                     IsReadOnly="True" BorderThickness="0" Margin="5,0" Height="28"
-                                                                                     VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                                                                        </ScrollViewer>
-                                                                    </Border>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                    </Grid.RowDefinitions>
+
+                                                                    <!-- Coluna 1 - Dados do Fornecedor -->
+                                                                    <!-- Fornecedor/Beneficiário -->
+                                                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,5,10,5">
+                                                                        <TextBlock Text="Beneficiário (Fornecedor):" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                                        <TextBox Text="{Binding Beneficiario}" Margin="0,3,0,0" FontSize="14"
+                                                                                    Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
+                                                                    </StackPanel>
+
+                                                                    <!-- CNPJ do Fornecedor -->
+                                                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,5,10,5">
+                                                                        <TextBlock Text="CNPJ do Beneficiário:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                                        <TextBox Text="{Binding CnpjBeneficiario}" Margin="0,3,0,0" FontSize="14"
+                                                                                    Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
+                                                                    </StackPanel>
+
+                                                                    <!-- Nosso Número -->
+                                                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,5,10,5">
+                                                                        <TextBlock Text="Nosso Número:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                                        <TextBox Text="{Binding NossoNumero}" Margin="0,3,0,0" FontSize="14"
+                                                                                    Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
+                                                                    </StackPanel>
+
+                                                                    <!-- Coluna 2 - Dados do Pagador e Linha Digitável -->
+                                                                    <!-- Pagador -->
+                                                                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,5,0,5">
+                                                                        <TextBlock Text="Pagador:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                                        <TextBox Text="{Binding Pagador}" Margin="0,3,0,0" FontSize="14"
+                                                                                    Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
+                                                                    </StackPanel>
+
+                                                                    <!-- CNPJ do Pagador -->
+                                                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,5,0,5">
+                                                                        <TextBlock Text="CNPJ do Pagador:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                                        <TextBox Text="{Binding CnpjPagador}" Margin="0,3,0,0" FontSize="14"
+                                                                                    Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
+                                                                    </StackPanel>
+
+                                                                    <!-- Linha Digitável -->
+                                                                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,5,0,5">
+                                                                        <TextBlock Text="Linha Digitável:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
+                                                                        <TextBox Text="{Binding LinhaDigitavel}" Margin="0,3,0,0" FontSize="14"
+                                                                                    Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
+                                                                    </StackPanel>
                                                                 </Grid>
-
-                                                                <!-- Botões alinhados -->
-                                                                <Button Grid.Row="0" Grid.Column="2" Content="Extrair" Width="65" Height="28" 
-                                                                        Style="{StaticResource EmphasisButtonStyle}" Padding="5,2"
-                                                                        Click="ExtrairDadosBoleto_Click"
-                                                                        VerticalAlignment="Center" Margin="10,0" FontSize="13"
-                                                                        ToolTip="Extrair dados do boleto automaticamente"/>
-
-                                                                <Button Grid.Row="0" Grid.Column="4" Content="✖" FontSize="12"
-                                                                        Style="{StaticResource DeleteButtonStyle}" Width="30" Height="28" 
-                                                                        VerticalAlignment="Center" Click="RemoverBoletoButton_Click"/>
-
-                                                                <!-- Linha 2: Informações básicas e datas -->
-                                                                <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0" HorizontalAlignment="Center">
-                                                                    <Grid Margin="0,0,0,5">
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                            <!-- Rótulo Valor -->
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                            <!-- TextBox Valor -->
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                            <!-- Rótulo Vencimento -->
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                            <!-- DatePicker Vencimento -->
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                            <!-- Rótulo Pagamento -->
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                            <!-- DatePicker Pagamento -->
-                                                                        </Grid.ColumnDefinitions>
-
-                                                                        <!-- Valor -->
-                                                                        <TextBlock Grid.Column="0" Text="Valor:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
-                                                                                   VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                                        <TextBox Grid.Column="1" Text="{Binding Valor, StringFormat=N2, ConverterCulture='pt-BR'}" FontSize="13"
-                                                                                 Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                                                                                 Background="{StaticResource SecondaryBrush}" Width="100"
-                                                                                 BorderThickness="1" Margin="0,0,15,0" />
-
-                                                                        <!-- Vencimento -->
-                                                                        <TextBlock Grid.Column="2" Text="Vencimento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
-                                                                                   VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                                        <DatePicker Grid.Column="3" x:Name="VencimentoDate" 
-                                                                                    SelectedDate="{Binding DataVencimento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                                                                    SelectedDateChanged="VencimentoDate_SelectedDateChanged"
-                                                                                    Style="{StaticResource DatePickerStyle}" Width="130"
-                                                                                    FontSize="13" VerticalAlignment="Center" Margin="0,0,15,0" />
-
-                                                                        <!-- Pagamento -->
-                                                                        <TextBlock Grid.Column="4" Text="Pagamento:" FontWeight="Bold" FontSize="13" Foreground="{StaticResource TextBrush}"
-                                                                                   VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                                        <DatePicker Grid.Column="5" SelectedDate="{Binding DataPagamento}" Style="{StaticResource DatePickerStyle}" Width="130"
-                                                                                    FontSize="13" VerticalAlignment="Center" />
-                                                                    </Grid>
-                                                                </WrapPanel>
-
-                                                                <!-- Linha 3: Expander com detalhes extras -->
-                                                                <Expander Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" 
-                                                                          Header="Detalhes adicionais" Margin="0,8,0,0"
-                                                                          Background="Transparent"
-                                                                          Foreground="{StaticResource TextBrush}">
-                                                                    <Grid Margin="10,5,0,0">
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="*"/>
-                                                                            <ColumnDefinition Width="*"/>
-                                                                        </Grid.ColumnDefinitions>
-                                                                        <Grid.RowDefinitions>
-                                                                            <RowDefinition Height="Auto"/>
-                                                                            <RowDefinition Height="Auto"/>
-                                                                            <RowDefinition Height="Auto"/>
-                                                                        </Grid.RowDefinitions>
-
-                                                                        <!-- Coluna 1 - Dados do Fornecedor -->
-                                                                        <!-- Fornecedor/Beneficiário -->
-                                                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,5,10,5">
-                                                                            <TextBlock Text="Beneficiário (Fornecedor):" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
-                                                                            <TextBox Text="{Binding Beneficiario}" Margin="0,3,0,0" FontSize="14"
-                                                                                     Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
-                                                                        </StackPanel>
-
-                                                                        <!-- CNPJ do Fornecedor -->
-                                                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,5,10,5">
-                                                                            <TextBlock Text="CNPJ do Beneficiário:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
-                                                                            <TextBox Text="{Binding CnpjBeneficiario}" Margin="0,3,0,0" FontSize="14"
-                                                                                     Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
-                                                                        </StackPanel>
-
-                                                                        <!-- Nosso Número -->
-                                                                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,5,10,5">
-                                                                            <TextBlock Text="Nosso Número:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
-                                                                            <TextBox Text="{Binding NossoNumero}" Margin="0,3,0,0" FontSize="14"
-                                                                                     Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
-                                                                        </StackPanel>
-
-                                                                        <!-- Coluna 2 - Dados do Pagador e Linha Digitável -->
-                                                                        <!-- Pagador -->
-                                                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,5,0,5">
-                                                                            <TextBlock Text="Pagador:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
-                                                                            <TextBox Text="{Binding Pagador}" Margin="0,3,0,0" FontSize="14"
-                                                                                     Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
-                                                                        </StackPanel>
-
-                                                                        <!-- CNPJ do Pagador -->
-                                                                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,5,0,5">
-                                                                            <TextBlock Text="CNPJ do Pagador:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
-                                                                            <TextBox Text="{Binding CnpjPagador}" Margin="0,3,0,0" FontSize="14"
-                                                                                     Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
-                                                                        </StackPanel>
-
-                                                                        <!-- Linha Digitável -->
-                                                                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,5,0,5">
-                                                                            <TextBlock Text="Linha Digitável:" FontWeight="Bold" FontSize="12" Foreground="{StaticResource TextBrush}"/>
-                                                                            <TextBox Text="{Binding LinhaDigitavel}" Margin="0,3,0,0" FontSize="14"
-                                                                                     Background="{StaticResource SecondaryBrush}" Foreground="{StaticResource TextBrush}"/>
-                                                                        </StackPanel>
-                                                                    </Grid>
-                                                                </Expander>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </ScrollViewer>
+                                                            </Expander>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
 
                                     <TextBlock Text="Detalhes:" Margin="0,5" FontSize="16" Foreground="{StaticResource TextBrush}" />

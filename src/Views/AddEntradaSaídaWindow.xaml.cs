@@ -55,6 +55,7 @@ namespace WMS_RadiadoresLemos_WPF
         private readonly List<string> opcoesFormaPagamento;
 
         private ObservableCollection<BoletoData> boletos = new ObservableCollection<BoletoData>();
+        private List<BoletoData> todosBoletos = new List<BoletoData>();
         private string? numeroNotaFiscalAtual;
 
         public AddEntradaSaídaWindow()
@@ -134,11 +135,15 @@ namespace WMS_RadiadoresLemos_WPF
                         produtos = produtos.Where(p => p.Quantidade > 0).ToList();
                     }
 
+                    // Limpar os itens antes de definir o ItemsSource
+                    ProdutoComboBox.ItemsSource = null;
+                    ProdutoComboBox.Items.Clear();
                     ProdutoComboBox.ItemsSource = produtos.Select(p => p.Nome).ToList();
                 }
             }
-            catch (Exception ex) { MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); }
+            catch (Exception ex) { MessageBox.Show($"Erro ao carregar produtos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
+
         private async Task CarregarFornecedores()
         {
             try
@@ -148,17 +153,19 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var collection = db.GetCollection<FornecedorData>("fornecedores");
                     fornecedores = await Task.Run(() => collection.FindAll().OrderBy(f => f.Nome).ToList());
-                    
-                    // Limpar os itens antes de definir o ItemsSource
+
+                    // Limpa os itens antes de definir o ItemsSource
+                    FornecedorComboBox.ItemsSource = null;
                     FornecedorComboBox.Items.Clear();
                     FornecedorComboBox.ItemsSource = fornecedores.Select(f => f.Nome).ToList();
                 }
             }
-            catch (Exception ex) { 
-                MessageBox.Show($"Erro ao carregar fornecedores: {ex.Message}", 
-                    "Erro", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error); 
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar fornecedores: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private async Task CarregarClientes()
         {
             try
@@ -168,6 +175,10 @@ namespace WMS_RadiadoresLemos_WPF
                 {
                     var collection = db.GetCollection<ClienteData>("clientes");
                     clientes = await Task.Run(() => collection.FindAll().OrderBy(c => c.CNPJ).ToList());
+                    
+                    // Limpar os itens antes de definir o ItemsSource
+                    ClienteComboBox.ItemsSource = null;
+                    ClienteComboBox.Items.Clear();
                     ClienteComboBox.ItemsSource = clientes.Select(c => c.CNPJ).ToList();
                 }
             }
@@ -799,38 +810,25 @@ namespace WMS_RadiadoresLemos_WPF
             if (boleto.Beneficiario.Equals(fornecedorSelecionadoNome, StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            // Fornecedor do boleto é diferente do selecionado
-            var resultado = MessageBox.Show(
-                $"O nome do fornecedor no boleto ({boleto.Beneficiario}) é diferente do fornecedor selecionado ({fornecedorSelecionadoNome}).\n\n" +
-                "Deseja adicionar este fornecedor ao sistema?",
-                "Fornecedor Diferente",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+            // Verificar se o fornecedor já existe no banco de dados
+            var fornecedorExistente = fornecedores.FirstOrDefault(f => 
+                f.Nome.Equals(boleto.Beneficiario, StringComparison.OrdinalIgnoreCase));
 
-            if (resultado == MessageBoxResult.Yes)
+            if (fornecedorExistente != null)
             {
-                // Criar novo fornecedor com os dados do boleto
-                var novoFornecedor = new FornecedorData
-                {
-                    Nome = boleto.Beneficiario,
-                    CNPJ = boleto.CnpjBeneficiario ?? "", // CNPJ vazio se não disponível
-                    Estado = boleto.EstadoBeneficiario ?? "", // Estado vazio se não disponível
-                    ComprasRelacionadas = new List<string>(),
-                    Id = string.Empty // Será preenchido pelo SetIdFromCNPJ
-                };
+                // O fornecedor já existe no sistema, perguntar se deseja usá-lo
+                var resultado = MessageBox.Show(
+                    $"O nome do fornecedor no boleto ({boleto.Beneficiario}) é diferente do fornecedor selecionado ({fornecedorSelecionadoNome}).\n\n" +
+                    "Este fornecedor já existe no sistema. Deseja usá-lo para este boleto?",
+                    "Fornecedor Encontrado",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
 
-                // Abrir janela de edição do fornecedor
-                var editarFornecedorWindow = new EditarFornecedorWindow(novoFornecedor);
-                bool? result = editarFornecedorWindow.ShowDialog();
-                
-                if (result == true)
+                if (resultado == MessageBoxResult.Yes)
                 {
-                    // Fornecedor salvo com sucesso
-                    await CarregarFornecedores();
-                    
                     // Atualizar fornecedor selecionado
-                    fornecedorSelecionadoId = editarFornecedorWindow.Fornecedor.Id;
-                    fornecedorSelecionadoNome = editarFornecedorWindow.Fornecedor.Nome;
+                    fornecedorSelecionadoId = fornecedorExistente.Id;
+                    fornecedorSelecionadoNome = fornecedorExistente.Nome;
                     FornecedorComboBox.Text = fornecedorSelecionadoNome;
                     
                     // Atualizar o fornecedor no boleto
@@ -840,13 +838,61 @@ namespace WMS_RadiadoresLemos_WPF
                 }
                 else
                 {
-                    // Usuário cancelou a adição do fornecedor
+                    // Usuário não quis usar o fornecedor existente
                     return false;
                 }
             }
-            
-            // Usuário não quis adicionar o fornecedor
-            return false;
+            else
+            {
+                // Fornecedor não existe, perguntar se deseja cadastrar
+                var resultado = MessageBox.Show(
+                    $"O nome do fornecedor no boleto ({boleto.Beneficiario}) é diferente do fornecedor selecionado ({fornecedorSelecionadoNome}).\n\n" +
+                    "Este fornecedor não existe no sistema. Deseja cadastrá-lo?",
+                    "Novo Fornecedor",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (resultado == MessageBoxResult.Yes)
+                {
+                    // Criar novo fornecedor com os dados do boleto
+                    var novoFornecedor = new FornecedorData
+                    {
+                        Nome = boleto.Beneficiario,
+                        CNPJ = boleto.CnpjBeneficiario ?? "", // CNPJ vazio se não disponível
+                        Estado = boleto.EstadoBeneficiario ?? "", // Estado vazio se não disponível
+                        ComprasRelacionadas = new List<string>(),
+                        Id = string.Empty // Será preenchido pelo SetIdFromCNPJ
+                    };
+
+                    // Abrir janela de edição do fornecedor
+                    var editarFornecedorWindow = new EditarFornecedorWindow(novoFornecedor);
+                    bool? result = editarFornecedorWindow.ShowDialog();
+                    
+                    if (result == true)
+                    {
+                        // Fornecedor salvo com sucesso
+                        await CarregarFornecedores();
+                        
+                        // Atualizar fornecedor selecionado
+                        fornecedorSelecionadoId = editarFornecedorWindow.Fornecedor.Id;
+                        fornecedorSelecionadoNome = editarFornecedorWindow.Fornecedor.Nome;
+                        FornecedorComboBox.Text = fornecedorSelecionadoNome;
+                        
+                        // Atualizar o fornecedor no boleto
+                        boleto.FornecedorId = fornecedorSelecionadoId;
+                        
+                        return true;
+                    }
+                    else
+                    {
+                        // Usuário cancelou a adição do fornecedor
+                        return false;
+                    }
+                }
+                
+                // Usuário não quis adicionar o fornecedor
+                return false;
+            }
         }
 
         private void AdicionarNaLista_Click(object sender, RoutedEventArgs e)
@@ -911,10 +957,10 @@ namespace WMS_RadiadoresLemos_WPF
 
                         // Adiciona o ID do boleto à lista de boletos da compra
                         compra.Boletos.Add(boleto.Id);
+                        
+                        // IMPORTANTE: Adiciona o boleto à coleção permanente
+                        todosBoletos.Add(boleto);
                     }
-
-                    // Atualiza a interface sem recriar os boletos
-                    BoletosItemsControl.Items.Refresh();
 
                     compras.Add(compra);
                 }
@@ -935,8 +981,15 @@ namespace WMS_RadiadoresLemos_WPF
             ListaItemsControl.ItemsSource = null;
             ListaItemsControl.ItemsSource = listaMovimentacoes;
             AnimateToggleLista();
+
+            // Limpa os boletos da interface para a próxima compra
+            boletos.Clear();
+            BoletosItemsControl.Items.Refresh();
+
             LimparCampos();
-            Invalida();
+
+            // Deixa mensagem status invisível para não confundir
+            StatusMessage.Visibility = Visibility.Collapsed;
 
             // Abre a lista de movimentações se estiver oculta
             if (Lista.Visibility == Visibility.Collapsed)
@@ -1209,20 +1262,21 @@ namespace WMS_RadiadoresLemos_WPF
                     }
 
                     // Organiza os boletos (arquivos físicos)
-                    // Substitui a criação de instância pelo método estático
-                    foreach (var boleto in boletos)
+                    // Usa a coleção todosBoletos em vez de boletos
+                    foreach (var boleto in todosBoletos)
                     {
                         if (!string.IsNullOrEmpty(boleto.CaminhoArquivo))
                         {
                             // Usa o método estático OrganizarArquivoBoleto
-                            OrganizarBoleto.OrganizarArquivoBoleto(boleto, numeroNotaFiscalAtual);
+                            OrganizarBoleto.OrganizarArquivoBoleto(boleto, boleto.NotaFiscal);
                         }
                     }
 
                     // Registra os boletos no banco de dados
-                    if (boletos.Count > 0)
+                    // Usa a coleção todosBoletos em vez de boletos
+                    if (todosBoletos.Count > 0)
                     {
-                        foreach (var boleto in boletos)
+                        foreach (var boleto in todosBoletos)
                         {
                             await RegistrarBoletosAsync(boleto);
                         }
@@ -1243,10 +1297,11 @@ namespace WMS_RadiadoresLemos_WPF
                     await RegistrarMovimentacaoAsync(mov);
                 }
 
-                // Limpa a lista e fecha a janela
+                // Limpa todas as coleções
                 movimentacoes.Clear();
                 listaMovimentacoes.Clear();
                 boletos.Clear();
+                todosBoletos.Clear();
                 ListaItemsControl.ItemsSource = null;
                 ListaItemsControl.ItemsSource = listaMovimentacoes;
                 this.Close();

@@ -30,7 +30,7 @@
 
                 <!-- Botões -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,10,0,0">
-                    <Button Content="Salvar" Width="250" Margin="10" Click="Salvar_Click" Style="{StaticResource EmphasisButtonStyle}"/>
+                    <Button x:Name="SalvarButton" Content="Salvar" Width="250" Margin="10" Click="Salvar_Click" Style="{StaticResource EmphasisButtonStyle}"/>
                     <Button Content="Cancelar" Width="150" Margin="10" Click="Cancelar_Click" Style="{StaticResource CancelButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
