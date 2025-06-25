@@ -20,9 +20,30 @@
                             <Image x:Name="IconAlterarTema"  Source="/assets/Icons/Genericos/Sol Config.png" Stretch="Uniform" Height="30" Width="25" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock Text="Alterar Tema" Style="{StaticResource TextBoxCustom2ButtonStyle}" />
                             <ComboBox x:Name="ThemeSelector" Style="{StaticResource ComboBoxSelectStyle}" DockPanel.Dock="Right" Width="225">
-                                <ComboBoxItem x:Name="LightTheme" Content="Tema Claro"/>
-                                <ComboBoxItem x:Name="DarkTheme" Content="Tema Escuro"/>
-                                <ComboBoxItem x:Name="MidnightTheme" Content="Tema Azul"/>
+                                <!-- Cabeçalho para Temas Claros -->
+                                <ComboBoxItem IsEnabled="False">
+                                    <TextBlock Text="--- TEMAS CLAROS ---" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                                </ComboBoxItem>
+                                <ComboBoxItem x:Name="LightTheme" Content="Claro Padrão"/>
+                                <ComboBoxItem x:Name="EmeraldTheme" Content="Verde Esmeralda"/>
+                                <ComboBoxItem x:Name="SunsetTheme" Content="Pôr do Sol"/>
+                                <ComboBoxItem x:Name="LavenderTheme" Content="Lavanda"/>
+                                <ComboBoxItem x:Name="OceanTheme" Content="Oceano"/>
+                                <ComboBoxItem x:Name="CottonCandyTheme" Content="Algodão Doce"/>
+                                <ComboBoxItem x:Name="CoffeeTheme" Content="Café"/>
+                                
+                                <!-- Cabeçalho para Temas Escuros -->
+                                <ComboBoxItem IsEnabled="False">
+                                    <TextBlock Text="--- TEMAS ESCUROS ---" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                                </ComboBoxItem>
+                                <ComboBoxItem x:Name="DarkTheme" Content="Escuro Padrão"/>
+                                <ComboBoxItem x:Name="MidnightTheme" Content="Azul Noturno"/>
+                                <ComboBoxItem x:Name="NightPurpleTheme" Content="Roxo Noturno"/>
+                                <ComboBoxItem x:Name="DarkTealTheme" Content="Azul Petróleo"/>
+                                <ComboBoxItem x:Name="CarbonTheme" Content="Carbono"/>
+                                <ComboBoxItem x:Name="ForestTheme" Content="Floresta"/>
+                                <ComboBoxItem x:Name="WineTheme" Content="Vinho"/>
+                                <ComboBoxItem x:Name="NavyTheme" Content="Marinha"/>
                             </ComboBox>
                         </DockPanel>
                     </Border>

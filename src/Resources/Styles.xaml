@@ -1,35 +1,20 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Definição de Cores -->
-    <!-- Paleta de Cores -->
-    <Color x:Key="BackgroundColor">#FFFFFF</Color>
-    <Color x:Key="PanelBackgroundColor">#E0E0E0</Color>
-    <Color x:Key="PrimaryColor">#F8F9FA</Color>
-    <Color x:Key="SecondaryColor">#F4F4F4</Color>
-    <Color x:Key="AccentColor">#6680E8</Color>
-    <Color x:Key="TextColor">#828282</Color>
-    <Color x:Key="HoverBackgroundColor">#D0D0D0</Color>
-    <Color x:Key="HoverForegroundColor">#707070</Color>
-    <Color x:Key="CancelColor">#FF0000</Color>
-    <Color x:Key="CancelHoverColor">#A00000</Color>
+    <!--#region ESTILOS DE CONTROLES BÁSICOS -->
 
-    <!-- Brushes -->
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
-    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{StaticResource PanelBackgroundColor}" />
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
-    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
-    <SolidColorBrush x:Key="ButtonForegroundBrush" Color="{StaticResource SecondaryColor}" />
-    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{StaticResource PrimaryColor}" />
-    <SolidColorBrush x:Key="ButtonHoverBrush" Color="{StaticResource HoverBackgroundColor}" />
-    <SolidColorBrush x:Key="CancelButtonBrush" Color="{StaticResource CancelColor}" />
-    <SolidColorBrush x:Key="CancelButtonHoverBrush" Color="{StaticResource CancelHoverColor}" />
-    <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}" />
-    <SolidColorBrush x:Key="HoverForegroundBrush" Color="{StaticResource HoverForegroundColor}" />
+    <!-- 
+    Estilos base para os controles fundamentais da aplicação
+    Estes estilos são a base para todos os outros estilos personalizados
+    -->
 
-    <!-- Estilo para Botões -->
+    <!-- Estilo para a Janela Principal -->
+    <Style TargetType="Window">
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+    </Style>
+
+    <!-- Estilo Base para Botões -->
     <Style TargetType="Button">
         <Setter Property="Foreground" Value="{StaticResource ButtonForegroundBrush}" />
         <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
@@ -55,7 +40,72 @@
         </Setter>
     </Style>
 
-    <!-- Estilo para Botões de Ênfase -->
+    <!-- Estilo Base para TextBoxes -->
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Padding" Value="10, 5, 10, 5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            CornerRadius="15">
+                        <ScrollViewer x:Name="PART_ContentHost" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo Base para PasswordBoxes -->
+    <Style TargetType="PasswordBox">
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Padding" Value="10, 5, 10, 5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            CornerRadius="15">
+                        <ScrollViewer x:Name="PART_ContentHost" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo Base para TabControl -->
+    <Style TargetType="TabControl">
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- Estilo Base para TabItem -->
+    <Style TargetType="TabItem">
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Padding" Value="10,5" />
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="False">
+                <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <!--#endregion-->
+
+    <!--#region ESTILOS DE BOTÕES ESPECIALIZADOS -->
+
+    <!-- 
+    Variações de botões para diferentes propósitos na aplicação
+    Cada estilo herda do estilo base de botão e adiciona características específicas
+    -->
+
+    <!-- Botão com Ênfase - Para ações principais -->
     <Style x:Key="EmphasisButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="{StaticResource AccentBrush}" />
         <Setter Property="Foreground" Value="White" />
@@ -83,7 +133,7 @@
         </Setter>
     </Style>
 
-    <!-- Estilo para Botões do Dashboard -->
+    <!-- Botão de Dashboard - Para navegação no dashboard -->
     <Style x:Key="DashboardButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
         <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -110,6 +160,8 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Botão de Dashboard Selecionado -->
     <Style x:Key="SelectedDashboardButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
         <Setter Property="Background" Value="{StaticResource AccentBrush}" />
         <Setter Property="Foreground" Value="{StaticResource BackgroundBrush}" />
@@ -137,7 +189,7 @@
         </Setter>
     </Style>
 
-    <!-- Estilo para Botões de Filtro -->
+    <!-- Botão de Filtro - Para seleção de filtros -->
     <Style x:Key="FilterButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -167,6 +219,8 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Item de Filtro -->
     <Style x:Key="FilterItemStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -192,199 +246,17 @@
         </Setter>
     </Style>
 
-    <!-- Estilo para Botões de ordernar -->
-    <Style x:Key="OrderButtonStyle" TargetType="Button" BasedOn="{StaticResource EmphasisButtonStyle}">
-        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="FontSize" Value="16"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
-                            CornerRadius="15"
-                            Padding="7">
-                        <Grid>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5, 0, 25, 0"/>
-                            <Path Data="M 0 0 L 4 4 L 8 0" Stroke="{StaticResource TextBrush}" StrokeThickness="2" Width="9" Height="6" Margin="5,5,5,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Cursor" Value="Hand"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
-                            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style x:Key="OrderItemStyle" TargetType="Button">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Padding" Value="10,8"/>
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#E0E0E0"/>
-                            <Setter Property="Foreground" Value="#444444"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+    <!-- Botão de Ordenação -->
+    <Style x:Key="OrderButtonStyle" TargetType="Button" BasedOn="{StaticResource FilterButtonStyle}">
+        <!-- Herda do FilterButtonStyle já que compartilham o mesmo design -->
     </Style>
 
-    <!-- Estilo para "Selecionar Data" -->
-    <Style x:Key="DatePickerStyle" TargetType="DatePicker">
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="Padding" Value="5" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="CalendarStyle">
-            <Setter.Value>
-                <Style TargetType="Calendar">
-                    <Setter Property="Background" Value="White" />
-                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-                    <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
-                    <Setter Property="BorderThickness" Value="5" />
-                    <Setter Property="Padding" Value="5" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Calendar">
-                                <Grid>
-                                    <Border Background="{TemplateBinding Background}" 
-                                        BorderBrush="{TemplateBinding BorderBrush}" 
-                                        BorderThickness="{TemplateBinding BorderThickness}" 
-                                        CornerRadius="5">
-                                        <CalendarItem x:Name="PART_CalendarItem" 
-                                                  Background="{TemplateBinding Background}" 
-                                                  BorderBrush="{TemplateBinding BorderBrush}" 
-                                                  Padding="{TemplateBinding Padding}" />
-                                    </Border>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <Style TargetType="DatePickerTextBox">
-        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Margin" Value="0, 0, 5, 0" />
+    <!-- Item de Ordenação -->
+    <Style x:Key="OrderItemStyle" TargetType="Button" BasedOn="{StaticResource FilterItemStyle}">
+        <!-- Herda do FilterItemStyle já que compartilham o mesmo design -->
     </Style>
 
-
-    <!-- Estilo para Botões de Menu -->
-    <Style x:Key="MenuButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="15, 10, 15, 10"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <!-- Estilos dos Itens do Menu -->
-    <Style x:Key="MenuItemTextStyle" TargetType="TextBlock">
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="FontSize" Value="18"/>
-        <Setter Property="Margin" Value="10,0,0,0"/>
-    </Style>
-    <!-- Estilo para Ícones do Menu -->
-    <Style x:Key="MenuIconStyle" TargetType="Path">
-        <Setter Property="Stretch" Value="Uniform"/>
-        <Setter Property="Width" Value="18"/>
-        <Setter Property="Height" Value="18"/>
-        <Setter Property="Margin" Value="10,0,5,0"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Fill" Value="{StaticResource TextBrush}"/>
-    </Style>
-    <!-- Estilo para Itens de Menu Selecionados -->
-    <Style x:Key="MenuItemSelectedStyle" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="20,10,10,10"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- Estilo dos Botões de Navegação -->
-    <Style x:Key="NavigationButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="25">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-    <!-- Estilo para Ícones de Navegação -->
-    <Style x:Key="NavegationIconStyle" TargetType="Path">
-        <Setter Property="Stretch" Value="Uniform"/>
-        <Setter Property="Width" Value="18"/>
-        <Setter Property="Height" Value="18"/>
-        <Setter Property="Margin" Value="0,0,8,0"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Fill" Value="{StaticResource TextBrush}"/>
-    </Style>
-
-    <!-- Estilo para Botões com Hover -->
+    <!-- Botão com Hover Especializado -->
     <Style x:Key="HoverButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Foreground" Value="{StaticResource ButtonForegroundBrush}" />
         <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
@@ -407,7 +279,7 @@
         </Setter>
     </Style>
 
-    <!-- Estilo para Botões de Cancelar -->
+    <!-- Botão de Cancelar -->
     <Style x:Key="CancelButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="{StaticResource CancelButtonBrush}" />
         <Setter Property="Foreground" Value="White" />
@@ -430,18 +302,7 @@
         </Setter>
     </Style>
 
-    <!-- Estilo para Carrinho de Compras -->
-    <Style x:Key="CarrinhoDeComprasGridStyle" TargetType="Grid">
-        <Setter Property="Margin" Value="0,0,0,10"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
+    <!-- Botão de Exclusão (pequeno) -->
     <Style x:Key="DeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="{StaticResource CancelButtonBrush}" />
         <Setter Property="Foreground" Value="White" />
@@ -467,68 +328,120 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!--#endregion-->
 
+    <!--#region ESTILOS DE NAVEGAÇÃO E MENU -->
 
+    <!-- 
+    Estilos para elementos de navegação da aplicação
+    Incluem botões de menu, ícones e estilos de navegação
+    -->
 
-
-    <!-- Vendas -->
-    <Style x:Key="VendasTitleTextBox" TargetType="TextBlock">
-        <Setter Property="Text" Value="NF" />
-        <Setter Property="FontSize" Value="20" />
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="Margin" Value="5" />
-        <Setter Property="HorizontalAlignment" Value="Center" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-    <Style x:Key="VendasTextBox" TargetType="TextBlock">
-        <Setter Property="Text" Value="Número: 123456" />
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="Margin" Value="5" />
-        <Setter Property="HorizontalAlignment" Value="Left" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-
-    <!-- Estilo para TextBoxes -->
-    <Style TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="FontSize" Value="18" />
-        <Setter Property="Padding" Value="10, 5, 10, 5" />
+    <!-- Botão de Menu -->
+    <Style x:Key="MenuButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="15, 10, 15, 10"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="TextBox">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            CornerRadius="15">
-                        <ScrollViewer x:Name="PART_ContentHost" />
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Texto de Item de Menu -->
+    <Style x:Key="MenuItemTextStyle" TargetType="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="Margin" Value="10,0,0,0"/>
+    </Style>
+
+    <!-- Ícone de Menu -->
+    <Style x:Key="MenuIconStyle" TargetType="Path">
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Margin" Value="10,0,5,0"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Fill" Value="{StaticResource TextBrush}"/>
+    </Style>
+
+    <!-- Item de Menu Selecionado -->
+    <Style x:Key="MenuItemSelectedStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="20,10,10,10"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Estilo para PasswordBoxes -->
-    <Style TargetType="PasswordBox">
-        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="FontSize" Value="18" />
-        <Setter Property="Padding" Value="10, 5, 10, 5" />
+    <!-- Botão de Navegação -->
+    <Style x:Key="NavigationButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="PasswordBox">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            CornerRadius="15">
-                        <ScrollViewer x:Name="PART_ContentHost" />
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="25">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Estilo para ComboBoxes -->
+    <!-- Ícone de Navegação -->
+    <Style x:Key="NavegationIconStyle" TargetType="Path">
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Fill" Value="{StaticResource TextBrush}"/>
+    </Style>
+    <!--#endregion-->
+
+    <!--#region ESTILOS DE ENTRADA DE DADOS -->
+
+    <!-- 
+    Estilos para campos de entrada de dados e seleção
+    Incluem ComboBox, DatePicker e outros controles de formulário
+    -->
+
+    <!-- ComboBox de Pesquisa - Permite digitação -->
     <Style x:Key="ComboBoxSearchStyle" TargetType="ComboBox">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
@@ -673,6 +586,8 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- ComboBox de Seleção - Apenas seleção sem digitação -->
     <Style x:Key="ComboBoxSelectStyle" TargetType="ComboBox">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
@@ -817,13 +732,60 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Item de ComboBox -->
     <Style TargetType="ComboBoxItem">
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
+    <!-- Seletor de Data -->
+    <Style x:Key="DatePickerStyle" TargetType="DatePicker">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CalendarStyle">
+            <Setter.Value>
+                <Style TargetType="Calendar">
+                    <Setter Property="Background" Value="White" />
+                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource PanelBackgroundBrush}" />
+                    <Setter Property="BorderThickness" Value="5" />
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Calendar">
+                                <Grid>
+                                    <Border Background="{TemplateBinding Background}" 
+                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                        CornerRadius="5">
+                                        <CalendarItem x:Name="PART_CalendarItem" 
+                                                  Background="{TemplateBinding Background}" 
+                                                  BorderBrush="{TemplateBinding BorderBrush}" 
+                                                  Padding="{TemplateBinding Padding}" />
+                                    </Border>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
-    <!-- Estilo para GroupBoxes -->
+    <!-- Caixa de Texto do DatePicker -->
+    <Style TargetType="DatePickerTextBox">
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="0, 0, 5, 0" />
+    </Style>
+
+    <!-- GroupBox Estilizado -->
     <Style x:Key="GroupBoxStyle" TargetType="GroupBox">
         <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -856,34 +818,16 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!--#endregion-->
 
+    <!--#region ESTILOS DE EXIBIÇÃO DE DADOS -->
 
-    <!-- Estilo para a Janela -->
-    <Style TargetType="Window">
-        <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
-        <Setter Property="FontFamily" Value="Segoe UI" />
-    </Style>
+    <!-- 
+    Estilos para controles de visualização de dados
+    Incluem DataGrid, ListView e outros controles de exibição
+    -->
 
-    <!-- Estilo para TabControl -->
-    <Style TargetType="TabControl">
-        <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-    </Style>
-
-    <!-- Estilo para TabItem -->
-    <Style TargetType="TabItem">
-        <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="Padding" Value="10,5" />
-        <Style.Triggers>
-            <Trigger Property="IsSelected" Value="False">
-                <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
-                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <!-- Estilo para DataGrid -->
+    <!-- DataGrid Personalizado -->
     <Style TargetType="DataGrid" x:Key="CustomDataGridStyle">
         <Setter Property="FontSize" Value="16" />
         <Setter Property="AutoGenerateColumns" Value="False" />
@@ -909,7 +853,7 @@
                 <Style TargetType="DataGridCell">
                     <Setter Property="BorderThickness" Value="0" />
                     <Setter Property="Padding" Value="5" />
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
                     <Setter Property="VerticalAlignment" Value="Center" />
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
@@ -969,84 +913,20 @@
         </Setter>
     </Style>
 
-    <!-- TODO: ORGANIZAR DAQUI PRA BAIXO -->
-
-    <!-- Estilo para Botão padrão 1 -->
-    <Style x:Key="CustomButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
-                        CornerRadius="15"
-                        Padding="15">
-                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+    <!-- ListView Personalizado -->
+    <Style x:Key="CustomListViewStyle" TargetType="ListView">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="Margin" Value="10,5" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource CustomListViewItemStyle}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
     </Style>
 
-    <!-- Estilo para Ícone - Botão padrão 1-->
-    <Style x:Key="IconCustomButtonStyle" TargetType="Path">
-        <Setter Property="Stretch" Value="Uniform"/>
-        <Setter Property="Width" Value="18"/>
-        <Setter Property="Height" Value="18"/>
-        <Setter Property="Margin" Value="10,0,5,0"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Fill" Value="{StaticResource TextBrush}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
-                <Setter Property="Fill" Value="{StaticResource PrimaryBrush}" />
-            </DataTrigger>
-        </Style.Triggers>
-    </Style>
-
-    <!-- Estilo para TextBox - Botão padrão 1-->
-    <Style x:Key="TextBoxCustomButtonStyle" TargetType="TextBlock">
-        <Setter Property="Margin" Value="10,0,0,0"/>
-        <Setter Property="FontSize" Value="18"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button, AncestorLevel=1}}" Value="True">
-                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-            </DataTrigger>
-        </Style.Triggers>
-    </Style>
-
-    <!-- Estilo para Ícone - Botão padrão 2-->
-    <Style x:Key="IconCustom2ButtonStyle" TargetType="Path">
-        <Setter Property="Stretch" Value="Uniform"/>
-        <Setter Property="Width" Value="18"/>
-        <Setter Property="Height" Value="18"/>
-        <Setter Property="Margin" Value="10,0,5,0"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Fill" Value="{StaticResource TextBrush}" />
-    </Style>
-
-    <!-- Estilo para TextBox - Botão padrão 2-->
-    <Style x:Key="TextBoxCustom2ButtonStyle" TargetType="TextBlock">
-        <Setter Property="Margin" Value="10,0,0,0"/>
-        <Setter Property="FontSize" Value="18"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-    </Style>
-
-    <!-- Estilo ListView -->
+    <!-- Itens do ListView -->
     <Style x:Key="CustomListViewItemStyle" TargetType="ListViewItem">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -1069,20 +949,7 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Estilo para o ListView -->
-    <Style x:Key="CustomListViewStyle" TargetType="ListView">
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="Padding" Value="5" />
-        <Setter Property="Margin" Value="10,5" />
-        <Setter Property="ItemContainerStyle" Value="{StaticResource CustomListViewItemStyle}" />
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
-    </Style>
-
-    <!-- Estilo para os cabeçalhos do GridViewColumn -->
+    <!-- Cabeçalhos do GridView -->
     <Style x:Key="CustomGridViewColumnHeaderStyle" TargetType="GridViewColumnHeader">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="Background" Value="Transparent" />
@@ -1100,5 +967,123 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+    <!--#endregion-->
+
+    <!--#region ESTILOS ESPECÍFICOS DE FUNCIONALIDADES -->
+
+    <!-- 
+    Estilos específicos para funcionalidades da aplicação
+    Incluem estilos para carrinho de compras, vendas, etc.
+    -->
+
+    <!-- Estilo para Carrinho de Compras -->
+    <Style x:Key="CarrinhoDeComprasGridStyle" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,10"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Estilo para Títulos de Vendas -->
+    <Style x:Key="VendasTitleTextBox" TargetType="TextBlock">
+        <Setter Property="Text" Value="NF" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Estilo para Textos de Vendas -->
+    <Style x:Key="VendasTextBox" TargetType="TextBlock">
+        <Setter Property="Text" Value="Número: 123456" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Estilo para Botões Customizados -->
+    <Style x:Key="CustomButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                        CornerRadius="15"
+                        Padding="15">
+                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo para Ícones de Botões Customizados -->
+    <Style x:Key="IconCustomButtonStyle" TargetType="Path">
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Margin" Value="10,0,5,0"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Fill" Value="{StaticResource TextBrush}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                <Setter Property="Fill" Value="{StaticResource PrimaryBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Estilo para Textos de Botões Customizados -->
+    <Style x:Key="TextBoxCustomButtonStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="10,0,0,0"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button, AncestorLevel=1}}" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Estilo para Ícones Secundários -->
+    <Style x:Key="IconCustom2ButtonStyle" TargetType="Path">
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Margin" Value="10,0,5,0"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Fill" Value="{StaticResource TextBrush}" />
+    </Style>
+
+    <!-- Estilo para Textos Secundários -->
+    <Style x:Key="TextBoxCustom2ButtonStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="10,0,0,0"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <!--#endregion-->
 
 </ResourceDictionary>

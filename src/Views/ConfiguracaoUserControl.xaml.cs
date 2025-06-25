@@ -41,11 +41,31 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
         // Altera tema quando o usuário seleciona um novo tema
         private void ThemeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ThemeSelector.SelectedItem is ComboBoxItem selectedItem)
+            if (ThemeSelector.SelectedItem is ComboBoxItem selectedItem && selectedItem.IsEnabled)
             {
                 string themeName = selectedItem.Name;
                 SwitchToTheme(themeName);
                 SaveTheme(themeName);
+            }
+            else
+            {
+                // Se um separador for selecionado, revertemos para a seleção anterior
+                if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ComboBoxItem lastItem && lastItem.IsEnabled)
+                {
+                    ThemeSelector.SelectedItem = lastItem;
+                }
+                else
+                {
+                    // Caso não haja seleção anterior, definimos o tema padrão
+                    foreach (ComboBoxItem item in ThemeSelector.Items)
+                    {
+                        if (item.IsEnabled && item.Name == "LightTheme")
+                        {
+                            ThemeSelector.SelectedItem = item;
+                            break;
+                        }
+                    }
+                }
             }
         }
 
@@ -68,17 +88,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
             if (File.Exists(ThemeFilePath))
             {
-                themeName = File.ReadAllText(ThemeFilePath);
+                themeName = File.ReadAllText(ThemeFilePath).Trim();
             }
 
+            // Pular os cabeçalhos e selecionar apenas itens válidos
             foreach (ComboBoxItem item in ThemeSelector.Items)
             {
-                if (item.Name == themeName)
+                if (item.IsEnabled && item.Name == themeName)
                 {
                     ThemeSelector.SelectedItem = item;
                     break;
                 }
             }
+            
+            // Adiciona o handler do evento após definir a seleção inicial
+            ThemeSelector.SelectionChanged += ThemeSelector_SelectionChanged;
         }
 
         // Botão Salvar e Aplicar
@@ -91,15 +115,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 SwitchToTheme(themeName);
                 MainWindow._instance?.Reload(); // Chama a função para recarregar a janela
             }
-        }
-        private string GetImageName(string iconName, string state)
-        {
-            return iconName switch
-            {
-                "IconUsuarios" => state == "Selected" ? "UsuárioS" : "UsuárioNS",
-                "IconBancoDados" => state == "Selected" ? "DataCenterS" : "DataCenterNS",
-                _ => throw new ArgumentException("Nome de ícone desconhecido", nameof(iconName))
-            };
         }
         private void BtnUsuarios_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {

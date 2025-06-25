@@ -120,30 +120,24 @@ namespace WMS_RadiadoresLemos_WPF
 
         public static void ApplyTheme(string themeName)
         {
-            var dict = new ResourceDictionary
+            var dictionaries = Application.Current.Resources.MergedDictionaries;
+            
+            // Limpa os dicionários existentes
+            dictionaries.Clear();
+            
+            // Primeiro carrega o dicionário de cores do tema escolhido
+            var themeDict = new ResourceDictionary
             {
-                /* COMO FUNCIONA AS LINHAS ABAIXO
-                 * 
-                 * Apenas uma das linhas abaixo deve ser usada
-                 * 
-                 * Caso precise alterar o Style.xaml, use a segunda linha, assim você poderá
-                 * ver as mudanças apenas alterando o Style.xaml, o que facilita o desenvolvimento.
-                 * 
-                 * Caso tenha terminado de desenvolver, tenha certeza que os outros temas em
-                 * src/Resources/Themes estão prontos e funcionando e iguais ao novo Styel.xaml.
-                 * 
-                 * APENAS USE A PRIMEIRA LINHA SE O ARQUIVO XAML DO TEMA ESTIVER PRONTO.
-                 */
-
-                // A LINHA DEBAIXO É A LINHA QUE CARREGA O ARQUIVO XAML DO TEMA CORRETAMENTE
-                Source = new Uri($"src/Resources/Themes/{themeName}.xaml", UriKind.Relative)
-
-                // A LINHA DEBAIXO SERVE PARA USAR O Style.xaml PADRÃO - PARA DESENVOLVIMENTO
-                //Source = new Uri("src/Resources/Style.xaml", UriKind.Relative)
+                Source = new Uri($"src/Resources/ThemeColors/{themeName}.xaml", UriKind.Relative)
             };
-
-            Application.Current.Resources.MergedDictionaries.Clear();
-            Application.Current.Resources.MergedDictionaries.Add(dict);
+            dictionaries.Add(themeDict);
+            
+            // Depois carrega o dicionário de estilos que depende das cores
+            var stylesDict = new ResourceDictionary
+            {
+                Source = new Uri("src/Resources/Styles.xaml", UriKind.Relative)
+            };
+            dictionaries.Add(stylesDict);
         }
     }
 }

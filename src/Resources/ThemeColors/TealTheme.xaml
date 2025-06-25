@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Cores Base -->
+    <Color x:Key="BackgroundColor">#F5FAFB</Color>
+    <Color x:Key="PanelBackgroundColor">#E3F2F5</Color>
+    <Color x:Key="PrimaryColor">#D3EAF0</Color>
+    <Color x:Key="SecondaryColor">#E8F5F7</Color>
+    <Color x:Key="AccentColor">#008B8B</Color>
+    <Color x:Key="TextColor">#1D3C40</Color>
+
+    <!-- Cores de Estado -->
+    <Color x:Key="HoverBackgroundColor">#BFE3E8</Color>
+    <Color x:Key="HoverForegroundColor">#0A4A4F</Color>
+    <Color x:Key="CancelColor">#E05757</Color>
+    <Color x:Key="CancelHoverColor">#C23E3E</Color>
+
+    <!-- Brushes Principais -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{StaticResource PanelBackgroundColor}" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
+
+    <!-- Brushes de Estado -->
+    <SolidColorBrush x:Key="ButtonForegroundBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="{StaticResource PrimaryColor}" />
+    <SolidColorBrush x:Key="ButtonHoverBrush" Color="{StaticResource HoverBackgroundColor}" />
+    <SolidColorBrush x:Key="CancelButtonBrush" Color="{StaticResource CancelColor}" />
+    <SolidColorBrush x:Key="CancelButtonHoverBrush" Color="{StaticResource CancelHoverColor}" />
+    <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}" />
+    <SolidColorBrush x:Key="HoverForegroundBrush" Color="{StaticResource HoverForegroundColor}" />
+</ResourceDictionary>
