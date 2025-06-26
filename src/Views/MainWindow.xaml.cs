@@ -397,58 +397,58 @@ namespace WMS_RadiadoresLemos_WPF
         private void UpdateIcon()
         {
             Uri? iconUri = null; 
+            string iconPath = null;
 
             if (ContentArea.Content is ComprasUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/ComprarS.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/ComprarS.png";
             }
             else if (ContentArea.Content is VendasUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/PranchetaS.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/PranchetaS.png";
             }
             else if (ContentArea.Content is RegistroUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/historicos.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/historicos.png";
             }
             else if (ContentArea.Content is ControleEstoqueUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/CaixaS.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/CaixaS.png";
             }
             else if (ContentArea.Content is EscolherCadastroUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/CadastroS.png";
             }
             else if (ContentArea.Content is BoletoTestUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/CadastroS.png", UriKind.Relative); // 👈 TEMPORÁRIO
+                iconPath = "/assets/Icons/Selected/CadastroS.png";
             }
             else if (ContentArea.Content is DashboardUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/GraficoS.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/GraficoS.png";
             }
             else if (ContentArea.Content is NotificacoesUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/SinoS.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/SinoS.png";
             }
             else if (ContentArea.Content is ConfiguracaoUserControl)
             {
-                iconUri = new Uri("/assets/Icons/Selected/EngrenagemS.png", UriKind.Relative);
+                iconPath = "/assets/Icons/Selected/EngrenagemS.png";
             }
 
-            if (iconUri != null)
+            if (iconPath != null)
             {
-                BitmapImage bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = iconUri;
-                bitmap.DecodePixelWidth = 64; 
-                bitmap.DecodePixelHeight = 64;
-                bitmap.EndInit();
-                RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
-                IconImage.Source = bitmap;
+                // Obter a cor do tema atual
+                Color accentColor = ((SolidColorBrush)FindResource("AccentBrush")).Color;
+                
+                // Colorizar o ícone com a cor do tema
+                IconImage.Source = ImageUtils.ColorizeImage(iconPath, accentColor);
+                
+                // Aplicar configurações de qualidade
+                RenderOptions.SetBitmapScalingMode(IconImage, BitmapScalingMode.HighQuality);
             }
             else
             {
-                // Limpa o ícone se nenhum controle corresponder ou se ContentArea estiver vazio
                 IconImage.Source = null;
             }
         }
@@ -510,6 +510,9 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 button.Style = (Style)FindResource("MenuItemSelectedStyle");
 
+                // Obter a cor de destaque do tema atual
+                Color accentColor = ((SolidColorBrush)FindResource("AccentBrush")).Color;
+
                 // Atualizar cores e ícones
                 foreach (var innerChild in ((StackPanel)button.Content).Children)
                 {
@@ -520,7 +523,10 @@ namespace WMS_RadiadoresLemos_WPF
                     else if (innerChild is Image image)
                     {
                         string imageName = GetImageName(image.Name, "Selected");
-                        image.Source = new BitmapImage(new Uri($"/assets/Icons/Selected/{imageName}.png", UriKind.Relative));
+                        string iconPath = $"/assets/Icons/Selected/{imageName}.png";
+                        
+                        // Colorizar o ícone com a cor do tema
+                        image.Source = ImageUtils.ColorizeImage(iconPath, accentColor);
                     }
                 }
             }

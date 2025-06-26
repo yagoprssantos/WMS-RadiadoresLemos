@@ -180,21 +180,28 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
         // Atualizar o ícone
         private void UpdateIcon(string iconPath)
         {
-            if (string.IsNullOrEmpty(iconPath))
+            if (!string.IsNullOrEmpty(iconPath))
+            {
+                try
+                {
+                    // Obter a cor do tema atual
+                    Color accentColor = ((SolidColorBrush)_mainWindow.FindResource("AccentBrush")).Color;
+                    
+                    // Colorizar o ícone com a cor do tema
+                    _iconImage.Source = ImageUtils.ColorizeImage(iconPath, accentColor);
+                    
+                    // Aplicar configurações de qualidade
+                    RenderOptions.SetBitmapScalingMode(_iconImage, BitmapScalingMode.HighQuality);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erro ao atualizar ícone no NavigationService: {ex.Message}");
+                }
+            }
+            else
             {
                 _iconImage.Source = null;
-                return;
             }
-
-            Uri iconUri = new Uri(iconPath, UriKind.Relative);
-            BitmapImage bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = iconUri;
-            bitmap.DecodePixelWidth = 64;
-            bitmap.DecodePixelHeight = 64;
-            bitmap.EndInit();
-            RenderOptions.SetBitmapScalingMode(bitmap, BitmapScalingMode.HighQuality);
-            _iconImage.Source = bitmap;
         }
 
         // Obter o menu associado ao tipo de controle
