@@ -433,11 +433,29 @@ namespace WMS_RadiadoresLemos_WPF
 
             foreach (var propriedade in tipoModelo.GetProperties())
             {
-                TabelaDataGrid.Columns.Add(new DataGridTextColumn
+                // Formatar valores monetários para campos de preço
+                if (propriedade.Name.Equals("Preco", StringComparison.OrdinalIgnoreCase) || 
+                    propriedade.Name.Equals("ValorTotal", StringComparison.OrdinalIgnoreCase) ||
+                    propriedade.Name.Contains("Valor"))
                 {
-                    Header = propriedade.Name,
-                    Binding = new System.Windows.Data.Binding(propriedade.Name)
-                });
+                    TabelaDataGrid.Columns.Add(new DataGridTextColumn
+                    {
+                        Header = propriedade.Name,
+                        Binding = new System.Windows.Data.Binding(propriedade.Name)
+                        {
+                            StringFormat = "{0:C2}",
+                            ConverterCulture = new System.Globalization.CultureInfo("pt-BR")
+                        }
+                    });
+                }
+                else
+                {
+                    TabelaDataGrid.Columns.Add(new DataGridTextColumn
+                    {
+                        Header = propriedade.Name,
+                        Binding = new System.Windows.Data.Binding(propriedade.Name)
+                    });
+                }
             }
         }
 

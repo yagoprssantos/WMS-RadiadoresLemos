@@ -14,14 +14,23 @@ namespace WMS_RadiadoresLemos_WPF
         private const string ThemeFilePath = "theme.txt";
         private const string DefaultTheme = "LightTheme";
 
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
-            
+            // Carrega o tema e adiciona o usuário admin - operações rápidas e necessárias
             LoadTheme();
+            AddAdminUser.AddAdmin();
             
+            // Inicia o backup em segundo plano para não bloquear a UI
+            Task.Run(RealizarBackupEmSegundoPlano);
+            
+            base.OnStartup(e);
+        }
+
+        private async Task RealizarBackupEmSegundoPlano()
+        {
             try
             {
-                // Fazer backup automático ao abrir
+                // Fazer backup automático em segundo plano
                 string diretorioBanco = Path.GetDirectoryName(DatabaseConnect.GetDatabasePath());
                 if (!string.IsNullOrEmpty(diretorioBanco) && Directory.Exists(diretorioBanco))
                 {
@@ -48,7 +57,7 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                 }
 
-                // Verificar e limpar arquivos antigos do Supabase ao abrir o aplicativo
+                // Verificar e limpar arquivos antigos do Supabase
                 try
                 {
                     var arquivosSupabase = await SupabaseUploader.ListarArquivosAsync();
@@ -63,11 +72,6 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 Console.WriteLine($"Erro ao fazer backup automático: {ex.Message}");
             }
-
-            // Adiciona o usuário administrador antes de qualquer outra operação
-            AddAdminUser.AddAdmin();
-            
-            base.OnStartup(e);
         }
 
         private async Task LimparArquivosAntigosSeNecessario(List<SupabaseArquivo> arquivos)

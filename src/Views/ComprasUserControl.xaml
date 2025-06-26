@@ -74,7 +74,7 @@
                                                     <TextBlock Text="{Binding DataCompra, StringFormat='Data de Compra: {0:dd/MM/yyyy}'}" Style="{StaticResource VendasTextBox}" FontSize="14"/>
                                                     <TextBlock Text="{Binding ProximoVencimento, StringFormat='Próximo Vencimento: {0:dd/MM/yyyy}', TargetNullValue='Não há vencimentos'}" 
                                                                Style="{StaticResource VendasTextBox}" FontSize="14" Foreground="{StaticResource TextBrush}"/>
-                                                    <TextBlock Text="{Binding ValorTotal, StringFormat='Total: R$ {0:N2}'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold"/>
+                                                    <TextBlock Text="{Binding ValorTotal, StringFormat={}{0:C2}, ConverterCulture='pt-BR'}" Style="{StaticResource VendasTextBox}" FontSize="14" FontWeight="Bold"/>
                                                     <Button Content="Detalhes" Style="{StaticResource EmphasisButtonStyle}" FontSize="14" Width="120" Margin="0,10,0,5" Click="DetalhesButton_Click"/>
                                                 </StackPanel>
                                             </Border>
@@ -272,7 +272,7 @@
                                                                             Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" FontSize="14"/>
                                                                 <TextBlock Text="{Binding FornecedorNome}" 
                                                                             Foreground="{StaticResource TextBrush}" FontSize="13"/>
-                                                                <TextBlock Text="{Binding ValorTotal, StringFormat='R$ {0:N2}'}" 
+                                                                <TextBlock Text="{Binding ValorTotal, StringFormat={}{0:C2}, ConverterCulture='pt-BR'}" 
                                                                             Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" FontSize="14"/>
                                                             </StackPanel>
                                                             <Button Grid.Column="1" Content="Detalhes" Click="DetalhesCompraCalendarioButton_Click" 

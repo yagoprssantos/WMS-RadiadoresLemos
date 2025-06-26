@@ -30,7 +30,8 @@ namespace WMS_RadiadoresLemos_WPF
         public Func<double, string> FormatadorDeEixoY { get; set; } = value => value.ToString("N");
 
         // Formatadores para valores monetários e numéricos
-        public Func<double, string> FormatadorMonetario { get; set; } = value => string.Format("R$ {0:N2}", value);
+        public Func<double, string> FormatadorMonetario { get; set; } = value => 
+            string.Format(System.Globalization.CultureInfo.GetCultureInfo("pt-BR"), "R$ {0:N2}", value);
         public Func<double, string> FormatadorNumerico { get; set; } = value => value.ToString("N0");
 
         // Propriedade para armazenar os logs

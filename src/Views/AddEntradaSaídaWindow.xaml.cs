@@ -234,7 +234,7 @@ namespace WMS_RadiadoresLemos_WPF
             MarcaAntesDadoTextBlock.Text = produto.Marca;
             CodigoAntesDadoTextBlock.Text = produto.Codigo;
             QuantidadeAntesDadoTextBlock.Text = produto.Quantidade.ToString();
-            PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C", CultureInfo.GetCultureInfo("pt-BR"));
+            PrecoAntesDadoTextBlock.Text = produto.Preco.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"));
         }
         private void AtualizarCamposDepois(ProdutoData produto)
         {
@@ -245,7 +245,7 @@ namespace WMS_RadiadoresLemos_WPF
             if (string.IsNullOrEmpty(QuantidadeTextBox.Text) || string.IsNullOrEmpty(PrecoTextBox.Text))
             {
                 QuantidadeDepoisDadoTextBlock.Text = produto.Quantidade.ToString();
-                PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C", CultureInfo.GetCultureInfo("pt-BR"));
+                PrecoDepoisDadoTextBlock.Text = produto.Preco.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"));
             }
         }
 

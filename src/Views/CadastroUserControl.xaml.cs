@@ -131,6 +131,22 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                     };
                     CadastroDataGrid.Columns.Add(column);
                 }
+                // Formatar valores monetários para campos de preço
+                else if (propriedade.Name.Equals("Preco", StringComparison.OrdinalIgnoreCase) || 
+                         propriedade.Name.Equals("ValorTotal", StringComparison.OrdinalIgnoreCase) ||
+                         propriedade.Name.Contains("Valor"))
+                {
+                    var column = new DataGridTextColumn
+                    {
+                        Header = propriedade.Name,
+                        Binding = new System.Windows.Data.Binding(propriedade.Name)
+                        {
+                            StringFormat = "{0:C2}",
+                            ConverterCulture = new System.Globalization.CultureInfo("pt-BR")
+                        }
+                    };
+                    CadastroDataGrid.Columns.Add(column);
+                }
                 else
                 {
                     // Para outras propriedades, usa a abordagem padrão
@@ -142,6 +158,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 }
             }
         }
+
         // Conversor para transformar List<string> em string separada por vírgulas
         public class ListToStringConverter : IValueConverter
         {

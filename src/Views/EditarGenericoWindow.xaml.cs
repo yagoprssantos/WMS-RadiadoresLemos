@@ -88,6 +88,17 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 // Remove aspas duplas do valor antes de exibir
                 var valorSemAspas = _registro[chave]?.ToString()?.Replace("\"", string.Empty) ?? string.Empty;
 
+                // Verifica se é um campo de preço e formata como moeda
+                if (chave.Equals("Preco", StringComparison.OrdinalIgnoreCase) || 
+                    chave.Equals("ValorTotal", StringComparison.OrdinalIgnoreCase) ||
+                    chave.Contains("Valor"))
+                {
+                    if (double.TryParse(valorSemAspas, out double valorPreco))
+                    {
+                        valorSemAspas = string.Format(System.Globalization.CultureInfo.GetCultureInfo("pt-BR"), "{0:C2}", valorPreco);
+                    }
+                }
+
                 var campo = new TextBox
                 {
                     Text = valorSemAspas,

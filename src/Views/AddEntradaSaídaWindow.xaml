@@ -542,7 +542,7 @@
                                                     </StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                                         <TextBlock Text="Preço: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                        <TextBlock Text="{Binding Preco, StringFormat=C, ConverterCulture='pt-BR'}" Foreground="{StaticResource TextBrush}" />
+                                                        <TextBlock Text="{Binding Preco, StringFormat={}{0:C2}, ConverterCulture='pt-BR'}" Foreground="{StaticResource TextBrush}" />
                                                     </StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                                         <TextBlock Text="Pagamento: " FontWeight="Bold" Foreground="{StaticResource TextBrush}" />

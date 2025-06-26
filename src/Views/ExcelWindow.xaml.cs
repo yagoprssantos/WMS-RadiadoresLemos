@@ -493,7 +493,13 @@ namespace WMS_RadiadoresLemos_WPF
             var camposParaConverter = new Dictionary<string, Func<string, BsonValue>>
             {
                 { "_id", valor => int.TryParse(valor, out var id) ? new BsonValue(id) : new BsonValue(valor) },
-                { "preco", valor => double.TryParse(valor, out var preco) ? new BsonValue(preco) : new BsonValue(valor) },
+                { "preco", valor => {
+                    // Remove o símbolo R$ e qualquer formatação para converter corretamente
+                    valor = valor.Replace("R$", "").Replace(".", "").Trim().Replace(",", ".");
+                    return double.TryParse(valor, System.Globalization.NumberStyles.Any, 
+                        System.Globalization.CultureInfo.InvariantCulture, out var preco) 
+                        ? new BsonValue(preco) : new BsonValue(valor); 
+                }},
                 { "quantidade", valor => int.TryParse(valor, out var quantidade) ? new BsonValue(quantidade) : new BsonValue(valor) },
                 { "data", valor =>
                     {
@@ -505,6 +511,18 @@ namespace WMS_RadiadoresLemos_WPF
                     }
                 }
             };
+
+            // Adicionar tratamento para campos com "valor" no nome
+            foreach (var campo in documento.Keys.Where(k => k.ToLower().Contains("valor") && !camposParaConverter.ContainsKey(k.ToLower())))
+            {
+                string campoLower = campo.ToLower();
+                camposParaConverter.Add(campoLower, valor => {
+                    valor = valor.Replace("R$", "").Replace(".", "").Trim().Replace(",", ".");
+                    return double.TryParse(valor, System.Globalization.NumberStyles.Any, 
+                        System.Globalization.CultureInfo.InvariantCulture, out var preco) 
+                        ? new BsonValue(preco) : new BsonValue(valor);
+                });
+            }
 
             foreach (var campo in camposParaConverter.Keys)
             {
@@ -636,6 +654,12 @@ namespace WMS_RadiadoresLemos_WPF
 
                                         // Alterna a cor de fundo das linhas
                                         cell.Style.Fill.BackgroundColor = i % 2 == 0 ? XLColor.White : XLColor.FromHtml("#F0F0F0");
+
+                                        // Configura o formato monetário para colunas específicas
+                                        if (headers[j].ToLower().Contains("preco") || headers[j].ToLower().Contains("valor"))
+                                        {
+                                            worksheet.Column(j + 1).Style.NumberFormat.Format = "R$ #,##0.00"; // Formato monetário em pt-BR
+                                        }
                                     }
                                 }
 
@@ -718,7 +742,11 @@ namespace WMS_RadiadoresLemos_WPF
                                 {
                                     worksheet.Column(i + 1).Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
                                 }
-                                else if (headers[i].ToLower().Contains("preco") || headers[i].ToLower().Contains("quantidade"))
+                                else if (headers[i].ToLower().Contains("preco") || headers[i].ToLower().Contains("valor"))
+                                {
+                                    worksheet.Column(i + 1).Style.NumberFormat.Format = "R$ #,##0.00"; // Formato monetário em pt-BR
+                                }
+                                else if (headers[i].ToLower().Contains("quantidade"))
                                 {
                                     worksheet.Column(i + 1).Style.NumberFormat.Format = "#,##0.00"; // Formato numérico
                                 }

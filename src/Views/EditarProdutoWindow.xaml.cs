@@ -65,7 +65,7 @@ namespace WMS_RadiadoresLemos_WPF
                 TipoProduto.Text = produto.Tipo;
                 MarcaProduto.Text = produto.Marca;
                 CodigoProduto.Text = produto.Codigo;
-                PrecoProduto.Text = produto.Preco.ToString("F2");
+                PrecoProduto.Text = produto.Preco.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
                 QuantidadeInicial.Text = produto.Quantidade.ToString("N0");
                 
                 // Atualiza o título da janela e texto do botão de acordo com a operação
@@ -381,7 +381,15 @@ namespace WMS_RadiadoresLemos_WPF
                 MessageBox.Show("O campo Quantidade Inicial deve ser um número válido e positivo.");
                 return false;
             }
-            if (!double.TryParse(PrecoProduto.Text.Replace(".", "").Replace(",", "."),
+            
+            // Extrai apenas os números e vírgulas do formato monetário
+            string precoTexto = PrecoProduto.Text
+                .Replace("R$", "")
+                .Replace(".", "")
+                .Trim()
+                .Replace(",", ".");
+                
+            if (!double.TryParse(precoTexto,
                 System.Globalization.NumberStyles.Any,
                 System.Globalization.CultureInfo.InvariantCulture,
                 out double preco) || preco < 0)
