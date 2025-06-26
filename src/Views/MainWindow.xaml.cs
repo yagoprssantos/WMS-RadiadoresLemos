@@ -52,6 +52,9 @@ namespace WMS_RadiadoresLemos_WPF
             // Inicializa o serviço de navegação
             _navigationService = new NavigationService(this, ContentArea, TitleTextBlock, IconImage);
 
+            // Inicializa os botões de navegação
+            InitializeNavigationButtons();
+
             usuariosUserControl = new UsuariosUserControl();
             controleEstoqueUserControl = new ControleEstoqueUserControl();
             registroUserControl = new RegistroUserControl();
@@ -265,20 +268,12 @@ namespace WMS_RadiadoresLemos_WPF
             {
                 _navigationService.GoBack();
             }
-            else
-            {
-                MessageBox.Show("Não há telas anteriores no histórico.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
         private void NextButton_Click(object sender, RoutedEventArgs e)
         {
             if (_navigationService.CanGoForward)
             {
                 _navigationService.GoForward();
-            }
-            else
-            {
-                MessageBox.Show("Não há telas futuras no histórico.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -577,6 +572,36 @@ namespace WMS_RadiadoresLemos_WPF
                         image.Source = new BitmapImage(new Uri($"/assets/Icons/NotSelected/{imageName}.png", UriKind.Relative));
                     }
                 }
+            }
+        }
+
+        private void InitializeNavigationButtons()
+        {
+            // Atualiza os botões de navegação de acordo com o estado do serviço de navegação
+            UpdateNavigationButtonsState();
+
+            // Assina o evento de mudança de navegação
+            _navigationService.NavigationChanged += (sender, e) => UpdateNavigationButtonsState();
+        }
+
+        private void UpdateNavigationButtonsState()
+        {
+            // Encontre os botões de navegação
+            var btnPrevious = (Button)FindName("PreviousButton");
+            var btnNext = (Button)FindName("NextButton");
+            
+            if (btnPrevious != null)
+            {
+                btnPrevious.IsEnabled = _navigationService.CanGoBack;
+                btnPrevious.Opacity = _navigationService.CanGoBack ? 1.0 : 0.5;
+                btnPrevious.ToolTip = _navigationService.CanGoBack ? "Voltar para a tela anterior" : "Não há telas anteriores";
+            }
+            
+            if (btnNext != null)
+            {
+                btnNext.IsEnabled = _navigationService.CanGoForward;
+                btnNext.Opacity = _navigationService.CanGoForward ? 1.0 : 0.5;
+                btnNext.ToolTip = _navigationService.CanGoForward ? "Avançar para a próxima tela" : "Não há telas futuras";
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -55,37 +56,39 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             );
         }
 
-        // Método para navegar para a tela de cadastro
+        // Substituir o método NavigateTo existente pelo seguinte código
         private void NavigateTo(UserControl userControl, string title, string iconPath)
         {
             // Encontra a janela principal
-            Window mainWindow = Window.GetWindow(this);
-
+            var mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
             {
-                // Obtém o ContentControl chamado "ContentArea" na janela principal
-                ContentControl contentArea = (ContentControl)mainWindow.FindName("ContentArea");
-                if (contentArea != null)
+                // Cria um dicionário de parâmetros se necessário
+                Dictionary<string, object> parameters = null;
+                
+                // Para o CadastroUserControl, adiciona parâmetros específicos
+                if (userControl is CadastroUserControl cadastroControl)
                 {
-                    // Define o novo conteúdo
-                    contentArea.Content = userControl;
-
-                    // Atualiza o título
-                    var titleTextBlock = (TextBlock)mainWindow.FindName("TitleTextBlock");
-                    if (titleTextBlock != null)
-                    {
-                        titleTextBlock.Text = title;
-                    }
-
-                    // Atualiza o ícone
-                    var iconImage = (Image)mainWindow.FindName("IconImage");
-                    if (iconImage != null)
-                    {
-                        iconImage.Source = new BitmapImage(new Uri(iconPath, UriKind.Relative));
-                    }
+                    string tipoTabela = "";
+                    if (title.Contains("Produtos")) tipoTabela = "Produtos";
+                    else if (title.Contains("Clientes")) tipoTabela = "Clientes";
+                    else if (title.Contains("Fornecedores")) tipoTabela = "Fornecedores";
+                    else if (title.Contains("Usuários")) tipoTabela = "Usuários";
+                    
+                    parameters = new Dictionary<string, object> { { "tipoTabela", tipoTabela } };
                 }
+                
+                // Usa o serviço de navegação para navegar
+                mainWindow.NavigationService.Navigate(
+                    userControl, 
+                    title, 
+                    iconPath,
+                    "BtnCadastro",  // Mantém o botão Cadastro selecionado
+                    parameters
+                );
             }
         }
+
         private void BtnProdutos_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             IconProdutos.Source = new BitmapImage(new Uri("/assets/Icons/Selected/CaixaS-2.png", UriKind.Relative)); // MUDAR - FICA COR AZUL

@@ -18,6 +18,7 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             SetCurrentThemeSelection();
         }
 
+        // Atualizar os métodos de navegação
         private void BtnUsuarios_Click(object sender, RoutedEventArgs e)
         {
             var usuariosControl = new UsuariosUserControl();

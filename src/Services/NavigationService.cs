@@ -10,31 +10,18 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
 {
     public class NavigationState
     {
-        // Tipo do UserControl
-        public Type ControlType { get; set; }
-        
-        // Instância do controle (para preservar estado)
         public UserControl Control { get; set; }
-        
-        // Parâmetros para inicialização
-        public Dictionary<string, object> Parameters { get; set; }
-        
-        // Botão do menu associado (para seleção visual)
-        public string AssociatedMenuButton { get; set; }
-        
-        // Título da página
         public string Title { get; set; }
-        
-        // Caminho do ícone
         public string IconPath { get; set; }
+        public string MenuButton { get; set; }
+        public Dictionary<string, object> Parameters { get; set; }
 
         public NavigationState(UserControl control, string title, string iconPath, string menuButton = null, Dictionary<string, object> parameters = null)
         {
             Control = control;
-            ControlType = control.GetType();
             Title = title;
             IconPath = iconPath;
-            AssociatedMenuButton = menuButton;
+            MenuButton = menuButton;
             Parameters = parameters ?? new Dictionary<string, object>();
         }
     }
@@ -42,15 +29,21 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
     public class NavigationService
     {
         // Histórico de navegação
-        private Stack<NavigationState> _backStack = new Stack<NavigationState>();
-        private Stack<NavigationState> _forwardStack = new Stack<NavigationState>();
+        private readonly Stack<NavigationState> _backStack = new Stack<NavigationState>();
+        private readonly Stack<NavigationState> _forwardStack = new Stack<NavigationState>();
         private NavigationState _currentState;
 
         // Referências para controles da UI
-        private MainWindow _mainWindow;
-        private ContentControl _contentArea;
-        private TextBlock _titleTextBlock;
-        private Image _iconImage;
+        private readonly MainWindow _mainWindow;
+        private readonly ContentControl _contentArea;
+        private readonly TextBlock _titleTextBlock;
+        private readonly Image _iconImage;
+
+        // Eventos para notificar mudanças no estado de navegação
+        public event EventHandler NavigationChanged;
+
+        public bool CanGoBack => _backStack.Count > 0;
+        public bool CanGoForward => _forwardStack.Count > 0;
 
         public NavigationService(MainWindow mainWindow, ContentControl contentArea, TextBlock titleTextBlock, Image iconImage)
         {
@@ -60,151 +53,158 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             _iconImage = iconImage;
         }
 
-        public bool CanGoBack => _backStack.Count > 0;
-        public bool CanGoForward => _forwardStack.Count > 0;
-
         // Navegar para um novo controle
         public void Navigate(UserControl control, string title, string iconPath, string menuButton = null, Dictionary<string, object> parameters = null)
         {
-            if (_currentState != null)
+            // Se o controle atual não for nulo, salve-o na pilha de retorno
+            if (_contentArea.Content != null && _currentState != null)
             {
                 _backStack.Push(_currentState);
+                _forwardStack.Clear(); // Limpa a pilha de avanço quando uma nova navegação ocorre
             }
 
-            _forwardStack.Clear();
-            
+            // Cria o novo estado de navegação
             _currentState = new NavigationState(control, title, iconPath, menuButton, parameters);
+
+            // Atualiza a UI
             UpdateContent();
+
+            // Notifica sobre a mudança na navegação
+            NavigationChanged?.Invoke(this, EventArgs.Empty);
         }
 
         // Voltar na navegação
         public void GoBack()
         {
-            if (!CanGoBack) return;
+            if (!CanGoBack)
+                return;
 
+            // Move o estado atual para a pilha de avanço
             if (_currentState != null)
             {
                 _forwardStack.Push(_currentState);
             }
 
+            // Recupera o estado anterior
             _currentState = _backStack.Pop();
+
+            // Atualiza a UI
             UpdateContent();
+
+            // Notifica sobre a mudança na navegação
+            NavigationChanged?.Invoke(this, EventArgs.Empty);
         }
 
         // Avançar na navegação
         public void GoForward()
         {
-            if (!CanGoForward) return;
+            if (!CanGoForward)
+                return;
 
+            // Move o estado atual para a pilha de retorno
             if (_currentState != null)
             {
                 _backStack.Push(_currentState);
             }
 
+            // Recupera o próximo estado
             _currentState = _forwardStack.Pop();
+
+            // Atualiza a UI
             UpdateContent();
+
+            // Notifica sobre a mudança na navegação
+            NavigationChanged?.Invoke(this, EventArgs.Empty);
         }
 
         // Recarregar o conteúdo atual
         public void Refresh()
         {
-            if (_currentState == null) return;
+            if (_currentState == null)
+                return;
 
-            // Cria uma nova instância do tipo atual
-            UserControl newInstance = (UserControl)Activator.CreateInstance(_currentState.ControlType);
-            
-            // Aplica os parâmetros específicos conforme o tipo do controle
-            ApplyParameters(newInstance, _currentState.Parameters);
-            
-            // Atualiza o controle atual
-            _currentState.Control = newInstance;
+            // Recria o controle com base no tipo atual
+            Type controlType = _currentState.Control.GetType();
+            UserControl newControl = (UserControl)Activator.CreateInstance(controlType);
+
+            // Aplica os parâmetros salvos no estado atual
+            if (_currentState.Parameters != null && _currentState.Parameters.Count > 0)
+            {
+                ApplyParameters(newControl, _currentState.Parameters);
+            }
+
+            // Atualiza o estado atual com o novo controle
+            _currentState.Control = newControl;
+
+            // Atualiza a UI
             UpdateContent();
         }
 
         // Aplicar parâmetros específicos ao controle
         private void ApplyParameters(UserControl control, Dictionary<string, object> parameters)
         {
-            if (parameters == null || parameters.Count == 0) return;
+            // Lógica para aplicar parâmetros específicos de cada tipo de controle
+            if (control is CadastroUserControl cadastroControl && parameters.ContainsKey("tipoTabela"))
+            {
+                var tipoTabela = parameters["tipoTabela"] as string;
+                // Executa método específico para selecionar a tabela
+                // Esta implementação depende da API disponível no CadastroUserControl
+            }
 
-            // Aplica parâmetros específicos por tipo de controle
-            if (control is ControleEstoqueUserControl estoqueControl)
-            {
-                estoqueControl.AtualizarTabelaEstoque();
-            }
-            else if (control is RegistroUserControl registroControl)
-            {
-                if (parameters.TryGetValue("tab", out object tab))
-                {
-                    switch (tab.ToString())
-                    {
-                        case "entradas":
-                            registroControl.CarregarEntradas();
-                            break;
-                        case "saidas":
-                            registroControl.CarregarSaidas();
-                            break;
-                        case "historico":
-                            registroControl.CarregarHistorico();
-                            break;
-                    }
-                }
-                else
-                {
-                    registroControl.CarregarHistorico();
-                }
-            }
-            // Adicionar outros casos específicos conforme necessário
+            // Adicione outros tipos de controle conforme necessário
         }
 
         // Atualizar o conteúdo da tela
         private void UpdateContent()
         {
-            if (_currentState == null) return;
+            if (_currentState == null)
+                return;
 
-            // Atualiza o conteúdo
+            // Atualiza o conteúdo principal
             _contentArea.Content = _currentState.Control;
-            
+
             // Atualiza o título
-            _titleTextBlock.Text = _currentState.Title;
-            
-            // Atualiza o ícone
-            UpdateIcon(_currentState.IconPath);
-            
-            // Atualiza a seleção do menu
-            if (!string.IsNullOrEmpty(_currentState.AssociatedMenuButton))
+            if (_titleTextBlock != null)
             {
-                _mainWindow.UpdateMenuSelection(_currentState.AssociatedMenuButton);
+                _titleTextBlock.Text = _currentState.Title;
+            }
+
+            // Atualiza o ícone
+            if (_iconImage != null && !string.IsNullOrEmpty(_currentState.IconPath))
+            {
+                UpdateIcon(_currentState.IconPath);
+            }
+
+            // Atualiza a seleção no menu
+            if (_mainWindow != null && !string.IsNullOrEmpty(_currentState.MenuButton))
+            {
+                _mainWindow.UpdateMenuSelection(_currentState.MenuButton);
             }
         }
 
         // Atualizar o ícone
         private void UpdateIcon(string iconPath)
         {
-            if (!string.IsNullOrEmpty(iconPath))
+            try
             {
-                try
-                {
-                    // Obter a cor do tema atual
-                    Color accentColor = ((SolidColorBrush)_mainWindow.FindResource("AccentBrush")).Color;
-                    
-                    // Colorizar o ícone com a cor do tema
-                    _iconImage.Source = ImageUtils.ColorizeImage(iconPath, accentColor);
-                    
-                    // Aplicar configurações de qualidade
-                    RenderOptions.SetBitmapScalingMode(_iconImage, BitmapScalingMode.HighQuality);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Erro ao atualizar ícone no NavigationService: {ex.Message}");
-                }
+                // Obter a cor do tema atual
+                Color accentColor = ((SolidColorBrush)Application.Current.Resources["AccentBrush"]).Color;
+
+                // Colorizar o ícone com a cor do tema
+                _iconImage.Source = ImageUtils.ColorizeImage(iconPath, accentColor);
+
+                // Aplicar configurações de qualidade
+                RenderOptions.SetBitmapScalingMode(_iconImage, BitmapScalingMode.HighQuality);
             }
-            else
+            catch (Exception ex)
             {
+                // Log do erro, mas continua sem o ícone
+                Console.WriteLine($"Erro ao atualizar ícone: {ex.Message}");
                 _iconImage.Source = null;
             }
         }
 
-        // Obter o menu associado ao tipo de controle
+        // Obter o botão de menu associado ao tipo de controle
         public string GetMenuButtonForControlType(Type controlType)
         {
             if (controlType == typeof(ComprasUserControl)) return "BtnCompras";
@@ -215,7 +215,9 @@ namespace WMS_RadiadoresLemos_WPF.src.Services
             if (controlType == typeof(DashboardUserControl)) return "BtnDashboard";
             if (controlType == typeof(NotificacoesUserControl)) return "BtnNotificacoes";
             if (controlType == typeof(ConfiguracaoUserControl)) return "BtnConfiguracoes";
-            
+            if (controlType == typeof(EscolherCadastroUserControl)) return "BtnCadastro";
+            if (controlType == typeof(BoletoTestUserControl)) return "BtnBoletos";
+
             return null;
         }
     }

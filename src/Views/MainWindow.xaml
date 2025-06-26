@@ -128,8 +128,9 @@
             </Grid.RowDefinitions>
 
             <!-- Botões de Navegação -->
+            <!-- Substitua o bloco de botões de navegação no MainWindow.xaml -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,15,0,0">
-                <Button Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0" Click="PreviousButton_Click">
+                <Button x:Name="PreviousButton" Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0" Click="PreviousButton_Click" ToolTip="Voltar">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
                         <Image Source="/assets/icons/Genericos/Seta.png" Width="30" Height="30" Margin="40,10,-20,10" RenderOptions.BitmapScalingMode="HighQuality">
@@ -139,19 +140,18 @@
                         </Image>
                     </Grid>
                 </Button>
-                <Button Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0" Click="NextButton_Click">
+                <Button x:Name="NextButton" Style="{StaticResource NavigationButtonStyle}" Margin="0, 0, 10, 0" Click="NextButton_Click" ToolTip="Avançar">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
                         <Image Source="/assets/icons/Genericos/Seta.png" Width="30" Height="30" Margin="10,10,10,10" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
                 </Button>
-                <Button Style="{StaticResource NavigationButtonStyle}" Click="RefreshButton_Click">
+                <Button x:Name="RefreshButton" Style="{StaticResource NavigationButtonStyle}" Click="RefreshButton_Click" ToolTip="Recarregar tela atual">
                     <Grid Width="50" Height="50">
                         <Ellipse Fill="Transparent"/>
                         <Image Source="/assets/icons/Genericos/Recarregar.png" Width="30" Height="30" Margin="10,10,10,10" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
                 </Button>
-                
             </StackPanel>
 
             <!-- Título e Ícone -->
