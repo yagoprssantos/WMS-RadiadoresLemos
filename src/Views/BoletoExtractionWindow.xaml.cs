@@ -400,7 +400,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
                 PreencherCampos();
 
                 _dadosCarregados = true;
-                SalvarBoletoButton.IsEnabled = true;
                 ExtrairRetornarButton.IsEnabled = true;
                 StatusTextBlock.Text = "✅ Dados extraídos com sucesso do boleto!";
 
@@ -468,7 +467,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
 
                 _dadosExtraidos = null;
                 _dadosCarregados = false;
-                SalvarBoletoButton.IsEnabled = false;
                 ExtrairRetornarButton.IsEnabled = false;
                 StatusTextBlock.Text = "Campos limpos. Faça upload de um novo arquivo.";
 
@@ -482,51 +480,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             catch (Exception ex)
             {
                 StatusTextBlock.Text = $"Erro ao limpar campos: {ex.Message}";
-            }
-        }
-
-        private void SalvarBoleto_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_dadosExtraidos == null)
-                {
-                    MessageBox.Show("Nenhum dado foi extraído ainda.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Atualiza dados dos campos editados para o objeto
-                AtualizarDadosDoFormulario();
-
-                // Verifica se o CNPJ do pagador é válido
-                if (!BoletoValidationService.ValidarCnpjPagador(_dadosExtraidos.CnpjPagador))
-                {
-                    return;
-                }
-
-                _dadosExtraidos.DataCadastro = DateTime.UtcNow;
-                _dadosExtraidos.UsuarioCadastro = MainWindow.UsuarioLogado?.Nome;
-                _dadosExtraidos.Status = _dadosExtraidos.DataVencimento < DateTime.Now ? StatusBoleto.Vencido : StatusBoleto.Pendente;
-
-                var db = DatabaseConnect.Database;
-                if (db != null)
-                {
-                    var collection = db.GetCollection<BoletoData>("boletos");
-                    collection.Insert(_dadosExtraidos);
-
-                    BoletoSalvo = _dadosExtraidos;
-                    MessageBox.Show("Boleto salvo com sucesso no banco de dados!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                    DialogResult = true;
-                    Close();
-                }
-                else
-                {
-                    MessageBox.Show("Erro ao conectar com o banco de dados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao salvar boleto: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -624,75 +577,6 @@ namespace WMS_RadiadoresLemos_WPF.src.Views
             if (string.IsNullOrEmpty(_dadosExtraidos.CaminhoArquivo) && !string.IsNullOrEmpty(_arquivoBoleto))
             {
                 _dadosExtraidos.CaminhoArquivo = _arquivoBoleto;
-            }
-        }
-
-        private void ValidarDados_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                List<string> erros = new List<string>();
-
-                if (string.IsNullOrWhiteSpace(BeneficiarioTextBox.Text))
-                    erros.Add("• Beneficiário não pode estar vazio");
-
-                string cnpj = CnpjBeneficiarioTextBox.Text?.Replace(".", "").Replace("/", "").Replace("-", "");
-                if (!string.IsNullOrEmpty(cnpj) && cnpj.Length != 14)
-                    erros.Add("• CNPJ deve ter 14 dígitos");
-
-                // Validação do CNPJ do pagador
-                if (string.IsNullOrWhiteSpace(CnpjPagadorTextBox.Text))
-                {
-                    erros.Add("• CNPJ do pagador é obrigatório");
-                }
-                else
-                {
-                    string cnpjPagadorLimpo = CnpjPagadorTextBox.Text.Replace(".", "").Replace("/", "").Replace("-", "");
-                    string cnpjEsperado = "38046801000160";
-
-                    if (cnpjPagadorLimpo != cnpjEsperado)
-                    {
-                        erros.Add("• CNPJ do pagador deve ser exatamente 38.046.801/0001-60 (Radiadores Lemos)");
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(ValorTextBox.Text))
-                {
-                    string valorStr = ValorTextBox.Text.Replace("R$", "").Replace(".", "").Replace(",", ".").Trim();
-                    if (!decimal.TryParse(valorStr, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal valor) || valor <= 0)
-                        erros.Add("• Valor deve ser maior que zero");
-                }
-
-                if (!string.IsNullOrEmpty(VencimentoTextBox.Text))
-                {
-                    if (!DateTime.TryParseExact(VencimentoTextBox.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime data))
-                        erros.Add("• Data de vencimento deve estar no formato dd/MM/yyyy");
-                }
-
-                if (erros.Count > 0)
-                {
-                    MessageBox.Show(
-                        "❌ Dados com problemas:\n\n" + string.Join("\n", erros),
-                        "Validação",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning
-                    );
-                }
-                else
-                {
-                    MessageBox.Show(
-                        "✅ Todos os dados estão válidos!\n\nVocê pode extrair e retornar ou salvar o boleto.",
-                        "Validação",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information
-                    );
-                    SalvarBoletoButton.IsEnabled = true;
-                    ExtrairRetornarButton.IsEnabled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro na validação: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

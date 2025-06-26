@@ -12,7 +12,7 @@
         <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="0.8*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
@@ -208,26 +208,17 @@
 
                         <!-- Botões de Ação -->
                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,15,20,20">
-                            <Button x:Name="ValidarButton" Content="Validar Dados" 
+                            <Button x:Name="ExtrairRetornarButton" Content="Extrair e Retornar" 
                                     Style="{StaticResource EmphasisButtonStyle}"
-                                    Click="ValidarDados_Click" Margin="5,0,5,0" Width="130"
-                                    ToolTip="Valida se os dados editados estão corretos"/>
-                                                    <Button x:Name="LimparButton" Content="Limpar" 
+                                    Click="ExtrairERetornar_Click" 
+                                    IsEnabled="False" Margin="5,0,5,0" Width="200"
+                                    ToolTip="Extrai os dados e retorna para a tela anterior"/>
+                            <Button x:Name="LimparButton" Content="Limpar" 
                                     Style="{StaticResource EmphasisButtonStyle}"
                                     Background="{StaticResource HoverBackgroundBrush}"
                                     Click="Limpar_Click" Margin="5,0,5,0" Width="130"
                                     ToolTip="Limpa todos os campos"/>
-                                                    <Button x:Name="ExtrairRetornarButton" Content="Extrair e Retornar" 
-                                    Style="{StaticResource EmphasisButtonStyle}"
-                                    Click="ExtrairERetornar_Click" 
-                                    IsEnabled="False" Margin="5,0,5,0" Width="130"
-                                    ToolTip="Extrai os dados e retorna para a tela anterior"/>
-                                                    <Button x:Name="SalvarBoletoButton" Content="Salvar Boleto" 
-                                    Style="{StaticResource EmphasisButtonStyle}"
-                                    Click="SalvarBoleto_Click" 
-                                    IsEnabled="False" Margin="5,0,5,0" Width="130"
-                                    ToolTip="Salva o boleto no banco de dados"/>
-                                                    <Button x:Name="FecharButton" Content="Fechar" 
+                            <Button x:Name="FecharButton" Content="Fechar" 
                                     Style="{StaticResource CancelButtonStyle}"
                                     Click="Fechar_Click" Width="130" Margin="5,0,5,0"
                                     ToolTip="Fecha a janela"/>
