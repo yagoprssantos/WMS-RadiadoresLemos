@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using WMS_RadiadoresLemos_WPF.src.Services;
 using WMS_RadiadoresLemos_WPF.src.Models;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using System.Collections.ObjectModel;
 
 namespace WMS_RadiadoresLemos_WPF
 {
     public partial class NotificacoesUserControl : UserControl
     {
-        private List<AlertaData> alertas;
+        private ObservableCollection<AlertaData> alertas;
         private DispatcherTimer verificarBoletosTimer;
 
         // Evento para notificar o MainWindow sobre novas notificações
@@ -20,6 +22,10 @@ namespace WMS_RadiadoresLemos_WPF
         public NotificacoesUserControl()
         {
             InitializeComponent();
+            
+            // Inicializar a coleção observável
+            alertas = new ObservableCollection<AlertaData>();
+            
             CarregarNotificacoes();
             CarregarFiltros();
             
@@ -28,6 +34,15 @@ namespace WMS_RadiadoresLemos_WPF
             
             // Verifica boletos próximos do vencimento ao carregar
             _ = VerificarBoletosProximosVencimento();
+            
+            // Atualizar UI quando novas notificações forem adicionadas
+            Alerta.ContagemAlterada += (count) => 
+            {
+                if (count > 0)
+                {
+                    Dispatcher.Invoke(() => CarregarNotificacoes());
+                }
+            };
         }
 
         // Inicializa o timer para verificar boletos a cada hora
@@ -48,12 +63,18 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para carregar todas as notificações
         private void CarregarNotificacoes()
         {
-            alertas = Alerta.Alertas.Values.SelectMany(lista => lista).ToList();
-
-            if (AlertaDataGrid != null)
+            var todasNotificacoes = Alerta.Alertas.Values.SelectMany(lista => lista).ToList();
+            
+            alertas.Clear();
+            foreach (var alerta in todasNotificacoes)
             {
-                AlertaDataGrid.ItemsSource = alertas;
+                alertas.Add(alerta);
             }
+            
+            NotificacoesItemsControl.ItemsSource = alertas;
+            
+            // Exibir mensagem quando não houver notificações
+            SemNotificacoesText.Visibility = alertas.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
         }
 
         // Método para carregar os filtros
@@ -65,11 +86,11 @@ namespace WMS_RadiadoresLemos_WPF
         // Método para carregar dados nos ComboBoxes
         private void CarregarDadosComboBoxes()
         {
-            TipoComboBox.ItemsSource = alertas.Select(a => a.Tipo).Distinct().ToList();
+            TipoComboBox.ItemsSource = Alerta.Alertas.Keys.ToList();
         }
 
         // Método chamado ao clicar no botão de aplicar filtro
-        private void AplicarFiltroButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void AplicarFiltroButton_Click(object sender, RoutedEventArgs e)
         {
             string tipo = TipoComboBox.SelectedItem?.ToString();
             DateTime? dataInicio = DataInicioHistoricoPicker.SelectedDate;
@@ -84,52 +105,98 @@ namespace WMS_RadiadoresLemos_WPF
         {
             try
             {
-                var alertasFiltrados = alertas.Where(a =>
+                var todasNotificacoes = Alerta.Alertas.Values.SelectMany(lista => lista).ToList();
+                
+                var alertasFiltrados = todasNotificacoes.Where(a =>
                     (string.IsNullOrEmpty(tipo) || a.Tipo.Equals(tipo, StringComparison.OrdinalIgnoreCase)) &&
                     (!dataInicio.HasValue || DateTime.Parse(a.Data).Date >= dataInicio.Value.Date) &&
                     (!dataFim.HasValue || DateTime.Parse(a.Data).Date <= dataFim.Value.Date)).ToList();
 
-                AlertaDataGrid.ItemsSource = alertasFiltrados;
+                alertas.Clear();
+                foreach (var alerta in alertasFiltrados)
+                {
+                    alertas.Add(alerta);
+                }
+                
+                // Exibir mensagem quando não houver notificações após filtro
+                SemNotificacoesText.Visibility = alertas.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
             }
             catch (Exception ex)
             {
                 // Log ou mensagem de erro
-                //MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao aplicar filtro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         // Evento para limpar os filtros
-        private void LimparFiltroButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void LimparFiltroButton_Click(object sender, RoutedEventArgs e)
         {
             TipoComboBox.SelectedItem = null;
             DataInicioHistoricoPicker.SelectedDate = null;
             DataFimHistoricoPicker.SelectedDate = null;
 
             // Recarregar todas as notificações
-            AlertaDataGrid.ItemsSource = alertas;
+            CarregarNotificacoes();
             FiltroPopup.IsOpen = false;
         }
 
         // Método chamado ao clicar no botão de filtrar
-        private void FiltrarButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void FiltrarButton_Click(object sender, RoutedEventArgs e)
         {
             FiltroPopup.IsOpen = true;
         }
 
-        private void AlertaDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
+        // Método para busca de texto nas notificações
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-
+            string searchText = SearchBox.Text.ToLower();
+            
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                CarregarNotificacoes();
+                return;
+            }
+            
+            var todasNotificacoes = Alerta.Alertas.Values.SelectMany(lista => lista).ToList();
+            
+            var filteredList = todasNotificacoes.Where(a => 
+                a.Tipo.ToLower().Contains(searchText) || 
+                a.Sistema.ToLower().Contains(searchText) || 
+                a.Detalhes.ToLower().Contains(searchText) || 
+                a.Acoes.ToLower().Contains(searchText) ||
+                a.Data.ToLower().Contains(searchText)).ToList();
+                
+            alertas.Clear();
+            foreach (var alerta in filteredList)
+            {
+                alertas.Add(alerta);
+            }
+            
+            // Exibir mensagem quando não houver notificações após busca
+            SemNotificacoesText.Visibility = alertas.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
         }
 
         // Método para parar o timer quando o controle for descarregado
         public void PararTimer()
         {
             verificarBoletosTimer?.Stop();
+        }
+
+        // Método para fechar uma notificação específica
+        private void FecharNotificacaoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is AlertaData alertaData)
+            {
+                foreach (var tipo in Alerta.Alertas.Keys)
+                {
+                    Alerta.Alertas[tipo].Remove(alertaData);
+                }
+                
+                alertas.Remove(alertaData);
+                
+                // Exibir mensagem quando não houver mais notificações
+                SemNotificacoesText.Visibility = alertas.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
+            }
         }
 
         // Método para verificar boletos próximos do vencimento
@@ -173,7 +240,7 @@ namespace WMS_RadiadoresLemos_WPF
                     {
                         Alerta.AdicionarAlerta("Importante",
                             $"Boleto {boleto.NotaFiscal} - Parcela {boleto.Parcela}",
-                            $"Boleto vence amanhã(${boleto.Valor:N2})",
+                            $"Boleto vence amanhã (${boleto.Valor:N2})",
                             $"- URGENTE: Realizar pagamento\n- Data de vencimento: {boleto.DataVencimento:dd/MM/yyyy}");
                         notificacoesAdicionadas++;
                     }
@@ -189,7 +256,7 @@ namespace WMS_RadiadoresLemos_WPF
                     // Já venceu
                     else if (diasAteVencimento < 0)
                     {
-                        Alerta.AdicionarAlerta("Importante",
+                        Alerta.AdicionarAlerta("Erro",
                             $"Boleto {boleto.NotaFiscal} - Parcela {boleto.Parcela}",
                             $"Boleto vencido há {Math.Abs(diasAteVencimento)} dia(s) (${boleto.Valor:N2})",
                             $"- URGENTE: Regularizar situação\n- Verificar multas e juros\n- Data de vencimento: {boleto.DataVencimento:dd/MM/yyyy}");
@@ -200,7 +267,7 @@ namespace WMS_RadiadoresLemos_WPF
                 // Recarrega as notificações após adicionar as novas
                 if (notificacoesAdicionadas > 0)
                 {
-                    CarregarNotificacoes();
+                    Dispatcher.Invoke(() => CarregarNotificacoes());
                     Console.WriteLine($"Verificação de boletos: {notificacoesAdicionadas} notificação(ões) adicionada(s)");
                 }
             }
@@ -212,7 +279,7 @@ namespace WMS_RadiadoresLemos_WPF
         }
 
         // Método para o botão de verificar boletos
-        private async void VerificarBoletosButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        private async void VerificarBoletosButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -221,13 +288,13 @@ namespace WMS_RadiadoresLemos_WPF
                 
                 await ForcarVerificacaoBoletos();
                 
-                System.Windows.MessageBox.Show("Verificação de boletos concluída!", "Sucesso", 
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                MessageBox.Show("Verificação de boletos concluída!", "Sucesso", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Erro ao verificar boletos: {ex.Message}", "Erro", 
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao verificar boletos: {ex.Message}", "Erro", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

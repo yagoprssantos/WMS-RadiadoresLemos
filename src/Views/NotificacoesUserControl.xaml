@@ -7,6 +7,83 @@
              d:DesignHeight="630" d:DesignWidth="800"
              Background="{StaticResource BackgroundBrush}">
 
+    <UserControl.Resources>
+        <DataTemplate x:Key="NotificacaoCardTemplate">
+            <Border Margin="0,0,0,10" Background="{StaticResource BackgroundBrush}" CornerRadius="15" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Cabeçalho do card -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Tipo da notificação -->
+                        <Border Grid.Column="0" 
+                                Background="{StaticResource PrimaryBrush}" 
+                                CornerRadius="15" 
+                                Padding="10">
+                            <TextBlock Text="{Binding Tipo}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" 
+                                       Foreground="{StaticResource TextBrush}"/>
+                        </Border>
+                        
+                        <!-- Data da notificação -->
+                        <Border Grid.Column="1" 
+                                Margin="10,0,0,0" 
+                                Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="15" 
+                                Padding="10">
+                            <TextBlock Text="{Binding Data, StringFormat=Data: {0}}"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextBrush}"/>
+                        </Border>
+                        
+                        <!-- Botão de fechar -->
+                        <Button Grid.Column="2" 
+                                Content="✖" 
+                                Background="Transparent" 
+                                BorderThickness="0"
+                                FontSize="12"
+                                Foreground="{StaticResource TextBrush}" 
+                                Click="FecharNotificacaoButton_Click"
+                                Tag="{Binding}"/>
+                    </Grid>
+                    
+                    <!-- Conteúdo do card -->
+                    <Border Grid.Row="1" 
+                            Margin="0,10,0,0" 
+                            Padding="10" 
+                            Background="{StaticResource SecondaryBrush}" 
+                            CornerRadius="15">
+                        <StackPanel>
+                            <!-- Detalhes da notificação -->
+                            <TextBlock Text="{Binding Detalhes}" 
+                                       TextWrapping="Wrap" 
+                                       Margin="0,0,0,10" 
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextBrush}"/>
+                            
+                            <!-- Ações sugeridas -->
+                            <TextBlock Text="{Binding Acoes}" 
+                                       TextWrapping="Wrap" 
+                                       FontSize="12"
+                                       Foreground="{StaticResource AccentBrush}" 
+                                       FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
     <Grid Margin="15, 15, 15, 0">
         <Border BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15" Padding="25" Background="{StaticResource PanelBackgroundBrush}">
             <Grid>
@@ -39,38 +116,24 @@
                     <Button Grid.Column="3" x:Name="VerificarBoletosButton" Content="Verificar Boletos" ToolTip="Verificar boletos próximos do vencimento" Style="{StaticResource FilterButtonStyle}" Click="VerificarBoletosButton_Click"/>
                 </Grid>
 
-                <!-- Tabela de Notificações -->
+                <!-- Área de Notificações -->
                 <Grid Grid.Row="1">
                     <Grid x:Name="AlertasGrid" Visibility="Visible">
-                        <Border CornerRadius="15" Background="{StaticResource SecondaryBrush}" Padding="5">
-                            <DataGrid Name="AlertaDataGrid" Style="{StaticResource CustomDataGridStyle}" >
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="Auto" MinWidth="120"/>
-                                    <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="Auto" MinWidth="70"/>
-                                    <DataGridTemplateColumn Header="Sistema" Width="*">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Sistema}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Detalhes" Width="*">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Detalhes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Ações" Width="*">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Acoes}" TextWrapping="Wrap" MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
+                        <Border CornerRadius="15" Background="{StaticResource PrimaryBrush}" Padding="15">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="NotificacoesItemsControl" 
+                                              ItemTemplate="{StaticResource NotificacaoCardTemplate}"/>
+                            </ScrollViewer>
                         </Border>
+                        
+                        <!-- Mensagem quando não há notificações -->
+                        <TextBlock x:Name="SemNotificacoesText" 
+                                   Text="Não há notificações disponíveis" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextBrush}"
+                                   FontSize="16"
+                                   Visibility="Collapsed"/>
                     </Grid>
                 </Grid>
             </Grid>
@@ -78,7 +141,7 @@
 
         <Popup x:Name="FiltroPopup" Placement="Bottom" StaysOpen="False" PlacementTarget="{Binding ElementName=FiltrarButton}">  
            <Border Background="{StaticResource PanelBackgroundBrush}" Padding="15">  
-               <Border Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">  
+               <Border Background="{StaticResource PrimaryBrush}" BorderBrush="{StaticResource PanelBackgroundBrush}" BorderThickness="1" CornerRadius="15">  
                    <StackPanel Background="Transparent" Margin="0">  
                        <TextBlock Text="Filtrar por Tipo" FontWeight="Bold" Margin="10, 10, 0, 5" Foreground="{StaticResource TextBrush}"/>  
                        <ComboBox x:Name="TipoComboBox" HorizontalAlignment="Stretch" Margin="15, 0" Style="{StaticResource ComboBoxSelectStyle}" Background="{StaticResource PanelBackgroundBrush}"/>  
