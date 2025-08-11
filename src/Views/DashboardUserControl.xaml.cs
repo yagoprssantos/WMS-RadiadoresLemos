@@ -422,44 +422,46 @@ namespace WMS_RadiadoresLemos_WPF
             PeriodoLabels = datas.ToArray();
             DataContext = this;
 
-            // Configurar o gráfico com melhorias visuais
-            if (GraficoContentControl.Content is CartesianChart chart)
-            {
-                // Eixo Y secundário para saldo
-                chart.AxisY.Add(new Axis
-                {
-                    Title = $"Saldo (Média diária: {mediaEntradas - mediaSaidas:N1})",
-                    LabelFormatter = value => value.ToString("N0"),
-                    Position = AxisPosition.RightTop,
-                    Foreground = new SolidColorBrush(Color.FromRgb(33, 150, 243)),
-                    FontWeight = FontWeights.Bold,
-                    MinValue = saldoValues.Min() < 0 ? saldoValues.Min() * 1.1 : 0 // Ajusta o eixo para valores negativos
-                });
+            // TODO: Resolver
 
-                // Linha de referência no zero
-                chart.AxisY[0].Sections = new SectionsCollection
-                {
-                    new AxisSection
-                    {
-                        Value = 0,
-                        SectionWidth = 0.5,
-                        Stroke = new SolidColorBrush(Color.FromArgb(80, 128, 128, 128))
-                    }
-                };
+            //// Configurar o gráfico com melhorias visuais
+            //if (GraficoContentControl.Content is CartesianChart chart)
+            //{
+            //    // Eixo Y secundário para saldo
+            //    chart.AxisY.Add(new Axis
+            //    {
+            //        Title = $"Saldo (Média diária: {mediaEntradas - mediaSaidas:N1})",
+            //        LabelFormatter = value => value.ToString("N0"),
+            //        Position = AxisPosition.RightTop,
+            //        Foreground = new SolidColorBrush(Color.FromRgb(33, 150, 243)),
+            //        FontWeight = FontWeights.Bold,
+            //        MinValue = saldoValues.Min() < 0 ? saldoValues.Min() * 1.1 : 0 // Ajusta o eixo para valores negativos
+            //    });
 
-                // Tooltip aprimorado com o estilo comum
-                chart.DataTooltip = new DefaultTooltip
-                {
-                    SelectionMode = TooltipSelectionMode.SharedXValues,
-                    ShowTitle = true,
-                    ShowSeries = true,
-                    Background = (Brush)FindResource("AccentBrush"),
-                    Foreground = Brushes.White,
-                    BorderBrush = Brushes.White,
-                    BorderThickness = new Thickness(1),
-                    FontSize = 14
-                };
-            }
+            //    // Linha de referência no zero
+            //    chart.AxisY[0].Sections = new SectionsCollection
+            //    {
+            //        new AxisSection
+            //        {
+            //            Value = 0,
+            //            SectionWidth = 0.5,
+            //            Stroke = new SolidColorBrush(Color.FromArgb(80, 128, 128, 128))
+            //        }
+            //    };
+
+            //    // Tooltip aprimorado com o estilo comum
+            //    chart.DataTooltip = new DefaultTooltip
+            //    {
+            //        SelectionMode = TooltipSelectionMode.SharedXValues,
+            //        ShowTitle = true,
+            //        ShowSeries = true,
+            //        Background = (Brush)FindResource("AccentBrush"),
+            //        Foreground = Brushes.White,
+            //        BorderBrush = Brushes.White,
+            //        BorderThickness = new Thickness(1),
+            //        FontSize = 14
+            //    };
+            //}
         }
 
         // Exibe produtos com maior movimentação
